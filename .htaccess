@@ -1,0 +1,13 @@
+# 1. Prohibir el listado de directorios (evita lo que ves en la captura)
+Options -Indexes
+
+# 2. Definir el archivo de inicio por defecto
+DirectoryIndex index.php
+
+# 3. Reglas estándar para redirigir tráfico al Front Controller (si usas un framework o enrutador)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
