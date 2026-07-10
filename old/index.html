@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Actividades Profesionales</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border-color: #e2e8f0;
+            --prio-alta: #ef4444;
+            --prio-media: #f59e0b;
+            --prio-baja: #10b981;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg-primary); color: var(--text-main); padding: 2rem; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 1200px; }
+        header { margin-bottom: 2rem; }
+        h1 { font-size: 1.75rem; font-weight: 700; }
+        h1 i { color: var(--accent); margin-right: 0.5rem; }
+        .card { background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); padding: 1.5rem; margin-bottom: 2rem; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: flex-end; }
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+        .form-group input, .form-group select { padding: 0.65rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.95rem; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+        button.btn-primary { background-color: var(--accent); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; height: 42px; justify-content: center; }
+        button.btn-primary:hover { background-color: var(--accent-hover); }
+        .table-container { background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
+        th { background-color: #f8fafc; padding: 1rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border-color); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+        td { padding: 1rem; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f8fafc; }
+        .editable { padding: 4px 8px; border-radius: 4px; min-height: 24px; }
+        .editable:focus { background-color: #f1f5f9; outline: 2px solid var(--accent); }
+        .badge { display: inline-flex; align-items: center; padding: 0.25rem 0.6rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; }
+        .badge-alta { background-color: #fee2e2; color: var(--prio-alta); }
+        .badge-media { background-color: #fef3c7; color: var(--prio-media); }
+        .badge-baja { background-color: #d1fae5; color: var(--prio-baja); }
+        select.table-select { border: none; background: transparent; font-weight: 600; cursor: pointer; outline: none; padding: 4px; border-radius: 4px; }
+        select.table-select:focus { background-color: #e2e8f0; }
+        .btn-icon { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 4px; font-size: 1.1rem; }
+        .btn-icon-delete:hover { color: var(--prio-alta); background-color: #fee2e2; }
+        .hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; display: flex; align-items: center; gap: 0.25rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1><i class="ri-checkbox-multiple-line"></i> Control de Actividades Alberto</h1>
+        <button id="btn-export" class="btn-primary" style="background-color: #10b981; height: 38px;">
+            <i class="ri-file-excel-line"></i> Exportar a Excel (CSV)
+        </button>
+
+        
+        
+    </header>
+
+    <div class="card">
+        <form id="activity-form" class="form-grid">
+            <div class="form-group" style="grid-column: span 2;">
+                <label for="task-name">Actividad / Tarea</label>
+                <input type="text" id="task-name" placeholder="Ej. Ajuste de redondeo bimonthly" required>
+            </div>
+            <div class="form-group">
+                <label for="task-desc">Descripción / Nota</label>
+                <input type="text" id="task-desc" placeholder="Detalles opcionales...">
+            </div>
+            <div class="form-group">
+                <label for="task-priority">Prioridad</label>
+                <select id="task-priority">
+                    <option value="Alta">Alta</option>
+                    <option value="Media" selected>Media</option>
+                    <option value="Baja">Baja</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="task-status">Estado</label>
+                <select id="task-status">
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="En Proceso">En Proceso</option>
+                    <option value="Completado">Completado</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-primary"><i class="ri-add-line"></i> Agregar</button>
+        </form>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 35%;">Actividad</th>
+                    <th style="width: 25%;">Descripción / Notas</th>
+                    <th style="width: 15%;">Prioridad</th>
+                    <th style="width: 15%;">Estado</th>
+                    <th style="width: 10%; text-align: center;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+    <p class="hint"><i class="ri-information-line"></i> <strong>Tip:</strong> Puedes hacer clic sobre el texto de la Actividad o Notas para editarlo directamente. Al hacer un clic fuera se guardará en la base de datos.</p>
+</div>
+
+<script>
+let activities = [];
+const tableBody = document.getElementById('table-body');
+const activityForm = document.getElementById('activity-form');
+// Coloca esto cerca de donde declaras 'activityForm' y 'tableBody'
+const btnExport = document.getElementById('btn-export');
+btnExport.addEventListener('click', exportToCSV);
+// Función para obtener los datos desde PHP (api.php)
+async function loadActivities() {
+    try {
+        const response = await fetch('api.php');
+        if (!response.ok) {
+            throw new Error(`Error en el servidor: ${response.status}`);
+        }
+        activities = await response.json();
+        renderTable();
+    } catch (error) {
+        console.error("Error cargando actividades:", error);
+        alert("No se pudieron cargar las actividades. Revisa la consola del navegador.");
+    }
+}
+
+// Renderizar las filas de la tabla de forma dinámica
+function renderTable() {
+    tableBody.innerHTML = '';
+    
+    if (activities.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: #64748b; padding: 2rem;">No hay actividades registradas o la conexión falló.</td></tr>`;
+        return;
+    }
+
+    activities.forEach((activity) => {
+        const tr = document.createElement('tr');
+        const priorityClass = `badge-${activity.priority.toLowerCase()}`;
+
+        tr.innerHTML = `
+            <td><div class="editable" contenteditable="true" onblur="saveInlineChange(${activity.id}, 'name', this.innerText)">${activity.name}</div></td>
+            <td><div class="editable" contenteditable="true" onblur="saveInlineChange(${activity.id}, 'description', this.innerText)">${activity.description || ''}</div></td>
+            <td>
+                <select class="table-select badge ${priorityClass}" onchange="saveSelectChange(${activity.id}, 'priority', this.value)">
+                    <option value="Alta" ${activity.priority === 'Alta' ? 'selected' : ''}>Alta</option>
+                    <option value="Media" ${activity.priority === 'Media' ? 'selected' : ''}>Media</option>
+                    <option value="Baja" ${activity.priority === 'Baja' ? 'selected' : ''}>Baja</option>
+                </select>
+            </td>
+            <td>
+                <select class="table-select" style="font-weight:500;" onchange="saveSelectChange(${activity.id}, 'status', this.value)">
+                    <option value="Pendiente" ${activity.status === 'Pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
+                    <option value="En Proceso" ${activity.status === 'En Proceso' ? 'selected' : ''}>🚀 En Proceso</option>
+                    <option value="Completado" ${activity.status === 'Completado' ? 'selected' : ''}>✅ Completado</option>
+                </select>
+            </td>
+            <td style="text-align: center;">
+                <button class="btn-icon btn-icon-delete" onclick="deleteActivity(${activity.id})"><i class="ri-delete-bin-line"></i></button>
+            </td>
+        `;
+        tableBody.appendChild(tr);
+    });
+}
+
+// Guardar una nueva actividad enviando un POST a la API
+activityForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+        name: document.getElementById('task-name').value,
+        description: document.getElementById('task-desc').value,
+        priority: document.getElementById('task-priority').value,
+        status: document.getElementById('task-status').value
+    };
+
+    try {
+        const response = await fetch('api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if(response.ok) {
+            activityForm.reset();
+            loadActivities();
+        } else {
+            alert("Error al guardar en la base de datos.");
+        }
+    } catch (error) {
+        console.error("Error guardando:", error);
+    }
+});
+
+async function saveInlineChange(id, field, value) {
+    const activity = activities.find(a => a.id === id);
+    if (activity) {
+        const updated = { ...activity, [field]: value.trim() };
+        await sendUpdate(updated);
+    }
+}
+
+async function saveSelectChange(id, field, value) {
+    const activity = activities.find(a => a.id === id);
+    if (activity) {
+        const updated = { ...activity, [field]: value };
+        await sendUpdate(updated);
+        loadActivities();
+    }
+}
+
+async function sendUpdate(activity) {
+    try {
+        await fetch('api.php', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: activity.id,
+                name: activity.name,
+                description: activity.description,
+                priority: activity.priority,
+                status: activity.status
+            })
+        });
+    } catch (error) {
+        console.error("Error actualizando:", error);
+    }
+}
+
+async function deleteActivity(id) {
+    if (confirm('¿Deseas eliminar permanentemente esta actividad?')) {
+        try {
+            const response = await fetch('api.php', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            });
+            if (response.ok) loadActivities();
+        } catch (error) {
+            console.error("Error eliminando:", error);
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadActivities);
+function exportToCSV() {
+    if (activities.length === 0) {
+        alert("No hay datos disponibles para exportar.");
+        return;
+    }
+
+    // 1. Definir los encabezados del archivo
+    let csvContent = "ID,Actividad,Descripcion,Prioridad,Estado\n";
+
+    // 2. Recorrer el arreglo de actividades y sanitizar los textos
+    activities.forEach(activity => {
+        // Limpiamos comillas dobles y saltos de línea para evitar romper las celdas de Excel
+        let id = activity.id;
+        let name = `"${activity.name.replace(/"/g, '""')}"`;
+        let description = `"${(activity.description || '').replace(/"/g, '""')}"`;
+        let priority = `"${activity.priority}"`;
+        let status = `"${activity.status}"`;
+
+        csvContent += `${id},${name},${description},${priority},${status}\n`;
+    });
+
+    // 3. Crear el archivo Blob con codificación UTF-8 para soportar tildes y eñes en Excel
+    const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    // 4. Crear un enlace de descarga temporal y simular el click
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `reporte_actividades_${new Date().toISOString().slice(0,10)}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+</body>
+</html>

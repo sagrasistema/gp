@@ -1,0 +1,30 @@
+[09-Jul-2026 14:56:25 America/Caracas] PHP Warning:  Undefined variable $connection in /home2/sagracom/public_html/proyecto/ac/index.php on line 50
+[09-Jul-2026 14:56:25 America/Caracas] PHP Fatal error:  Uncaught TypeError: mysqli_query(): Argument #1 ($mysql) must be of type mysqli, null given in /home2/sagracom/public_html/proyecto/ac/index.php:50
+Stack trace:
+#0 /home2/sagracom/public_html/proyecto/ac/index.php(50): mysqli_query(NULL, 'SELECT \r\n      ...')
+#1 {main}
+  thrown in /home2/sagracom/public_html/proyecto/ac/index.php on line 50
+[09-Jul-2026 14:58:06 America/Caracas] PHP Warning:  Undefined variable $connection in /home2/sagracom/public_html/proyecto/ac/index.php on line 50
+[09-Jul-2026 14:58:06 America/Caracas] PHP Fatal error:  Uncaught TypeError: mysqli_query(): Argument #1 ($mysql) must be of type mysqli, null given in /home2/sagracom/public_html/proyecto/ac/index.php:50
+Stack trace:
+#0 /home2/sagracom/public_html/proyecto/ac/index.php(50): mysqli_query(NULL, 'SELECT \r\n      ...')
+#1 {main}
+  thrown in /home2/sagracom/public_html/proyecto/ac/index.php on line 50
+[09-Jul-2026 14:58:22 America/Caracas] PHP Warning:  Undefined variable $connection in /home2/sagracom/public_html/proyecto/ac/nuevo.php on line 20
+[09-Jul-2026 14:58:22 America/Caracas] PHP Fatal error:  Uncaught TypeError: mysqli_query(): Argument #1 ($mysql) must be of type mysqli, null given in /home2/sagracom/public_html/proyecto/ac/nuevo.php:20
+Stack trace:
+#0 /home2/sagracom/public_html/proyecto/ac/nuevo.php(20): mysqli_query(NULL, 'SELECT id, name...')
+#1 {main}
+  thrown in /home2/sagracom/public_html/proyecto/ac/nuevo.php on line 20
+[09-Jul-2026 14:58:31 America/Caracas] PHP Warning:  Undefined variable $connection in /home2/sagracom/public_html/proyecto/ac/index.php on line 50
+[09-Jul-2026 14:58:31 America/Caracas] PHP Fatal error:  Uncaught TypeError: mysqli_query(): Argument #1 ($mysql) must be of type mysqli, null given in /home2/sagracom/public_html/proyecto/ac/index.php:50
+Stack trace:
+#0 /home2/sagracom/public_html/proyecto/ac/index.php(50): mysqli_query(NULL, 'SELECT \r\n      ...')
+#1 {main}
+  thrown in /home2/sagracom/public_html/proyecto/ac/index.php on line 50
+[09-Jul-2026 15:12:11 America/Caracas] PHP Warning:  Undefined variable $connection in /home2/sagracom/public_html/proyecto/ac/index.php on line 50
+[09-Jul-2026 15:12:11 America/Caracas] PHP Fatal error:  Uncaught TypeError: mysqli_query(): Argument #1 ($mysql) must be of type mysqli, null given in /home2/sagracom/public_html/proyecto/ac/index.php:50
+Stack trace:
+#0 /home2/sagracom/public_html/proyecto/ac/index.php(50): mysqli_query(NULL, 'SELECT \r\n      ...')
+#1 {main}
+  thrown in /home2/sagracom/public_html/proyecto/ac/index.php on line 50
