@@ -16,7 +16,7 @@ include 'header.php';
 
 
     <div class="table-container">
-        <table>
+        <tablele class="custom-table">
             <thead>
                 <tr>
                     <th style="width: 25%;">Cliente / Empresa</th>
