@@ -1,61 +1,88 @@
 <?php 
+// v/ac/nuevo.php
+
+// 1. Incluimos tu archivo de conexión primero (Inicializa la variable $pdo)
 include '../main/config.php'; 
 
 // 2. Definimos el título de la página para que el header común lo asimile
-$pageTitle = "Aceptación y Continuidad";
-// v/ac/nuevo.php
+$pageTitle = "Iniciar Aceptación y Continuidad";
+
+// 3. Incluimos el encabezado común de tu sistema
 include '../main/h.php'; 
 ?>
 
-<div class="container" style="margin-top: 30px;">
-    <div class="row">
-        <div class="col s12 m8 offset-m2">
-            <div class="card white" style="border-radius: 8px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                <span class="card-title" style="font-weight: bold; color: #1e88e5;">Iniciar Aceptación y Continuidad</span>
-                <p class="grey-text">Selecciona un cliente y el tipo de formulario a generar.</p>
-                <br>
+<div class="container" style="max-width: 700px; margin-top: 20px;">
+    <header>
+        <img src="../main/logo.png" alt="Logo Corporativo" class="brand-logo" style="cursor: pointer;" onclick="window.location.href='../index.php'">
+        <h1>
+            <i class="ri-shield-check-line"></i> Aceptación y Continuidad
+        </h1>
+        <a href="index.php" class="btn-back"><i class="ri-arrow-left-line"></i></a>
+    </header>
 
-                <form action="../../c/ac.php?action=create" method="POST">
-                    
-                    <div class="input-field col s12" style="margin-bottom: 25px;">
-                        <select name="clientId" required class="browser-default" style="border: 1px solid #ccc; border-radius: 4px; padding: 10px;">
-                            <option value="" disabled selected>-- Selecciona un Cliente --</option>
-                            <?php
-                            $_clients = mysqli_query($connection, "SELECT id, name FROM clientes WHERE status = 'Activo' ORDER BY name ASC");
-                            while ($client = $_clients->fetch_object()) {
-                                echo "<option value='{$client->id}'>{$client->name}</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
+    <div class="card">
+        <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">
+            Iniciar Nueva Evaluación
+        </h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">
+            Selecciona el cliente corporativo y el tipo de formulario regulatorio a generar.
+        </p>
 
-                    <div class="input-field col s12" style="margin-bottom: 30px;">
-                        <select name="typeId" required class="browser-default" style="border: 1px solid #ccc; border-radius: 4px; padding: 10px;">
-                            <option value="" disabled selected>-- Selecciona Tipo de Evaluación --</option>
-                            <?php
-                            $_types = mysqli_query($connection, "SELECT typeId, typeName FROM ac_types ORDER BY typeId ASC");
-                            while ($type = $_types->fetch_object()) {
-                                echo "<option value='{$type->typeId}'>{$type->typeName}</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-
-                    <div class="row" style="margin-top: 20px;">
-                        <div class="col s12 right-align">
-                            <a href="index.php" class="btn btn-secondary grey lighten-1 black-text waves-effect" style="margin-right: 10px;">Cancelar</a>
-                            <button type="submit" class="btn blue waves-effect waves-light">
-                                <i class="material-icons left">check_circle</i> Crear Evaluación
-                            </button>
-                        </div>
-                    </div>
-                </form>
-
+        <form action="../../c/ac.php?action=create" method="POST">
+            
+            <div class="form-group">
+                <label for="clientId">Cliente / Empresa Activa</label>
+                <select name="clientId" id="clientId" required>
+                    <option value="" disabled selected>-- Selecciona un Cliente --</option>
+                    <?php
+                    try {
+                        // CORRECCIÓN: Migración a PDO nativo
+                        $stmtClients = $pdo->query("SELECT id, name FROM clientes WHERE status = 'Activo' ORDER BY name ASC");
+                        $clients = $stmtClients->fetchAll(PDO::FETCH_OBJ);
+                        
+                        foreach ($clients as $client) {
+                            $safeName = htmlspecialchars($client->name, ENT_QUOTES, 'UTF-8');
+                            echo "<option value='{$client->id}'>{$safeName}</option>";
+                        }
+                    } catch (PDOException $e) {
+                        echo "<option value='' disabled>Error al cargar clientes</option>";
+                    }
+                    ?>
+                </select>
             </div>
-        </div>
+
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label for="typeId">Tipo de Evaluación</label>
+                <select name="typeId" id="typeId" required>
+                    <option value="" disabled selected>-- Selecciona Tipo de Evaluación --</option>
+                    <?php
+                    try {
+                        // CORRECCIÓN: Migración a PDO nativo
+                        $stmtTypes = $pdo->query("SELECT typeId, typeName FROM ac_types ORDER BY typeId ASC");
+                        $types = $stmtTypes->fetchAll(PDO::FETCH_OBJ);
+                        
+                        foreach ($types as $type) {
+                            $safeTypeName = htmlspecialchars($type->typeName, ENT_QUOTES, 'UTF-8');
+                            echo "<option value='{$type->typeId}'>{$safeTypeName}</option>";
+                        }
+                    } catch (PDOException $e) {
+                        echo "<option value='' disabled>Error al cargar tipos de evaluación</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <div class="actions" style="margin-top: 2.5rem;">
+                <a href="index.php" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-checkbox-circle-line"></i> Crear Evaluación
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
 <?php 
+// 4. Incluimos el pie de página común de tu sistema
 include '../main/footer.php'; 
 ?>
