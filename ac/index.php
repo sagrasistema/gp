@@ -4,7 +4,7 @@
 // 1. Incluimos el encabezado común de tu sistema
 include '../main/h.php'; 
 
-// 2. Incluimos tu archivo de conexión (Ajusta la ruta exacta si tu archivo se llama diferente, por ejemplo: connection.php)
+// 2. Incluimos tu archivo de conexión (Este archivo crea la variable corporativa $pdo)
 include '../main/config.php'; 
 
 ?>
@@ -35,41 +35,56 @@ include '../main/config.php';
                 </thead>
                 <tbody>
                     <?php
-                    // Consulta relacional: Trae los datos de 'ac' uniendo el nombre del cliente y el tipo de proceso
-                    $query = "SELECT 
-                                a.acId, 
-                                c.name AS clientName, 
-                                t.typeName, 
-                                a.created_at 
-                              FROM ac a
-                              INNER JOIN clientes c ON a.clientId = c.id
-                              INNER JOIN ac_types t ON a.typeId = t.typeId
-                              ORDER BY a.acId DESC";
-                    
-                    // Ejecutamos la consulta usando tu variable global '$connection'
-                    $_ac = mysqli_query($connection, $query);
-                    
-                    // Verificamos si la consulta tiene registros creados
-                    if ($_ac && mysqli_num_rows($_ac) > 0) {
-                        while ($ac = $_ac->fetch_object()) {
+                    try {
+                        // Sentencia SQL limpia y optimizada para el motor relacional
+                        $query = "SELECT 
+                                    a.acId, 
+                                    c.name AS clientName, 
+                                    t.typeName, 
+                                    a.created_at 
+                                  FROM ac a
+                                  INNER JOIN clientes c ON a.clientId = c.id
+                                  INNER JOIN ac_types t ON a.typeId = t.typeId
+                                  ORDER BY a.acId DESC";
+                        
+                        // Ejecución segura a través de la instancia PDO ($pdo)
+                        $stmt = $pdo->query($query);
+                        $evaluaciones = $stmt->fetchAll(PDO::FETCH_OBJ);
+                        
+                        // Verificamos si la consulta arrojó registros
+                        if (!empty($evaluaciones)) {
+                            foreach ($evaluaciones as $ac) {
+                                // Mitigación XSS: Sanitización de datos persistidos en la base de datos antes de pintar en el DOM
+                                $clientName = htmlspecialchars($ac->clientName, ENT_QUOTES, 'UTF-8');
+                                $typeName   = htmlspecialchars($ac->typeName, ENT_QUOTES, 'UTF-8');
+                                $fecha      = date('d/m/Y', strtotime($ac->created_at));
+
+                                echo "<tr>";
+                                echo "<td style='padding-left: 20px;'>#{$ac->acId}</td>";
+                                echo "<td><strong>{$clientName}</strong></td>";
+                                echo "<td><span class='chip blue lighten-5 blue-text' style='font-weight: 500;'>{$typeName}</span></td>";
+                                echo "<td>{$fecha}</td>";
+                                echo "<td class='center-align'>
+                                        <a href='formularios.php?aid={$ac->acId}' class='btn-small blue-grey darken-1 waves-effect waves-light' style='border-radius: 4px;'>
+                                            <i class='material-icons left'>assignment</i> Responder
+                                        </a>
+                                      </td>";
+                                echo "</tr>";
+                            }
+                        } else {
+                            // Mensaje en caso de que la tabla esté vacía
                             echo "<tr>";
-                            echo "<td style='padding-left: 20px;'>#{$ac->acId}</td>";
-                            echo "<td><strong>{$ac->clientName}</strong></td>";
-                            echo "<td><span class='chip blue lighten-5 blue-text' style='font-weight: 500;'>{$ac->typeName}</span></td>";
-                            echo "<td>" . date('d/m/Y', strtotime($ac->created_at)) . "</td>";
-                            echo "<td class='center-align'>
-                                    <a href='formularios.php?aid={$ac->acId}' class='btn-small blue-grey darken-1 waves-effect waves-light' style='border-radius: 4px;'>
-                                        <i class='material-icons left'>assignment</i> Responder
-                                    </a>
-                                  </td>";
+                            echo "<td colspan='5' class='center-align grey-text' style='padding: 40px;'>";
+                            echo "<i class='material-icons large' style='opacity: 0.3;'>folder_open</i><br>";
+                            echo "No se han encontrado evaluaciones de Aceptación y Continuidad iniciadas.<br>Haz clic en el botón '+' superior para registrar la primera.";
+                            echo "</td>";
                             echo "</tr>";
                         }
-                    } else {
-                        // Mensaje amigable en caso de que la tabla de AC esté vacía
+                    } catch (PDOException $e) {
+                        // Manejo defensivo de errores en producción para ocultar trazas de base de datos
                         echo "<tr>";
-                        echo "<td colspan='5' class='center-align grey-text' style='padding: 40px;'>";
-                        echo "<i class='material-icons large style='opacity: 0.3;'>folder_open</i><br>";
-                        echo "No se han encontrado evaluaciones de Aceptación y Continuidad iniciadas.<br>Haz clic en el botón '+' superior para registrar la primera.";
+                        echo "<td colspan='5' class='center-align red-text font-weight-bold' style='padding: 30px;'>";
+                        echo "<i class='material-icons left'>error</i> Error interno: No se pudo conectar con el repositorio de datos de auditoría.";
                         echo "</td>";
                         echo "</tr>";
                     }
