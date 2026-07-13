@@ -2,7 +2,7 @@
 // v/ac/index.php
 
 // 1. Incluimos el encabezado común de tu sistema
-include '../main/header.php'; 
+include '../main/h.php'; 
 
 // 2. Incluimos tu archivo de conexión (Ajusta la ruta exacta si tu archivo se llama diferente, por ejemplo: connection.php)
 include '../main/config.php'; 

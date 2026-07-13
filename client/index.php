@@ -1,5 +1,5 @@
 <?php 
-$pageTitle = "Control de Clientes Alberto";
+$pageTitle = "Control de Clientes";
 include 'header.php'; 
 ?>
 
