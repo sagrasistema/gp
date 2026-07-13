@@ -1,6 +1,6 @@
 <?php 
 $pageTitle = "Control de Clientes";
-include '../main/h.php'; 
+include 'header.php'; 
 ?>
 
 <div class="container">
