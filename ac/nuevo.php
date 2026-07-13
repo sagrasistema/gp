@@ -1,6 +1,10 @@
 <?php 
+include '../main/config.php'; 
+
+// 2. Definimos el título de la página para que el header común lo asimile
+$pageTitle = "Aceptación y Continuidad";
 // v/ac/nuevo.php
-include '../main/header.php'; 
+include '../main/h.php'; 
 ?>
 
 <div class="container" style="margin-top: 30px;">
