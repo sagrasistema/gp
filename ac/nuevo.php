@@ -25,7 +25,7 @@ include '../main/h.php';
             Iniciar Nueva Evaluación
         </h3>
         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">
-            Selecciona el cliente corporativo y el tipo de formulario regulatorio a generar.
+            Selecciona el cliente corporativo, el tipo de evaluación y el servicio específico a generar.
         </p>
 
         <form action="../../c/ac.php?action=create" method="POST">
@@ -36,7 +36,6 @@ include '../main/h.php';
                     <option value="" disabled selected>-- Selecciona un Cliente --</option>
                     <?php
                     try {
-                        // CORRECCIÓN: Migración a PDO nativo
                         $stmtClients = $pdo->query("SELECT id, name FROM clientes WHERE status = 'Activo' ORDER BY name ASC");
                         $clients = $stmtClients->fetchAll(PDO::FETCH_OBJ);
                         
@@ -57,7 +56,6 @@ include '../main/h.php';
                     <option value="" disabled selected>-- Selecciona Tipo de Evaluación --</option>
                     <?php
                     try {
-                        // CORRECCIÓN: Migración a PDO nativo
                         $stmtTypes = $pdo->query("SELECT typeId, typeName FROM ac_types ORDER BY typeId ASC");
                         $types = $stmtTypes->fetchAll(PDO::FETCH_OBJ);
                         
@@ -67,6 +65,26 @@ include '../main/h.php';
                         }
                     } catch (PDOException $e) {
                         echo "<option value='' disabled>Error al cargar tipos de evaluación</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label for="serviceId">Servicio a Prestar</label>
+                <select name="serviceId" id="serviceId" required>
+                    <option value="" disabled selected>-- Selecciona el Servicio --</option>
+                    <?php
+                    try {
+                        $stmtServices = $pdo->query("SELECT serviceId, serviceName FROM ac_services ORDER BY serviceId ASC");
+                        $services = $stmtServices->fetchAll(PDO::FETCH_OBJ);
+                        
+                        foreach ($services as $service) {
+                            $safeServiceName = htmlspecialchars($service->serviceName, ENT_QUOTES, 'UTF-8');
+                            echo "<option value='{$service->serviceId}'>{$safeServiceName}</option>";
+                        }
+                    } catch (PDOException $e) {
+                        echo "<option value='' disabled>Error al cargar el catálogo de servicios</option>";
                     }
                     ?>
                 </select>
