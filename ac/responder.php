@@ -232,42 +232,49 @@ include '../main/h.php';
                                 </div>
                             </div>
 
+                            
                             <?php if ($q->questionNumber == 28): ?>
-                                <div style="margin-top: 1.5rem; background: #f8fafc; padding: 1.25rem; border-radius: 6px; border: 1px dashed #cbd5e1;">
-                                    <h4 style="font-size: 0.9rem; color: #1e293b; margin-bottom: 0.5rem; font-weight: 700;"><i class="ri-matrix-line"></i> Desglose Analítico Matriz de Riesgo Interno (Prueba 28)</h4>
-                                    <table class="subtest-table">
-                                        <thead>
+                            <div style="margin-top: 1.5rem; background: #f8fafc; padding: 1.25rem; border-radius: 6px; border: 1px dashed #cbd5e1;">
+                                <h4 style="font-size: 0.9rem; color: #1e293b; margin-bottom: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="ri-matrix-line" style="color: var(--accent, #0284c7);"></i> Desglose Analítico Matriz de Riesgo Interno (Prueba 28)
+                                </h4>
+                                <table class="subtest-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 5%; text-align: center;">N°</th>
+                                            <th style="width: 65%;">Descripción de la Prueba de Control / Factor de Riesgo</th>
+                                            <th style="width: 30%; text-align: center;">Nivel de Riesgo Asignado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        // Consultamos las 21 pruebas cargadas en la BD
+                                        $subtests = $pdo->query("SELECT * FROM ac_q28_tests ORDER BY testNumber ASC")->fetchAll(PDO::FETCH_OBJ);
+                                        foreach ($subtests as $sub):
+                                            // Buscar si ya tiene un riesgo guardado para mantener la persistencia
+                                            $savedRisk = $q28Saved[$sub->testId]['riskValue'] ?? 'No Aplica';
+                                        ?>
                                             <tr>
-                                                <th style="width: 5%;">N°</th>
-                                                <th>Descripción de la Prueba de Control</th>
-                                                <th style="width: 25%;">Nivel de Riesgo Asignado</th>
+                                                <td style="text-align: center;"><strong><?= $sub->testNumber ?></strong></td>
+                                                <td style="line-height: 1.35; color: #334155; font-size: 0.88rem;">
+                                                    <?= htmlspecialchars($sub->testText, ENT_QUOTES, 'UTF-8') ?>
+                                                </td>
+                                                <td style="text-align: center;">
+                                                    <select name="q28[<?= $sub->testId ?>]" class="q28-select" onchange="calculateLiveRisk()" style="width: 100%; max-width: 200px;">
+                                                        <option value="No Aplica" <?= $savedRisk === 'No Aplica' ? 'selected' : '' ?>>No Aplica (0 pts)</option>
+                                                        <option value="Bajo" <?= $savedRisk === 'Bajo' ? 'selected' : '' ?>>Bajo (1 pts)</option>
+                                                        <option value="Bajo-Moderado" <?= $savedRisk === 'Bajo-Moderado' ? 'selected' : '' ?>>Bajo-Moderado (2 pts)</option>
+                                                        <option value="Moderado" <?= $savedRisk === 'Moderado' ? 'selected' : '' ?>>Moderado (3 pts)</option>
+                                                        <option value="Moderado-Alto" <?= $savedRisk === 'Moderado-Alto' ? 'selected' : '' ?>>Moderado-Alto (4 pts)</option>
+                                                        <option value="Alto" <?= $savedRisk === 'Alto' ? 'selected' : '' ?>>Alto (5 pts)</option>
+                                                    </select>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            $subtests = $pdo->query("SELECT * FROM ac_q28_tests ORDER BY testNumber ASC")->fetchAll(PDO::FETCH_OBJ);
-                                            foreach ($subtests as $sub):
-                                                $savedRisk = $q28Saved[$sub->testId]['riskValue'] ?? 'No Aplica';
-                                            ?>
-                                                <tr>
-                                                    <td><strong><?= $sub->testNumber ?></strong></td>
-                                                    <td><?= htmlspecialchars($sub->testText, ENT_QUOTES, 'UTF-8') ?></td>
-                                                    <td>
-                                                        <select name="q28[<?= $sub->testId ?>]" class="q28-select" onchange="calculateLiveRisk()">
-                                                            <option value="No Aplica" <?= $savedRisk === 'No Aplica' ? 'selected' : '' ?>>No Aplica (0 pts)</option>
-                                                            <option value="Bajo" <?= $savedRisk === 'Bajo' ? 'selected' : '' ?>>Bajo (1 pts)</option>
-                                                            <option value="Bajo-Moderado" <?= $savedRisk === 'Bajo-Moderado' ? 'selected' : '' ?>>Bajo-Moderado (2 pts)</option>
-                                                            <option value="Moderado" <?= $savedRisk === 'Moderado' ? 'selected' : '' ?>>Moderado (3 pts)</option>
-                                                            <option value="Moderado-Alto" <?= $savedRisk === 'Moderado-Alto' ? 'selected' : '' ?>>Moderado-Alto (4 pts)</option>
-                                                            <option value="Alto" <?= $savedRisk === 'Alto' ? 'selected' : '' ?>>Alto (5 pts)</option>
-                                                        </select>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?>
 
                         </div>
                     <?php endforeach; ?>
