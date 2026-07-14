@@ -173,6 +173,21 @@ include '../main/h.php';
     .subtest-table select:focus { border-color: var(--accent, #0284c7); }
     
     .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+    /* Estados del Semáforo de Riesgo */
+    .badge-risk {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+    .badge-risk.risk-bajo { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-risk.risk-moderado { background-color: #fefce8; color: #854d0e; border: 1px solid #fef08a; }
+    .badge-risk.risk-moderado-alto { background-color: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; }
+    .badge-risk.risk-alto { background-color: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
 </style>
 
 <div class="ac-container">
@@ -192,12 +207,23 @@ include '../main/h.php';
         <div class="meta-item">Client / Empresa <strong><?= htmlspecialchars($acData->clientName, ENT_QUOTES, 'UTF-8') ?></strong></div>
         <div class="meta-item">Tipo Evaluación <strong><?= htmlspecialchars($acData->typeName, ENT_QUOTES, 'UTF-8') ?></strong></div>
         <div class="meta-item">Servicio Requerido <strong><?= htmlspecialchars($acData->serviceName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-        <div class="meta-item" style="margin-left: auto; text-align: right;">
-            Riesgo Calculado Matriz 
-            <strong id="live-risk-badge" style="font-size: 1.2rem; color: var(--accent, #0284c7);">
-                <?= $acData->riskScore ?> Pts (<?= $acData->riskLevel ?>)
-            </strong>
+
+        <div class="meta-item" style="margin-left: auto; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
+            <span style="font-size: 0.8rem; color: var(--text-muted, #64748b); font-weight: 500;">Riesgo Calculado Matriz</span>
+            <?php
+            // Determinar la clase inicial según los datos de la base de datos
+            $riskClass = 'risk-bajo';
+            $riskIcon = 'ri-checkbox-circle-line';
+            
+            if ($acData->riskLevel === 'Moderado') { $riskClass = 'risk-moderado'; $riskIcon = 'ri-alert-line'; }
+            elseif ($acData->riskLevel === 'Moderado-Alto') { $riskClass = 'risk-moderado-alto'; $riskIcon = 'ri-error-warning-line'; }
+            elseif ($acData->riskLevel === 'Alto') { $riskClass = 'risk-alto'; $riskIcon = 'ri-close-circle-line'; }
+            ?>
+            <span id="live-risk-badge" class="badge-risk <?= $riskClass ?>">
+                <i class="<?= $riskIcon ?>"></i> <?= $acData->riskScore ?> Pts (<?= $acData->riskLevel ?>)
+            </span>
         </div>
+        
     </div>
 
     <form action="responder.php?acId=<?= $acId ?>" method="POST">
@@ -334,14 +360,32 @@ function calculateLiveRisk() {
     });
 
     let level = 'Bajo';
-    if (score <= 25) level = 'Bajo';
-    else if (score <= 55) level = 'Moderado';
-    else if (score <= 85) level = 'Moderado-Alto';
-    else level = 'Alto';
+    let cssClass = 'risk-bajo';
+    let iconClass = 'ri-checkbox-circle-line';
 
-    document.getElementById('live-risk-badge').innerText = `${score} Pts (${level})`;
+    if (score <= 25) {
+        level = 'Bajo';
+        cssClass = 'risk-bajo';
+        iconClass = 'ri-checkbox-circle-line';
+    } else if (score <= 55) {
+        level = 'Moderado';
+        cssClass = 'risk-moderado';
+        iconClass = 'ri-alert-line';
+    } else if (score <= 85) {
+        level = 'Moderado-Alto';
+        cssClass = 'risk-moderado-alto';
+        iconClass = 'ri-error-warning-line';
+    } else {
+        level = 'Alto';
+        cssClass = 'risk-alto';
+        iconClass = 'ri-close-circle-line';
+    }
+
+    // Actualizar el Badge completo con el nuevo color, icono y texto
+    const badge = document.getElementById('live-risk-badge');
+    badge.className = `badge-risk ${cssClass}`;
+    badge.innerHTML = `<i class="${iconClass}"></i> ${score} Pts (${level})`;
 }
-
 document.addEventListener("DOMContentLoaded", calculateLiveRisk);
 </script>
 
