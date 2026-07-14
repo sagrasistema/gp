@@ -1,0 +1,142 @@
+/* main/layout.css */
+:root {
+    --bg-primary: #f8fafc;
+    --bg-card: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --accent: #0284c7;
+    --accent-hover: #0369a1;
+    --border-color: #e2e8f0;
+}
+
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--bg-primary); 
+    color: var(--text-main); 
+}
+
+/* 1. NAVBAR SUPERIOR */
+.main-navbar {
+    height: 60px;
+    width: 100%;
+    background: #2c3e50;
+    border-bottom: 1px solid #1e2b37;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.navbar-left { display: flex; align-items: center; gap: 1.25rem; }
+.navbar-logo-container { display: flex; align-items: center; height: 40px; }
+
+.main-system-logo { 
+    height: 36px; 
+    width: auto; 
+    object-fit: contain; 
+    cursor: pointer;
+}
+
+.navbar-title { 
+    font-weight: 600; 
+    color: #94a3b8; 
+    font-size: 0.95rem;
+    border-left: 1px solid #34495e;
+    padding-left: 1.25rem;
+}
+
+.navbar-right { display: flex; align-items: center; gap: 1rem; color: #edf2f7; font-size: 0.9rem; }
+.user-name-text { font-weight: 500; }
+.user-avatar { background: #34495e; color: #fff; padding: 0.45rem; border-radius: 50%; font-size: 1.1rem; }
+
+.btn-toggle { 
+    background: none; 
+    border: none; 
+    font-size: 1.4rem; 
+    color: #cbd5e1; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center;
+    padding: 0.2rem;
+    transition: color 0.2s;
+}
+.btn-toggle:hover { color: #fff; }
+
+/* 2. CUERPO DE LA APP Y SIDEBAR */
+.app-body {
+    margin-top: 60px;
+    display: flex;
+    min-height: calc(100vh - 60px);
+    width: 100%;
+}
+
+.main-sidebar {
+    width: 90px;
+    background: #2c3e50;
+    color: #fff;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    bottom: 0;
+    z-index: 900;
+    border-right: 1px solid #1e2b37;
+}
+
+.sidebar-menu { padding: 0.75rem 0; display: flex; flex-direction: column; gap: 0.25rem; }
+
+.menu-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.4rem;
+    padding: 1rem 0.5rem;
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    border-left: 3px solid transparent;
+}
+.menu-item i { font-size: 1.4rem; }
+.menu-item span { font-size: 0.75rem; font-weight: 500; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
+
+.menu-item:hover { 
+    background: #3498db; 
+    color: #fff; 
+}
+
+.menu-item.active { background: #1a252f; color: #fff; font-weight: 600; border-left-color: #3498db; }
+.menu-item.style-disabled { opacity: 0.4; pointer-events: none; }
+
+/* 3. ÁREA DE TRABAJO PRINCIPAL */
+.main-content {
+    flex-grow: 1;
+    margin-left: 90px;
+    padding: 2rem;
+    width: calc(100% - 90px);
+    min-height: 100%;
+}
+
+/* COMPORTAMIENTO RESPONSIVO MÓVIL */
+@media (max-width: 768px) {
+    .main-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    .app-body.sidebar-open .main-sidebar {
+        transform: translateX(0);
+    }
+    .main-content { margin-left: 0; width: 100%; padding: 1.5rem 1rem; }
+    .navbar-title, .user-name-text { display: none; }
+}
