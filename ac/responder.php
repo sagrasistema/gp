@@ -35,9 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
-        // A. Guardar las respuestas a las 30 preguntas generales
-        #if (isset($_POST['answers']) && is_array($_POST['answers'])) {
-       // A. Guardar las respuestas a las 30 preguntas generales (Permitiendo vacíos)
+        // A. Guardar las respuestas a las 30 preguntas generales (Permitiendo vacíos)
         if (isset($_POST['answers']) && is_array($_POST['answers'])) {
             $stmtUpdateAnswer = $pdo->prepare("
                 UPDATE ac_general_answers 
@@ -45,7 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 WHERE acId = :acId AND questionId = :questionId
             ");
             foreach ($_POST['answers'] as $qId => $data) {
-                // Si el usuario no marcó Sí o No, guardamos NULL o vacío en lugar de obligarlo
                 $responseValue = (!empty($data['response'])) ? $data['response'] : null;
 
                 $stmtUpdateAnswer->execute([
@@ -56,13 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
             }
         }
-        // B. Guardar las 21 subpruebas de la Pregunta 28 y calcular el Score
-        #$totalScore = 0;
+        
         // B. Guardar las 21 subpruebas de la Pregunta 28 y calcular el Score
         $totalScore = 0;
         if (isset($_POST['q28']) && is_array($_POST['q28'])) {
             
-            // Usamos un query inteligente: si no existe el registro de respuesta para este acId y testId, lo inserta; si ya existe, lo actualiza.
             $stmtUpdateQ28 = $pdo->prepare("
                 INSERT INTO ac_q28_answers (acId, testId, riskValue, score) 
                 VALUES (:acId, :testId, :riskValue, :score)
@@ -92,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
             }
         }
+        
         // C. Determinar cualitativamente el Rango de riesgo
         if ($totalScore <= 25) {
             $riskLevel = 'Bajo';
@@ -132,32 +128,30 @@ $pageTitle = "Responder Cuestionario AC";
 include '../main/h.php';
 ?>
 
+<link rel="stylesheet" href="../main/layout.css">
+
 <style>
-    .ac-container { max-width: 1000px; margin: 20px auto; padding: 0 15px; font-family: 'Segoe UI', Roboto, sans-serif; }
+    /* Estilos internos específicos del Formulario y Acordeones */
+    .view-container-form { width: 100%; max-width: 1000px; margin: 0 auto; }
     
-    /* Resumen Superior */
     .meta-summary { background: #fff; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color, #e2e8f0); margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; gap: 2rem; }
     .meta-item { font-size: 0.9rem; color: var(--text-muted, #64748b); }
     .meta-item strong { color: var(--text-main, #0f172a); display: block; font-size: 1.05rem; }
     
-    /* Acordeones Principales (Categorías) */
     .accordion-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 0.5rem; overflow: hidden; }
     .accordion-header { background: #fff; padding: 1rem 1.25rem; font-size: 0.95rem; font-weight: 600; color: #334155; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; transition: background 0.2s; border-left: 4px solid var(--accent, #0284c7); }
     .accordion-header:hover { background: #f8fafc; }
     .accordion-header i { font-size: 1.2rem; color: #64748b; transition: transform 0.2s; }
     
-    /* Clase activa para mostrar contenido */
     .accordion-item.active .accordion-header { background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
     .accordion-item.active .accordion-header i { transform: rotate(180deg); }
     .accordion-content { display: none; padding: 1.25rem; background: #fafafa; }
     .accordion-item.active .accordion-content { display: block; }
 
-    /* Filas de Preguntas */
     .question-row { background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1.25rem; margin-bottom: 0.75rem; }
     .question-text { font-size: 0.95rem; font-weight: 500; color: #1e293b; margin-bottom: 1rem; line-height: 1.4; }
     .question-inputs { display: grid; grid-template-columns: 180px 1fr; gap: 1.5rem; align-items: center; }
     
-    /* Inputs de Opción */
     .radio-group { display: flex; gap: 1.25rem; }
     .radio-label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; cursor: pointer; font-weight: 600; color: #475569; }
     .radio-label input { width: 17px; height: 17px; accent-color: var(--accent, #0284c7); }
@@ -165,7 +159,6 @@ include '../main/h.php';
     .comment-input { width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 0.5rem 0.75rem; font-size: 0.88rem; outline: none; transition: border-color 0.2s; }
     .comment-input:focus { border-color: var(--accent, #0284c7); }
 
-    /* Tabla de la Matriz Q28 */
     .subtest-table { width: 100%; border-collapse: collapse; margin-top: 1.25rem; font-size: 0.88rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; }
     .subtest-table th { background: #f8fafc; text-align: left; padding: 0.75rem; font-size: 0.8rem; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
     .subtest-table td { padding: 0.75rem; border-bottom: 1px solid #e2e8f0; color: #334155; }
@@ -173,29 +166,38 @@ include '../main/h.php';
     .subtest-table select:focus { border-color: var(--accent, #0284c7); }
     
     .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
-    /* Estados del Semáforo de Riesgo */
-    .badge-risk {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-        font-size: 0.95rem;
-        font-weight: 700;
-        transition: all 0.3s ease;
-    }
+
+    .badge-risk { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.95rem; font-weight: 700; transition: all 0.3s ease; }
     .badge-risk.risk-bajo { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
     .badge-risk.risk-moderado { background-color: #fefce8; color: #854d0e; border: 1px solid #fef08a; }
     .badge-risk.risk-moderado-alto { background-color: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; }
     .badge-risk.risk-alto { background-color: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    @media (max-width: 768px) {
+        .meta-summary { flex-direction: column; gap: 1rem !important; }
+        .meta-item:last-child { align-items: flex-start !important; text-align: left !important; margin-left: 0 !important; }
+        .question-inputs { grid-template-columns: 1fr; gap: 1rem; }
+    }
 </style>
 
-<div class="ac-container">
-    <header style="margin-bottom: 1.5rem;">
-        <img src="../main/logo.png" alt="Logo Corporativo" class="brand-logo" style="cursor: pointer;" onclick="window.location.href='../index.php'">
-        <h1><i class="ri-survey-line"></i> Ejecutar Cuestionario</h1>
-        <a href="index.php" class="btn-back"><i class="ri-arrow-left-line"></i></a>
-    </header>
+<?php
+// Mapeo dinámico de rutas del layout de la subcarpeta ac/
+$customLogoPath = '../main/logo.png'; 
+$customHomePath = '../index.php';     
+$customAcPath   = 'index.php';  
+$currentTab     = 'aceptacion'; 
+
+include '../main/layout_header.php'; 
+?>
+
+<div class="view-container-form">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="ri-survey-line" style="color: var(--accent);"></i> Ejecutar Cuestionario
+        </h1>
+        <a href="index.php" class="btn btn-secondary"><i class="ri-arrow-left-line"></i> Volver</a>
+    </div>
 
     <?php if (isset($_GET['success'])): ?>
         <div class="alert-success">
@@ -211,7 +213,6 @@ include '../main/h.php';
         <div class="meta-item" style="margin-left: auto; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
             <span style="font-size: 0.8rem; color: var(--text-muted, #64748b); font-weight: 500;">Riesgo Calculado Matriz</span>
             <?php
-            // Determinar la clase inicial según los datos de la base de datos
             $riskClass = 'risk-bajo';
             $riskIcon = 'ri-checkbox-circle-line';
             
@@ -223,7 +224,6 @@ include '../main/h.php';
                 <i class="<?= $riskIcon ?>"></i> <?= $acData->riskScore ?> Pts (<?= $acData->riskLevel ?>)
             </span>
         </div>
-        
     </div>
 
     <form action="responder.php?acId=<?= $acId ?>" method="POST">
@@ -267,13 +267,12 @@ include '../main/h.php';
                                 </div>
                             </div>
 
-                            
                             <?php if ($q->questionNumber == 28): ?>
-                            <div style="margin-top: 1.5rem; background: #f8fafc; padding: 1.25rem; border-radius: 6px; border: 1px dashed #cbd5e1;">
+                            <div style="margin-top: 1.5rem; background: #f8fafc; padding: 1.25rem; border-radius: 6px; border: 1px dashed #cbd5e1; overflow-x: auto;">
                                 <h4 style="font-size: 0.9rem; color: #1e293b; margin-bottom: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
                                     <i class="ri-matrix-line" style="color: var(--accent, #0284c7);"></i> Desglose Analítico Matriz de Riesgo Interno (Prueba 28)
                                 </h4>
-                                <table class="subtest-table">
+                                <table class="subtest-table" style="min-width: 600px;">
                                     <thead>
                                         <tr>
                                             <th style="width: 5%; text-align: center;">N°</th>
@@ -283,10 +282,8 @@ include '../main/h.php';
                                     </thead>
                                     <tbody>
                                         <?php
-                                        // Consultamos las 21 pruebas cargadas en la BD
                                         $subtests = $pdo->query("SELECT * FROM ac_q28_tests ORDER BY testNumber ASC")->fetchAll(PDO::FETCH_OBJ);
                                         foreach ($subtests as $sub):
-                                            // Buscar si ya tiene un riesgo guardado para mantener la persistencia
                                             $savedRisk = $q28Saved[$sub->testId]['riskValue'] ?? 'No Aplica';
                                         ?>
                                             <tr>
@@ -309,7 +306,7 @@ include '../main/h.php';
                                     </tbody>
                                 </table>
                             </div>
-                        <?php endif; ?>
+                            <?php endif; ?>
 
                         </div>
                     <?php endforeach; ?>
@@ -327,21 +324,16 @@ include '../main/h.php';
 </div>
 
 <script>
-// Manejar la apertura y el colapso del acordeón
 function toggleAccordion(headerElement) {
     const item = headerElement.parentElement;
-    
-    // Si ya está activo, lo cerramos; si no, lo abrimos
     if (item.classList.contains('active')) {
         item.classList.remove('active');
     } else {
-        // Opcional: Cerrar otros acordeones abiertos para mantener orden (limpieza visual)
         document.querySelectorAll('.accordion-item').forEach(el => el.classList.remove('active'));
         item.classList.add('active');
     }
 }
 
-// Calcular riesgo en tiempo real
 function calculateLiveRisk() {
     const selects = document.querySelectorAll('.q28-select');
     let score = 0;
@@ -364,29 +356,28 @@ function calculateLiveRisk() {
     let iconClass = 'ri-checkbox-circle-line';
 
     if (score <= 25) {
-        level = 'Bajo';
-        cssClass = 'risk-bajo';
-        iconClass = 'ri-checkbox-circle-line';
+        level = 'Bajo'; cssClass = 'risk-bajo'; iconClass = 'ri-checkbox-circle-line';
     } else if (score <= 55) {
-        level = 'Moderado';
-        cssClass = 'risk-moderado';
-        iconClass = 'ri-alert-line';
+        level = 'Moderado'; cssClass = 'risk-moderado'; iconClass = 'ri-alert-line';
     } else if (score <= 85) {
-        level = 'Moderado-Alto';
-        cssClass = 'risk-moderado-alto';
-        iconClass = 'ri-error-warning-line';
+        level = 'Moderado-Alto'; cssClass = 'risk-moderado-alto'; iconClass = 'ri-error-warning-line';
     } else {
-        level = 'Alto';
-        cssClass = 'risk-alto';
-        iconClass = 'ri-close-circle-line';
+        level = 'Alto'; cssClass = 'risk-alto'; iconClass = 'ri-close-circle-line';
     }
 
-    // Actualizar el Badge completo con el nuevo color, icono y texto
     const badge = document.getElementById('live-risk-badge');
-    badge.className = `badge-risk ${cssClass}`;
-    badge.innerHTML = `<i class="${iconClass}"></i> ${score} Pts (${level})`;
+    if (badge) {
+        badge.className = `badge-risk ${cssClass}`;
+        badge.innerHTML = `<i class="${iconClass}"></i> ${score} Pts (${level})`;
+    }
 }
 document.addEventListener("DOMContentLoaded", calculateLiveRisk);
 </script>
 
-<?php include '../main/footer.php'; ?>
+<?php 
+// Cierre del layout modular y scripts de navegación móvil
+include '../main/layout_footer.php'; 
+
+// Footer nativo del sistema
+include '../main/footer.php'; 
+?>
