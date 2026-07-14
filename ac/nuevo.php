@@ -47,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // C. Inicializar respuestas en 'No Aplica' (0 puntos) para las 21 subpruebas asociadas a la Q28
-        // Obtenemos los testId reales de la tabla ac_q28_tests
         $tests = $pdo->query("SELECT testId FROM ac_q28_tests ORDER BY testNumber ASC")->fetchAll(PDO::FETCH_COLUMN);
 
         $stmtInsertTestAnswer = $pdo->prepare("
@@ -80,20 +79,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // 2. Definimos el título de la página para que el header común lo asimile
 $pageTitle = "Iniciar Aceptación y Continuidad";
 
-// 3. Incluimos el encabezado común de tu sistema
+// 3. Incluimos el encabezado común de tu sistema (Sesiones / Metas)
 include '../main/h.php'; 
 ?>
 
-<div class="container" style="max-width: 700px; margin-top: 20px;">
-    <header>
-        <img src="../main/logo.png" alt="Logo Corporativo" class="brand-logo" style="cursor: pointer;" onclick="window.location.href='../index.php'">
-        <h1>
+<link rel="stylesheet" href="../main/layout.css">
+
+<?php
+// Configuración dinámica del Layout para que mapee las rutas desde la subcarpeta ac/
+$customLogoPath = '../main/logo.png'; 
+$customHomePath = '../index.php';     
+$customAcPath   = 'index.php';  
+$currentTab     = 'aceptacion'; // Mantiene activa la opción "Aceptación" en el menú lateral
+
+include '../main/layout_header.php'; 
+?>
+
+<div class="view-container" style="max-width: 700px; margin: 0 auto;">
+    
+    <div class="view-header">
+        <h1 class="page-main-title">
             <i class="ri-shield-check-line"></i> Aceptación y Continuidad
         </h1>
-        <a href="index.php" class="btn-back"><i class="ri-arrow-left-line"></i></a>
-    </header>
+        <div class="header-actions">
+            <a href="index.php" class="btn btn-secondary"><i class="ri-arrow-left-line"></i> Volver</a>
+        </div>
+    </div>
 
-    <div class="card">
+    <div class="card" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 2.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);">
         <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">
             Iniciar Nueva Evaluación
         </h3>
@@ -104,8 +117,8 @@ include '../main/h.php';
         <form action="nuevo.php" method="POST">
             
             <div class="form-group">
-                <label for="clientId">Cliente / Empresa Activa</label>
-                <select name="clientId" id="clientId" required>
+                <label for="clientId" style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem;">Cliente / Empresa Activa</label>
+                <select name="clientId" id="clientId" required style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.95rem; color: var(--text-main);">
                     <option value="" disabled selected>-- Selecciona un Cliente --</option>
                     <?php
                     try {
@@ -124,8 +137,8 @@ include '../main/h.php';
             </div>
 
             <div class="form-group" style="margin-top: 1.5rem;">
-                <label for="typeId">Tipo de Evaluación</label>
-                <select name="typeId" id="typeId" required>
+                <label for="typeId" style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem;">Tipo de Evaluación</label>
+                <select name="typeId" id="typeId" required style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.95rem; color: var(--text-main);">
                     <option value="" disabled selected>-- Selecciona Tipo de Evaluación --</option>
                     <?php
                     try {
@@ -144,8 +157,8 @@ include '../main/h.php';
             </div>
 
             <div class="form-group" style="margin-top: 1.5rem;">
-                <label for="serviceId">Servicio a Prestar</label>
-                <select name="serviceId" id="serviceId" required>
+                <label for="serviceId" style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem;">Servicio a Prestar</label>
+                <select name="serviceId" id="serviceId" required style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.95rem; color: var(--text-main);">
                     <option value="" disabled selected>-- Selecciona el Servicio --</option>
                     <?php
                     try {
@@ -163,7 +176,7 @@ include '../main/h.php';
                 </select>
             </div>
 
-            <div class="actions" style="margin-top: 2.5rem;">
+            <div class="actions" style="margin-top: 2.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
                 <a href="index.php" class="btn btn-secondary">Cancelar</a>
                 <button type="submit" class="btn btn-primary">
                     <i class="ri-checkbox-circle-line"></i> Crear Evaluación
@@ -174,6 +187,9 @@ include '../main/h.php';
 </div>
 
 <?php 
-// 4. Incluimos el pie de página común de tu sistema
+// Renderiza el cierre estructural del bloque flex layout y scripts móviles
+include '../main/layout_footer.php'; 
+
+// 4. Incluimos el pie de página nativo común de tu sistema
 include '../main/footer.php'; 
 ?>
