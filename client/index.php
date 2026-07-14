@@ -1,18 +1,32 @@
 <?php 
 $pageTitle = "Control de Clientes";
-include 'header.php'; 
+include 'header.php'; // Tu archivo de conexión / inicialización local de la carpeta client
 ?>
 
-<div class="container">
-    <header>
-        <img href="../index.php" src="logo.png" alt="Logo Corporativo" class="brand-logo">
-        <h1> Control de Clientes </h1>
+<link rel="stylesheet" href="../main/layout.css">
+
+<?php
+// Configuración dinámica del Layout para la carpeta client/
+$customLogoPath = '../main/logo.png'; // Ruta para llegar al logo original del sistema
+$customHomePath = '../index.php';     // Ruta para volver al HUB principal
+$customAcPath   = '../ac/index.php';  // Ruta para ir al módulo AC
+$currentTab     = 'inicio';           // Podemos dejar 'inicio' o definir una pestaña para clientes si la creas luego
+
+include '../main/layout_header.php'; 
+?>
+
+<div class="view-container">
+    
+    <div class="view-header">
+        <h1 class="page-main-title">
+            <i class="ri-team-line"></i> Control de Clientes
+        </h1>
         <div class="header-actions">
             <a href="../index.php" class="btn btn-secondary"><i class="ri-arrow-left-line"></i> Menú Principal</a>
             <button id="btn-export" class="btn btn-success"><i class="ri-file-excel-line"></i> Exportar (CSV)</button>
             <a href="nuevo.php" class="btn btn-primary"><i class="ri-user-add-line"></i> Nuevo Cliente</a>
         </div>
-    </header>
+    </div>
 
     <div class="table-container">
         <table class="custom-table">
@@ -26,9 +40,16 @@ include 'header.php';
                     <th style="width: 12%; text-align: center;">Acciones</th>
                 </tr>
             </thead>
-            <tbody id="table-body"></tbody>
+            <tbody id="table-body">
+                </tbody>
         </table>
     </div>
 </div>
 
-<?php include 'footer.php'; ?>
+<?php 
+// Renderiza el cierre del layout, barra lateral y los scripts de interacción móvil
+include '../main/layout_footer.php'; 
+
+// Renderiza los scripts del pie de página de clientes (donde seguramente cargas tu JS para rellenar la tabla)
+include 'footer.php'; 
+?>
