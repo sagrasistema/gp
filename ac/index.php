@@ -5,11 +5,10 @@ include '../main/h.php';
 include '../main/config.php'; 
 ?>
 
-<!-- 1. NAVBAR SUPERIOR COMPLETO (Mismo esquema de color corporativo oscuro) -->
+<!-- 1. NAVBAR SUPERIOR COMPLETO (Identidad unificada oscura) -->
 <header class="main-navbar">
     <div class="navbar-left">
-        <button id="toggle-sidebar-btn" class="btn-toggle"><i class="ri-menu-line"></i></button>
-        
+        <!-- Logo real del sistema en sus colores originales -->
         <div class="navbar-logo-container">
             <img src="../main/logo.png" alt="SAGRA" class="main-system-logo" onclick="window.location.href='../index.php'">
         </div>
@@ -17,17 +16,19 @@ include '../main/config.php';
         <span class="navbar-title">Módulo de Auditoría</span>
     </div>
     
-    <!-- Elementos reordenados: El nombre primero, luego el avatar a la derecha -->
+    <!-- Lado derecho organizado: Nombre -> Avatar -> Icono Menú -->
     <div class="navbar-right">
         <span class="user-name-text">Juan Manuel Godoy</span>
         <i class="ri-user-line user-avatar"></i>
+        <!-- El botón del menú se ubica ahora del lado derecho del usuario -->
+        <button id="toggle-sidebar-btn" class="btn-toggle"><i class="ri-menu-line"></i></button>
     </div>
 </header>
 
-<!-- Contenedor para la estructura debajo del Navbar -->
+<!-- Contenedor del cuerpo bajo el Navbar -->
 <div class="app-body">
     
-    <!-- 2. SIDEBAR COMPACTO ESTILO CORRIDO (Ancho: 90px, Icono arriba del texto) -->
+    <!-- 2. SIDEBAR COMPACTO VERTICAL (Ancho: 90px) -->
     <aside class="main-sidebar">
         <nav class="sidebar-menu">
             <a href="../index.php" class="menu-item">
@@ -45,7 +46,7 @@ include '../main/config.php';
         </nav>
     </aside>
 
-    <!-- 3. ÁREA DE TRABAJO MAXIMIZADA -->
+    <!-- 3. ÁREA DE TRABAJO PRINCIPAL MAXIMIZADA -->
     <main class="main-content">
         <div class="view-container">
             <div class="view-header">
@@ -58,7 +59,7 @@ include '../main/config.php';
                 </div>
             </div>
 
-            <!-- TABLA ADMINISTRATIVA -->
+            <!-- TABLA ADMINISTRATIVA SEGURA CON PDO -->
             <div class="table-container">
                 <table class="custom-table">
                     <thead>
@@ -73,7 +74,6 @@ include '../main/config.php';
                     <tbody>
                         <?php
                         try {
-                            // Sanitización lógica y ejecución segura mediante PDO
                             $query = "SELECT a.acId, c.name AS clientName, t.typeName, a.created_at 
                                       FROM ac a
                                       INNER JOIN clientes c ON a.clientId = c.id
@@ -104,7 +104,6 @@ include '../main/config.php';
                                 echo "<tr><td colspan='5' style='text-align: center; color: #64748b; padding: 3rem;'>No se han encontrado evaluaciones.</td></tr>";
                             }
                         } catch (PDOException $e) {
-                            // Encapsulado seguro de logs internos
                             echo "<tr><td colspan='5' style='text-align: center; color: red; padding: 2rem;'>Error al cargar los datos del servidor.</td></tr>";
                         }
                         ?>
@@ -115,7 +114,7 @@ include '../main/config.php';
     </main>
 </div>
 
-<!-- SISTEMA DE DISEÑO ARQUITECTÓNICO COMPACTO -->
+<!-- CAPA DE ESTILOS CSS CORREGIDA -->
 <style>
     body {
         margin: 0 !important;
@@ -126,11 +125,11 @@ include '../main/config.php';
         overflow-x: hidden;
     }
 
-    /* 1. NAVBAR COLOR UNIFICADO (Mismo que el sidebar) */
+    /* 1. NAVBAR SUPERIOR UNIFICADO */
     .main-navbar {
         height: 60px;
         width: 100%;
-        background: #2c3e50; /* Mismo tono oscuro */
+        background: #2c3e50;
         border-bottom: 1px solid #1e2b37;
         display: flex;
         align-items: center;
@@ -141,11 +140,18 @@ include '../main/config.php';
         left: 0;
         z-index: 1000;
     }
-    .navbar-left { display: flex; align-items: center; gap: 1.5rem; }
-    .btn-toggle { background: none; border: none; font-size: 1.4rem; color: #cbd5e1; cursor: pointer; display: flex; align-items: center; }
     
+    .navbar-left { display: flex; align-items: center; gap: 1.25rem; }
+    
+    /* Contenedor e Imagen del logo en su estado original sin filtros */
     .navbar-logo-container { display: flex; align-items: center; height: 40px; }
-    .main-system-logo { height: 35px; width: auto; object-fit: contain; cursor: pointer; filter: brightness(0) invert(1); } /* Inversión a blanco si tu logo es oscuro */
+    .main-system-logo { 
+        height: 36px; 
+        width: auto; 
+        object-fit: contain; 
+        cursor: pointer;
+        /* Removido el filtro invertido para respetar los colores reales */
+    }
 
     .navbar-title { 
         font-weight: 600; 
@@ -155,12 +161,26 @@ include '../main/config.php';
         padding-left: 1.25rem;
     }
     
-    /* Configuración derecha con orden invertido */
-    .navbar-right { display: flex; align-items: center; gap: 0.85rem; color: #edf2f7; font-size: 0.9rem; }
-    .user-avatar { background: #34495e; color: #fff; padding: 0.45rem; border-radius: 50%; font-size: 1.1rem; }
+    /* Lado derecho estructurado */
+    .navbar-right { display: flex; align-items: center; gap: 1rem; color: #edf2f7; font-size: 0.9rem; }
     .user-name-text { font-weight: 500; }
+    .user-avatar { background: #34495e; color: #fff; padding: 0.45rem; border-radius: 50%; font-size: 1.1rem; }
+    
+    /* Estilo del botón de menú a la derecha */
+    .btn-toggle { 
+        background: none; 
+        border: none; 
+        font-size: 1.4rem; 
+        color: #cbd5e1; 
+        cursor: pointer; 
+        display: flex; 
+        align-items: center;
+        padding: 0.2rem;
+        transition: color 0.2s;
+    }
+    .btn-toggle:hover { color: #fff; }
 
-    /* CUERPO PRINCIPAL */
+    /* CUERPO DE LA APP */
     .app-body {
         display: flex;
         margin-top: 60px;
@@ -185,7 +205,7 @@ include '../main/config.php';
     }
     .sidebar-menu { padding: 0.75rem 0; display: flex; flex-direction: column; gap: 0.25rem; }
     
-    /* Reorientación de ítems: Icono arriba, texto abajo */
+    /* Orientación vertical (Icono arriba, texto abajo) */
     .menu-item {
         display: flex;
         flex-direction: column;
@@ -206,7 +226,7 @@ include '../main/config.php';
     .menu-item.active { background: #1a252f; color: #fff; font-weight: 600; border-left-color: #3498db; }
     .menu-item.style-disabled { opacity: 0.4; }
 
-    /* 3. CONTENEDOR DE TRABAJO (Desplazado solo 90px) */
+    /* 3. CONTENEDOR DE TRABAJO AMPLIO */
     .main-content {
         flex-grow: 1;
         margin-left: 90px;
@@ -218,7 +238,7 @@ include '../main/config.php';
     .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; }
     .page-main-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0; }
 
-    /* RESPONSIVO */
+    /* COMPORTAMIENTO PARA DISPOSITIVOS MÓVILES */
     @media (max-width: 768px) {
         .main-sidebar {
             transform: translateX(-100%);
@@ -235,7 +255,7 @@ include '../main/config.php';
     }
 </style>
 
-<!-- CONTROL INTERACTIVO -->
+<!-- LÓGICA INTERACTIVA DEL MENU -->
 <script>
     document.getElementById('toggle-sidebar-btn').addEventListener('click', function(e) {
         e.stopPropagation();
