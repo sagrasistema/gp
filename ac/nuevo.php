@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->commit();
 
         // Redirigir directamente al archivo interactivo para responder el cuestionario creado
-        header("Location: responder.php?acId=" . $acId);
+        header("Location: index.php");
         exit;
 
     } catch (PDOException $e) {

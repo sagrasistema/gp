@@ -64,9 +64,10 @@ include '../main/config.php';
                             echo "<td><strong>{$clientName}</strong></td>";
                             echo "<td>{$typeName}</td>";
                             echo "<td>{$fecha}</td>";
+                            // CAMBIO AQUÍ: Redirección corregida apuntando a responder.php?acId=
                             echo "<td style='text-align: center;'>
                                     <div class=\"actions-cell\">
-                                        <a href='formularios.php?aid={$ac->acId}' class='btn btn-secondary' style='padding: 0.4rem 0.8rem; font-size: 0.85rem; gap: 0.25rem;'>
+                                        <a href='responder.php?acId={$ac->acId}' class='btn btn-secondary' style='padding: 0.4rem 0.8rem; font-size: 0.85rem; gap: 0.25rem;'>
                                             <i class='ri-file-list-3-line'></i> Responder
                                         </a>
                                     </div>
