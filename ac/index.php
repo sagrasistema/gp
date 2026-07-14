@@ -5,10 +5,8 @@ include '../main/h.php';
 include '../main/config.php'; 
 ?>
 
-<!-- 1. NAVBAR SUPERIOR COMPLETO (Identidad unificada oscura) -->
 <header class="main-navbar">
     <div class="navbar-left">
-        <!-- Logo real del sistema en sus colores originales -->
         <div class="navbar-logo-container">
             <img src="../main/logo.png" alt="SAGRA" class="main-system-logo" onclick="window.location.href='../index.php'">
         </div>
@@ -16,19 +14,15 @@ include '../main/config.php';
         <span class="navbar-title">Módulo de Auditoría</span>
     </div>
     
-    <!-- Lado derecho organizado: Nombre -> Avatar -> Icono Menú -->
     <div class="navbar-right">
         <span class="user-name-text">Juan Manuel Godoy</span>
         <i class="ri-user-line user-avatar"></i>
-        <!-- El botón del menú se ubica ahora del lado derecho del usuario -->
         <button id="toggle-sidebar-btn" class="btn-toggle"><i class="ri-menu-line"></i></button>
     </div>
 </header>
 
-<!-- Contenedor del cuerpo bajo el Navbar -->
 <div class="app-body">
     
-    <!-- 2. SIDEBAR COMPACTO VERTICAL (Ancho: 90px) -->
     <aside class="main-sidebar">
         <nav class="sidebar-menu">
             <a href="../index.php" class="menu-item">
@@ -46,7 +40,6 @@ include '../main/config.php';
         </nav>
     </aside>
 
-    <!-- 3. ÁREA DE TRABAJO PRINCIPAL MAXIMIZADA -->
     <main class="main-content">
         <div class="view-container">
             <div class="view-header">
@@ -59,7 +52,6 @@ include '../main/config.php';
                 </div>
             </div>
 
-            <!-- TABLA ADMINISTRATIVA SEGURA CON PDO -->
             <div class="table-container">
                 <table class="custom-table">
                     <thead>
@@ -114,7 +106,6 @@ include '../main/config.php';
     </main>
 </div>
 
-<!-- CAPA DE ESTILOS CSS CORREGIDA -->
 <style>
     body {
         margin: 0 !important;
@@ -125,7 +116,7 @@ include '../main/config.php';
         overflow-x: hidden;
     }
 
-    /* 1. NAVBAR SUPERIOR UNIFICADO */
+    /* 1. NAVBAR SUPERIOR */
     .main-navbar {
         height: 60px;
         width: 100%;
@@ -142,15 +133,15 @@ include '../main/config.php';
     }
     
     .navbar-left { display: flex; align-items: center; gap: 1.25rem; }
-    
-    /* Contenedor e Imagen del logo en su estado original sin filtros */
     .navbar-logo-container { display: flex; align-items: center; height: 40px; }
+    
+    /* Forzado de contraste para que las letras de SAGRA se vean blancas sobre el fondo oscuro */
     .main-system-logo { 
         height: 36px; 
         width: auto; 
         object-fit: contain; 
         cursor: pointer;
-        /* Removido el filtro invertido para respetar los colores reales */
+        filter: brightness(0) invert(1); 
     }
 
     .navbar-title { 
@@ -161,12 +152,10 @@ include '../main/config.php';
         padding-left: 1.25rem;
     }
     
-    /* Lado derecho estructurado */
     .navbar-right { display: flex; align-items: center; gap: 1rem; color: #edf2f7; font-size: 0.9rem; }
     .user-name-text { font-weight: 500; }
     .user-avatar { background: #34495e; color: #fff; padding: 0.45rem; border-radius: 50%; font-size: 1.1rem; }
     
-    /* Estilo del botón de menú a la derecha */
     .btn-toggle { 
         background: none; 
         border: none; 
@@ -188,7 +177,7 @@ include '../main/config.php';
         width: 100%;
     }
 
-    /* 2. SIDEBAR COMPACTO (90px) */
+    /* 2. SIDEBAR COMPACTO CON HOVER AZUL CLARO (#3498db) */
     .main-sidebar {
         width: 90px;
         background: #2c3e50;
@@ -205,7 +194,6 @@ include '../main/config.php';
     }
     .sidebar-menu { padding: 0.75rem 0; display: flex; flex-direction: column; gap: 0.25rem; }
     
-    /* Orientación vertical (Icono arriba, texto abajo) */
     .menu-item {
         display: flex;
         flex-direction: column;
@@ -216,15 +204,20 @@ include '../main/config.php';
         padding: 1rem 0.5rem;
         color: #cbd5e1;
         text-decoration: none;
-        transition: all 0.2s ease;
+        transition: color 0.2s ease, background-color 0.2s ease;
         border-left: 3px solid transparent;
     }
     .menu-item i { font-size: 1.4rem; }
     .menu-item span { font-size: 0.75rem; font-weight: 500; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
     
-    .menu-item:hover { background: #34495e; color: #fff; }
+    /* Hover con cambio exacto a azul claro */
+    .menu-item:hover { 
+        background: #34495e; 
+        color: #3498db; 
+    }
+    
     .menu-item.active { background: #1a252f; color: #fff; font-weight: 600; border-left-color: #3498db; }
-    .menu-item.style-disabled { opacity: 0.4; }
+    .menu-item.style-disabled { opacity: 0.4; pointer-events: none; }
 
     /* 3. CONTENEDOR DE TRABAJO AMPLIO */
     .main-content {
@@ -238,7 +231,7 @@ include '../main/config.php';
     .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; }
     .page-main-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0; }
 
-    /* COMPORTAMIENTO PARA DISPOSITIVOS MÓVILES */
+    /* COMPORTAMIENTO RESPONSIVO */
     @media (max-width: 768px) {
         .main-sidebar {
             transform: translateX(-100%);
@@ -255,7 +248,6 @@ include '../main/config.php';
     }
 </style>
 
-<!-- LÓGICA INTERACTIVA DEL MENU -->
 <script>
     document.getElementById('toggle-sidebar-btn').addEventListener('click', function(e) {
         e.stopPropagation();
