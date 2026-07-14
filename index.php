@@ -226,7 +226,7 @@
         <div class="navbar-logo-container">
             <img src="client/logo.png" alt="SAGRA" class="main-system-logo">
         </div>
-        <span class="navbar-title">Ecosistema Global</span>
+        <span class="navbar-title">SAGRAGP VERSION 2.0</span>
     </div>
     
     <div class="navbar-right">
@@ -236,6 +236,23 @@
 </header>
 
 <div class="app-body">
+        <aside class="main-sidebar">
+        <nav class="sidebar-menu">
+            <a href="../index.php" class="menu-item">
+                <i class="ri-home-4-line"></i>
+                <span>Inicio</span>
+            </a>
+            <a href="index.php" class="menu-item active">
+                <i class="ri-shield-check-line"></i>
+                <span>Aceptación</span>
+            </a>
+            <a href="#" class="menu-item style-disabled">
+                <i class="ri-customer-service-2-line"></i>
+                <span>Soporte IT</span>
+            </a>
+        </nav>
+    </aside>
+
     <div class="container">
         
         <div class="view-header">

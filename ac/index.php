@@ -11,7 +11,7 @@ include '../main/config.php';
             <img src="../main/logo.png" alt="SAGRA" class="main-system-logo" onclick="window.location.href='../index.php'">
         </div>
         
-        <span class="navbar-title">Módulo de Auditoría</span>
+        <span class="navbar-title">SAGRAGP VERSION 2.0</span>
     </div>
     
     <div class="navbar-right">
