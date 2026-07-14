@@ -57,12 +57,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         // B. Guardar las 21 subpruebas de la Pregunta 28 y calcular el Score
+        #$totalScore = 0;
+        // B. Guardar las 21 subpruebas de la Pregunta 28 y calcular el Score
         $totalScore = 0;
         if (isset($_POST['q28']) && is_array($_POST['q28'])) {
+            
+            // Usamos un query inteligente: si no existe el registro de respuesta para este acId y testId, lo inserta; si ya existe, lo actualiza.
             $stmtUpdateQ28 = $pdo->prepare("
-                UPDATE ac_q28_answers 
-                SET riskValue = :riskValue, score = :score 
-                WHERE acId = :acId AND testId = :testId
+                INSERT INTO ac_q28_answers (acId, testId, riskValue, score) 
+                VALUES (:acId, :testId, :riskValue, :score)
+                ON DUPLICATE KEY UPDATE riskValue = :riskValueUpdate, score = :scoreUpdate
             ");
             
             $pointsMap = [
@@ -79,14 +83,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $totalScore += $score;
 
                 $stmtUpdateQ28->execute([
-                    ':riskValue' => $riskValue,
-                    ':score'     => $score,
-                    ':acId'      => $acId,
-                    ':testId'    => $tId
+                    ':acId'             => $acId,
+                    ':testId'           => $tId,
+                    ':riskValue'        => $riskValue,
+                    ':score'            => $score,
+                    ':riskValueUpdate'  => $riskValue,
+                    ':scoreUpdate'      => $score
                 ]);
             }
         }
-
         // C. Determinar cualitativamente el Rango de riesgo
         if ($totalScore <= 25) {
             $riskLevel = 'Bajo';

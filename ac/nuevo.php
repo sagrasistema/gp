@@ -45,9 +45,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':questionId' => $qId
             ]);
         }
-
+        
         // C. Inicializar respuestas en 'No Aplica' (0 puntos) para las 21 subpruebas asociadas a la Q28
-        $tests = $pdo->query("SELECT testId FROM ac_q28_tests ORDER BY testId ASC")->fetchAll(PDO::FETCH_COLUMN);
+        // Obtenemos los testId reales de la tabla ac_q28_tests
+        $tests = $pdo->query("SELECT testId FROM ac_q28_tests ORDER BY testNumber ASC")->fetchAll(PDO::FETCH_COLUMN);
 
         $stmtInsertTestAnswer = $pdo->prepare("
             INSERT INTO ac_q28_answers (acId, testId, riskValue, score) 
