@@ -5,59 +5,72 @@ include '../main/h.php';
 include '../main/config.php'; 
 ?>
 
-<div class="system-layout" style="display: flex; min-height: 100vh; background-color: #f8fafc;">
+<!-- CONTENEDOR MAESTRO FULL-WIDTH -->
+<div class="system-layout">
     
-    <aside class="main-sidebar" style="width: 240px; background: #34495e; color: #fff; flex-shrink: 0;">
-        <div class="sidebar-brand" style="padding: 1.5rem; background: #2c3e50; text-align: center;">
-            <img src="../main/logo.png" alt="SAGRA" style="max-height: 45px; cursor: pointer;" onclick="window.location.href='../index.php'">
+    <!-- BARRA LATERAL IZQUIERDA (Sidebar Completamente Pegado) -->
+    <aside class="main-sidebar">
+        <div class="sidebar-brand">
+            <!-- Título de la app simulando el logo de tu captura original -->
+            <div style="display: flex; align-items: center; gap: 0.5rem; justify-content: center; color: #fff;">
+                <span style="background: #0284c7; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 900; font-size: 1.1rem;">S</span>
+                <div style="text-align: left; line-height: 1;">
+                    <strong style="font-size: 1.1rem; letter-spacing: 0.05em;">SAGRA</strong>
+                    <span style="display: block; font-size: 0.6rem; color: #94a3b8;">GESTIÓN DE PROYECTOS</span>
+                </div>
+            </div>
         </div>
-        <nav class="sidebar-menu" style="padding: 1rem 0;">
-            <a href="../index.php" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.5rem; color: #cbd5e1; text-decoration: none; font-size: 0.95rem;">
-                <i class="ri-home-4-line"></i> Inicio
+        <nav class="sidebar-menu">
+            <a href="../index.php" class="menu-item">
+                <i class="ri-home-4-line"></i> <span>Inicio</span>
             </a>
-            <a href="index.php" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.5rem; color: #fff; background: #1a252f; text-decoration: none; font-size: 0.95rem; font-weight: 600; border-left: 4px solid #3498db;">
-                <i class="ri-shield-check-line"></i> Aceptación y Cont.
+            <a href="index.php" class="menu-item active">
+                <i class="ri-shield-check-line"></i> <span>Aceptación y Cont.</span>
             </a>
-            <a href="#" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.5rem; color: #cbd5e1; text-decoration: none; font-size: 0.95rem; opacity: 0.6;">
-                <i class="ri-customer-service-2-line"></i> Soporte IT
+            <a href="#" class="menu-item style-disabled">
+                <i class="ri-customer-service-2-line"></i> <span>Soporte IT</span>
             </a>
         </nav>
     </aside>
 
-    <div class="content-wrapper" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+    <!-- CONTENEDOR DERECHO (Navbar Superior + Contenido Variable) -->
+    <div class="content-wrapper">
         
-        <header class="main-navbar" style="height: 60px; background: #fff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem;">
-            <div class="navbar-left" style="display: flex; align-items: center; gap: 1rem;">
-                <button id="toggle-sidebar-btn" class="btn-toggle" style="background: none; border: none; font-size: 1.3rem; color: #475569; cursor: pointer;"><i class="ri-menu-line"></i></button>
-                <span style="font-weight: 600; color: #334155; font-size: 1rem;">Módulo de Auditoría</span>
+        <!-- NAVBAR SUPERIOR (Completamente Pegado al Borde de Arriba) -->
+        <header class="main-navbar">
+            <div class="navbar-left">
+                <button id="toggle-sidebar-btn" class="btn-toggle"><i class="ri-menu-line"></i></button>
+                <span class="navbar-title">Módulo de Auditoría</span>
             </div>
-            <div class="navbar-right" style="display: flex; align-items: center; gap: 1rem; color: #475569; font-size: 0.9rem;">
-                <i class="ri-user-line" style="background: #f1f5f9; padding: 0.4rem; border-radius: 50%;"></i>
+            <div class="navbar-right">
+                <i class="ri-user-line user-avatar"></i>
                 <span class="user-name-text">Juan Manuel Godoy</span>
             </div>
         </header>
 
-        <main style="padding: 1.5rem; flex-grow: 1;">
-            <div class="container" style="max-width: 1200px; margin: 0 auto; width: 100%;">
-                <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-                    <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="ri-shield-check-line" style="color: #0284c7;"></i> Aceptación y Continuidad
+        <!-- CUERPO DEL CONTENIDO CON PADDING INTERNO -->
+        <main class="main-content">
+            <div class="view-container">
+                <div class="view-header">
+                    <h1 class="page-main-title">
+                        <i class="ri-shield-check-line"></i> Aceptación y Continuidad
                     </h1>
-                    <div class="header-actions" style="display: flex; gap: 0.75rem;">
-                        <a href="../index.php" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem; font-weight: 500; text-decoration: none; border: 1px solid #cbd5e1; color: #475569; background: #fff;"><i class="ri-arrow-left-line"></i> Menú</a>
-                        <a href="nuevo.php" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem; font-weight: 500; text-decoration: none; color: #fff; background: #0284c7; border: none;"><i class="ri-add-line"></i> Nueva Evaluación</a>
+                    <div class="header-actions">
+                        <a href="../index.php" class="btn btn-secondary"><i class="ri-arrow-left-line"></i> Menú</a>
+                        <a href="nuevo.php" class="btn btn-primary"><i class="ri-add-line"></i> Nueva Evaluación</a>
                     </div>
-                </header>
+                </div>
 
-                <div class="table-container" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto; width: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                    <table class="custom-table" style="width: 100%; border-collapse: collapse; text-align: left; min-width: 600px;">
+                <!-- TABLA ADMINISTRATIVA RESPONSIVA -->
+                <div class="table-container">
+                    <table class="custom-table">
                         <thead>
-                            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-                                <th style="padding: 1rem; width: 12%; font-weight: 600; color: #64748b; font-size: 0.85rem;">ID AC</th>
-                                <th style="padding: 1rem; width: 33%; font-weight: 600; color: #64748b; font-size: 0.85rem;">Cliente / Empresa</th>
-                                <th style="padding: 1rem; width: 25%; font-weight: 600; color: #64748b; font-size: 0.85rem;">Tipo de Evaluación</th>
-                                <th style="padding: 1rem; width: 15%; font-weight: 600; color: #64748b; font-size: 0.85rem;">Fecha Creación</th>
-                                <th style="padding: 1rem; width: 15%; text-align: center; font-weight: 600; color: #64748b; font-size: 0.85rem;">Acciones</th>
+                            <tr>
+                                <th style="width: 10%;">ID AC</th>
+                                <th style="width: 40%;">Cliente / Empresa</th>
+                                <th style="width: 25%;">Tipo de Evaluación</th>
+                                <th style="width: 15%;">Fecha Creación</th>
+                                <th style="width: 10%; text-align: center;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -77,13 +90,13 @@ include '../main/config.php';
                                         $typeName   = htmlspecialchars($ac->typeName, ENT_QUOTES, 'UTF-8');
                                         $fecha      = date('d/m/Y', strtotime($ac->created_at));
 
-                                        echo "<tr style='border-bottom: 1px solid #e2e8f0; vertical-align: middle;'>";
-                                        echo "<td style='padding: 1rem; font-weight: 600; color: #64748b;'>#{$ac->acId}</td>";
-                                        echo "<td style='padding: 1rem; color: #0f172a;'><strong>{$clientName}</strong></td>";
-                                        echo "<td style='padding: 1rem; color: #334155;'>{$typeName}</td>";
-                                        echo "<td style='padding: 1rem; color: #334155;'>{$fecha}</td>";
-                                        echo "<td style='padding: 1rem; text-align: center;'>
-                                                <a href='responder.php?acId={$ac->acId}' class='btn' style='display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 4px; border: 1px solid #cbd5e1; color: #475569; background: #fff; text-decoration: none; font-weight: 500;'>
+                                        echo "<tr>";
+                                        echo "<td style='font-weight: 600; color: #64748b;'>#{$ac->acId}</td>";
+                                        echo "<!-- Se eliminó strong duplicado para conservar estilos limpios --><td><strong>{$clientName}</strong></td>";
+                                        echo "<td>{$typeName}</td>";
+                                        echo "<td>{$fecha}</td>";
+                                        echo "<td style='text-align: center;'>
+                                                <a href='responder.php?acId={$ac->acId}' class='btn btn-secondary' style='padding: 0.4rem 0.8rem; font-size: 0.85rem;'>
                                                     <i class='ri-file-list-3-line'></i> Responder
                                                 </a>
                                               </td>";
@@ -93,7 +106,7 @@ include '../main/config.php';
                                     echo "<tr><td colspan='5' style='text-align: center; color: #64748b; padding: 3rem;'>No se han encontrado evaluaciones.</td></tr>";
                                 }
                             } catch (PDOException $e) {
-                                echo "<tr><td colspan='5' style='text-align: center; color: red; padding: 2rem;'>Error de datos.</td></tr>";
+                                echo "<tr><td colspan='5' style='text-align: center; color: red; padding: 2rem;'>Error al cargar los datos del servidor.</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -104,26 +117,151 @@ include '../main/config.php';
     </div>
 </div>
 
+<!-- SISTEMA DE DISEÑO ESTRUCTURAL Y RESPONSIVO -->
 <style>
+    .system-layout {
+        display: flex;
+        min-height: 100vh;
+        width: 100vw;
+        overflow-x: hidden;
+    }
+
+    /* Estilos del Sidebar Edge-to-Edge */
+    .main-sidebar {
+        width: 260px;
+        background: #2c3e50;
+        color: #fff;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        z-index: 100;
+        transition: transform 0.3s ease;
+    }
+    .sidebar-brand {
+        padding: 1.25rem 1.5rem;
+        background: #1e2b37;
+        border-bottom: 1px solid #34495e;
+        height: 60px;
+        display: flex;
+        align-items: center;
+    }
+    .sidebar-menu {
+        padding: 0.5rem 0;
+        display: flex;
+        flex-direction: column;
+    }
+    .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.85rem 1.5rem;
+        color: #edf2f7;
+        text-decoration: none;
+        font-size: 0.95rem;
+        border-left: 4px solid transparent;
+        transition: all 0.2s ease;
+    }
+    .menu-item:hover {
+        background: #34495e;
+        color: #fff;
+    }
+    .menu-item.active {
+        background: #1a252f;
+        color: #fff;
+        font-weight: 600;
+        border-left-color: #3498db;
+    }
+    .menu-item.style-disabled {
+        opacity: 0.5;
+    }
+
+    /* Estilos del Content Wrapper y Navbar Edge-to-Edge */
+    .content-wrapper {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+    .main-navbar {
+        height: 60px;
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2rem;
+        position: sticky;
+        top: 0;
+        z-index: 90;
+    }
+    .navbar-left { display: flex; align-items: center; gap: 1.25rem; }
+    .navbar-right { display: flex; align-items: center; gap: 0.75rem; color: #475569; font-size: 0.95rem; }
+    .btn-toggle { background: none; border: none; font-size: 1.4rem; color: #475569; cursor: pointer; display: flex; align-items: center; }
+    .navbar-title { font-weight: 600; color: #1e293b; font-size: 1.05rem; }
+    .user-avatar { background: #f1f5f9; padding: 0.4rem; border-radius: 50%; font-size: 1.2rem; }
+
+    /* Área de Trabajo Interna */
+    .main-content {
+        padding: 2rem;
+        flex-grow: 1;
+        width: 100%;
+    }
+    .view-container {
+        max-width: 1300px;
+        margin: 0 auto;
+        width: 100%;
+    }
+    .view-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        gap: 1rem;
+    }
+    .page-main-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    /* MEDIA QUERIES - RESPONSIVE COMPLETO PARA CELULARES */
+    @media (max-width: 992px) {
+        .main-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            transform: translateX(-100%); /* Oculto por defecto a la izquierda */
+        }
+        .system-layout.sidebar-open .main-sidebar {
+            transform: translateX(0); /* Desliza hacia la derecha al abrir */
+        }
+        .main-navbar { padding: 0 1rem; }
+        .main-content { padding: 1rem; }
+    }
+
     @media (max-width: 768px) {
-        .main-sidebar { display: none !important; } /* Esconde sidebar en móviles */
-        .user-name-text { display: none; } /* Oculta nombre del usuario para ahorrar espacio */
-        header style { flex-direction: column; align-items: flex-start !important; }
-        .header-actions { width: 100%; justify-content: space-between; }
+        .user-name-text { display: none; } /* Remueve texto largo en mobile */
+        .view-header { flex-direction: column; align-items: flex-start; }
+        .header-actions { width: 100%; display: flex; justify-content: space-between; }
+        .header-actions .btn { flex-grow: 1; justify-content: center; }
     }
 </style>
 
+<!-- CONTROL INTERACTIVO DEL MENU MOBILE -->
 <script>
-    // Colapsado básico opcional para móviles
-    document.getElementById('toggle-sidebar-btn').addEventListener('click', function() {
+    document.getElementById('toggle-sidebar-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        document.querySelector('.system-layout').classList.toggle('sidebar-open');
+    });
+
+    // Cierra el menú al hacer clic fuera en dispositivos móviles
+    document.addEventListener('click', function(e) {
+        const layout = document.querySelector('.system-layout');
         const sidebar = document.querySelector('.main-sidebar');
-        if (sidebar.style.display === 'none' || sidebar.style.display === '') {
-            sidebar.style.display = 'block';
-            sidebar.style.position = 'absolute';
-            sidebar.style.zIndex = '999';
-            sidebar.style.height = '100vh';
-        } else {
-            sidebar.style.display = 'none';
+        if (layout.classList.contains('sidebar-open') && !sidebar.contains(e.target)) {
+            layout.classList.remove('sidebar-open');
         }
     });
 </script>
