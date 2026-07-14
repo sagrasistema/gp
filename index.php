@@ -12,6 +12,33 @@
     <link rel="stylesheet" href="main/layout.css">
     
     <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #0284c7;
+            --accent-hover: #0369a1;
+            --border-color: #e2e8f0;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+        }
+
+        body { 
+            background-color: var(--bg-primary); 
+            background-image: url('client/mosaico.svg'); 
+            background-repeat: repeat;
+            background-size: 60px 60px;
+            color: var(--text-main); 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
         /* Aquí dejas únicamente los estilos específicos de la cuadrícula de tarjetas */
         .container { width: 100%; max-width: 1100px; margin: 0 auto; }
         .view-header { margin-bottom: 3rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); }
