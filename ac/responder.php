@@ -10,7 +10,7 @@ if (!$acId) {
 
 // 1. Obtener la cabecera de la AC junto con el nombre del cliente
 try {
-    $stmtAC =$pdo->prepare("
+    $stmtAC = $pdo->prepare("
         SELECT ac.*, c.name AS clientName, t.typeName, s.serviceName 
         FROM ac 
         JOIN clientes c ON ac.clientId = c.id
@@ -18,8 +18,8 @@ try {
         JOIN ac_services s ON ac.serviceId = s.serviceId
         WHERE ac.acId = :acId
     ");
-    $stmtAC->execute([':acId' =>$acId]);
-    $acData =$stmtAC->fetch(PDO::FETCH_OBJ);
+    $stmtAC->execute([':acId' => $acId]);
+    $acData = $stmtAC->fetch(PDO::FETCH_OBJ);
 
     if (!$acData) {
         die("Error: La evaluación solicitada no existe.");
@@ -37,12 +37,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // A. Guardar las respuestas a las 30 preguntas generales
         if (isset($_POST['answers']) && is_array($_POST['answers'])) {
-            $stmtUpdateAnswer =$pdo->prepare("
+            $stmtUpdateAnswer = $pdo->prepare("
                 UPDATE ac_general_answers 
                 SET response = :response, comment = :comment 
                 WHERE acId = :acId AND questionId = :questionId
             ");
-            foreach ($_POST['answers'] as$qId => $data) {$stmtUpdateAnswer->execute([
+            foreach ($_POST['answers'] as $qId => $data) {
+                $stmtUpdateAnswer->execute([
                     ':response'   => $data['response'] ?? null,
                     ':comment'    => $data['comment'] ?? '',
                     ':acId'       => $acId,
@@ -54,13 +55,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // B. Guardar las 21 subpruebas de la Pregunta 28 y calcular el Score
         $totalScore = 0;
         if (isset($_POST['q28']) && is_array($_POST['q28'])) {
-            $stmtUpdateQ28 =$pdo->prepare("
+            $stmtUpdateQ28 = $pdo->prepare("
                 UPDATE ac_q28_answers 
                 SET riskValue = :riskValue, score = :score 
                 WHERE acId = :acId AND testId = :testId
             ");
             
-            // Tabla de equivalencia de puntos
             $pointsMap = [
                 'No Aplica'       => 0,
                 'Bajo'            => 1,
@@ -70,8 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'Alto'            => 5
             ];
 
-            foreach ($_POST['q28'] as$tId => $riskValue) {$score = $pointsMap[$riskValue] ?? 0;
-                $totalScore +=$score;
+            foreach ($_POST['q28'] as $tId => $riskValue) {
+                $score = $pointsMap[$riskValue] ?? 0;
+                $totalScore += $score;
 
                 $stmtUpdateQ28->execute([
                     ':riskValue' => $riskValue,
@@ -82,17 +83,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // C. Determinar cualitativamente el Rango del nivel de riesgo en base al Score
-        // Máximo score posible = 21 pruebas * 5 puntos = 105 puntos.
-        if ($totalScore <= 25) {$riskLevel = 'Bajo';
-        } elseif ($totalScore <= 55) {$riskLevel = 'Moderado';
-        } elseif ($totalScore <= 85) {$riskLevel = 'Moderado-Alto';
+        // C. Determinar cualitativamente el Rango de riesgo
+        if ($totalScore <= 25) {
+            $riskLevel = 'Bajo';
+        } elseif ($totalScore <= 55) {
+            $riskLevel = 'Moderado';
+        } elseif ($totalScore <= 85) {
+            $riskLevel = 'Moderado-Alto';
         } else {
             $riskLevel = 'Alto';
         }
 
-        // D. Actualizar los totales acumulados en la tabla cabecera `ac`
-        $stmtUpdateAC =$pdo->prepare("
+        // D. Actualizar totales en `ac`
+        $stmtUpdateAC = $pdo->prepare("
             UPDATE ac SET riskScore = :riskScore, riskLevel = :riskLevel WHERE acId = :acId
         ");
         $stmtUpdateAC->execute([
@@ -103,65 +106,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->commit();
         
-        // Refrescar para ver los cambios guardados
         header("Location: responder.php?acId=" . $acId . "&success=1");
         exit;
 
     } catch (PDOException $e) {
-        if ($pdo->inTransaction())$pdo->rollBack();
+        if ($pdo->inTransaction()) $pdo->rollBack();
         die("Error al guardar las respuestas: " . $e->getMessage());
     }
 }
 
-// 2. Cargar datos guardados previamente para pintar el formulario (Persistencia)
-// Cargar respuestas generales
-$answersSaved =$pdo->query("SELECT questionId, response, comment FROM ac_general_answers WHERE acId = $acId")->fetchAll(PDO::FETCH_UNIQUE);
-// Cargar respuestas de subpruebas Q28
-$q28Saved =$pdo->query("SELECT testId, riskValue FROM ac_q28_answers WHERE acId = $acId")->fetchAll(PDO::FETCH_UNIQUE);
+// Cargar respuestas guardadas
+$answersSaved = $pdo->query("SELECT questionId, response, comment FROM ac_general_answers WHERE acId = $acId")->fetchAll(PDO::FETCH_UNIQUE);
+$q28Saved = $pdo->query("SELECT testId, riskValue FROM ac_q28_answers WHERE acId = $acId")->fetchAll(PDO::FETCH_UNIQUE);
 
 $pageTitle = "Responder Cuestionario AC";
 include '../main/h.php';
 ?>
 
 <style>
-    .ac-container { max-width: 950px; margin: 20px auto; padding: 0 15px; }
-    .meta-summary { background: #fff; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; gap: 2rem; }
-    .meta-item { font-size: 0.9rem; color: var(--text-muted); }
-    .meta-item strong { color: var(--text-main); display: block; font-size: 1.05rem; }
+    .ac-container { max-width: 1000px; margin: 20px auto; padding: 0 15px; font-family: 'Segoe UI', Roboto, sans-serif; }
     
-    /* Estilos del Acordeón */
-    .accordion-item { background: #fff; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.75rem; overflow: hidden; }
-    .accordion-header { background: #f8fafc; padding: 1rem 1.25rem; font-size: 1rem; font-weight: 600; color: var(--text-main); cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; transition: background 0.2s; }
-    .accordion-header:hover { background: #f1f5f9; }
-    .accordion-header i { font-size: 1.25rem; transition: transform 0.2s; }
-    .accordion-item.active .accordion-header { background: #e2e8f0; border-bottom: 1px solid var(--border-color); }
+    /* Resumen Superior */
+    .meta-summary { background: #fff; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color, #e2e8f0); margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; gap: 2rem; }
+    .meta-item { font-size: 0.9rem; color: var(--text-muted, #64748b); }
+    .meta-item strong { color: var(--text-main, #0f172a); display: block; font-size: 1.05rem; }
+    
+    /* Acordeones Principales (Categorías) */
+    .accordion-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 0.5rem; overflow: hidden; }
+    .accordion-header { background: #fff; padding: 1rem 1.25rem; font-size: 0.95rem; font-weight: 600; color: #334155; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; transition: background 0.2s; border-left: 4px solid var(--accent, #0284c7); }
+    .accordion-header:hover { background: #f8fafc; }
+    .accordion-header i { font-size: 1.2rem; color: #64748b; transition: transform 0.2s; }
+    
+    /* Clase activa para mostrar contenido */
+    .accordion-item.active .accordion-header { background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
     .accordion-item.active .accordion-header i { transform: rotate(180deg); }
-    .accordion-content { display: none; padding: 1.25rem; }
+    .accordion-content { display: none; padding: 1.25rem; background: #fafafa; }
     .accordion-item.active .accordion-content { display: block; }
 
-    /* Estructura Interna de Preguntas */
-    .question-row { padding: 1rem 0; border-bottom: 1px solid #f1f5f9; }
-    .question-row:last-child { border-bottom: none; }
-    .question-text { font-size: 0.95rem; font-weight: 500; color: #1e293b; margin-bottom: 0.75rem; line-height: 1.4; }
-    .question-inputs { display: grid; grid-template-columns: 180px 1fr; gap: 1.5rem; align-items: start; }
+    /* Filas de Preguntas */
+    .question-row { background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1.25rem; margin-bottom: 0.75rem; }
+    .question-text { font-size: 0.95rem; font-weight: 500; color: #1e293b; margin-bottom: 1rem; line-height: 1.4; }
+    .question-inputs { display: grid; grid-template-columns: 180px 1fr; gap: 1.5rem; align-items: center; }
     
-    /* Inputs de Radio Estilizados */
-    .radio-group { display: flex; gap: 1rem; }
-    .radio-label { display: flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; cursor: pointer; font-weight: 600; }
-    .radio-label input { width: 16px; height: 16px; accent-color: var(--accent); }
+    /* Inputs de Opción */
+    .radio-group { display: flex; gap: 1.25rem; }
+    .radio-label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; cursor: pointer; font-weight: 600; color: #475569; }
+    .radio-label input { width: 17px; height: 17px; accent-color: var(--accent, #0284c7); }
     
-    /* Cuadro de texto */
-    .comment-input { width: 100%; border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem; font-size: 0.88rem; resize: vertical; min-height: 38px; font-family: inherit; }
-    .comment-input:focus { border-color: var(--accent); outline: none; }
+    .comment-input { width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 0.5rem 0.75rem; font-size: 0.88rem; outline: none; transition: border-color 0.2s; }
+    .comment-input:focus { border-color: var(--accent, #0284c7); }
 
-    /* Estilos Especiales de la Matriz Q28 (Sub-tabla) */
-    .subtest-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
-    .subtest-table th { background: #f1f5f9; text-align: left; padding: 0.6rem; font-size: 0.8rem; color: var(--text-muted); }
-    .subtest-table td { padding: 0.6rem; border-bottom: 1px solid #f1f5f9; }
-    .subtest-table select { padding: 0.35rem; border-radius: 4px; border: 1px solid var(--border-color); font-size: 0.85rem; width: 100%; max-width: 160px; background: #fff; }
+    /* Tabla de la Matriz Q28 */
+    .subtest-table { width: 100%; border-collapse: collapse; margin-top: 1.25rem; font-size: 0.88rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; }
+    .subtest-table th { background: #f8fafc; text-align: left; padding: 0.75rem; font-size: 0.8rem; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+    .subtest-table td { padding: 0.75rem; border-bottom: 1px solid #e2e8f0; color: #334155; }
+    .subtest-table select { padding: 0.4rem; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 0.85rem; width: 100%; max-width: 180px; background: #fff; outline: none; }
+    .subtest-table select:focus { border-color: var(--accent, #0284c7); }
     
-    /* Alerta de Éxito Flotante */
-    .alert-success { background: #d1fae5; color: #065f46; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+    .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
 </style>
 
 <div class="ac-container">
@@ -173,7 +175,7 @@ include '../main/h.php';
 
     <?php if (isset($_GET['success'])): ?>
         <div class="alert-success">
-            <i class="ri-checkbox-circle-fill"></i> Respuestas y cálculo de matriz de riesgo actualizados exitosamente.
+            <i class="ri-checkbox-circle-fill"></i> Respuestas guardadas y nivel de riesgo recalculado de forma correcta.
         </div>
     <?php endif; ?>
 
@@ -183,7 +185,7 @@ include '../main/h.php';
         <div class="meta-item">Servicio Requerido <strong><?= htmlspecialchars($acData->serviceName, ENT_QUOTES, 'UTF-8') ?></strong></div>
         <div class="meta-item" style="margin-left: auto; text-align: right;">
             Riesgo Calculado Matriz 
-            <strong id="live-risk-badge" style="font-size: 1.2rem; color: var(--accent);">
+            <strong id="live-risk-badge" style="font-size: 1.2rem; color: var(--accent, #0284c7);">
                 <?= $acData->riskScore ?> Pts (<?= $acData->riskLevel ?>)
             </strong>
         </div>
@@ -192,25 +194,23 @@ include '../main/h.php';
     <form action="responder.php?acId=<?= $acId ?>" method="POST">
         
         <?php
-        // Consultar categorías y preguntas organizadas dinámicamente
-        $categories =$pdo->query("SELECT * FROM ac_categories ORDER BY orderNum ASC")->fetchAll(PDO::FETCH_OBJ);
+        $categories = $pdo->query("SELECT * FROM ac_categories ORDER BY orderNum ASC")->fetchAll(PDO::FETCH_OBJ);
         
-        foreach ($categories as$cat):
-            // Traer las preguntas de esta categoría en específico
-            $stmtQ =$pdo->prepare("SELECT * FROM ac_questions WHERE categoryId = :catId ORDER BY questionNumber ASC");
-            $stmtQ->execute([':catId' =>$cat->categoryId]);
-            $questions =$stmtQ->fetchAll(PDO::FETCH_OBJ);
+        foreach ($categories as $cat):
+            $stmtQ = $pdo->prepare("SELECT * FROM ac_questions WHERE categoryId = :catId ORDER BY questionNumber ASC");
+            $stmtQ->execute([':catId' => $cat->categoryId]);
+            $questions = $stmtQ->fetchAll(PDO::FETCH_OBJ);
         ?>
             <div class="accordion-item">
                 <div class="accordion-header" onclick="toggleAccordion(this)">
-                    <span>Categoría <?= $cat->orderNum ?>: <?= htmlspecialchars($cat->categoryName, ENT_QUOTES, 'UTF-8') ?></span>
+                    <span><?= htmlspecialchars($cat->categoryName, ENT_QUOTES, 'UTF-8') ?></span>
                     <i class="ri-arrow-down-s-line"></i>
                 </div>
                 
                 <div class="accordion-content">
-                    <?php foreach ($questions as$q): 
-                        // Recuperar valores persistentes si ya existen respuestas previas
-                        $savedRes =$answersSaved[$q->questionId]['response'] ?? '';$savedComment = $answersSaved[$q->questionId]['comment'] ?? '';
+                    <?php foreach ($questions as $q): 
+                        $savedRes = $answersSaved[$q->questionId]['response'] ?? '';
+                        $savedComment = $answersSaved[$q->questionId]['comment'] ?? '';
                     ?>
                         <div class="question-row">
                             <div class="question-text">
@@ -228,13 +228,13 @@ include '../main/h.php';
                                 </div>
                                 
                                 <div>
-                                    <input type="text" name="answers[<?= $q->questionId ?>][comment]" class="comment-input" placeholder="Justificación o comentarios..." value="<?= htmlspecialchars($savedComment, ENT_QUOTES, 'UTF-8') ?>">
+                                    <input type="text" name="answers[<?= $q->questionId ?>][comment]" class="comment-input" placeholder="Comentarios o justificación..." value="<?= htmlspecialchars($savedComment, ENT_QUOTES, 'UTF-8') ?>">
                                 </div>
                             </div>
 
                             <?php if ($q->questionNumber == 28): ?>
-                                <div style="margin-top: 1.5rem; background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px dashed #cbd5e1;">
-                                    <h4 style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 0.5rem;"><i class="ri-matrix-line"></i> Desglose Analítico Matriz de Riesgo Interno (Prueba 28)</h4>
+                                <div style="margin-top: 1.5rem; background: #f8fafc; padding: 1.25rem; border-radius: 6px; border: 1px dashed #cbd5e1;">
+                                    <h4 style="font-size: 0.9rem; color: #1e293b; margin-bottom: 0.5rem; font-weight: 700;"><i class="ri-matrix-line"></i> Desglose Analítico Matriz de Riesgo Interno (Prueba 28)</h4>
                                     <table class="subtest-table">
                                         <thead>
                                             <tr>
@@ -245,8 +245,9 @@ include '../main/h.php';
                                         </thead>
                                         <tbody>
                                             <?php
-                                            $subtests =$pdo->query("SELECT * FROM ac_q28_tests ORDER BY testNumber ASC")->fetchAll(PDO::FETCH_OBJ);
-                                            foreach ($subtests as $sub):$savedRisk = $q28Saved[$sub->testId]['riskValue'] ?? 'No Aplica';
+                                            $subtests = $pdo->query("SELECT * FROM ac_q28_tests ORDER BY testNumber ASC")->fetchAll(PDO::FETCH_OBJ);
+                                            foreach ($subtests as $sub):
+                                                $savedRisk = $q28Saved[$sub->testId]['riskValue'] ?? 'No Aplica';
                                             ?>
                                                 <tr>
                                                     <td><strong><?= $sub->testNumber ?></strong></td>
@@ -277,4 +278,55 @@ include '../main/h.php';
         <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end; margin-bottom: 4rem;">
             <a href="index.php" class="btn btn-secondary">Regresar al panel</a>
             <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem;">
-                <i class="ri-save-3
+                <i class="ri-save-3-line"></i> Guardar Cuestionario Completo
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Manejar la apertura y el colapso del acordeón
+function toggleAccordion(headerElement) {
+    const item = headerElement.parentElement;
+    
+    // Si ya está activo, lo cerramos; si no, lo abrimos
+    if (item.classList.contains('active')) {
+        item.classList.remove('active');
+    } else {
+        // Opcional: Cerrar otros acordeones abiertos para mantener orden (limpieza visual)
+        document.querySelectorAll('.accordion-item').forEach(el => el.classList.remove('active'));
+        item.classList.add('active');
+    }
+}
+
+// Calcular riesgo en tiempo real
+function calculateLiveRisk() {
+    const selects = document.querySelectorAll('.q28-select');
+    let score = 0;
+    
+    const pointsMap = {
+        'No Aplica': 0,
+        'Bajo': 1,
+        'Bajo-Moderado': 2,
+        'Moderado': 3,
+        'Moderado-Alto': 4,
+        'Alto': 5
+    };
+
+    selects.forEach(select => {
+        score += pointsMap[select.value] || 0;
+    });
+
+    let level = 'Bajo';
+    if (score <= 25) level = 'Bajo';
+    else if (score <= 55) level = 'Moderado';
+    else if (score <= 85) level = 'Moderado-Alto';
+    else level = 'Alto';
+
+    document.getElementById('live-risk-badge').innerText = `${score} Pts (${level})`;
+}
+
+document.addEventListener("DOMContentLoaded", calculateLiveRisk);
+</script>
+
+<?php include '../main/footer.php'; ?>
