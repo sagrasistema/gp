@@ -135,13 +135,12 @@ include '../main/config.php';
     .navbar-left { display: flex; align-items: center; gap: 1.25rem; }
     .navbar-logo-container { display: flex; align-items: center; height: 40px; }
     
-    /* Forzado de contraste para que las letras de SAGRA se vean blancas sobre el fondo oscuro */
+    /* Logo restaurado exactamente a su estado y colores originales (sin filtros) */
     .main-system-logo { 
         height: 36px; 
         width: auto; 
         object-fit: contain; 
         cursor: pointer;
-        filter: brightness(0) invert(1); 
     }
 
     .navbar-title { 
@@ -177,7 +176,7 @@ include '../main/config.php';
         width: 100%;
     }
 
-    /* 2. SIDEBAR COMPACTO CON HOVER AZUL CLARO (#3498db) */
+    /* 2. SIDEBAR COMPACTO CON HOVER DE RECUADRO AZUL CLARO (#3498db) */
     .main-sidebar {
         width: 90px;
         background: #2c3e50;
@@ -210,10 +209,10 @@ include '../main/config.php';
     .menu-item i { font-size: 1.4rem; }
     .menu-item span { font-size: 0.75rem; font-weight: 500; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
     
-    /* Hover con cambio exacto a azul claro */
+    /* CAMBIO HOVER: El fondo cambia a azul claro (#3498db) y las letras/iconos se ponen blanco puro */
     .menu-item:hover { 
-        background: #34495e; 
-        color: #3498db; 
+        background: #3498db; 
+        color: #fff; 
     }
     
     .menu-item.active { background: #1a252f; color: #fff; font-weight: 600; border-left-color: #3498db; }
