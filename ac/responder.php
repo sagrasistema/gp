@@ -36,6 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->beginTransaction();
 
         // A. Guardar las respuestas a las 30 preguntas generales
+        #if (isset($_POST['answers']) && is_array($_POST['answers'])) {
+       // A. Guardar las respuestas a las 30 preguntas generales (Permitiendo vacíos)
         if (isset($_POST['answers']) && is_array($_POST['answers'])) {
             $stmtUpdateAnswer = $pdo->prepare("
                 UPDATE ac_general_answers 
@@ -43,15 +45,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 WHERE acId = :acId AND questionId = :questionId
             ");
             foreach ($_POST['answers'] as $qId => $data) {
+                // Si el usuario no marcó Sí o No, guardamos NULL o vacío en lugar de obligarlo
+                $responseValue = (!empty($data['response'])) ? $data['response'] : null;
+
                 $stmtUpdateAnswer->execute([
-                    ':response'   => $data['response'] ?? null,
+                    ':response'   => $responseValue,
                     ':comment'    => $data['comment'] ?? '',
                     ':acId'       => $acId,
                     ':questionId' => $qId
                 ]);
             }
         }
-
         // B. Guardar las 21 subpruebas de la Pregunta 28 y calcular el Score
         $totalScore = 0;
         if (isset($_POST['q28']) && is_array($_POST['q28'])) {
@@ -220,7 +224,7 @@ include '../main/h.php';
                             <div class="question-inputs">
                                 <div class="radio-group">
                                     <label class="radio-label">
-                                        <input type="radio" name="answers[<?= $q->questionId ?>][response]" value="Si" <?= $savedRes === 'Si' ? 'checked' : '' ?> required> Sí
+                                        <input type="radio" name="answers[<?= $q->questionId ?>][response]" value="Si" <?= $savedRes === 'Si' ? 'checked' : '' ?>> Sí
                                     </label>
                                     <label class="radio-label">
                                         <input type="radio" name="answers[<?= $q->questionId ?>][response]" value="No" <?= $savedRes === 'No' ? 'checked' : '' ?>> No
