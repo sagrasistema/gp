@@ -101,9 +101,7 @@ include '../main/layout_header.php';
         <h1 class="page-main-title">
             <i class="ri-shield-check-line"></i> Aceptación y Continuidad
         </h1>
-        <div class="header-actions">
-            <a href="index.php" class="btn btn-secondary"><i class="ri-arrow-left-line"></i> Volver</a>
-        </div>
+        
     </div>
 
     <div class="card" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 2.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);">
