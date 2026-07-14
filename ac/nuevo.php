@@ -95,7 +95,7 @@ $currentTab     = 'aceptacion'; // Mantiene activa la opción "Aceptación" en e
 include '../main/layout_header.php'; 
 ?>
 
-<div class="view-container" style="max-width: 700px; margin: 0 auto;">
+<div class="view-container">
     
     <div class="view-header">
         <h1 class="page-main-title">
