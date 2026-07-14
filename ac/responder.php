@@ -190,7 +190,7 @@ $currentTab     = 'aceptacion';
 include '../main/layout_header.php'; 
 ?>
 
-<div class="view-container-form">
+<div class="view-container">
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
         <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
