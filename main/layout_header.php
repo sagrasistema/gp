@@ -16,7 +16,7 @@ $activeTab = isset($currentTab) ? $currentTab : '';
         <div class="navbar-logo-container">
             <img src="<?php echo $logoPath; ?>" alt="SAGRA" class="main-system-logo" onclick="window.location.href='<?php echo $homePath; ?>'">
         </div>
-        <span class="navbar-title">Módulo de Auditoría</span>
+        <span class="navbar-title">SAGRAGP VERSION 2.0</span>
     </div>
     
     <div class="navbar-right">
