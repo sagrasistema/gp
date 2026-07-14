@@ -4,6 +4,78 @@
 // 1. Incluimos tu archivo de conexión primero (Inicializa la variable $pdo)
 include '../main/config.php'; 
 
+// =========================================================================
+// LÓGICA DE PROCESAMIENTO Y GUARDADO (FUNCIONA COMO CONTROLADOR INTEGRADO)
+// =========================================================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $clientId = filter_input(INPUT_POST, 'clientId', FILTER_VALIDATE_INT);
+    $typeId = filter_input(INPUT_POST, 'typeId', FILTER_VALIDATE_INT);
+    $serviceId = filter_input(INPUT_POST, 'serviceId', FILTER_VALIDATE_INT);
+
+    if (!$clientId || !$typeId || !$serviceId) {
+        die("Error: Datos del formulario incompletos o inválidos.");
+    }
+
+    try {
+        // Iniciar una transacción para asegurar la consistencia relacional de todas las tablas
+        $pdo->beginTransaction();
+
+        // A. Insertar la cabecera en la tabla principal `ac`
+        $stmtInsertAC = $pdo->prepare("
+            INSERT INTO ac (clientId, typeId, serviceId, riskScore, riskLevel) 
+            VALUES (:clientId, :typeId, :serviceId, 0, 'Por evaluar')
+        ");
+        $stmtInsertAC->execute([
+            ':clientId'  => $clientId,
+            ':typeId'    => $typeId,
+            ':serviceId' => $serviceId
+        ]);
+        $acId = $pdo->lastInsertId();
+
+        // B. Inicializar respuestas vacías para las 30 preguntas maestras
+        $questions = $pdo->query("SELECT questionId FROM ac_questions ORDER BY questionId ASC")->fetchAll(PDO::FETCH_COLUMN);
+        
+        $stmtInsertAnswer = $pdo->prepare("
+            INSERT INTO ac_general_answers (acId, questionId, response, comment) 
+            VALUES (:acId, :questionId, NULL, '')
+        ");
+        foreach ($questions as $qId) {
+            $stmtInsertAnswer->execute([
+                ':acId'       => $acId,
+                ':questionId' => $qId
+            ]);
+        }
+
+        // C. Inicializar respuestas en 'No Aplica' (0 puntos) para las 21 subpruebas asociadas a la Q28
+        $tests = $pdo->query("SELECT testId FROM ac_q28_tests ORDER BY testId ASC")->fetchAll(PDO::FETCH_COLUMN);
+
+        $stmtInsertTestAnswer = $pdo->prepare("
+            INSERT INTO ac_q28_answers (acId, testId, riskValue, score) 
+            VALUES (:acId, :testId, 'No Aplica', 0)
+        ");
+        foreach ($tests as $tId) {
+            $stmtInsertTestAnswer->execute([
+                ':acId'   => $acId,
+                ':testId' => $tId
+            ]);
+        }
+
+        // Confirmar la transacción de forma exitosa
+        $pdo->commit();
+
+        // Redirigir directamente al archivo interactivo para responder el cuestionario creado
+        header("Location: responder.php?acId=" . $acId);
+        exit;
+
+    } catch (PDOException $e) {
+        // En caso de fallar algo, revertimos todos los pasos anteriores para no dejar basura en la BD
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        die("Error en el sistema al iniciar la evaluación: " . $e->getMessage());
+    }
+}
+
 // 2. Definimos el título de la página para que el header común lo asimile
 $pageTitle = "Iniciar Aceptación y Continuidad";
 
@@ -28,7 +100,7 @@ include '../main/h.php';
             Selecciona el cliente corporativo, el tipo de evaluación y el servicio específico a generar.
         </p>
 
-        <form action="../../c/ac.php?action=create" method="POST">
+        <form action="nuevo.php" method="POST">
             
             <div class="form-group">
                 <label for="clientId">Cliente / Empresa Activa</label>
