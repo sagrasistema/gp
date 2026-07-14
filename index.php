@@ -30,15 +30,63 @@
 
         body { 
             background-color: var(--bg-primary); 
-            background-image: url('client/mosaico.svg'); /* Reutiliza tu mosaico */
+            background-image: url('client/mosaico.svg'); 
             background-repeat: repeat;
             background-size: 60px 60px;
             color: var(--text-main); 
-            padding: 3rem 2rem; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 1. NAVBAR SUPERIOR COMPLETO (Idéntico al de los submódulos) */
+        .main-navbar {
+            height: 60px;
+            width: 100%;
+            background: #2c3e50;
+            border-bottom: 1px solid #1e2b37;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        
+        .navbar-left { display: flex; align-items: center; gap: 1.25rem; }
+        .navbar-logo-container { display: flex; align-items: center; height: 40px; }
+        
+        /* Logo real original sin filtros */
+        .main-system-logo { 
+            height: 36px; 
+            width: auto; 
+            object-fit: contain; 
+            cursor: pointer;
+        }
+
+        .navbar-title { 
+            font-weight: 600; 
+            color: #94a3b8; 
+            font-size: 0.95rem;
+            border-left: 1px solid #34495e;
+            padding-left: 1.25rem;
+        }
+        
+        .navbar-right { display: flex; align-items: center; gap: 1rem; color: #edf2f7; font-size: 0.9rem; }
+        .user-name-text { font-weight: 500; }
+        .user-avatar { background: #34495e; color: #fff; padding: 0.45rem; border-radius: 50%; font-size: 1.1rem; }
+
+        /* CONTENEDOR CENTRAL DEL MENÚ */
+        .app-body {
+            margin-top: 60px; /* Separación para el navbar fijo */
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem 1.5rem;
+            width: 100%;
         }
 
         .container { 
@@ -46,41 +94,26 @@
             max-width: 1100px; 
         }
 
-        /* Encabezado Principal */
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        /* Encabezado del área de contenido */
+        .view-header {
             margin-bottom: 3rem;
             padding-bottom: 1.5rem;
             border-bottom: 1px solid var(--border-color);
         }
 
-        .logo-title-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-        }
-
-        .header-logo {
-            height: 55px;
-            width: auto;
-            object-fit: contain;
-        }
-
-        header h1 {
+        .view-header h1 {
             font-size: 1.8rem;
             font-weight: 700;
             color: var(--text-main);
         }
 
-        header p {
+        .view-header p {
             color: var(--text-muted);
             font-size: 0.95rem;
             margin-top: 0.25rem;
         }
 
-        /* Grid de Módulos (Estilo de la imagen de referencia) */
+        /* Grid de Módulos */
         .modules-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -105,7 +138,6 @@
             overflow: hidden;
         }
 
-        /* Efectos Hover */
         .module-card:hover {
             transform: translateY(-5px);
             border-color: var(--accent);
@@ -145,10 +177,10 @@
             line-height: 1.4;
         }
 
-        /* Estilos Especiales para los Módulos No Desarrollados */
+        /* Módulos Deshabilitados */
         .module-card.disabled {
             cursor: not-allowed;
-            opacity: 0.85;
+            opacity: 0.75;
         }
 
         .module-card.disabled:hover {
@@ -162,12 +194,7 @@
             color: #94a3b8;
         }
 
-        .module-card.disabled:hover .icon-box {
-            background-color: #f1f5f9;
-            color: #94a3b8;
-        }
-
-        /* Etiqueta de Próximamente */
+        /* Etiqueta Próximamente */
         .badge-coming-soon {
             position: absolute;
             top: 12px;
@@ -182,61 +209,78 @@
             letter-spacing: 0.05em;
             border: 1px solid #e2e8f0;
         }
+
+        /* RESPONSIVO PARA PANTALLAS PEQUEÑAS */
+        @media (max-width: 768px) {
+            .navbar-title { display: none; }
+            .user-name-text { display: none; }
+            .app-body { padding: 2rem 1rem; align-items: flex-start; }
+            .view-header { text-align: center; margin-bottom: 2rem; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <div class="logo-title-wrapper">
-            <img src="client/logo.png" alt="Logo" class="header-logo">
-            <div>
-                <h1>Panel de Administración Global</h1>
-                <p>Selecciona el módulo del ecosistema al que deseas ingresar</p>
-            </div>
+<header class="main-navbar">
+    <div class="navbar-left">
+        <div class="navbar-logo-container">
+            <img src="client/logo.png" alt="SAGRA" class="main-system-logo">
         </div>
-    </header>
+        <span class="navbar-title">Ecosistema Global</span>
+    </div>
+    
+    <div class="navbar-right">
+        <span class="user-name-text">Juan Manuel Godoy</span>
+        <i class="ri-user-line user-avatar"></i>
+    </div>
+</header>
 
-    <main class="modules-grid">
+<div class="app-body">
+    <div class="container">
         
-        <a href="client/index.php" class="module-card">
-            <div class="icon-box">
-                <i class="ri-team-line"></i>
-            </div>
-            <h2>Clientes</h2>
-            <p>Control, registro y fichas corporativas de clientes de la firma.</p>
-        </a>
+        <div class="view-header">
+            <h1>Panel de Administración Global</h1>
+            <p>Selecciona el módulo del ecosistema al que deseas ingresar</p>
+        </div>
 
-        
-        <a href="ac/index.php" class="module-card">
+        <main class="modules-grid">
             
-            <div class="icon-box">
-                <i class="ri-shield-check-line"></i>
-            </div>
-            <h2>Aceptación y Continuidad</h2>
-            <p>Evaluación de riesgos, políticas internas y aprobación regulatoria.</p>
-        </a>
-        
+            <a href="client/index.php" class="module-card">
+                <div class="icon-box">
+                    <i class="ri-team-line"></i>
+                </div>
+                <h2>Clientes</h2>
+                <p>Control, registro y fichas corporativas de clientes de la firma.</p>
+            </a>
 
-        <div class="module-card disabled">
-            <span class="badge-coming-soon">Próximamente</span>
-            <div class="icon-box">
-                <i class="ri-file-list-3-line"></i>
+            <a href="ac/index.php" class="module-card">
+                <div class="icon-box">
+                    <i class="ri-shield-check-line"></i>
+                </div>
+                <h2>Aceptación y Continuidad</h2>
+                <p>Evaluación de riesgos, políticas internas y aprobación regulatoria.</p>
+            </a>
+            
+            <div class="module-card disabled">
+                <span class="badge-coming-soon">Próximamente</span>
+                <div class="icon-box">
+                    <i class="ri-file-list-3-line"></i>
+                </div>
+                <h2>Términos y Condiciones</h2>
+                <p>Gestión de contratos, cláusulas legales y acuerdos de nivel de servicio.</p>
             </div>
-            <h2>Términos y Condiciones</h2>
-            <p>Gestión de contratos, cláusulas legales y acuerdos de nivel de servicio.</p>
-        </div>
 
-        <div class="module-card disabled">
-            <span class="badge-coming-soon">Próximamente</span>
-            <div class="icon-box">
-                <i class="ri-folders-line"></i>
+            <div class="module-card disabled">
+                <span class="badge-coming-soon">Próximamente</span>
+                <div class="icon-box">
+                    <i class="ri-folders-line"></i>
+                </div>
+                <h2>Proyecto</h2>
+                <p>Planificación de flujos de trabajo, entregables y asignación de tareas.</p>
             </div>
-            <h2>Proyecto</h2>
-            <p>Planificación de flujos de trabajo, entregables y asignación de tareas.</p>
-        </div>
 
-    </main>
+        </main>
+    </div>
 </div>
 
 </body>
