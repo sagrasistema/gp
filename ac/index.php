@@ -102,7 +102,7 @@ include '../main/layout_header.php';
             <i class="ri-add-box-line"></i> Crear Registro
         </a>
 
-        <a href="../index.php" class="btn-control-blue">
+        <a href="../index.php" class="btn btn-primary">
             <i class="ri-close-circle-line"></i> Cancelar (Atrás)
         </a>
     </div>
