@@ -4,6 +4,36 @@ include '../main/config.php';
 
 // Validar que exista el ID de la evaluación a responder
 $acId = filter_input(INPUT_GET, 'acId', FILTER_VALIDATE_INT);
+// =========================================================================
+// LÓGICA ESPECIAL PARA EL ESTADO DE LA PREGUNTA 28 (GRID DE PROGRESO)
+// =========================================================================
+
+// 1. Contar el número total de subpruebas configuradas para la pregunta 28
+$totalSubtestsQuery = $pdo->query("SELECT COUNT(*) FROM ac_q28_tests");
+$totalSubtests = (int)$totalSubtestsQuery->fetchColumn(); // Habitualmente 21
+
+// 2. Contar cuántas subpruebas ya han sido guardadas y contestadas para esta evaluación ($acId)
+// Consideramos válidas las respuestas que no estén vacías, nulas o con valor 'Pendiente'
+$stmtAnswered = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM ac_q28_answers 
+    WHERE acId = :acId 
+      AND riskValue IS NOT NULL 
+      AND riskValue != '' 
+      AND riskValue != 'Pendiente'
+");
+$stmtAnswered->execute(['acId' => $acId]);
+$answeredCount = (int)$stmtAnswered->fetchColumn();
+
+// 3. Definir la variable de estado para la pregunta 28
+if ($answeredCount === $totalSubtests) {
+    $estadoPregunta28 = 'lista';       // Completado (Verde)
+} elseif ($answeredCount > 0) {
+    $estadoPregunta28 = 'en-proceso';   // En progreso (Amarillo)
+} else {
+    $estadoPregunta28 = 'no-tocado';    // Pendiente (Gris)
+}
+// =========================================================================
 if (!$acId) {
     die("Error: No se especificó una evaluación válida.");
 }
@@ -262,19 +292,33 @@ include '../main/layout_header.php';
     <div class="activities-grid-card">
         <h3><i class="ri-grid-fill" style="color: var(--accent);"></i> Progreso General de Actividades (1-30)</h3>
         <div class="activities-grid">
-            <?php 
-            // Generar los 30 botones del progreso interactivo
-            for ($i = 1; $i <= 30; $i++): 
-                // Verificar si esta pregunta ya fue respondida en BD
-                // Nota: se asume que las preguntas tienen IDs correlativos o que asociamos los números de forma directa.
-                // Buscaremos dinámicamente si la pregunta con questionNumber = $i tiene respuesta.
-                $isCompleted = false;
-                foreach($answersSaved as $qId => $ans) {
-                    // Como el ID de pregunta puede diferir, buscaremos más abajo la asociación exacta
-                }
-            ?>
-                <a href="#question-<?= $i ?>" id="grid-box-<?= $i ?>" class="activity-box pending" onclick="scrollToQuestion(<?= $i ?>, event)">
-                    <?= $i ?>
+            <?php for ($i = 1; $i <= 30; $i++): ?>
+                <?php 
+                    // Inicializamos la clase de estilo por defecto
+                    $claseEstado = 'pendiente'; // Gris por defecto
+
+                    if ($i === 28) {
+                        // --- CASO ESPECIAL: PREGUNTA 28 ---
+                        if ($estadoPregunta28 === 'lista') {
+                            $claseEstado = 'completado';  // Verde
+                        } elseif ($estadoPregunta28 === 'en-proceso') {
+                            $claseEstado = 'en-progreso'; // Amarillo
+                        } else {
+                            $claseEstado = 'pendiente';   // Gris
+                        }
+                    } else {
+                        // --- COMPROBACIÓN ESTÁNDAR PARA LAS PREGUNTAS 1 A 27 Y 29 A 30 ---
+                        // Aquí consultas si la pregunta normal tiene registro en tu tabla estándar de respuestas
+                        $stmtCheck = $pdo->prepare("SELECT id FROM ac_respuestas WHERE acId = :acId AND pregunta_num = :pNum LIMIT 1");
+                        $stmtCheck->execute(['acId' => $acId, 'pNum' => $i]);
+                        if ($stmtCheck->fetch()) {
+                            $claseEstado = 'completado'; // Si tiene respuesta guardada, se pinta de verde
+                        }
+                    }
+                ?>
+                
+                <a href="#pregunta-<?php echo $i; ?>" class="cuadro-progreso <?php echo $claseEstado; ?>" title="Pregunta <?php echo $i; ?>">
+                    <?php echo $i; ?>
                 </a>
             <?php endfor; ?>
         </div>
