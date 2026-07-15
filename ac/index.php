@@ -66,10 +66,7 @@ include '../main/layout_header.php';
         <h1 class="page-main-title">
             <i class="ri-shield-check-line"></i> Aceptación y Continuidad
         </h1>
-        <div class="header-actions">
-            <a href="../index.php" class="btn btn-secondary"><i class="ri-arrow-left-line"></i> Menú</a>
-            <a href="nuevo.php" class="btn btn-primary"><i class="ri-add-line"></i> Nueva Evaluación</a>
-        </div>
+
     </div>
 
     <div class="table-actions-container">
