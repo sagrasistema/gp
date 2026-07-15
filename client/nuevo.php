@@ -261,7 +261,7 @@ include '../main/layout_header.php';
                 </select>
             </div>
 
-            <div class="actions col-4" style="display: none;">
+            <div class="actions col-4" >
                 <button type="submit" class="btn btn-primary"><i class="ri-save-line"></i> Guardar Ficha Completa</button>
             </div>
         </form>
