@@ -100,22 +100,16 @@ $isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
 
     <div class="activities-grid-card">
         <h3><i class="ri-grid-fill" style="color: var(--accent);"></i> Progreso General de Actividades (1-30)</h3>
-        <div class="activity-grid">
-            <?php for ($i = 1; $i <= 30; $i++): ?>
-                <?php 
-                if ($i === 28) {
-                    // Evaluamos la condición especial calculada arriba
-                    $isActiveClass = $isQ28Complete ? 'completed' : 'pending';
-                } else {
-                    // Lógica normal para el resto de preguntas (validada con .completed en vez de .active)
-                    $isActiveClass = (isset($respuestasNormales[$i]) && $respuestasNormales[$i] !== '') ? 'completed' : 'pending';
-                }
-                ?>
-                <div class="grid-item <?= $isActiveClass ?>" 
-                     id="grid-box-<?= $i ?>" 
-                     onclick="scrollToQuestion(<?= $i ?>, event)">
-                     <?= $i ?>
-                </div>
+        <div class="activities-grid">
+            <?php for ($i = 1; $i <= 30; $i++): 
+                // Determinamos dinámicamente si está completado o no
+                $statusClass = isset($completedActivities[$i]) ? 'completed' : 'pending';
+            ?>
+                <a href="#activity-<?php echo $i; ?>" 
+                class="activity-box <?php echo $statusClass; ?>" 
+                id="grid-box-<?php echo $i; ?>">
+                    <?php echo $i; ?>
+                </a>
             <?php endfor; ?>
         </div>
 
@@ -428,6 +422,27 @@ document.addEventListener("DOMContentLoaded", () => {
     calculateLiveRisk();
     updateProgressGrid();
 });
+function updateLiveProgressBar() {
+    // 1. Buscamos todos los cuadritos dentro del grid
+    const totalBoxes = document.querySelectorAll('.activities-grid .activity-box').length;
+    
+    // 2. Contamos solo los que tienen la clase 'completed'
+    const completedBoxes = document.querySelectorAll('.activities-grid .activity-box.completed').length;
+    
+    // 3. Calculamos el porcentaje
+    const percentage = totalBoxes > 0 ? Math.round((completedBoxes / totalBoxes) * 100) : 0;
+    
+    // 4. Actualizamos visualmente tu barra de progreso
+    const progressBar = document.querySelector('.progress-bar-fill');
+    const progressText = document.querySelector('.progress-text');
+    
+    if (progressBar) {
+        progressBar.style.width = percentage + '%';
+    }
+    if (progressText) {
+        progressText.textContent = `Progreso del Formulario (${percentage}%)`;
+    }
+}
 </script>
 
 <?php 

@@ -206,6 +206,50 @@
         .question-inputs { grid-template-columns: 1fr; gap: 1rem; }
         .activities-grid { grid-template-columns: repeat(6, 1fr); }
     }
+    /* Contenedor principal de la cuadrícula */
+    .activities-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr); /* Crea 5 columnas perfectas */
+        gap: 10px;
+        margin: 20px 0;
+        max-width: 300px; /* Ajusta el ancho para que se mantenga compacto */
+    }
+
+    /* Estilo base para cada cuadrito */
+    .activity-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1 / 1; /* Los hace perfectamente cuadrados */
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: 2px solid transparent;
+        cursor: pointer;
+    }
+
+    /* Estado: Pendiente / Sin responder */
+    .activity-box.pending {
+        background-color: #f1f3f5;
+        color: #495057;
+        border-color: #dee2e6;
+    }
+
+    /* Estado: Completado / Respondido (Verde agradable) */
+    .activity-box.completed {
+        background-color: #2fb344;
+        color: #ffffff;
+        box-shadow: 0 4px 6px rgba(47, 179, 68, 0.15);
+    }
+
+    /* Efectos interactivos al pasar el mouse */
+    .activity-box:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        filter: brightness(1.05);
+    }
     </style>
 </head>
 <body>
