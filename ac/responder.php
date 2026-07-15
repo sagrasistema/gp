@@ -199,6 +199,27 @@ include '../main/layout_header.php';
         <a href="index.php" class="btn btn-secondary"><i class="ri-arrow-left-line"></i> Volver</a>
     </div>
 
+    <div class="table-actions-container">
+        <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+            <i class="ri-arrow-go-back-line"></i> 
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+            <i class="ri-screenshot-2-line"></i>
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
+            <i class="ri-book-open-line"></i> 
+        </a>
+
+        <a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Registro">
+            <i class="ri-add-line"></i>
+        </a>
+
+        <a href="../index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+            <i class="ri-close-circle-line"></i> 
+        </a>
+    </div>
     <?php if (isset($_GET['success'])): ?>
         <div class="alert-success">
             <i class="ri-checkbox-circle-fill"></i> Respuestas guardadas y nivel de riesgo recalculado de forma correcta.
