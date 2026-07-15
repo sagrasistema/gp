@@ -131,68 +131,6 @@ include '../main/h.php';
 
 <link rel="stylesheet" href="../main/layout.css">
 
-<style>
-    /* Estilos internos específicos del Formulario y Acordeones */
-    .view-container-form { width: 100%; max-width: 1000px; margin: 0 auto; }
-    
-    .meta-summary { background: #fff; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color, #e2e8f0); margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; gap: 2rem; }
-    .meta-item { font-size: 0.9rem; color: var(--text-muted, #64748b); }
-    .meta-item strong { color: var(--text-main, #0f172a); display: block; font-size: 1.05rem; }
-    
-    /* CUADRÍCULA DE ACTIVIDADES (PROGRESO) */
-    .activities-grid-card { background: #fff; border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; }
-    .activities-grid-card h3 { font-size: 0.95rem; font-weight: 700; margin-top: 0; margin-bottom: 0.75rem; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; }
-    .activities-grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 0.5rem; }
-    .activity-box { display: flex; align-items: center; justify-content: center; height: 35px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; text-decoration: none; border: 1px solid #cbd5e1; transition: all 0.2s ease-in-out; cursor: pointer; }
-    
-    /* Estados de la Cuadrícula */
-    .activity-box.pending { background: #f1f5f9; color: #64748b; border-color: #cbd5e1; }
-    .activity-box.completed { background: #10b981; color: #ffffff; border-color: #059669; }
-    .activity-box:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-
-    .accordion-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 0.5rem; overflow: hidden; }
-    .accordion-header { background: #fff; padding: 1rem 1.25rem; font-size: 0.95rem; font-weight: 600; color: #334155; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; transition: background 0.2s; border-left: 4px solid var(--accent, #0284c7); }
-    .accordion-header:hover { background: #f8fafc; }
-    .accordion-header i { font-size: 1.2rem; color: #64748b; transition: transform 0.2s; }
-    
-    .accordion-item.active .accordion-header { background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
-    .accordion-item.active .accordion-header i { transform: rotate(180deg); }
-    .accordion-content { display: none; padding: 1.25rem; background: #fafafa; }
-    .accordion-item.active .accordion-content { display: block; }
-
-    .question-row { background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1.25rem; margin-bottom: 0.75rem; scroll-margin-top: 80px; }
-    .question-text { font-size: 0.95rem; font-weight: 500; color: #1e293b; margin-bottom: 1rem; line-height: 1.4; }
-    .question-inputs { display: grid; grid-template-columns: 180px 1fr; gap: 1.5rem; align-items: center; }
-    
-    .radio-group { display: flex; gap: 1.25rem; }
-    .radio-label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; cursor: pointer; font-weight: 600; color: #475569; }
-    .radio-label input { width: 17px; height: 17px; accent-color: var(--accent, #0284c7); }
-    
-    .comment-input { width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 0.5rem 0.75rem; font-size: 0.88rem; outline: none; transition: border-color 0.2s; }
-    .comment-input:focus { border-color: var(--accent, #0284c7); }
-
-    .subtest-table { width: 100%; border-collapse: collapse; margin-top: 1.25rem; font-size: 0.88rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; }
-    .subtest-table th { background: #f8fafc; text-align: left; padding: 0.75rem; font-size: 0.8rem; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
-    .subtest-table td { padding: 0.75rem; border-bottom: 1px solid #e2e8f0; color: #334155; }
-    .subtest-table select { padding: 0.4rem; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 0.85rem; width: 100%; max-width: 180px; background: #fff; outline: none; }
-    .subtest-table select:focus { border-color: var(--accent, #0284c7); }
-    
-    .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
-
-    .badge-risk { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.95rem; font-weight: 700; transition: all 0.3s ease; }
-    .badge-risk.risk-bajo { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-    .badge-risk.risk-moderado { background-color: #fefce8; color: #854d0e; border: 1px solid #fef08a; }
-    .badge-risk.risk-moderado-alto { background-color: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; }
-    .badge-risk.risk-alto { background-color: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
-
-    @media (max-width: 768px) {
-        .meta-summary { flex-direction: column; gap: 1rem !important; }
-        .meta-item:last-child { align-items: flex-start !important; text-align: left !important; margin-left: 0 !important; }
-        .question-inputs { grid-template-columns: 1fr; gap: 1rem; }
-        .activities-grid { grid-template-columns: repeat(6, 1fr); }
-    }
-</style>
-
 <?php
 // Mapeo dinámico de rutas del layout de la subcarpeta ac/
 $customLogoPath = '../main/logo.png'; 
