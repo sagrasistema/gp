@@ -23,41 +23,54 @@ include '../main/layout_header.php';
         justify-content: flex-end;
         align-items: center;
         gap: 0.5rem;
-        margin-bottom: 0.75rem; /* Separación discreta con la tabla */
+        margin-bottom: 1rem; /* Margen para separarlo de la tabla */
     }
     
-    .btn-export {
+    /* Botón azul habilitado */
+    .btn-control-blue {
         display: inline-flex;
         align-items: center;
-        gap: 0.35rem;
-        padding: 0.5rem 0.85rem;
+        gap: 0.4rem;
+        padding: 0.55rem 1rem;
         font-size: 0.85rem;
         font-weight: 500;
         border-radius: 6px;
-        border: 1px solid #e2e8f0;
-        background-color: #ffffff;
-        color: #475569;
+        border: 1px solid #2563eb;
+        background-color: #2563eb;
+        color: #ffffff;
         cursor: pointer;
         transition: all 0.2s ease;
         text-decoration: none;
     }
 
-    /* Efecto hover suave */
-    .btn-export:hover {
-        background-color: #f8fafc;
-        border-color: #cbd5e1;
-        color: #0f172a;
+    .btn-control-blue:hover {
+        background-color: #1d4ed8;
+        border-color: #1d4ed8;
+        color: #ffffff;
     }
 
-    /* Ajuste para el modo oscuro si lo tienes implementado */
-    body.dark-mode .btn-export {
+    /* Botón deshabilitado */
+    .btn-control-disabled {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.55rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        background-color: #f1f5f9;
+        color: #94a3b8;
+        cursor: not-allowed;
+        text-decoration: none;
+        pointer-events: none; /* Evita clics */
+    }
+
+    /* Adaptación a modo oscuro */
+    body.dark-mode .btn-control-disabled {
         background-color: #1e293b;
         border-color: #334155;
-        color: #cbd5e1;
-    }
-    body.dark-mode .btn-export:hover {
-        background-color: #334155;
-        color: #f8fafc;
+        color: #64748b;
     }
 </style>
 
@@ -66,8 +79,12 @@ include '../main/layout_header.php';
         <h1 class="page-main-title">
             <i class="ri-shield-check-line"></i> Aceptación y Continuidad
         </h1>
-
+        <div class="header-actions">
+            <a href="../index.php" class="btn btn-secondary"><i class="ri-arrow-left-line"></i> Menú</a>
+            <a href="nuevo.php" class="btn btn-primary"><i class="ri-add-line"></i> Nueva Evaluación</a>
+        </div>
     </div>
+
     <div class="table-actions-container">
         <a href="#" class="btn-control-disabled">
             <i class="ri-arrow-go-back-line"></i> Atrás
@@ -141,13 +158,6 @@ include '../main/layout_header.php';
         </table>
     </div>
 </div>
-
-<script>
-function exportTable(type) {
-    console.log("Exportando tabla como: " + type);
-    // Aquí puedes agregar la lógica de DataTables, jsPDF o tu sistema personalizado de exportación.
-}
-</script>
 
 <?php 
 include '../main/layout_footer.php'; 
