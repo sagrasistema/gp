@@ -39,6 +39,78 @@ $answeredSubtests = (int)$stmtResp28->fetchColumn();
 // 3. Determinar si la pregunta 28 está completamente lista
 $isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
 ?>
+
+<style>
+    /* Estilos del Contenedor de la Tarjeta */
+    .activities-grid-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .activities-grid-card h3 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-top: 0;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Cuadrícula de 5 columnas compacta */
+    .activities-grid {
+        display: grid !important;
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Estilo de cada Cajita Numérica */
+    .activity-box {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        aspect-ratio: 1 / 1 !important; /* Cuadrados perfectos */
+        width: 100% !important;
+        border-radius: 6px !important;
+        font-size: 0.85rem !important;
+        font-weight: 700 !important;
+        text-decoration: none !important;
+        transition: all 0.2s ease-in-out !important;
+        box-sizing: border-box !important;
+        border: 1.5px solid #cbd5e1 !important;
+    }
+
+    /* Estado Pendiente (Rojo / Gris Suave) */
+    .activity-box.pending {
+        background-color: #fef2f2 !important;
+        color: #ef4444 !important;
+        border-color: #fca5a5 !important;
+    }
+    .activity-box.pending:hover {
+        background-color: #fee2e2 !important;
+        border-color: #f87171 !important;
+        transform: translateY(-2px) !important;
+    }
+
+    /* Estado Completado / Listo (Verde) */
+    .activity-box.completed {
+        background-color: #ecfdf5 !important;
+        color: #10b981 !important;
+        border-color: #a7f3d0 !important;
+    }
+    .activity-box.completed:hover {
+        background-color: #d1fae5 !important;
+        border-color: #34d399 !important;
+        transform: translateY(-2px) !important;
+    }
+</style>
+
 <div class="view-container">
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
@@ -100,14 +172,20 @@ $isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
 
     <div class="activities-grid-card">
         <h3><i class="ri-grid-fill" style="color: var(--accent);"></i> Progreso General de Actividades (1-30)</h3>
+        
         <div class="activities-grid">
             <?php for ($i = 1; $i <= 30; $i++): 
-                // Determinamos dinámicamente si está completado o no
-                $statusClass = isset($completedActivities[$i]) ? 'completed' : 'pending';
+                // Evaluamos el estado inicial de completación cargado desde la Base de Datos
+                if ($i === 28) {
+                    $statusClass = $isQ28Complete ? 'completed' : 'pending';
+                } else {
+                    $statusClass = isset($completedActivities[$i]) ? 'completed' : 'pending';
+                }
             ?>
-                <a href="#activity-<?php echo $i; ?>" 
-                class="activity-box <?php echo $statusClass; ?>" 
-                id="grid-box-<?php echo $i; ?>">
+                <a href="#question-<?php echo $i; ?>" 
+                   class="activity-box <?php echo $statusClass; ?>" 
+                   id="grid-box-<?php echo $i; ?>"
+                   onclick="scrollToQuestion(<?php echo $i; ?>, event)">
                     <?php echo $i; ?>
                 </a>
             <?php endfor; ?>
@@ -115,8 +193,8 @@ $isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
 
         <div class="progress-container" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <span style="font-size: 0.85rem; font-weight: 600; color: #475569;">Progreso del Formulario</span>
-                <span id="progress-percent-text" style="font-size: 0.85rem; font-weight: 700; color: var(--accent, #10b981);">0%</span>
+                <span id="progress-text-label" style="font-size: 0.85rem; font-weight: 600; color: #475569;">Progreso del Formulario</span>
+                <span id="progress-percent-text" style="font-size: 0.85rem; font-weight: 700; color: #10b981;">0%</span>
             </div>
             <div style="width: 100%; height: 6px; background-color: #e2e8f0; border-radius: 9999px; overflow: hidden;">
                 <div id="progress-fill-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 9999px; transition: width 0.4s ease;"></div>
@@ -129,7 +207,7 @@ $isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
         <?php
         $categories = $pdo->query("SELECT * FROM ac_categories ORDER BY orderNum ASC")->fetchAll(PDO::FETCH_OBJ);
         
-        // Mapeo JS de questionNumber => questionId para el progreso en vivo
+        [cite_start]// Mapeo JS de questionNumber => questionId para el progreso en vivo [cite: 364]
         $qNumberToIdMap = [];
 
         foreach ($categories as $cat):
@@ -148,7 +226,7 @@ $isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
                         $savedRes = $answersSaved[$q->questionId]['response'] ?? '';
                         $savedComment = $answersSaved[$q->questionId]['comment'] ?? '';
                         
-                        // Guardar la correspondencia de número a ID
+                        [cite_start]// Guardar la correspondencia de número a ID [cite: 365]
                         $qNumberToIdMap[$q->questionNumber] = [
                             'id' => $q->questionId,
                             'completed' => (!empty($savedRes))
@@ -281,49 +359,47 @@ function isQ28FullyAnswered() {
     let answeredCount = 0;
     selects.forEach(select => {
         if (select.value && select.value !== '') {
+            // Se considera completado si han elegido un valor válido
             answeredCount++;
         }
     });
     return answeredCount === selects.length;
 }
 
-// Recalcular porcentaje global y barra de progreso de manera dinámica
+// Recalcular porcentaje global y actualizar barra de progreso dinámicamente [cite: 363]
 function updateLiveProgressBar() {
     const totalQuestions = 30;
-    const currentCompleted = document.querySelectorAll('.activity-grid .grid-item.completed').length;
-    const percent = Math.round((currentCompleted / totalQuestions) * 100);
+    const completedBoxes = document.querySelectorAll('.activities-grid .activity-box.completed').length;
+    const percent = Math.round((completedBoxes / totalQuestions) * 100);
     
     const percentText = document.getElementById('progress-percent-text');
     const fillBar = document.getElementById('progress-fill-bar');
+    const progressTextLabel = document.getElementById('progress-text-label');
     
     if (percentText) percentText.innerText = `${percent}%`;
     if (fillBar) fillBar.style.width = `${percent}%`;
+    if (progressTextLabel) progressTextLabel.innerText = `Progreso del Formulario (${percent}%)`;
 }
 
 function updateProgressGrid() {
-    let completedCount = 0;
-    const totalQuestions = 30;
-
-    // 1. Cargar estados iniciales desde PHP y contar completados
+    // 1. Cargar estados iniciales desde PHP y mapear la cuadrícula
     Object.keys(backendProgress).forEach(qNum => {
         const box = document.getElementById(`grid-box-${qNum}`);
         if(box) {
-            // Caso Especial Pregunta 28: Depende de que todas las subpruebas estén llenas
+            // Caso Especial Pregunta 28: Depende de que todas las subpruebas estén llenas 
             if (parseInt(qNum) === 28) {
                 if (isQ28FullyAnswered()) {
                     box.classList.remove('pending');
                     box.classList.add('completed');
-                    completedCount++;
                 } else {
                     box.classList.remove('completed');
                     box.classList.add('pending');
                 }
             } else {
-                // Flujo normal para las demás preguntas de Sí o No
+                // Flujo normal para las demás preguntas de Sí o No 
                 if(backendProgress[qNum].completed) {
                     box.classList.remove('pending');
                     box.classList.add('completed');
-                    completedCount++;
                 } else {
                     box.classList.remove('completed');
                     box.classList.add('pending');
@@ -333,25 +409,18 @@ function updateProgressGrid() {
     });
 
     // Calcular y renderizar el progreso inicial
-    const initialPercent = Math.round((completedCount / totalQuestions) * 100);
-    const percentText = document.getElementById('progress-percent-text');
-    const fillBar = document.getElementById('progress-fill-bar');
-    if (percentText) percentText.innerText = `${initialPercent}%`;
-    if (fillBar) fillBar.style.width = `${initialPercent}%`;
+    updateLiveProgressBar();
 
     // 2. Escuchar cambios dinámicos en los radios (Preguntas 1 - 27 y 29 - 30)
     document.querySelectorAll('.q-radio').forEach(radio => {
         radio.addEventListener('change', function() {
             const qNum = this.getAttribute('data-qnum');
-            // Ignoramos la pregunta 28 aquí, ya que tiene su propio manejador por selects
-            if (parseInt(qNum) === 28) return; 
+            if (parseInt(qNum) === 28) return; // Ignoramos la 28 aquí
 
             const box = document.getElementById(`grid-box-${qNum}`);
             if (box && this.checked) {
-                if (box.classList.contains('pending')) {
-                    box.classList.remove('pending');
-                    box.classList.add('completed');
-                }
+                box.classList.remove('pending');
+                box.classList.add('completed');
                 updateLiveProgressBar();
             }
         });
@@ -422,27 +491,6 @@ document.addEventListener("DOMContentLoaded", () => {
     calculateLiveRisk();
     updateProgressGrid();
 });
-function updateLiveProgressBar() {
-    // 1. Buscamos todos los cuadritos dentro del grid
-    const totalBoxes = document.querySelectorAll('.activities-grid .activity-box').length;
-    
-    // 2. Contamos solo los que tienen la clase 'completed'
-    const completedBoxes = document.querySelectorAll('.activities-grid .activity-box.completed').length;
-    
-    // 3. Calculamos el porcentaje
-    const percentage = totalBoxes > 0 ? Math.round((completedBoxes / totalBoxes) * 100) : 0;
-    
-    // 4. Actualizamos visualmente tu barra de progreso
-    const progressBar = document.querySelector('.progress-bar-fill');
-    const progressText = document.querySelector('.progress-text');
-    
-    if (progressBar) {
-        progressBar.style.width = percentage + '%';
-    }
-    if (progressText) {
-        progressText.textContent = `Progreso del Formulario (${percentage}%)`;
-    }
-}
 </script>
 
 <?php 
