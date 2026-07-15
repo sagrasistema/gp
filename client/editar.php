@@ -135,8 +135,13 @@ include '../main/layout_header.php';
     }
 </style>
 
-<div class="container" style="max-width: 1100px;">
-    <header>
+<div class="view-container">
+    
+    <div class="view-header">
+        <h1 class="page-main-title">
+            <i class="ri-user-add-line"></i> Modificar Ficha de Cliente
+        </h1>
+
         <div class="table-actions-container">
             <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
                 <i class="ri-arrow-go-back-line"></i> 
@@ -158,7 +163,7 @@ include '../main/layout_header.php';
                 <i class="ri-close-circle-line"></i> 
             </a>
         </div>
-    </header>
+    </div>
 
     <div class="card">
         <form id="edit-form" class="form-grid-complex">
