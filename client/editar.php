@@ -1,15 +1,18 @@
 <?php 
 $pageTitle = "Modificar Ficha Corporativa";
-include 'header.php';
-// Configuración de rutas para la cabecera dinámica
-$customLogoPath = "../logo.png";
-$customHomePath = "../index.php"; 
-$customAcPath = "../ac/index.php";
+include 'header.php'; ?>
+<link rel="stylesheet" href="../main/layout.css">
+<?php
+// Configuración dinámica del Layout para la carpeta client/ (Estándar unificado)
+$customLogoPath = '../main/logo.png'; // Ruta para llegar al logo original del sistema
+$customHomePath = '../index.php';     // Ruta para volver al HUB principal
+$customAcPath   = '../ac/index.php';  // Ruta para ir al módulo AC
+$currentTab     = 'inicio'; 
 
 include '../main/layout_header.php'; 
+
 ?>
 
-<link rel="stylesheet" href="../main/layout.css">
 
 <style>
     .form-grid-complex { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
@@ -21,37 +24,16 @@ include '../main/layout_header.php';
     @media (max-width: 768px) { .form-grid-complex > div { grid-column: span 4 !important; } }
 </style>
 
-<div class="view-container">
-    <div class="view-header">
-        <h1 class="page-main-title">Modificar Datos del Cliente</h1>
-
-        <div class="table-actions-container">
-            <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
-                <i class="ri-arrow-go-back-line"></i> 
-            </a>
-
-            <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
-                <i class="ri-screenshot-2-line"></i>
-            </a>
-
-            <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
-                <i class="ri-book-open-line"></i> 
-            </a>
-
-            <button href="#" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
-                <i class="ri-add-line"></i>
-            </button>
-
-            <a href="index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
-                <i class="ri-close-circle-line"></i> 
-            </a>
-        </div>
-    </div>        
-    </div>
+<div class="container" style="max-width: 1100px;">
+    <header>
+        <img src="logo.png" alt="Logo Corporativo" class="brand-logo">
+        
+        <h1>Modificar Datos del Cliente</h1>
+        <a href="index.php" class="btn-back"><i class="ri-arrow-left-line"></i></a>
+    </header>
 
     <div class="card">
         <form id="edit-form" class="form-grid-complex">
-            <input type="hidden" id="client-id" value="<?php echo isset($_GET['id']) ? htmlspecialchars($_GET['id'], ENT_QUOTES, 'UTF-8') : ''; ?>">
             
             <div class="section-title"><i class="ri-building-line"></i> Datos de la Empresa</div>
             
@@ -144,7 +126,7 @@ include '../main/layout_header.php';
                 </select>
             </div>
 
-            <div class="actions col-4" style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <div class="actions col-4">
                 <a href="index.php" class="btn btn-secondary">Cancelar</a>
                 <button type="submit" class="btn btn-primary"><i class="ri-refresh-line"></i> Actualizar Ficha Completa</button>
             </div>
@@ -152,100 +134,4 @@ include '../main/layout_header.php';
     </div>
 </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const clientId = document.getElementById('client-id').value;
-
-    if (!clientId) {
-        alert("ID de cliente no proporcionado o inválido.");
-        window.location.href = "index.php";
-        return;
-    }
-
-    // 1. CARGAR DATOS ACTUALES DEL CLIENTE
-    fetch(`../api/api.php?action=getClient&id=${clientId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                const client = data.data;
-                document.getElementById('client-name').value = client.clientName || '';
-                document.getElementById('client-rif').value = client.clientRif || '';
-                document.getElementById('client-phone').value = client.clientPhone || '';
-                document.getElementById('client-email').value = client.clientEmail || '';
-                document.getElementById('client-website').value = client.clientWebsite || '';
-                document.getElementById('client-address').value = client.clientAddress || '';
-                document.getElementById('client-city').value = client.clientCity || '';
-                document.getElementById('client-state-geo').value = client.clientStateGeo || '';
-                document.getElementById('client-zip').value = client.clientZip || '';
-                document.getElementById('client-country').value = client.clientCountry || '';
-                document.getElementById('client-employees').value = client.clientEmployees || '';
-                document.getElementById('client-income').value = client.clientIncome || '';
-                document.getElementById('client-sector').value = client.clientSector || '';
-                document.getElementById('client-service').value = client.clientService || '';
-                document.getElementById('client-sector-desc').value = client.clientSectorDesc || '';
-                document.getElementById('client-service-desc').value = client.clientServiceDesc || '';
-                document.getElementById('client-instagram').value = client.clientInstagram || '';
-                document.getElementById('client-linkedin').value = client.clientLinkedin || '';
-                document.getElementById('client-status').value = client.clientStatus || 'Activo';
-            } else {
-                alert("Error al obtener los datos del cliente: " + (data.message || 'Desconocido'));
-                window.location.href = "index.php";
-            }
-        })
-        .catch(error => {
-            console.error("Error cargando cliente:", error);
-            alert("No se pudo conectar con el servidor.");
-        });
-
-    // 2. PROCESAR EL ENVÍO DEL FORMULARIO DE ACTUALIZACIÓN
-    document.getElementById('edit-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const updatedData = {
-            clientId: clientId,
-            clientName: document.getElementById('client-name').value,
-            clientRif: document.getElementById('client-rif').value,
-            clientPhone: document.getElementById('client-phone').value,
-            clientEmail: document.getElementById('client-email').value,
-            clientWebsite: document.getElementById('client-website').value,
-            clientAddress: document.getElementById('client-address').value,
-            clientCity: document.getElementById('client-city').value,
-            clientStateGeo: document.getElementById('client-state-geo').value,
-            clientZip: document.getElementById('client-zip').value,
-            clientCountry: document.getElementById('client-country').value,
-            clientEmployees: document.getElementById('client-employees').value,
-            clientIncome: document.getElementById('client-income').value,
-            clientSector: document.getElementById('client-sector').value,
-            clientService: document.getElementById('client-service').value,
-            clientSectorDesc: document.getElementById('client-sector-desc').value,
-            clientServiceDesc: document.getElementById('client-service-desc').value,
-            clientInstagram: document.getElementById('client-instagram').value,
-            clientLinkedin: document.getElementById('client-linkedin').value,
-            clientStatus: document.getElementById('client-status').value
-        };
-
-        fetch('../api/api.php?action=updateClient', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updatedData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert("Ficha del cliente actualizada correctamente.");
-                window.location.href = "index.php";
-            } else {
-                alert("Error al actualizar la ficha: " + (data.message || 'Desconocido'));
-            }
-        })
-        .catch(error => {
-            console.error("Error en la actualización:", error);
-            alert("Ocurrió un error al intentar procesar la actualización.");
-        });
-    });
-});
-</script>
-
-<?php include '../main/layout_footer.php';
+<?php include 'footer.php'; ?>
