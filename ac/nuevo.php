@@ -103,7 +103,7 @@ include '../main/layout_header.php';
         </h1>
         
     </div>
-    
+
     <div class="table-actions-container">
         <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
             <i class="ri-arrow-go-back-line"></i> 
@@ -117,7 +117,7 @@ include '../main/layout_header.php';
             <i class="ri-book-open-line"></i> 
         </a>
 
-        <a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Registro">
+        <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
             <i class="ri-add-line"></i>
         </a>
 
