@@ -161,7 +161,7 @@ include '../main/layout_header.php';
                 <i class="ri-add-line"></i>
             </button>
 
-            <a href="client/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+            <a href="index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
                 <i class="ri-close-circle-line"></i> 
             </a>
         </div>
