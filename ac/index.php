@@ -18,14 +18,12 @@ include '../main/layout_header.php';
 ?>
 
 <style>
-    /* --- CONFIGURACIÓN DE LOS TOOLTIPS --- */
-
-    /* Aseguramos que el contenedor de los botones permita posicionar el tooltip */
-    .table-actions-container a {
-        position: relative;
-        display: inline-flex;
+    .table-actions-container {
+        display: flex;
+        justify-content: flex-end;
         align-items: center;
-        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem; /* Margen para separarlo de la tabla */
     }
 
     /* El globo del Tooltip */
