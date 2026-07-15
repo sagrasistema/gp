@@ -207,7 +207,7 @@
         .activities-grid { grid-template-columns: repeat(6, 1fr); }
     }
     /* Contenedor principal de la cuadrícula */
-<style>
+
     .activities-sidebar-container {
         width: 100%;
         max-width: 260px; /* Evita que se ensanche demasiado */
