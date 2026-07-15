@@ -68,8 +68,6 @@ include '../ac/conect-responder.php';
             // Generar los 30 botones del progreso interactivo
             for ($i = 1; $i <= 30; $i++): 
                 // Verificar si esta pregunta ya fue respondida en BD
-                // Nota: se asume que las preguntas tienen IDs correlativos o que asociamos los números de forma directa.
-                // Buscaremos dinámicamente si la pregunta con questionNumber = $i tiene respuesta.
                 $isCompleted = false;
                 foreach($answersSaved as $qId => $ans) {
                     // Como el ID de pregunta puede diferir, buscaremos más abajo la asociación exacta
@@ -79,6 +77,16 @@ include '../ac/conect-responder.php';
                     <?= $i ?>
                 </a>
             <?php endfor; ?>
+        </div>
+
+        <div class="progress-container" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span style="font-size: 0.85rem; font-weight: 600; color: #475569;">Progreso del Formulario</span>
+                <span id="progress-percent-text" style="font-size: 0.85rem; font-weight: 700; color: var(--accent, #10b981);">0%</span>
+            </div>
+            <div style="width: 100%; height: 6px; background-color: #e2e8f0; border-radius: 9999px; overflow: hidden;">
+                <div id="progress-fill-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 9999px; transition: width 0.4s ease;"></div>
+            </div>
         </div>
     </div>
 
@@ -232,13 +240,17 @@ function scrollToQuestion(qNum, event) {
 }
 
 function updateProgressGrid() {
-    // 1. Cargar estados iniciales desde PHP
+    let completedCount = 0;
+    const totalQuestions = 30;
+
+    // 1. Cargar estados iniciales desde PHP y contar completados
     Object.keys(backendProgress).forEach(qNum => {
         const box = document.getElementById(`grid-box-${qNum}`);
         if(box) {
             if(backendProgress[qNum].completed) {
                 box.classList.remove('pending');
                 box.classList.add('completed');
+                completedCount++;
             } else {
                 box.classList.remove('completed');
                 box.classList.add('pending');
@@ -246,14 +258,29 @@ function updateProgressGrid() {
         }
     });
 
-    // 2. Escuchar cambios dinámicos en los radios para actualizar la UI sin guardar
+    // Calcular y renderizar el progreso inicial
+    const initialPercent = Math.round((completedCount / totalQuestions) * 100);
+    document.getElementById('progress-percent-text').innerText = `${initialPercent}%`;
+    document.getElementById('progress-fill-bar').style.width = `${initialPercent}%`;
+
+    // 2. Escuchar cambios dinámicos en los radios para actualizar la UI y la barra de progreso
     document.querySelectorAll('.q-radio').forEach(radio => {
         radio.addEventListener('change', function() {
             const qNum = this.getAttribute('data-qnum');
             const box = document.getElementById(`grid-box-${qNum}`);
             if (box && this.checked) {
-                box.classList.remove('pending');
-                box.classList.add('completed');
+                // Si la cajita aún era pendiente, la marcamos completa e incrementamos el progreso
+                if (box.classList.contains('pending')) {
+                    box.classList.remove('pending');
+                    box.classList.add('completed');
+                }
+                
+                // Recalcular el progreso dinámico al cambiar los radios en vivo
+                const currentCompleted = document.querySelectorAll('.activities-grid .activity-box.completed').length;
+                const percent = Math.round((currentCompleted / totalQuestions) * 100);
+                
+                document.getElementById('progress-percent-text').innerText = `${percent}%`;
+                document.getElementById('progress-fill-bar').style.width = `${percent}%`;
             }
         });
     });
