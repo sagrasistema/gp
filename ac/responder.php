@@ -2,6 +2,25 @@
 // v/ac/responder.php
 include '../main/config.php';
 include '../ac/conect-responder.php';
+// --- LÓGICA ESPECIAL PARA LA PREGUNTA 28 ---
+// 1. Contar el total de subpruebas configuradas en el sistema
+$stmtTotal28 = $pdo->query("SELECT COUNT(*) FROM ac_q28_tests");
+$totalSubtests = (int)$stmtTotal28->fetchColumn();
+
+// 2. Contar cuántas subpruebas ya han sido respondidas para este acId
+// (Las respuestas válidas no son nulas y son distintas de vacío)
+$stmtResp28 = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM ac_q28_answers 
+    WHERE acId = :acId 
+      AND riskValue IS NOT NULL 
+      AND riskValue != ''
+");
+$stmtResp28->execute([':acId' => $acId]);
+$answeredSubtests = (int)$stmtResp28->fetchColumn();
+
+// 3. Determinar si la pregunta 28 está completamente lista
+$isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
 // Validar que exista el ID de la evaluación a responder
 ?>
 <div class="view-container">
@@ -63,19 +82,23 @@ include '../ac/conect-responder.php';
 
     <div class="activities-grid-card">
         <h3><i class="ri-grid-fill" style="color: var(--accent);"></i> Progreso General de Actividades (1-30)</h3>
-        <div class="activities-grid">
-            <?php 
-            // Generar los 30 botones del progreso interactivo
-            for ($i = 1; $i <= 30; $i++): 
-                // Verificar si esta pregunta ya fue respondida en BD
-                $isCompleted = false;
-                foreach($answersSaved as $qId => $ans) {
-                    // Como el ID de pregunta puede diferir, buscaremos más abajo la asociación exacta
+        <div class="activity-grid">
+            <?php for ($i = 1; $i <= 30; $i++): ?>
+                <?php 
+                if ($i === 28) {
+                    // Evaluamos la condición especial calculada arriba
+                    $isActive = $isQ28Complete ? 'active' : '';
+                } else {
+                    // Lógica normal para el resto de preguntas (ej. si existe respuesta Sí o No)
+                    // Reemplaza '$respuestasNormales[$i]' por la estructura real con la que validas tus otras preguntas
+                    $isActive = (isset($respuestasNormales[$i]) && $respuestasNormales[$i] !== '') ? 'active' : '';
                 }
-            ?>
-                <a href="#question-<?= $i ?>" id="grid-box-<?= $i ?>" class="activity-box pending" onclick="scrollToQuestion(<?= $i ?>, event)">
-                    <?= $i ?>
-                </a>
+                ?>
+                <div class="grid-item <?php echo $isActive; ?>" 
+                    id="grid-item-<?php echo $i; ?>" 
+                    onclick="scrollToQuestion(<?php echo $i; ?>)">
+                    <?php echo $i; ?>
+                </div>
             <?php endfor; ?>
         </div>
 
@@ -239,6 +262,33 @@ function scrollToQuestion(qNum, event) {
     }
 }
 
+// Función para verificar si la pregunta 28 está completamente respondida (21 subpruebas)
+function isQ28FullyAnswered() {
+    const selects = document.querySelectorAll('.q28-select');
+    if (selects.length === 0) return false;
+    
+    let answeredCount = 0;
+    selects.forEach(select => {
+        if (select.value && select.value !== '') {
+            answeredCount++;
+        }
+    });
+    return answeredCount === selects.length;
+}
+
+// Recalcular porcentaje global y barra de progreso de manera dinámica
+function updateLiveProgressBar() {
+    const totalQuestions = 30;
+    const currentCompleted = document.querySelectorAll('.activities-grid .activity-box.completed').length;
+    const percent = Math.round((currentCompleted / totalQuestions) * 100);
+    
+    const percentText = document.getElementById('progress-percent-text');
+    const fillBar = document.getElementById('progress-fill-bar');
+    
+    if (percentText) percentText.innerText = `${percent}%`;
+    if (fillBar) fillBar.style.width = `${percent}%`;
+}
+
 function updateProgressGrid() {
     let completedCount = 0;
     const totalQuestions = 30;
@@ -247,40 +297,68 @@ function updateProgressGrid() {
     Object.keys(backendProgress).forEach(qNum => {
         const box = document.getElementById(`grid-box-${qNum}`);
         if(box) {
-            if(backendProgress[qNum].completed) {
-                box.classList.remove('pending');
-                box.classList.add('completed');
-                completedCount++;
+            // Caso Especial Pregunta 28: Depende de que todas las subpruebas estén llenas
+            if (parseInt(qNum) === 28) {
+                if (isQ28FullyAnswered()) {
+                    box.classList.remove('pending');
+                    box.classList.add('completed');
+                    completedCount++;
+                } else {
+                    box.classList.remove('completed');
+                    box.classList.add('pending');
+                }
             } else {
-                box.classList.remove('completed');
-                box.classList.add('pending');
+                // Flujo normal para las demás preguntas de Sí o No
+                if(backendProgress[qNum].completed) {
+                    box.classList.remove('pending');
+                    box.classList.add('completed');
+                    completedCount++;
+                } else {
+                    box.classList.remove('completed');
+                    box.classList.add('pending');
+                }
             }
         }
     });
 
     // Calcular y renderizar el progreso inicial
     const initialPercent = Math.round((completedCount / totalQuestions) * 100);
-    document.getElementById('progress-percent-text').innerText = `${initialPercent}%`;
-    document.getElementById('progress-fill-bar').style.width = `${initialPercent}%`;
+    const percentText = document.getElementById('progress-percent-text');
+    const fillBar = document.getElementById('progress-fill-bar');
+    if (percentText) percentText.innerText = `${initialPercent}%`;
+    if (fillBar) fillBar.style.width = `${initialPercent}%`;
 
-    // 2. Escuchar cambios dinámicos en los radios para actualizar la UI y la barra de progreso
+    // 2. Escuchar cambios dinámicos en los radios (Preguntas 1 - 27 y 29 - 30)
     document.querySelectorAll('.q-radio').forEach(radio => {
         radio.addEventListener('change', function() {
             const qNum = this.getAttribute('data-qnum');
+            // Ignoramos la pregunta 28 aquí, ya que tiene su propio manejador por selects
+            if (parseInt(qNum) === 28) return; 
+
             const box = document.getElementById(`grid-box-${qNum}`);
             if (box && this.checked) {
-                // Si la cajita aún era pendiente, la marcamos completa e incrementamos el progreso
                 if (box.classList.contains('pending')) {
                     box.classList.remove('pending');
                     box.classList.add('completed');
                 }
-                
-                // Recalcular el progreso dinámico al cambiar los radios en vivo
-                const currentCompleted = document.querySelectorAll('.activities-grid .activity-box.completed').length;
-                const percent = Math.round((currentCompleted / totalQuestions) * 100);
-                
-                document.getElementById('progress-percent-text').innerText = `${percent}%`;
-                document.getElementById('progress-fill-bar').style.width = `${percent}%`;
+                updateLiveProgressBar();
+            }
+        });
+    });
+
+    // 3. Escuchar cambios dinámicos en los Selects de la Pregunta 28
+    document.querySelectorAll('.q28-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const box = document.getElementById('grid-box-28');
+            if (box) {
+                if (isQ28FullyAnswered()) {
+                    box.classList.remove('pending');
+                    box.classList.add('completed');
+                } else {
+                    box.classList.remove('completed');
+                    box.classList.add('pending');
+                }
+                updateLiveProgressBar();
             }
         });
     });
@@ -320,11 +398,16 @@ function calculateLiveRisk() {
     const badge = document.getElementById('live-risk-badge');
     if (badge) {
         badge.className = `badge-risk ${cssClass}`;
-        badge.innerHTML = `<i class="${iconClass}"></i> ${score} Pts (${level})`;
+        badge.innerHTML = `<i class="${iconClass}"></i> ${score} Pts (Riesgo ${level})`;
     }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Escuchar cambios para actualizar el badge del cálculo del nivel de riesgo acumulado
+    document.querySelectorAll('.q28-select').forEach(select => {
+        select.addEventListener('change', calculateLiveRisk);
+    });
+
     calculateLiveRisk();
     updateProgressGrid();
 });
