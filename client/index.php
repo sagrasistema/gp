@@ -21,11 +21,29 @@ include '../main/layout_header.php';
         <h1 class="page-main-title">
             <i class="ri-team-line"></i> Control de Clientes
         </h1>
-        <div class="header-actions">
-            <a href="../index.php" class="btn btn-secondary"><i class="ri-arrow-left-line"></i> Menú Principal</a>
-            <button id="btn-export" class="btn btn-success"><i class="ri-file-excel-line"></i> Exportar (CSV)</button>
-            <a href="nuevo.php" class="btn btn-primary"><i class="ri-user-add-line"></i> Nuevo Cliente</a>
+
+        <div class="table-actions-container">
+            <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+                <i class="ri-arrow-go-back-line"></i> 
+            </a>
+
+            <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+                <i class="ri-screenshot-2-line"></i>
+            </a>
+
+            <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
+                <i class="ri-book-open-line"></i> 
+            </a>
+
+            <a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Registro">
+                <i class="ri-add-line"></i>
+            </a>
+
+            <a href="../index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+                <i class="ri-close-circle-line"></i> 
+            </a>
         </div>
+
     </div>
 
     <div class="table-container">
