@@ -98,12 +98,12 @@ include '../main/layout_header.php';
             <i class="ri-book-open-line"></i> Instrucciones
         </a>
 
-        <a href="nuevo.php" class="btn-control-blue">
-            <i class="ri-add-box-line"></i> Crear Registro
+        <a href="nuevo.php" class="btn btn-primary">
+            <i class="ri-add-box-line"></i>
         </a>
 
         <a href="../index.php" class="btn btn-primary">
-            <i class="ri-close-circle-line"></i> Cancelar (Atrás)
+            <i class="ri-close-circle-line"></i> 
         </a>
     </div>
 
