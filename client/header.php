@@ -80,6 +80,94 @@
         .btn-icon { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 4px; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
         .btn-icon-edit:hover { color: var(--accent); background-color: #e0f2fe; }
         .btn-icon-delete:hover { color: var(--status-inactivo); background-color: #fee2e2; }
+             /* --- CONTENEDOR PRINCIPAL FORZADO A LA DERECHA --- */
+        .table-actions-container {
+            display: flex !important;
+            justify-content: flex-end !important;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            width: 100%; /* Asegura que ocupe todo el ancho para poder alinearse a la derecha */
+        }
+
+        /* --- CONFIGURACIÓN DE LOS TOOLTIPS --- */
+
+        /* Posicionamiento relativo individual para cada botón */
+        .table-actions-container a {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* El globo del Tooltip */
+        .table-actions-container a::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%; /* Lo ubica justo arriba del botón */
+            left: 50%;
+            transform: translateX(-50%) translateY(5px);
+            background-color: #1e293b; /* Fondo oscuro elegante */
+            color: #ffffff;
+            padding: 0.4rem 0.7rem;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 99;
+            pointer-events: none; /* Evita interferir con los clics */
+        }
+
+        /* La pequeña flecha del Tooltip */
+        .table-actions-container a::before {
+            content: "";
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%) translateY(5px);
+            border-width: 6px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent; /* Flecha apuntando abajo */
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 99;
+            pointer-events: none;
+        }
+
+        /* Acción Hover: Muestra el tooltip con un efecto de deslizamiento hacia arriba */
+        .table-actions-container a:hover::after,
+        .table-actions-container a:hover::before {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Ajuste para que los botones deshabilitados tengan el cursor correcto y sí muestren el tooltip */
+        .btn-control-disabled {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.55rem 1rem;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed; /* Muestra el icono de prohibido */
+            text-decoration: none;
+        }
+
+        /* Modo oscuro para el botón deshabilitado */
+        body.dark-mode .btn-control-disabled {
+            background-color: #1e293b;
+            border-color: #334155;
+            color: #64748b;
+        }
     </style>
 </head>
 <body>
