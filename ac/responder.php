@@ -196,7 +196,7 @@ include '../main/layout_header.php';
         <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
             <i class="ri-survey-line" style="color: var(--accent);"></i> Ejecutar Cuestionario
         </h1>
-        <a href="index.php" class="btn btn-secondary"><i class="ri-arrow-left-line"></i> Volver</a>
+        
     </div>
 
     <div class="table-actions-container">
