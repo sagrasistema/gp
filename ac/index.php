@@ -17,6 +17,50 @@ $currentTab     = 'aceptacion'; // Marca "Aceptación" activo en el sidebar
 include '../main/layout_header.php';
 ?>
 
+<style>
+    .table-actions-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem; /* Separación discreta con la tabla */
+    }
+    
+    .btn-export {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.5rem 0.85rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        background-color: #ffffff;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    /* Efecto hover suave */
+    .btn-export:hover {
+        background-color: #f8fafc;
+        border-color: #cbd5e1;
+        color: #0f172a;
+    }
+
+    /* Ajuste para el modo oscuro si lo tienes implementado */
+    body.dark-mode .btn-export {
+        background-color: #1e293b;
+        border-color: #334155;
+        color: #cbd5e1;
+    }
+    body.dark-mode .btn-export:hover {
+        background-color: #334155;
+        color: #f8fafc;
+    }
+</style>
+
 <div class="view-container">
     <div class="view-header">
         <h1 class="page-main-title">
@@ -26,6 +70,24 @@ include '../main/layout_header.php';
             <a href="../index.php" class="btn btn-secondary"><i class="ri-arrow-left-line"></i> Menú</a>
             <a href="nuevo.php" class="btn btn-primary"><i class="ri-add-line"></i> Nueva Evaluación</a>
         </div>
+    </div>
+
+    <div class="table-actions-container">
+        <button type="button" class="btn-export" onclick="exportTable('copy')">
+            <i class="ri-file-copy-line"></i> Copiar
+        </button>
+        <button type="button" class="btn-export" onclick="exportTable('csv')">
+            <i class="ri-file-text-line"></i> CSV
+        </button>
+        <button type="button" class="btn-export" onclick="exportTable('excel')">
+            <i class="ri-file-excel-line"></i> Excel
+        </button>
+        <button type="button" class="btn-export" onclick="exportTable('pdf')">
+            <i class="ri-file-pdf-line"></i> PDF
+        </button>
+        <button type="button" class="btn-export" onclick="exportTable('print')">
+            <i class="ri-printer-line"></i> Imprimir
+        </button>
     </div>
 
     <div class="table-container">
@@ -79,6 +141,13 @@ include '../main/layout_header.php';
         </table>
     </div>
 </div>
+
+<script>
+function exportTable(type) {
+    console.log("Exportando tabla como: " + type);
+    // Aquí puedes agregar la lógica de DataTables, jsPDF o tu sistema personalizado de exportación.
+}
+</script>
 
 <?php 
 include '../main/layout_footer.php'; 
