@@ -224,13 +224,10 @@ $isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
                 <div class="accordion-content">
                     <?php foreach ($questions as $q): 
                         $savedRes = $answersSaved[$q->questionId]['response'] ?? '';
-                        $savedComment = $answersSaved[$q->questionId]['comment'] ?? '';
-                        
-                        [cite_start]// Guardar la correspondencia de número a ID [cite: 365]
-                        $qNumberToIdMap[$q->questionNumber] = [
-                            'id' => $q->questionId,
-                            'completed' => (!empty($savedRes))
-                        ];
+                        $savedComment = $answersSaved[$q->questionId]['comment'] ?? '' // <-- ¡Falta el punto y coma aquí!
+
+                        // Guardar la correspondencia de número a ID
+                        $qNumberToIdMap[$q->questionNumber] = [ 'id' => $q->questionId, 'completed' => (!empty($savedRes)) ];
                     ?>
                         <div class="question-row" id="question-<?= $q->questionNumber ?>">
                             <div class="question-text">
