@@ -18,12 +18,24 @@ include '../main/layout_header.php';
 ?>
 
 <style>
+    /* --- CONTENEDOR PRINCIPAL FORZADO A LA DERECHA --- */
     .table-actions-container {
-        display: flex;
-        justify-content: flex-end;
+        display: flex !important;
+        justify-content: flex-end !important;
         align-items: center;
         gap: 0.5rem;
-        margin-bottom: 1rem; /* Margen para separarlo de la tabla */
+        margin-bottom: 1rem;
+        width: 100%; /* Asegura que ocupe todo el ancho para poder alinearse a la derecha */
+    }
+
+    /* --- CONFIGURACIÓN DE LOS TOOLTIPS --- */
+
+    /* Posicionamiento relativo individual para cada botón */
+    .table-actions-container a {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
     /* El globo del Tooltip */
