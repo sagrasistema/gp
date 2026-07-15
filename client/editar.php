@@ -1,6 +1,6 @@
 <?php 
 $pageTitle = "Modificar Ficha Corporativa";
-
+include 'header.php';
 // Configuración de rutas para la cabecera dinámica
 $customLogoPath = "../logo.png";
 $customHomePath = "../index.php"; 
