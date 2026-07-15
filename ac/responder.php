@@ -207,7 +207,7 @@ $isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
         <?php
         $categories = $pdo->query("SELECT * FROM ac_categories ORDER BY orderNum ASC")->fetchAll(PDO::FETCH_OBJ);
         
-        [cite_start]// Mapeo JS de questionNumber => questionId para el progreso en vivo [cite: 364]
+        
         $qNumberToIdMap = [];
 
         foreach ($categories as $cat):
