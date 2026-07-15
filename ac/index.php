@@ -79,27 +79,23 @@ include '../main/layout_header.php';
         <h1 class="page-main-title">
             <i class="ri-shield-check-line"></i> Aceptación y Continuidad
         </h1>
-        <div class="header-actions">
-            <a href="../index.php" class="btn btn-secondary"><i class="ri-arrow-left-line"></i> Menú</a>
-            <a href="nuevo.php" class="btn btn-primary"><i class="ri-add-line"></i> Nueva Evaluación</a>
-        </div>
     </div>
 
     <div class="table-actions-container">
         <a href="#" class="btn-control-disabled">
-            <i class="ri-arrow-go-back-line"></i> Atrás
+            <i class="ri-arrow-go-back-line"></i> 
         </a>
 
         <a href="#" class="btn-control-disabled">
-            <i class="ri-screenshot-2-line"></i> Captura
+            <i class="ri-screenshot-2-line"></i>
         </a>
 
         <a href="#" class="btn-control-disabled">
-            <i class="ri-book-open-line"></i> Instrucciones
+            <i class="ri-book-open-line"></i> 
         </a>
 
         <a href="nuevo.php" class="btn btn-primary">
-            <i class="ri-add-box-line"></i>
+            <i class="ri-add-line"></i>
         </a>
 
         <a href="../index.php" class="btn btn-primary">
