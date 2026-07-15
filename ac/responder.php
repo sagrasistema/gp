@@ -100,19 +100,17 @@ $isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
 
     <div class="activities-grid-card">
         <h3><i class="ri-grid-fill" style="color: var(--accent);"></i> Progreso General de Actividades (1-30)</h3>
-        <div class="activities-sidebar-container">
-            <div class="activities-grid">
-                <?php for ($i = 1; $i <= 30; $i++): 
-                    // Evaluamos si el índice está marcado como completado en tu array
-                    $statusClass = isset($completedActivities[$i]) ? 'completed' : 'pending';
-                ?>
-                    <a href="#activity-<?php echo $i; ?>" 
-                    class="activity-box <?php echo $statusClass; ?>" 
-                    id="grid-box-<?php echo $i; ?>">
-                        <?php echo $i; ?>
-                    </a>
-                <?php endfor; ?>
-            </div>
+        <div class="activities-grid">
+            <?php for ($i = 1; $i <= 30; $i++): 
+                // Determinamos dinámicamente si está completado o no
+                $statusClass = isset($completedActivities[$i]) ? 'completed' : 'pending';
+            ?>
+                <a href="#activity-<?php echo $i; ?>" 
+                class="activity-box <?php echo $statusClass; ?>" 
+                id="grid-box-<?php echo $i; ?>">
+                    <?php echo $i; ?>
+                </a>
+            <?php endfor; ?>
         </div>
 
         <div class="progress-container" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">

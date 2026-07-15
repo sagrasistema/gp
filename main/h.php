@@ -207,54 +207,49 @@
         .activities-grid { grid-template-columns: repeat(6, 1fr); }
     }
     /* Contenedor principal de la cuadrícula */
-
-    .activities-sidebar-container {
-        width: 100%;
-        max-width: 260px; /* Evita que se ensanche demasiado */
-        margin: 0 auto;
-    }
-    
     .activities-grid {
-        display: grid !important;
-        grid-template-columns: repeat(5, 1fr) !important; /* Fuerza 5 columnas */
-        gap: 8px !important; /* Espaciado entre cuadritos */
-        margin: 15px 0 !important;
-        padding: 0 !important;
-        list-style: none !important;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr); /* Crea 5 columnas perfectas */
+        gap: 10px;
+        margin: 20px 0;
+        max-width: 300px; /* Ajusta el ancho para que se mantenga compacto */
     }
 
+    /* Estilo base para cada cuadrito */
     .activity-box {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        width: 100% !important;
-        aspect-ratio: 1 / 1 !important; /* Cuadrado perfecto */
-        border-radius: 6px !important;
-        font-weight: bold !important;
-        font-size: 13px !important;
-        text-decoration: none !important;
-        transition: all 0.2s ease !important;
-        border: 1px solid #dee2e6 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1 / 1; /* Los hace perfectamente cuadrados */
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        border: 2px solid transparent;
+        cursor: pointer;
     }
 
-    /* Colores modo claro */
+    /* Estado: Pendiente / Sin responder */
     .activity-box.pending {
-        background-color: #f8f9fa !important;
-        color: #495057 !important;
+        background-color: #f1f3f5;
+        color: #495057;
+        border-color: #dee2e6;
     }
 
+    /* Estado: Completado / Respondido (Verde agradable) */
     .activity-box.completed {
-        background-color: #2fb344 !important;
-        color: #ffffff !important;
-        border-color: #2fb344 !important;
+        background-color: #2fb344;
+        color: #ffffff;
+        box-shadow: 0 4px 6px rgba(47, 179, 68, 0.15);
     }
 
+    /* Efectos interactivos al pasar el mouse */
     .activity-box:hover {
-        transform: scale(1.08);
-        z-index: 2;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        filter: brightness(1.05);
     }
-
-
     </style>
 </head>
 <body>
