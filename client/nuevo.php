@@ -157,11 +157,11 @@ include '../main/layout_header.php';
                 <i class="ri-book-open-line"></i> 
             </a>
 
-            <button type="submit" form="client-form" class="btn btn-primary" data-tooltip="Crear Registro">
+            <button href="btn-control-disabled" class="btn btn-primary" data-tooltip="Crear Registro" onclick="return false;">
                 <i class="ri-add-line"></i>
             </button>
 
-            <a href="index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+            <a href="client/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
                 <i class="ri-close-circle-line"></i> 
             </a>
         </div>
