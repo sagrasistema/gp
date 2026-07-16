@@ -147,8 +147,8 @@ $rotationAngle = -90 + ($score * 1.8);
 <style>
     .gauge-container {
         position: relative;
-        width: 160px; /* Tamaño aumentado al doble */
-        height: 88px;  /* Altura proporcional para el semicírculo */
+        width: 120px; /* 160px * 0.75 = 120px */
+        height: 66px;  /* 88px * 0.75 = 66px (Proporción perfecta para el semicírculo) */
         margin: 0.5rem 0 0 auto; /* Alineado a la derecha con margen superior */
         overflow: hidden;
     }
@@ -157,11 +157,11 @@ $rotationAngle = -90 + ($score * 1.8);
         position: absolute;
         top: 0;
         left: 0;
-        width: 160px;
-        height: 160px;
+        width: 120px; /* 160px * 0.75 = 120px */
+        height: 120px; /* 160px * 0.75 = 120px */
         border-radius: 50%;
         box-sizing: border-box;
-        border: 15px solid #e2e8f0; /* Bordes más gruesos proporcionalmente */
+        border: 11px solid #e2e8f0; /* 15px * 0.75 = 11.25px (ajustado a 11px) */
         /* Degradado cónico: Verde -> Amarillo -> Naranja -> Rojo */
         background: conic-gradient(
             from 180deg at 50% 50%,
@@ -171,8 +171,10 @@ $rotationAngle = -90 + ($score * 1.8);
             #ef4444 180deg, /* Rojo */
             #e2e8f0 180deg
         );
-        mask: radial-gradient(circle, transparent 64px, #000 65px);
-        -webkit-mask: radial-gradient(circle, transparent 64px, #000 65px);
+        /* Máscara radial recalculada para el nuevo radio interior: */
+        /* Radio total (60px) - grosor del borde (11px) = 49px */
+        mask: radial-gradient(circle, transparent 48px, #000 49px);
+        -webkit-mask: radial-gradient(circle, transparent 48px, #000 49px);
         transform: rotate(90deg); /* Apunta el semicírculo hacia arriba */
     }
     /* La aguja del tacómetro */
@@ -180,10 +182,10 @@ $rotationAngle = -90 + ($score * 1.8);
         position: absolute;
         bottom: 0;
         left: 50%;
-        width: 6px; /* Aguja ligeramente más gruesa para mejor visualización */
-        height: 70px; /* Más larga para el nuevo radio */
+        width: 4px; /* 6px * 0.75 = 4.5px (ajustado a 4px para nitidez) */
+        height: 52px; /* 70px * 0.75 = 52.5px (ajustado a 52px para mantenerse dentro del arco) */
         background-color: #1e293b;
-        border-radius: 4px;
+        border-radius: 3px; /* Redondeado proporcional */
         transform-origin: bottom center;
         /* Aplicamos el ángulo dinámico calculado en PHP */
         transform: translateX(-50%) rotate(<?= $rotationAngle ?>deg);
@@ -193,14 +195,14 @@ $rotationAngle = -90 + ($score * 1.8);
     /* El pin o centro donde rota la aguja */
     .gauge-center-pin {
         position: absolute;
-        bottom: -6px;
+        bottom: -5px; /* -6px * 0.75 = -4.5px (ajustado a -5px) */
         left: 50%;
-        width: 20px; /* Pin central más robusto */
-        height: 20px;
+        width: 15px; /* 20px * 0.75 = 15px */
+        height: 15px; /* 20px * 0.75 = 15px */
         background-color: #1e293b;
         border-radius: 50%;
         transform: translateX(-50%);
-        border: 3px solid #fff;
+        border: 2px solid #fff; /* 3px * 0.75 = 2.25px (ajustado a 2px) */
         z-index: 3;
     }
 </style>
