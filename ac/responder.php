@@ -234,55 +234,7 @@ include '../ac/conect-responder.php';
         </div>
     </form>
 </div>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    
-    // Función para evaluar si la pregunta 28 está totalmente contestada
-    function isQ28FullyAnswered() {
-        const selects = document.querySelectorAll('.q28-select');
-        if (selects.length === 0) return false;
 
-        let answeredCount = 0;
-        selects.forEach(select => {
-            // Se asume contestada si tiene un valor seleccionado válido y no vacío
-            if (select.value && select.value !== "" && select.value !== "Seleccione...") {
-                answeredCount++;
-            }
-        });
-
-        // Debug visual en consola de desarrollador (F12) para que verifiques cuántas van
-        console.log(`Progreso Pregunta 28: ${answeredCount} de ${selects.length} respondidas.`);
-
-        // Retorna TRUE únicamente si las 21 subpruebas están respondidas
-        return answeredCount === selects.length;
-    };
-
-    // Función principal para actualizar el estado visual de la cajita 28
-    function updateQ28VisualStatus() {
-        const box28 = document.getElementById('grid-box-28');
-        if (!box28) return;
-
-        if (isQ28FullyAnswered()) {
-            box28.classList.add('completed');
-        } else {
-            box28.classList.remove('completed');
-        }
-
-        // Llamar a la función global que recalcula la barra de progreso general (si existe)
-        if (typeof updateProgressBar === "function") {
-            updateProgressBar();
-        }
-    }
-
-    // Escuchar cambios en cualquiera de los selectores de la pregunta 28
-    document.querySelectorAll('.q28-select').forEach(select => {
-        select.addEventListener('change', updateQ28VisualStatus);
-    });
-
-    // Ejecución inicial al cargar la página para evaluar el estado guardado en BD
-    setTimeout(updateQ28VisualStatus, 500);
-});
-</script>
 <?php 
 // Cierre del layout modular y scripts de navegación móvil
 include 'js-responder.php'; 
