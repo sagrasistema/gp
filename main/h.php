@@ -201,7 +201,7 @@
     .badge-risk.risk-alto { background-color: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
 
     @media (max-width: 768px) {
-        .meta-summary { flex-direction: column; gap: 1rem !important; }
+        .meta-summary {font-size: 0.95rem; flex-direction: column; gap: 1rem !important; }
         .meta-item:last-child { align-items: flex-start !important; text-align: left !important; margin-left: 0 !important; }
         .question-inputs { grid-template-columns: 1fr; gap: 1rem; }
         .activities-grid { grid-template-columns: repeat(6, 1fr); }
