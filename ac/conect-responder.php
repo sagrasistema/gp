@@ -147,7 +147,7 @@ $rotationAngle = -90 + ($score * 1.8);
 <style>
     .gauge-container {
         position: relative;
-        width: 120px; /* Tamaño aumentado al doble */
+        width: 160px; /* Tamaño aumentado al doble */
         height: 88px;  /* Altura proporcional para el semicírculo */
         margin: 0.5rem 0 0 auto; /* Alineado a la derecha con margen superior */
         overflow: hidden;
