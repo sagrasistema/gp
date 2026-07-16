@@ -39,7 +39,7 @@ include '../ac/conect-responder.php';
             <i class="ri-checkbox-circle-fill"></i> Respuestas guardadas y nivel de riesgo recalculado de forma correcta.
         </div>
     <?php endif; ?>
-<div class="meta-summary" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.25rem; width: 100%; align-items: stretch;">
+<div class="meta-summary" style="display: grid; grid-template-columns: 18.75% 18.75% 18.75% 18.75% 25%; gap: 1rem; width: 100%; align-items: stretch;">
     
     <div class="meta-item">Client / Empresa <br><strong><?= htmlspecialchars($acData->clientName, ENT_QUOTES, 'UTF-8') ?></strong></div>
     <div class="meta-item">Tipo Evaluación <br><strong><?= htmlspecialchars($acData->typeName, ENT_QUOTES, 'UTF-8') ?></strong></div>
@@ -53,7 +53,7 @@ include '../ac/conect-responder.php';
             ?></strong></div>
 
     <div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 3; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
-        <div class="gauge-wrapper" style="width: 100%; max-width: 210px; height: auto; display: flex; justify-content: center; align-items: center;">
+        <div class="gauge-wrapper" style="width: 100%; max-width: 240px; height: auto; display: flex; justify-content: center; align-items: center;">
             <svg class="gauge-svg" viewBox="0 -12 200 122" width="100%" height="100%">
                 
                 <defs>
@@ -74,19 +74,19 @@ include '../ac/conect-responder.php';
                 
                 <path d="M 174.4 45.9 A 92 92 0 0 1 192 100 L 168 100 A 68 68 0 0 0 155.0 60.0 Z" fill="#ef4444" />
 
-                <text font-size="7.5" font-weight="800" fill="#ffffff" text-anchor="middle">
+                <text font-size="5.5" font-weight="850" fill="#ffffff" text-anchor="middle">
                     <textPath href="#path-bajo" startOffset="50%">BAJO</textPath>
                 </text>
-                <text font-size="6.5" font-weight="800" fill="#1e293b" text-anchor="middle">
-                    <textPath href="#path-bajo-mod" startOffset="50%">BAJO-MODERADO</textPath>
+                <text font-size="5" font-weight="850" fill="#1e293b" text-anchor="middle">
+                    <textPath href="#path-bajo-mod" startOffset="50%">BAJO MODERADO</textPath>
                 </text>
-                <text font-size="7.5" font-weight="800" fill="#1e293b" text-anchor="middle">
+                <text font-size="5.5" font-weight="850" fill="#1e293b" text-anchor="middle">
                     <textPath href="#path-mod" startOffset="50%">MODERADO</textPath>
                 </text>
-                <text font-size="6.5" font-weight="800" fill="#ffffff" text-anchor="middle">
-                    <textPath href="#path-mod-alto" startOffset="50%">MODERADO-ALTO</textPath>
+                <text font-size="5" font-weight="850" fill="#ffffff" text-anchor="middle">
+                    <textPath href="#path-mod-alto" startOffset="50%">MODERADO ALTO</textPath>
                 </text>
-                <text font-size="7.5" font-weight="800" fill="#ffffff" text-anchor="middle">
+                <text font-size="5.5" font-weight="850" fill="#ffffff" text-anchor="middle">
                     <textPath href="#path-alto" startOffset="50%">ALTO</textPath>
                 </text>
 
