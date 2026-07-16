@@ -145,115 +145,35 @@ $rotationAngle = -90 + ($score * 1.8);
 ?>
 
 <style>
-/* Contenedor exterior que agrupa el tacómetro y sus números */
+/* Contenedor externo del Tacómetro */
 .gauge-wrapper {
-    display: flex;
-    flex-direction: column;
+    display: inline-flex;
+    justify-content: center;
     align-items: center;
-    width: 180px; /* Tamaño ideal para que sea visible y detallado */
+    width: 160px;
+    height: 92px;
     user-select: none;
+    overflow: visible;
 }
 
-/* El contenedor que recorta el círculo para simular un semicírculo perfecto */
-.gauge-container {
-    position: relative;
-    width: 160px;
-    height: 80px; /* Exactamente la mitad del ancho para el semicírculo */
-    overflow: hidden;
+/* El elemento SVG se comporta de manera responsiva y fluida */
+.gauge-svg {
+    display: block;
+    overflow: visible;
 }
 
-/* Semicírculo de colores con un grosor de 24px para un look imponente */
-.gauge-arc {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 160px;
-    height: 160px; /* Círculo completo que recortará el contenedor */
-    border-radius: 50%;
-    box-sizing: border-box;
-    /* Borde de color grueso de 24px */
-    border: 24px solid transparent; 
-    
-    /* Gradiente cónico con cortes de color limpios imitando la imagen de referencia */
-    background: conic-gradient(
-        from 270deg at 50% 50%,
-        #22c55e 0deg,    /* Verde (Bajo) */
-        #eab308 45deg,   /* Amarillo (Moderado) */
-        #f97316 135deg,  /* Naranja (Moderado-Alto) */
-        #ef4444 180deg,  /* Rojo (Alto) */
-        transparent 180deg
-    ) border-box;
-    
-    transform: rotate(-90deg); /* Alinea el inicio en el extremo izquierdo */
-    pointer-events: none;
-}
-
-/* Aguja estilizada tipo indicador real */
-.gauge-needle {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 4px;
-    height: 62px; /* Largo de la aguja */
-    background-color: #1e293b;
-    border-radius: 4px 4px 0 0;
-    transform-origin: bottom center;
-    z-index: 5;
-    /* Transición fluida para simular el movimiento físico de la aguja */
-    transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-/* Pin central con estilo cromado/metálico como el de tu referencia */
-.gauge-center-pin {
-    position: absolute;
-    bottom: -10px; /* Centrado en la base del recorte */
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    background: radial-gradient(circle, #f8fafc 0%, #64748b 70%, #1e293b 100%);
-    border: 2px solid #ffffff;
-    border-radius: 50%;
-    transform: translateX(-50%);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-    z-index: 6;
-}
-
-/* Contenedor de las etiquetas de criterios */
-.gauge-labels {
-    position: relative;
-    width: 176px; /* Ligeramente más ancho para acompañar la curva */
-    height: 20px;
-    margin-top: 6px;
-}
-
-/* Estilo común para los números */
-.label-item {
-    position: absolute;
+/* Estilos de los textos de los Criterios (1, 2, 3, 4) */
+.gauge-text {
     font-family: system-ui, -apple-system, sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    color: #475569; /* Slate oscuro para legibilidad */
-    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+    fill: #475569; /* Color gris pizarra oscuro para excelente contraste */
+    text-anchor: middle;
+    dominant-baseline: middle;
 }
 
-/* Posicionamiento exacto de los números según los arcos de color */
-.score-1 {
-    left: 8px;
-    top: -18px; /* Cerca de la base verde */
-}
-
-.score-2 {
-    left: 42px;
-    top: -42px; /* Debajo de la transición verde-amarillo */
-}
-
-.score-3 {
-    right: 42px;
-    top: -42px; /* Debajo de la transición amarillo-naranja */
-}
-
-.score-4 {
-    right: 8px;
-    top: -18px; /* Cerca de la base roja */
+/* Efecto de transición suave en caso de que la aguja se mueva dinámicamente */
+.gauge-svg g {
+    transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 </style>
