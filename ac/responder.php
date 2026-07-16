@@ -39,87 +39,73 @@ include '../ac/conect-responder.php';
             <i class="ri-checkbox-circle-fill"></i> Respuestas guardadas y nivel de riesgo recalculado de forma correcta.
         </div>
     <?php endif; ?>
-    <div class="meta-summary" style="display: flex; flex-direction: column; gap: 1.25rem; width: 100%;">
+<div class="meta-summary" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; width: 100%;">
+    
+    <div class="meta-item">Client / Empresa <br><strong><?= htmlspecialchars($acData->clientName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+    <div class="meta-item">Tipo Evaluación <br><strong><?= htmlspecialchars($acData->typeName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+    <div class="meta-item">Naturaleza del Servicio <br><strong><?= htmlspecialchars($acData->serviceName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+    <div class="meta-item">Período de la AC <br><strong><?php 
+            if (!empty($acData->startDate) && !empty($acData->endDate)) {
+                echo "Desde " . date('Y-m-d', strtotime($acData->startDate)) . " Hasta " . date('Y-m-d', strtotime($acData->endDate));
+            } else {
+                echo "SIN ASIGNAR";
+            }
+            ?></strong></div>
+
+    <hr style="grid-column: span 3; margin: 0; border: 0; border-top: 1px solid var(--border-color, #e2e8f0); opacity: 0.6;">
+    
+    <div style="grid-column: 4 / 5;"></div>
+
+    <div class="meta-item">Socio Líder de A&C <br><strong><?= htmlspecialchars($acData->partnerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+    <div class="meta-item">Gerente de A&C <br><strong><?= htmlspecialchars($acData->managerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+    <div class="meta-item">Socio de Riesgo <br><strong><?= htmlspecialchars($acData->riskUserId, ENT_QUOTES, 'UTF-8') ?></strong></div>
+    
+    <div class="meta-item" style="display: flex; flex-direction: column; justify-content: center; gap: 0.25rem;">
+        <span style="font-size: 0.8rem; color: var(--text-muted, #64748b); font-weight: 500;">Riesgo Calculado Matriz</span>
+        <?php
+        $riskClass = 'risk-bajo';
+        $riskIcon = 'ri-checkbox-circle-line';
         
-        <div class="meta-row-top" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5rem; width: 100%; align-items: center;">
-            <div class="meta-item">Client / Empresa <br><strong><?= htmlspecialchars($acData->clientName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-            <div class="meta-item">Tipo Evaluación <br><strong><?= htmlspecialchars($acData->typeName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-            <div class="meta-item">Naturaleza del Servicio <br><strong><?= htmlspecialchars($acData->serviceName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-            <div class="meta-item">Período de la AC <br><strong><?php 
-                    if (!empty($acData->startDate) && !empty($acData->endDate)) {
-                        echo "Desde " . date('Y-m-d', strtotime($acData->startDate)) . " Hasta " . date('Y-m-d', strtotime($acData->endDate));
-                    } else {
-                        echo "SIN ASIGNAR";
-                    }
-                    ?></strong></div>
+        if ($acData->riskLevel === 'Moderado') { $riskClass = 'risk-moderado'; $riskIcon = 'ri-alert-line'; }
+        elseif ($acData->riskLevel === 'Moderado-Alto') { $riskClass = 'risk-moderado-alto'; $riskIcon = 'ri-error-warning-line'; }
+        elseif ($acData->riskLevel === 'Alto') { $riskClass = 'risk-alto'; $riskIcon = 'ri-close-circle-line'; }
+        ?>
+        <span id="live-risk-badge" class="badge-risk <?= $riskClass ?>" style="white-space: nowrap; width: fit-content;">
+            <i class="<?= $riskIcon ?>"></i> <?= $acData->riskScore ?> Pts (<?= $acData->riskLevel ?>)
+        </span>
+    </div>
 
-
-        </div>
-
-        <hr style="margin: 0; border: 0; border-top: 1px solid var(--border-color, #e2e8f0); opacity: 0.6;">
-
-        <div class="meta-row-bottom" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5rem; width: 100%; align-items: center;">
-            <div class="meta-item">Socio Líder de A&C <br><strong><?= htmlspecialchars($acData->partnerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-            <div class="meta-item">Gerente de A&C <br><strong><?= htmlspecialchars($acData->managerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-            <div class="meta-item">Socio de Riesgo <br><strong><?= htmlspecialchars($acData->riskUserId, ENT_QUOTES, 'UTF-8') ?></strong></div>
-            
-                <div class="meta-item">
-                <span style="font-size: 0.8rem; color: var(--text-muted, #64748b); font-weight: 500;">Riesgo Calculado Matriz</span>
-                <?php
-                $riskClass = 'risk-bajo';
-                $riskIcon = 'ri-checkbox-circle-line';
+    <div class="meta-item-gauge" style="grid-column: 4 / 5; grid-row: 1 / span 3; display: flex; justify-content: center; align-items: center; width: 100%;">
+        <div class="gauge-wrapper" style="width: 240px; height: 140px;">
+            <svg class="gauge-svg" viewBox="0 -10 200 120" width="100%" height="100%">
                 
-                if ($acData->riskLevel === 'Moderado') { $riskClass = 'risk-moderado'; $riskIcon = 'ri-alert-line'; }
-                elseif ($acData->riskLevel === 'Moderado-Alto') { $riskClass = 'risk-moderado-alto'; $riskIcon = 'ri-error-warning-line'; }
-                elseif ($acData->riskLevel === 'Alto') { $riskClass = 'risk-alto'; $riskIcon = 'ri-close-circle-line'; }
+                <path d="M 8 100 A 92 92 0 0 1 35 35 L 52 52 A 68 68 0 0 0 32 100 Z" fill="#22c55e" />
+                <path d="M 35 35 A 92 92 0 0 1 100 8 L 100 32 A 68 68 0 0 0 52 52 Z" fill="#eab308" />
+                <path d="M 100 8 A 92 92 0 0 1 165 35 L 148 52 A 68 68 0 0 0 100 32 Z" fill="#f97316" />
+                <path d="M 165 35 A 92 92 0 0 1 192 100 L 168 100 A 68 68 0 0 0 148 52 Z" fill="#ef4444" />
+
+                <text x="0" y="112" class="gauge-text">0</text>
+                <text x="21" y="23" class="gauge-text">25</text>
+                <text x="100" y="-3" class="gauge-text">50</text>
+                <text x="179" y="23" class="gauge-text">75</text>
+                <text x="200" y="112" class="gauge-text">100</text>
+
+                <?php
+                $score = isset($acData->riskScore) ? (float)$acData->riskScore : 0;
+                $clampedScore = max(0, min(100, $score));
+                $angle = -90 + (($clampedScore - 0) / (100 - 0)) * 180;
                 ?>
-                <span id="live-risk-badge" class="badge-risk <?= $riskClass ?>" style="white-space: nowrap;">
-                    <i class="<?= $riskIcon ?>"></i> <?= $acData->riskScore ?> Pts (<?= $acData->riskLevel ?>)
-                </span>
-            </div>
-<div class="meta-item" style="display: flex; justify-content: flex-end; width: 100%;">
-    <div class="gauge-wrapper">
-        <svg class="gauge-svg" viewBox="0 -8 200 118" width="160" height="94">
-            
-            <path d="M 8 100 A 92 92 0 0 1 35 35 L 52 52 A 68 68 0 0 0 32 100 Z" fill="#22c55e" />
-            
-            <path d="M 35 35 A 92 92 0 0 1 100 8 L 100 32 A 68 68 0 0 0 52 52 Z" fill="#eab308" />
-            
-            <path d="M 100 8 A 92 92 0 0 1 165 35 L 148 52 A 68 68 0 0 0 100 32 Z" fill="#f97316" />
-            
-            <path d="M 165 35 A 92 92 0 0 1 192 100 L 168 100 A 68 68 0 0 0 148 52 Z" fill="#ef4444" />
+                <g transform="rotate(<?= $angle ?>, 100, 100)">
+                    <path d="M 97 100 L 99.3 10 L 100.7 10 L 103 100 Z" fill="#1e293b" />
+                </g>
 
-            <text x="2" y="112" class="gauge-text">0</text>
-            <text x="23" y="24" class="gauge-text">25</text>
-            <text x="100" y="-1" class="gauge-text">50</text>
-            <text x="177" y="24" class="gauge-text">75</text>
-            <text x="198" y="112" class="gauge-text">100</text>
-
-            <?php
-            // Capturamos el score de riesgo de tu sistema (ej: 64 Pts)
-            $score = isset($acData->riskScore) ? (float)$acData->riskScore : 0;
-            
-            // Forzamos límites para evitar que la aguja se descontrole
-            $clampedScore = max(0, min(100, $score));
-            
-            // Mapeo perfecto: 0 Pts -> -90° (Izquierda), 100 Pts -> 90° (Derecha)
-            $angle = -90 + (($clampedScore - 0) / (100 - 0)) * 180;
-            ?>
-            <g transform="rotate(<?= $angle ?>, 100, 100)">
-                <path d="M 97.5 100 L 99.5 10 L 100.5 10 L 102.5 100 Z" fill="#1e293b" />
-            </g>
-
-            <circle cx="100" cy="100" r="11" fill="#1e293b" stroke="#ffffff" stroke-width="2.5" />
-            <circle cx="100" cy="100" r="4" fill="#94a3b8" />
-        </svg>
-    </div>
-</div>
-
-            
+                <circle cx="100" cy="100" r="12" fill="#1e293b" stroke="#ffffff" stroke-width="2.5" />
+                <circle cx="100" cy="100" r="4.5" fill="#94a3b8" />
+            </svg>
         </div>
-
     </div>
 
+</div>
     <div class="activities-grid-card">
         <h3><i class="ri-grid-fill" style="color: var(--accent);"></i> Progreso General de Actividades (1-30)</h3>
         <div class="activities-grid">
