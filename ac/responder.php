@@ -73,15 +73,22 @@ include '../ac/conect-responder.php';
     <hr style="margin: 0; border: 0; border-top: 1px solid var(--border-color, #e2e8f0); opacity: 0.6;">
 
     <div class="meta-row-bottom" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; width: 100%;">
-        
-        <div class="meta-item" style="display: flex; flex-direction: column; gap: 0.15rem;">
-            <span style="font-size: 0.75rem; color: var(--text-muted, #64748b); text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Socio Líder de A&C</span>
-            <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);"><?= htmlspecialchars($acData->partnerName ?? 'SIN ASIGNAR', ENT_QUOTES, 'UTF-8') ?></strong>
-        </div>
-
-        <div class="meta-item" style="display: flex; flex-direction: column; gap: 0.15rem;">
-            <span style="font-size: 0.75rem; color: var(--text-muted, #64748b); text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Gerente de A&C</span>
-            <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);"><?= htmlspecialchars($acData->managerName ?? 'SIN ASIGNAR', ENT_QUOTES, 'UTF-8') ?></strong>
+        <div class="meta-item">Socio Líder de A&C <strong><?= htmlspecialchars($acData->partnerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+        <div class="meta-item">Gerente de A&C <strong><?= htmlspecialchars($acData->managerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+        <div class="meta-item">Socio de Riesgo <strong><?= htmlspecialchars($acData->riskUserId, ENT_QUOTES, 'UTF-8') ?></strong></div>
+        div class="meta-item" style="margin-left: auto; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
+            <span style="font-size: 0.8rem; color: var(--text-muted, #64748b); font-weight: 500;">Riesgo Calculado Matriz</span>
+            <?php
+            $riskClass = 'risk-bajo';
+            $riskIcon = 'ri-checkbox-circle-line';
+            
+            if ($acData->riskLevel === 'Moderado') { $riskClass = 'risk-moderado'; $riskIcon = 'ri-alert-line'; }
+            elseif ($acData->riskLevel === 'Moderado-Alto') { $riskClass = 'risk-moderado-alto'; $riskIcon = 'ri-error-warning-line'; }
+            elseif ($acData->riskLevel === 'Alto') { $riskClass = 'risk-alto'; $riskIcon = 'ri-close-circle-line'; }
+            ?>
+            <span id="live-risk-badge" class="badge-risk <?= $riskClass ?>">
+                <i class="<?= $riskIcon ?>"></i> <?= $acData->riskScore ?> Pts (<?= $acData->riskLevel ?>)
+            </span>
         </div>
 
 
