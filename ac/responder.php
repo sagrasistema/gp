@@ -234,7 +234,76 @@ include '../ac/conect-responder.php';
         </div>
     </form>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Función para actualizar barra de progreso analizando las clases del grid
+    function updateLiveProgressBar() {
+        const totalBoxes = 30;
+        let completedCount = 0;
 
+        for (let i = 1; i <= totalBoxes; i++) {
+            const box = document.getElementById(`grid-box-${i}`);
+            if (box && box.classList.contains('completed')) {
+                completedCount++;
+            }
+        }
+
+        const percentage = Math.round((completedCount / totalBoxes) * 100);
+        
+        // Elementos visuales
+        const barFill = document.getElementById('progress-bar-fill');
+        const percentageText = document.getElementById('progress-percentage-text');
+
+        if (barFill && percentageText) {
+            barFill.style.width = `${percentage}%`;
+            percentageText.textContent = `${completedCount} de ${totalBoxes} listos (${percentage}%)`;
+        }
+    }
+
+    // Escuchar cambios en los inputs de radio del cuestionario
+    const radioInputs = document.querySelectorAll('.q-radio');
+    radioInputs.forEach(radio => {
+        radio.addEventListener('change', function() {
+            const qNum = this.getAttribute('data-qnum');
+            const targetBox = document.getElementById(`grid-box-${qNum}`);
+            
+            // Si la pregunta 28 requiere lógica de subpruebas se valida diferente, 
+            // pero para las generales (o si se marca una opción válida):
+            if (targetBox) {
+                if (qNum == 28) {
+                    // Validación especial si es la pregunta 28 (se completa si todas las subpruebas tienen respuesta activa)
+                    if (isQ28FullyAnswered()) {
+                        targetBox.classList.remove('pending');
+                        targetBox.classList.add('completed');
+                    } else {
+                        targetBox.classList.remove('completed');
+                        targetBox.classList.add('pending');
+                    }
+                } else {
+                    targetBox.classList.remove('pending');
+                    targetBox.classList.add('completed');
+                }
+            }
+            updateLiveProgressBar();
+        });
+    });
+
+    // Función auxiliar de comprobación para la pregunta 28
+    function isQ28FullyAnswered() {
+        const selects = document.querySelectorAll('.q28-select');
+        let fullyAnswered = true;
+        selects.forEach(sel => {
+            if (sel.value === 'No Aplica' || sel.value === '') {
+                // Si consideras que 'No Aplica' cuenta como respondida, puedes ajustar esta condición
+            }
+        });
+        return fullyAnswered;
+    }
+
+    // Primera ejecución al cargar el DOM para pintar el estado guardado
+    updateLiveProgressBar();
+});
+</script>
 <?php 
 // Cierre del layout modular y scripts de navegación móvil
 include 'js-responder.php'; 
