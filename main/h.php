@@ -231,35 +231,31 @@
 /* ==========================================================================
    AJUSTES DE TIPOGRAFÍA PARA LA SECCIÓN DE PROGRESO (1-30)
    ========================================================================== */
+/* ==========================================================================
+   AJUSTES DE TIPOGRAFÍA PARA EL PROGRESO DE ACTIVIDADES (1-30)
+   ========================================================================== */
 
-/* 1. Título de la tarjeta (Progreso General de Actividades 1-30) */
-/* (Ajusta la clase si tu título usa otra etiqueta h3, h4 o div) */
-.meta-summary-card h3, 
-.card-header, 
-.card-title {
-    font-size: 13px !important; /* Bajamos de su tamaño actual a un elegante 13px */
-    font-weight: 700;
-    color: #1e293b; /* Slate oscuro profesional */
+/* 1. Título de la tarjeta (Progreso General de Actividades (1-30)) */
+.activities-grid-card h3 {
+    font-size: 13px !important; /* Letra pequeña, elegante y jerárquica */
+    font-weight: 700 !important;
+    color: #1e293b !important;
 }
 
-/* 2. Números dentro de los botones/pastillas verdes (1 al 30) */
-/* (Cambia el selector por el que uses en tus botones, ej: .btn-step, .step-pill, etc.) */
-.btn-progress, 
-.step-item, 
-.progress-grid div, 
-.progress-grid button {
-    font-size: 11px !important; /* Letra más pequeña y nítida para los números */
-    font-weight: 700; /* Negrita para que no pierda legibilidad al ser pequeña */
+/* 2. Números de las pastillas del 1 al 30 (Los enlaces <a>) */
+.activities-grid-card .activity-box {
+    font-size: 11px !important; /* Letra pequeña y nítida para los botones numéricos */
+    font-weight: 700 !important; /* Conserva el grosor para legibilidad */
 }
 
 /* 3. Textos inferiores ("Progreso del Formulario" y el "0%") */
-.progress-text-label, 
-.progress-footer span, 
-.progress-percentage {
-    font-size: 11px !important; /* Tamaño sutil acorde al resto de la interfaz */
-    color: #64748b; /* Gris muted para que no compita visualme */
-    font-weight: 500;
+/* Al estar los estilos inline en tu HTML, este selector con mayor peso aplicará el cambio */
+.activities-grid-card .progress-bar-container div[style*="display: flex"] {
+    font-size: 11px !important; /* Reduce la etiqueta y el porcentaje del pie de tarjeta */
+    font-weight: 600 !important;
+    color: #64748b !important; /* Cambiado a un gris ligeramente más suave */
 }
+
 
     </style>
 </head>
