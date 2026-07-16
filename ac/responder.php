@@ -53,10 +53,17 @@ include '../ac/conect-responder.php';
             ?></strong></div>
 
     <div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 3; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
-        <div class="gauge-wrapper" style="width: 100%; max-width: 210px; height: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.5rem;">
-            
+        <div class="gauge-wrapper" style="width: 100%; max-width: 210px; height: auto; display: flex; justify-content: center; align-items: center;">
             <svg class="gauge-svg" viewBox="0 -12 200 122" width="100%" height="100%">
                 
+                <defs>
+                    <path id="path-bajo" d="M 20 100 A 80 80 0 0 1 35.3 53.0" fill="none" />
+                    <path id="path-bajo-mod" d="M 35.3 53.0 A 80 80 0 0 1 75.3 23.9" fill="none" />
+                    <path id="path-mod" d="M 75.3 23.9 A 80 80 0 0 1 124.7 23.9" fill="none" />
+                    <path id="path-mod-alto" d="M 124.7 23.9 A 80 80 0 0 1 164.7 53.0" fill="none" />
+                    <path id="path-alto" d="M 164.7 53.0 A 80 80 0 0 1 180 100" fill="none" />
+                </defs>
+
                 <path d="M 8 100 A 92 92 0 0 1 25.6 45.9 L 45.0 60.0 A 68 68 0 0 0 32 100 Z" fill="#22c55e" />
                 
                 <path d="M 25.6 45.9 A 92 92 0 0 1 71.6 12.5 L 79.0 35.3 A 68 68 0 0 0 45.0 60.0 Z" fill="#84cc16" />
@@ -66,6 +73,22 @@ include '../ac/conect-responder.php';
                 <path d="M 128.4 12.5 A 92 92 0 0 1 174.4 45.9 L 155.0 60.0 A 68 68 0 0 0 121.0 35.3 Z" fill="#f97316" />
                 
                 <path d="M 174.4 45.9 A 92 92 0 0 1 192 100 L 168 100 A 68 68 0 0 0 155.0 60.0 Z" fill="#ef4444" />
+
+                <text font-size="7.5" font-weight="800" fill="#ffffff" text-anchor="middle">
+                    <textPath href="#path-bajo" startOffset="50%">BAJO</textPath>
+                </text>
+                <text font-size="6.5" font-weight="800" fill="#1e293b" text-anchor="middle">
+                    <textPath href="#path-bajo-mod" startOffset="50%">B-MOD</textPath>
+                </text>
+                <text font-size="7.5" font-weight="800" fill="#1e293b" text-anchor="middle">
+                    <textPath href="#path-mod" startOffset="50%">MOD</textPath>
+                </text>
+                <text font-size="6.5" font-weight="800" fill="#ffffff" text-anchor="middle">
+                    <textPath href="#path-mod-alto" startOffset="50%">M-ALTO</textPath>
+                </text>
+                <text font-size="7.5" font-weight="800" fill="#ffffff" text-anchor="middle">
+                    <textPath href="#path-alto" startOffset="50%">ALTO</textPath>
+                </text>
 
                 <text x="2" y="112" class="gauge-text">0</text>
                 <text x="21" y="34" class="gauge-text">20</text>
@@ -86,25 +109,6 @@ include '../ac/conect-responder.php';
                 <circle cx="100" cy="100" r="11" fill="#1e293b" stroke="#ffffff" stroke-width="2.5" />
                 <circle cx="100" cy="100" r="4" fill="#94a3b8" />
             </svg>
-
-            <div class="gauge-legend" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; width: 100%; margin-top: -10px;">
-                <span style="font-size: 8.5px; font-weight: bold; display: flex; align-items: center; gap: 2.5px; color: #475569;">
-                    <span style="width: 7px; height: 7px; background-color: #22c55e; border-radius: 50%; display: inline-block;"></span>Bajo
-                </span>
-                <span style="font-size: 8.5px; font-weight: bold; display: flex; align-items: center; gap: 2.5px; color: #475569;">
-                    <span style="width: 7px; height: 7px; background-color: #84cc16; border-radius: 50%; display: inline-block;"></span>B-Mod
-                </span>
-                <span style="font-size: 8.5px; font-weight: bold; display: flex; align-items: center; gap: 2.5px; color: #475569;">
-                    <span style="width: 7px; height: 7px; background-color: #eab308; border-radius: 50%; display: inline-block;"></span>Mod
-                </span>
-                <span style="font-size: 8.5px; font-weight: bold; display: flex; align-items: center; gap: 2.5px; color: #475569;">
-                    <span style="width: 7px; height: 7px; background-color: #f97316; border-radius: 50%; display: inline-block;"></span>Mod-Alto
-                </span>
-                <span style="font-size: 8.5px; font-weight: bold; display: flex; align-items: center; gap: 2.5px; color: #475569;">
-                    <span style="width: 7px; height: 7px; background-color: #ef4444; border-radius: 50%; display: inline-block;"></span>Alto
-                </span>
-            </div>
-
         </div>
     </div>
 
