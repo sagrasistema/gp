@@ -40,46 +40,75 @@ include '../ac/conect-responder.php';
         </div>
     <?php endif; ?>
 
-    <div class="row mb-3">
-        <div class="col-md-8">
-            <h5 class="text-muted">Detalles del Análisis</h5>
-        </div>
-        <div class="col-md-4 text-end">
-            <span class="text-muted d-block mb-1" style="font-size: 11px; text-transform: uppercase;">Riesgo Calculado Matriz</span>
-            <span class="badge <?php echo $riskClass; ?> p-2 fs-6">
-                <i class="<?php echo $riskIcon; ?> me-1"></i> <?php echo $acData->riskLevel; ?>
-            </span>
-        </div>
-    </div>
-
-    <div class="row align-items-end">
-        <div class="col-md-4">
-            <label class="form-label text-muted" style="font-size: 11px;">Socio de Riesgo</label>
-            <div class="p-2 border rounded bg-light">
-                <strong><?php echo $acData->riskPartner ?? 'No asignado'; ?></strong>
-            </div>
-        </div>
+    <div class="meta-summary" style="display: flex; flex-direction: column; gap: 1.25rem; width: 100%;">
         
-        <div class="col-md-4">
-            <label class="form-label text-muted" style="font-size: 11px;">Gerente a Cargo</label>
-            <div class="p-2 border rounded bg-light">
-                <strong><?php echo $acData->manager ?? 'No asignado'; ?></strong>
+        <div class="meta-row-top" style="display: flex; align-items: center; gap: 1.5rem; width: 100%; flex-wrap: wrap;">
+            <div class="meta-item">Client / Empresa <strong><?= htmlspecialchars($acData->clientName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+            <div class="meta-item">Tipo Evaluación <strong><?= htmlspecialchars($acData->typeName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+            <div class="meta-item">Naturaleza del Servicio <strong><?= htmlspecialchars($acData->serviceName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+            <div class="meta-item">Período de la AC <strong><?php 
+                    if (!empty($acData->startDate) && !empty($acData->endDate)) {
+                        echo "Desde " . date('Y-m-d', strtotime($acData->startDate)) . " Hasta " . date('Y-m-d', strtotime($acData->endDate));
+                    } else {
+                        echo "SIN ASIGNAR";
+                    }
+                    ?></strong></div>
+
+            <div class="meta-item" style="margin-left: auto; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
+                <span style="font-size: 0.8rem; color: var(--text-muted, #64748b); font-weight: 500;">Riesgo Calculado Matriz</span>
+                <?php
+                $riskClass = 'risk-bajo';
+                $riskIcon = 'ri-checkbox-circle-line';
+                
+                if ($acData->riskLevel === 'Moderado') { $riskClass = 'risk-moderado'; $riskIcon = 'ri-alert-line'; }
+                elseif ($acData->riskLevel === 'Moderado-Alto') { $riskClass = 'risk-moderado-alto'; $riskIcon = 'ri-error-warning-line'; }
+                elseif ($acData->riskLevel === 'Alto') { $riskClass = 'risk-alto'; $riskIcon = 'ri-close-circle-line'; }
+                ?>
+                <span id="live-risk-badge" class="badge-risk <?= $riskClass ?>">
+                    <i class="<?= $riskIcon ?>"></i> <?= $acData->riskScore ?> Pts (<?= $acData->riskLevel ?>)
+                </span>
+                
+                <div class="gauge-container">
+                    <div class="gauge-arc"></div>
+                    <div class="gauge-needle"></div>
+                    <div class="gauge-center-pin"></div>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-4 d-flex justify-content-end">
-            <div class="tacometro-wrapper">
-                <div class="tacometro">
-                    <div class="tacometro-mask"></div>
-                    <div class="tacometro-needle"></div>
-                    <div class="tacometro-center"></div>
-                </div>
-                <div class="tacometro-score">
-                    Score: <?php echo $clampedScore; ?> Pts
-                </div>
-            </div>
+        <hr style="margin: 0; border: 0; border-top: 1px solid var(--border-color, #e2e8f0); opacity: 0.6;">
+
+        <div class="meta-row-bottom" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; width: 100%;">
+            <div class="meta-item">Socio Líder de A&C <strong><?= htmlspecialchars($acData->partnerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+            <div class="meta-item">Gerente de A&C <strong><?= htmlspecialchars($acData->managerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+            <div class="meta-item">Socio de Riesgo <strong><?= htmlspecialchars($acData->riskUserId, ENT_QUOTES, 'UTF-8') ?></strong></div>
+            <div class="meta-item"></div>
+            <div class="meta-item"></div>
+        </div>
+
+    </div>
+
+    <div class="activities-grid-card">
+        <h3><i class="ri-grid-fill" style="color: var(--accent);"></i> Progreso General de Actividades (1-30)</h3>
+        <div class="activities-grid">
+            <?php 
+            // Generar los 30 botones del progreso interactivo
+            for ($i = 1; $i <= 30; $i++): 
+                // Verificar si esta pregunta ya fue respondida en BD
+                // Nota: se asume que las preguntas tienen IDs correlativos o que asociamos los números de forma directa.
+                // Buscaremos dinámicamente si la pregunta con questionNumber = $i tiene respuesta.
+                $isCompleted = false;
+                foreach($answersSaved as $qId => $ans) {
+                    // Como el ID de pregunta puede diferir, buscaremos más abajo la asociación exacta
+                }
+            ?>
+                <a href="#question-<?= $i ?>" id="grid-box-<?= $i ?>" class="activity-box pending" onclick="scrollToQuestion(<?= $i ?>, event)">
+                    <?= $i ?>
+                </a>
+            <?php endfor; ?>
         </div>
     </div>
+
     <form action="responder.php?acId=<?= $acId ?>" method="POST">
         
         <?php
