@@ -72,27 +72,24 @@ include '../ac/conect-responder.php';
 
     <hr style="margin: 0; border: 0; border-top: 1px solid var(--border-color, #e2e8f0); opacity: 0.6;">
 
-    <div class="meta-row-bottom" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; width: 100%;">
+    <div class="meta-row-bottom" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; width: 100%; align-items: center;">
+        
         <div class="meta-item">Socio Líder de A&C <strong><?= htmlspecialchars($acData->partnerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+        
         <div class="meta-item">Gerente de A&C <strong><?= htmlspecialchars($acData->managerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+        
         <div class="meta-item">Socio de Riesgo <strong><?= htmlspecialchars($acData->riskUserId, ENT_QUOTES, 'UTF-8') ?></strong></div>
-        <div class="meta-item" style="margin-left: auto; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
-            <span style="font-size: 0.8rem; color: var(--text-muted, #64748b); font-weight: 500;">Riesgo Calculado Matriz</span>
-            <?php
-            $riskClass = 'risk-bajo';
-            $riskIcon = 'ri-checkbox-circle-line';
-            
-            if ($acData->riskLevel === 'Moderado') { $riskClass = 'risk-moderado'; $riskIcon = 'ri-alert-line'; }
-            elseif ($acData->riskLevel === 'Moderado-Alto') { $riskClass = 'risk-moderado-alto'; $riskIcon = 'ri-error-warning-line'; }
-            elseif ($acData->riskLevel === 'Alto') { $riskClass = 'risk-alto'; $riskIcon = 'ri-close-circle-line'; }
-            ?>
-            <span id="live-risk-badge" class="badge-risk <?= $riskClass ?>">
-                <i class="<?= $riskIcon ?>"></i> <?= $acData->riskScore ?> Pts (<?= $acData->riskLevel ?>)
-            </span>
+        
+        <div class="meta-item" style="display: flex; flex-direction: column; align-items: center; gap: 0.25rem;">
+            <span style="font-size: 0.75rem; color: var(--text-muted, #64748b); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Medidor de Riesgo</span>
+            <div class="gauge-container">
+                <div class="gauge-arc"></div>
+                <div class="gauge-needle"></div>
+                <div class="gauge-center-pin"></div>
+            </div>
         </div>
 
-
-
+        <div class="meta-item"></div>
 
     </div>
 
