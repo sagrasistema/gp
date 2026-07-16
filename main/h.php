@@ -255,6 +255,33 @@
     font-weight: 600 !important;
     color: #64748b !important; /* Cambiado a un gris ligeramente más suave */
 }
+/* ==========================================================================
+   DISEÑO EN UNA SOLA LÍNEA DE 30 CUADROS
+   ========================================================================== */
+
+/* 1. Forzar el contenedor a tener exactamente 30 columnas */
+.activities-grid {
+    display: grid !important;
+    grid-template-columns: repeat(30, 1fr) !important;
+    gap: 4px !important; /* Espacio pequeño y elegante entre cada cuadrito */
+    width: 100% !important;
+}
+
+/* 2. Reducir y escuadrar las cajas para que quepan perfectamente */
+.activities-grid-card .activity-box {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    
+    width: 100% !important; /* Se estira para llenar su 1/30 del ancho disponible */
+    aspect-ratio: 1 / 1 !important; /* Hace que el alto sea idéntico al ancho (cuadrado perfecto) */
+    height: auto !important; 
+    
+    padding: 0 !important; /* Eliminamos el padding para evitar que se desborde */
+    font-size: 10px !important; /* Tamaño óptimo para que los números de dos dígitos (ej: 28, 30) no se corten */
+    font-weight: 700 !important;
+    border-radius: 4px !important; /* Esquinas ligeramente redondeadas para un look moderno */
+}
 
 
     </style>
