@@ -52,9 +52,10 @@ include '../ac/conect-responder.php';
             }
             ?></strong></div>
 
-    <div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 3; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
-        <div class="gauge-wrapper" style="width: 100%; max-width: 240px; height: auto; display: flex; justify-content: center; align-items: center;">
-            <svg class="gauge-svg" viewBox="0 -12 200 122" width="100%" height="100%">
+<div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 3; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; padding: 0.5rem; box-sizing: border-box;">
+        
+        <div class="gauge-wrapper" style="width: 100%; max-width: 220px; height: auto; display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+            <svg class="gauge-svg" viewBox="0 -12 200 122" width="100%" height="100%" style="display: block; overflow: visible;">
                 
                 <defs>
                     <path id="path-bajo" d="M 20 100 A 80 80 0 0 1 35.3 53.0" fill="none" />
@@ -74,19 +75,19 @@ include '../ac/conect-responder.php';
                 
                 <path d="M 174.4 45.9 A 92 92 0 0 1 192 100 L 168 100 A 68 68 0 0 0 155.0 60.0 Z" fill="#ef4444" />
 
-                <text font-size="5.5" font-weight="850" fill="#ffffff" text-anchor="middle">
+                <text font-size="5.2" font-weight="850" fill="#ffffff" text-anchor="middle">
                     <textPath href="#path-bajo" startOffset="50%">BAJO</textPath>
                 </text>
-                <text font-size="5" font-weight="850" fill="#1e293b" text-anchor="middle">
+                <text font-size="4.6" font-weight="850" fill="#1e293b" text-anchor="middle">
                     <textPath href="#path-bajo-mod" startOffset="50%">BAJO MODERADO</textPath>
                 </text>
-                <text font-size="5.5" font-weight="850" fill="#1e293b" text-anchor="middle">
+                <text font-size="5.2" font-weight="850" fill="#1e293b" text-anchor="middle">
                     <textPath href="#path-mod" startOffset="50%">MODERADO</textPath>
                 </text>
-                <text font-size="5" font-weight="850" fill="#ffffff" text-anchor="middle">
+                <text font-size="4.6" font-weight="850" fill="#ffffff" text-anchor="middle">
                     <textPath href="#path-mod-alto" startOffset="50%">MODERADO ALTO</textPath>
                 </text>
-                <text font-size="5.5" font-weight="850" fill="#ffffff" text-anchor="middle">
+                <text font-size="5.2" font-weight="850" fill="#ffffff" text-anchor="middle">
                     <textPath href="#path-alto" startOffset="50%">ALTO</textPath>
                 </text>
 
@@ -111,7 +112,6 @@ include '../ac/conect-responder.php';
             </svg>
         </div>
     </div>
-
     <hr style="grid-column: span 4; margin: 0; border: 0; border-top: 1px solid var(--border-color, #e2e8f0); opacity: 0.6;">
 
     <div class="meta-item">Socio Líder de A&C <br><strong><?= htmlspecialchars($acData->partnerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
