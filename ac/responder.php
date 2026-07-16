@@ -1,237 +1,9 @@
 <?php
 // v/ac/responder.php
 include '../main/config.php';
-
+include '../ac/conect-responder.php';
 // Validar que exista el ID de la evaluación a responder
-$acId = filter_input(INPUT_GET, 'acId', FILTER_VALIDATE_INT);
-// =========================================================================
-// LÓGICA ESPECIAL PARA EL ESTADO DE LA PREGUNTA 28 (GRID DE PROGRESO)
-// =========================================================================
-
-// 1. Contar el número total de subpruebas configuradas para la pregunta 28
-$totalSubtestsQuery = $pdo->query("SELECT COUNT(*) FROM ac_q28_tests");
-$totalSubtests = (int)$totalSubtestsQuery->fetchColumn(); // Habitualmente 21
-
-// 2. Contar cuántas subpruebas ya han sido guardadas y contestadas para esta evaluación ($acId)
-// Consideramos válidas las respuestas que no estén vacías, nulas o con valor 'Pendiente'
-$stmtAnswered = $pdo->prepare("
-    SELECT COUNT(*) 
-    FROM ac_q28_answers 
-    WHERE acId = :acId 
-      AND riskValue IS NOT NULL 
-      AND riskValue != '' 
-      AND riskValue != 'Pendiente'
-");
-$stmtAnswered->execute(['acId' => $acId]);
-$answeredCount = (int)$stmtAnswered->fetchColumn();
-
-// 3. Definir la variable de estado para la pregunta 28
-if ($answeredCount === $totalSubtests) {
-    $estadoPregunta28 = 'lista';       // Completado (Verde)
-} elseif ($answeredCount > 0) {
-    $estadoPregunta28 = 'en-proceso';   // En progreso (Amarillo)
-} else {
-    $estadoPregunta28 = 'no-tocado';    // Pendiente (Gris)
-}
-// =========================================================================
-if (!$acId) {
-    die("Error: No se especificó una evaluación válida.");
-}
-
-// 1. Obtener la cabecera de la AC junto con el nombre del cliente
-try {
-    $stmtAC = $pdo->prepare("
-        SELECT ac.*, c.name AS clientName, t.typeName, s.serviceName 
-        FROM ac 
-        JOIN clientes c ON ac.clientId = c.id
-        JOIN ac_types t ON ac.typeId = t.typeId
-        JOIN ac_services s ON ac.serviceId = s.serviceId
-        WHERE ac.acId = :acId
-    ");
-    $stmtAC->execute([':acId' => $acId]);
-    $acData = $stmtAC->fetch(PDO::FETCH_OBJ);
-
-    if (!$acData) {
-        die("Error: La evaluación solicitada no existe.");
-    }
-} catch (PDOException $e) {
-    die("Error de base de datos: " . $e->getMessage());
-}
-
-// ==========================================
-// LÓGICA DE PROCESAMIENTO / GUARDADO (POST)
-// ==========================================
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        $pdo->beginTransaction();
-
-        // A. Guardar las respuestas a las 30 preguntas generales (Permitiendo vacíos)
-        if (isset($_POST['answers']) && is_array($_POST['answers'])) {
-            $stmtUpdateAnswer = $pdo->prepare("
-                UPDATE ac_general_answers 
-                SET response = :response, comment = :comment 
-                WHERE acId = :acId AND questionId = :questionId
-            ");
-            foreach ($_POST['answers'] as $qId => $data) {
-                $responseValue = (!empty($data['response'])) ? $data['response'] : null;
-
-                $stmtUpdateAnswer->execute([
-                    ':response'   => $responseValue,
-                    ':comment'    => $data['comment'] ?? '',
-                    ':acId'       => $acId,
-                    ':questionId' => $qId
-                ]);
-            }
-        }
-        
-        // B. Guardar las 21 subpruebas de la Pregunta 28 y calcular el Score
-        $totalScore = 0;
-        if (isset($_POST['q28']) && is_array($_POST['q28'])) {
-            
-            $stmtUpdateQ28 = $pdo->prepare("
-                INSERT INTO ac_q28_answers (acId, testId, riskValue, score) 
-                VALUES (:acId, :testId, :riskValue, :score)
-                ON DUPLICATE KEY UPDATE riskValue = :riskValueUpdate, score = :scoreUpdate
-            ");
-            
-            $pointsMap = [
-                'No Aplica'       => 0,
-                'Bajo'            => 1,
-                'Bajo-Moderado'   => 2,
-                'Moderado'        => 3,
-                'Moderado-Alto'   => 4,
-                'Alto'            => 5
-            ];
-
-            foreach ($_POST['q28'] as $tId => $riskValue) {
-                $score = $pointsMap[$riskValue] ?? 0;
-                $totalScore += $score;
-
-                $stmtUpdateQ28->execute([
-                    ':acId'             => $acId,
-                    ':testId'           => $tId,
-                    ':riskValue'        => $riskValue,
-                    ':score'            => $score,
-                    ':riskValueUpdate'  => $riskValue,
-                    ':scoreUpdate'      => $score
-                ]);
-            }
-        }
-        
-        // C. Determinar cualitativamente el Rango de riesgo
-        if ($totalScore <= 25) {
-            $riskLevel = 'Bajo';
-        } elseif ($totalScore <= 55) {
-            $riskLevel = 'Moderado';
-        } elseif ($totalScore <= 85) {
-            $riskLevel = 'Moderado-Alto';
-        } else {
-            $riskLevel = 'Alto';
-        }
-
-        // D. Actualizar totales en `ac`
-        $stmtUpdateAC = $pdo->prepare("
-            UPDATE ac SET riskScore = :riskScore, riskLevel = :riskLevel WHERE acId = :acId
-        ");
-        $stmtUpdateAC->execute([
-            ':riskScore' => $totalScore,
-            ':riskLevel' => $riskLevel,
-            ':acId'      => $acId
-        ]);
-
-        $pdo->commit();
-        
-        header("Location: responder.php?acId=" . $acId . "&success=1");
-        exit;
-
-    } catch (PDOException $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
-        die("Error al guardar las respuestas: " . $e->getMessage());
-    }
-}
-
-// Cargar respuestas guardadas
-$answersSaved = $pdo->query("SELECT questionId, response, comment FROM ac_general_answers WHERE acId = $acId")->fetchAll(PDO::FETCH_UNIQUE);
-$q28Saved = $pdo->query("SELECT testId, riskValue FROM ac_q28_answers WHERE acId = $acId")->fetchAll(PDO::FETCH_UNIQUE);
-
-$pageTitle = "Responder Cuestionario AC";
-include '../main/h.php';
 ?>
-
-<link rel="stylesheet" href="../main/layout.css">
-
-<style>
-    /* Estilos internos específicos del Formulario y Acordeones */
-    .view-container-form { width: 100%; max-width: 1000px; margin: 0 auto; }
-    
-    .meta-summary { background: #fff; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color, #e2e8f0); margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; gap: 2rem; }
-    .meta-item { font-size: 0.9rem; color: var(--text-muted, #64748b); }
-    .meta-item strong { color: var(--text-main, #0f172a); display: block; font-size: 1.05rem; }
-    
-    /* CUADRÍCULA DE ACTIVIDADES (PROGRESO) */
-    .activities-grid-card { background: #fff; border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; }
-    .activities-grid-card h3 { font-size: 0.95rem; font-weight: 700; margin-top: 0; margin-bottom: 0.75rem; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; }
-    .activities-grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 0.5rem; }
-    .activity-box { display: flex; align-items: center; justify-content: center; height: 35px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; text-decoration: none; border: 1px solid #cbd5e1; transition: all 0.2s ease-in-out; cursor: pointer; }
-    
-    /* Estados de la Cuadrícula */
-    .activity-box.pending { background: #f1f5f9; color: #64748b; border-color: #cbd5e1; }
-    .activity-box.completed { background: #10b981; color: #ffffff; border-color: #059669; }
-    .activity-box:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-
-    .accordion-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 0.5rem; overflow: hidden; }
-    .accordion-header { background: #fff; padding: 1rem 1.25rem; font-size: 0.95rem; font-weight: 600; color: #334155; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; transition: background 0.2s; border-left: 4px solid var(--accent, #0284c7); }
-    .accordion-header:hover { background: #f8fafc; }
-    .accordion-header i { font-size: 1.2rem; color: #64748b; transition: transform 0.2s; }
-    
-    .accordion-item.active .accordion-header { background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
-    .accordion-item.active .accordion-header i { transform: rotate(180deg); }
-    .accordion-content { display: none; padding: 1.25rem; background: #fafafa; }
-    .accordion-item.active .accordion-content { display: block; }
-
-    .question-row { background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1.25rem; margin-bottom: 0.75rem; scroll-margin-top: 80px; }
-    .question-text { font-size: 0.95rem; font-weight: 500; color: #1e293b; margin-bottom: 1rem; line-height: 1.4; }
-    .question-inputs { display: grid; grid-template-columns: 180px 1fr; gap: 1.5rem; align-items: center; }
-    
-    .radio-group { display: flex; gap: 1.25rem; }
-    .radio-label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; cursor: pointer; font-weight: 600; color: #475569; }
-    .radio-label input { width: 17px; height: 17px; accent-color: var(--accent, #0284c7); }
-    
-    .comment-input { width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 0.5rem 0.75rem; font-size: 0.88rem; outline: none; transition: border-color 0.2s; }
-    .comment-input:focus { border-color: var(--accent, #0284c7); }
-
-    .subtest-table { width: 100%; border-collapse: collapse; margin-top: 1.25rem; font-size: 0.88rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; }
-    .subtest-table th { background: #f8fafc; text-align: left; padding: 0.75rem; font-size: 0.8rem; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
-    .subtest-table td { padding: 0.75rem; border-bottom: 1px solid #e2e8f0; color: #334155; }
-    .subtest-table select { padding: 0.4rem; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 0.85rem; width: 100%; max-width: 180px; background: #fff; outline: none; }
-    .subtest-table select:focus { border-color: var(--accent, #0284c7); }
-    
-    .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
-
-    .badge-risk { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.95rem; font-weight: 700; transition: all 0.3s ease; }
-    .badge-risk.risk-bajo { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-    .badge-risk.risk-moderado { background-color: #fefce8; color: #854d0e; border: 1px solid #fef08a; }
-    .badge-risk.risk-moderado-alto { background-color: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; }
-    .badge-risk.risk-alto { background-color: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
-
-    @media (max-width: 768px) {
-        .meta-summary { flex-direction: column; gap: 1rem !important; }
-        .meta-item:last-child { align-items: flex-start !important; text-align: left !important; margin-left: 0 !important; }
-        .question-inputs { grid-template-columns: 1fr; gap: 1rem; }
-        .activities-grid { grid-template-columns: repeat(6, 1fr); }
-    }
-</style>
-
-<?php
-// Mapeo dinámico de rutas del layout de la subcarpeta ac/
-$customLogoPath = '../main/logo.png'; 
-$customHomePath = '../index.php';     
-$customAcPath   = 'index.php';  
-$currentTab     = 'aceptacion'; 
-
-include '../main/layout_header.php'; 
-?>
-
 <div class="view-container">
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
@@ -292,33 +64,19 @@ include '../main/layout_header.php';
     <div class="activities-grid-card">
         <h3><i class="ri-grid-fill" style="color: var(--accent);"></i> Progreso General de Actividades (1-30)</h3>
         <div class="activities-grid">
-            <?php for ($i = 1; $i <= 30; $i++): ?>
-                <?php 
-                    // Inicializamos la clase de estilo por defecto
-                    $claseEstado = 'pendiente'; // Gris por defecto
-
-                    if ($i === 28) {
-                        // --- CASO ESPECIAL: PREGUNTA 28 ---
-                        if ($estadoPregunta28 === 'lista') {
-                            $claseEstado = 'completado';  // Verde
-                        } elseif ($estadoPregunta28 === 'en-proceso') {
-                            $claseEstado = 'en-progreso'; // Amarillo
-                        } else {
-                            $claseEstado = 'pendiente';   // Gris
-                        }
-                    } else {
-                        // --- COMPROBACIÓN ESTÁNDAR PARA LAS PREGUNTAS 1 A 27 Y 29 A 30 ---
-                        // Aquí consultas si la pregunta normal tiene registro en tu tabla estándar de respuestas
-                        $stmtCheck = $pdo->prepare("SELECT id FROM ac_respuestas WHERE acId = :acId AND pregunta_num = :pNum LIMIT 1");
-                        $stmtCheck->execute(['acId' => $acId, 'pNum' => $i]);
-                        if ($stmtCheck->fetch()) {
-                            $claseEstado = 'completado'; // Si tiene respuesta guardada, se pinta de verde
-                        }
-                    }
-                ?>
-                
-                <a href="#pregunta-<?php echo $i; ?>" class="cuadro-progreso <?php echo $claseEstado; ?>" title="Pregunta <?php echo $i; ?>">
-                    <?php echo $i; ?>
+            <?php 
+            // Generar los 30 botones del progreso interactivo
+            for ($i = 1; $i <= 30; $i++): 
+                // Verificar si esta pregunta ya fue respondida en BD
+                // Nota: se asume que las preguntas tienen IDs correlativos o que asociamos los números de forma directa.
+                // Buscaremos dinámicamente si la pregunta con questionNumber = $i tiene respuesta.
+                $isCompleted = false;
+                foreach($answersSaved as $qId => $ans) {
+                    // Como el ID de pregunta puede diferir, buscaremos más abajo la asociación exacta
+                }
+            ?>
+                <a href="#question-<?= $i ?>" id="grid-box-<?= $i ?>" class="activity-box pending" onclick="scrollToQuestion(<?= $i ?>, event)">
+                    <?= $i ?>
                 </a>
             <?php endfor; ?>
         </div>
