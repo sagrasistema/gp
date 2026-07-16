@@ -79,12 +79,22 @@ include '../ac/conect-responder.php';
             <div class="meta-item"></div>
             
             <div class="meta-item" style="display: flex; justify-content: flex-end; width: 100%;">
-                <div class="gauge-container" style="margin: 0;">
-                    <div class="gauge-arc"></div>
-                    <div class="gauge-needle"></div>
-                    <div class="gauge-center-pin"></div>
-                </div>
+            <div class="gauge-container" style="margin: 0; position: relative; width: 140px; height: 90px; overflow: visible;">
+                
+                <div class="gauge-arc"></div>
+                
+                <span class="gauge-label lbl-criterio-1">1</span>
+                <span class="gauge-label lbl-criterio-2">2</span>
+                <span class="gauge-label lbl-criterio-3">3</span>
+                <span class="gauge-label lbl-criterio-4">4</span>
+                
+                <div class="gauge-needle"></div>
+                <div class="gauge-center-pin"></div>
+                
             </div>
+        </div>
+
+
         </div>
 
     </div>

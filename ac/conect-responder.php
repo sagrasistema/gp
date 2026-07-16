@@ -145,64 +145,101 @@ $rotationAngle = -90 + ($score * 1.8);
 ?>
 
 <style>
-    .gauge-container {
-        position: relative;
-        width: 120px; /* 160px * 0.75 = 120px */
-        height: 66px;  /* 88px * 0.75 = 66px (Proporción perfecta para el semicírculo) */
-        margin: 0.5rem 0 0 auto; /* Alineado a la derecha con margen superior */
-        overflow: hidden;
-    }
-    /* Semicírculo de fondo (el arco de colores) */
-    .gauge-arc {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 120px; /* 160px * 0.75 = 120px */
-        height: 120px; /* 160px * 0.75 = 120px */
-        border-radius: 50%;
-        box-sizing: border-box;
-        border: 11px solid #e2e8f0; /* 15px * 0.75 = 11.25px (ajustado a 11px) */
-        /* Degradado cónico: Verde -> Amarillo -> Naranja -> Rojo */
-        background: conic-gradient(
-            from 180deg at 50% 50%,
-            #22c55e 0deg,   /* Verde */
-            #eab308 60deg,  /* Amarillo */
-            #f97316 120deg, /* Naranja */
-            #ef4444 180deg, /* Rojo */
-            #e2e8f0 180deg
-        );
-        /* Máscara radial recalculada para el nuevo radio interior: */
-        /* Radio total (60px) - grosor del borde (11px) = 49px */
-        mask: radial-gradient(circle, transparent 48px, #000 49px);
-        -webkit-mask: radial-gradient(circle, transparent 48px, #000 49px);
-        transform: rotate(90deg); /* Apunta el semicírculo hacia arriba */
-    }
-    /* La aguja del tacómetro */
-    .gauge-needle {
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        width: 4px; /* 6px * 0.75 = 4.5px (ajustado a 4px para nitidez) */
-        height: 52px; /* 70px * 0.75 = 52.5px (ajustado a 52px para mantenerse dentro del arco) */
-        background-color: #1e293b;
-        border-radius: 3px; /* Redondeado proporcional */
-        transform-origin: bottom center;
-        /* Aplicamos el ángulo dinámico calculado en PHP */
-        transform: translateX(-50%) rotate(<?= $rotationAngle ?>deg);
-        transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 2;
-    }
-    /* El pin o centro donde rota la aguja */
-    .gauge-center-pin {
-        position: absolute;
-        bottom: -5px; /* -6px * 0.75 = -4.5px (ajustado a -5px) */
-        left: 50%;
-        width: 15px; /* 20px * 0.75 = 15px */
-        height: 15px; /* 20px * 0.75 = 15px */
-        background-color: #1e293b;
-        border-radius: 50%;
-        transform: translateX(-50%);
-        border: 2px solid #fff; /* 3px * 0.75 = 2.25px (ajustado a 2px) */
-        z-index: 3;
-    }
+/* Contenedor principal con espacio controlado para evitar desbordes */
+.gauge-container {
+    position: relative;
+    width: 140px; 
+    height: 90px; 
+    margin: 0;
+    overflow: visible; /* Permite que los números sobresalgan sutilmente */
+}
+
+/* Semicírculo de fondo con los COLORES MUCHO MÁS GRANDES (Grosor: 20px) */
+.gauge-arc {
+    position: absolute;
+    top: 0;
+    left: 10px; /* Centrado dentro de los 140px de ancho */
+    width: 120px; 
+    height: 120px; 
+    border-radius: 50%;
+    box-sizing: border-box;
+    border: 20px solid #e2e8f0; /* Subido a 20px para mayor impacto visual */
+    
+    /* Degradado cónico: Verde -> Amarillo -> Naranja -> Rojo */
+    background: conic-gradient(
+        from 180deg at 50% 50%,
+        #22c55e 0deg,   /* Verde */
+        #eab308 60deg,  /* Amarillo */
+        #f97316 120deg, /* Naranja */
+        #ef4444 180deg, /* Rojo */
+        #e2e8f0 180deg
+    );
+    
+    /* Máscara radial exacta: Radio total (60px) - grosor (20px) = 40px */
+    mask: radial-gradient(circle, transparent 39px, #000 40px);
+    -webkit-mask: radial-gradient(circle, transparent 39px, #000 40px);
+    transform: rotate(90deg); 
+}
+
+/* Aguja del tacómetro ajustada al nuevo radio */
+.gauge-needle {
+    position: absolute;
+    bottom: 30px; /* Alineado al nuevo eje central */
+    left: 50%;
+    width: 4px; 
+    height: 44px; /* Longitud ideal para no pisar la franja gruesa de color */
+    background-color: #1e293b;
+    border-radius: 3px; 
+    transform-origin: bottom center;
+    /* La rotación se calcula dinámicamente con tu PHP */
+    transform: translateX(-50%) rotate(<?= $rotationAngle ?? 0 ?>deg);
+    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+}
+
+/* Pin del centro de rotación */
+.gauge-center-pin {
+    position: absolute;
+    bottom: 25px; /* Ajustado al eje de la aguja */
+    left: 50%;
+    width: 12px; 
+    height: 12px; 
+    background-color: #1e293b;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    border: 2px solid #fff; 
+    z-index: 3;
+}
+
+/* --- ESTILOS DE LOS NÚMEROS DE CRITERIOS --- */
+.gauge-label {
+    position: absolute;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b; /* Color slate intermedio elegante */
+    font-family: system-ui, -apple-system, sans-serif;
+    user-select: none;
+    line-height: 1;
+}
+
+/* Posiciones calculadas para calzar en las zonas de color */
+.lbl-criterio-1 {
+    bottom: 25px;
+    left: 0px; /* Esquina inferior izquierda (Zona Verde) */
+}
+
+.lbl-criterio-2 {
+    top: 5px;
+    left: 32px; /* Cuadrante superior izquierdo (Zona Amarilla) */
+}
+
+.lbl-criterio-3 {
+    top: 5px;
+    right: 32px; /* Cuadrante superior derecho (Zona Naranja) */
+}
+
+.lbl-criterio-4 {
+    bottom: 25px;
+    right: 0px; /* Esquina inferior derecha (Zona Roja) */
+}
 </style>
