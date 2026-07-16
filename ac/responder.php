@@ -69,22 +69,22 @@ include '../ac/conect-responder.php';
         
         <div class="meta-item" style="display: flex; flex-direction: column; gap: 0.15rem;">
             <span style="font-size: 0.75rem; color: var(--text-muted, #64748b); text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Socio Líder de A&C</span>
-            <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);"><?= htmlspecialchars($acData->partnerName ?? 'Juan Manuel Godoy Vielma', ENT_QUOTES, 'UTF-8') ?></strong>
+            <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);"><?= htmlspecialchars($acData->partnerName ?? 'SIN ASIGNAR', ENT_QUOTES, 'UTF-8') ?></strong>
         </div>
 
         <div class="meta-item" style="display: flex; flex-direction: column; gap: 0.15rem;">
             <span style="font-size: 0.75rem; color: var(--text-muted, #64748b); text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Gerente de A&C</span>
-            <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);"><?= htmlspecialchars($acData->managerName ?? 'Alberto Daniel Valera Godoy', ENT_QUOTES, 'UTF-8') ?></strong>
+            <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);"><?= htmlspecialchars($acData->managerName ?? 'SIN ASIGNAR', ENT_QUOTES, 'UTF-8') ?></strong>
         </div>
 
         <div class="meta-item" style="display: flex; flex-direction: column; gap: 0.15rem;">
             <span style="font-size: 0.75rem; color: var(--text-muted, #64748b); text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Naturaleza del Servicio</span>
-            <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);"><?= htmlspecialchars($acData->natureName ?? 'Auditoría de Estados Financieros', ENT_QUOTES, 'UTF-8') ?></strong>
+            <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);"><?= htmlspecialchars($acData->natureName ?? 'SIN ASIGNAR', ENT_QUOTES, 'UTF-8') ?></strong>
         </div>
 
         <div class="meta-item" style="display: flex; flex-direction: column; gap: 0.15rem;">
             <span style="font-size: 0.75rem; color: var(--text-muted, #64748b); text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Servicio</span>
-            <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);"><?= htmlspecialchars($acData->serviceName ?? 'Auditoría Anual de Estados Financieros', ENT_QUOTES, 'UTF-8') ?></strong>
+            <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);"><?= htmlspecialchars($acData->serviceName ?? 'SIN ASIGNAR', ENT_QUOTES, 'UTF-8') ?></strong>
         </div>
 
         <div class="meta-item" style="display: flex; flex-direction: column; gap: 0.15rem;">
@@ -94,7 +94,7 @@ include '../ac/conect-responder.php';
                 if (!empty($acData->startDate) && !empty($acData->endDate)) {
                     echo "Desde " . date('Y-m-d', strtotime($acData->startDate)) . " Hasta " . date('Y-m-d', strtotime($acData->endDate));
                 } else {
-                    echo "Desde 2023-03-21 Hasta 2024-03-21";
+                    echo "SIN ASIGNAR";
                 }
                 ?>
             </strong>
