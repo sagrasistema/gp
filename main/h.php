@@ -228,6 +228,38 @@
     padding: 0.2rem 0.5rem !important;
     font-weight: 600;
 }
+/* ==========================================================================
+   AJUSTES DE TIPOGRAFÍA PARA LA SECCIÓN DE PROGRESO (1-30)
+   ========================================================================== */
+
+/* 1. Título de la tarjeta (Progreso General de Actividades 1-30) */
+/* (Ajusta la clase si tu título usa otra etiqueta h3, h4 o div) */
+.meta-summary-card h3, 
+.card-header, 
+.card-title {
+    font-size: 13px !important; /* Bajamos de su tamaño actual a un elegante 13px */
+    font-weight: 700;
+    color: #1e293b; /* Slate oscuro profesional */
+}
+
+/* 2. Números dentro de los botones/pastillas verdes (1 al 30) */
+/* (Cambia el selector por el que uses en tus botones, ej: .btn-step, .step-pill, etc.) */
+.btn-progress, 
+.step-item, 
+.progress-grid div, 
+.progress-grid button {
+    font-size: 11px !important; /* Letra más pequeña y nítida para los números */
+    font-weight: 700; /* Negrita para que no pierda legibilidad al ser pequeña */
+}
+
+/* 3. Textos inferiores ("Progreso del Formulario" y el "0%") */
+.progress-text-label, 
+.progress-footer span, 
+.progress-percentage {
+    font-size: 11px !important; /* Tamaño sutil acorde al resto de la interfaz */
+    color: #64748b; /* Gris muted para que no compita visualmente */
+    font-weight: 500;
+}
 
     </style>
 </head>
