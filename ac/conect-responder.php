@@ -149,8 +149,6 @@ $rotationAngle = -90 + ($score * 1.8);
 /* Contenedor del Tacómetro */
 .gauge-wrapper {
     display: inline-flex;
-    justify-content: center;
-    align-items: center;
     user-select: none;
     overflow: visible;
 }
@@ -162,7 +160,7 @@ $rotationAngle = -90 + ($score * 1.8);
     shape-rendering: geometricPrecision;
 }
 
-/* Estilo para los números del intervalo */
+/* Estilo para los números de intervalo */
 .gauge-text {
     font-family: system-ui, -apple-system, sans-serif;
     font-size: 11px;

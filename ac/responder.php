@@ -42,11 +42,8 @@ include '../ac/conect-responder.php';
 <div class="meta-summary" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.25rem; width: 100%; align-items: stretch;">
     
     <div class="meta-item">Client / Empresa <br><strong><?= htmlspecialchars($acData->clientName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-    
     <div class="meta-item">Tipo Evaluación <br><strong><?= htmlspecialchars($acData->typeName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-    
     <div class="meta-item">Naturaleza del Servicio <br><strong><?= htmlspecialchars($acData->serviceName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-    
     <div class="meta-item">Período de la AC <br><strong><?php 
             if (!empty($acData->startDate) && !empty($acData->endDate)) {
                 echo "Desde " . date('Y-m-d', strtotime($acData->startDate)) . " Hasta " . date('Y-m-d', strtotime($acData->endDate));
@@ -55,9 +52,9 @@ include '../ac/conect-responder.php';
             }
             ?></strong></div>
 
-    <div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 2; display: flex; justify-content: center; align-items: center; width: 100%; min-height: 140px;">
-        <div class="gauge-wrapper" style="width: 100%; max-width: 180px; height: auto;">
-            <svg class="gauge-svg" viewBox="0 -10 200 120" width="100%" height="100%">
+    <div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 2; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
+        <div class="gauge-wrapper" style="width: 100%; max-width: 210px; height: auto; display: flex; justify-content: center; align-items: center;">
+            <svg class="gauge-svg" viewBox="0 -12 200 122" width="100%" height="100%">
                 
                 <path d="M 8 100 A 92 92 0 0 1 35 35 L 52 52 A 68 68 0 0 0 32 100 Z" fill="#22c55e" />
                 <path d="M 35 35 A 92 92 0 0 1 100 8 L 100 32 A 68 68 0 0 0 52 52 Z" fill="#eab308" />
@@ -65,9 +62,9 @@ include '../ac/conect-responder.php';
                 <path d="M 165 35 A 92 92 0 0 1 192 100 L 168 100 A 68 68 0 0 0 148 52 Z" fill="#ef4444" />
 
                 <text x="2" y="112" class="gauge-text">0</text>
-                <text x="23" y="24" class="gauge-text">25</text>
-                <text x="100" y="-1" class="gauge-text">50</text>
-                <text x="177" y="24" class="gauge-text">75</text>
+                <text x="22" y="22" class="gauge-text">25</text>
+                <text x="100" y="-3" class="gauge-text">50</text>
+                <text x="178" y="22" class="gauge-text">75</text>
                 <text x="198" y="112" class="gauge-text">100</text>
 
                 <?php
@@ -79,7 +76,7 @@ include '../ac/conect-responder.php';
                     <path d="M 97 100 L 99.3 10 L 100.7 10 L 103 100 Z" fill="#1e293b" />
                 </g>
 
-                <circle cx="100" cy="100" r="11" fill="#1e293b" stroke="#ffffff" stroke-width="2" />
+                <circle cx="100" cy="100" r="11" fill="#1e293b" stroke="#ffffff" stroke-width="2.5" />
                 <circle cx="100" cy="100" r="4" fill="#94a3b8" />
             </svg>
         </div>
@@ -88,9 +85,7 @@ include '../ac/conect-responder.php';
     <hr style="grid-column: span 4; margin: 0; border: 0; border-top: 1px solid var(--border-color, #e2e8f0); opacity: 0.6;">
 
     <div class="meta-item">Socio Líder de A&C <br><strong><?= htmlspecialchars($acData->partnerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-    
     <div class="meta-item">Gerente de A&C <br><strong><?= htmlspecialchars($acData->managerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-    
     <div class="meta-item">Socio de Riesgo <br><strong><?= htmlspecialchars($acData->riskUserId, ENT_QUOTES, 'UTF-8') ?></strong></div>
     
     <div class="meta-item" style="display: flex; flex-direction: column; justify-content: center; gap: 0.25rem;">
