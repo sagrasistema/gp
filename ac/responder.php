@@ -108,6 +108,15 @@ include '../ac/conect-responder.php';
                 </a>
             <?php endfor; ?>
         </div>
+        <div class="progress-bar-container" style="margin-top: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #475569;">
+                <span>Progreso del Formulario</span>
+                <span id="progress-percentage-text">0%</span>
+            </div>
+            <div style="width: 100%; height: 8px; background-color: #e2e8f0; border-radius: 9999px; overflow: hidden; position: relative;">
+                <div id="progress-bar-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 9999px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+            </div>
+        </div>
     </div>
 
     <form action="responder.php?acId=<?= $acId ?>" method="POST">
