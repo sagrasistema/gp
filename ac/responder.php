@@ -1,115 +1,236 @@
 <?php
 // v/ac/responder.php
 include '../main/config.php';
-include '../ac/conect-responder.php';
 
-// --- VALIDACIÓN E INICIALIZACIÓN DE VARIABLES CRÍTICAS ---
-$acId = isset($_GET['acId']) ? (int)$_GET['acId'] : 0;
-if ($acId === 0) {
-    die("Error: ID de evaluación no válido o ausente.");
-}
+// Validar que exista el ID de la evaluación a responder
+$acId = filter_input(INPUT_GET, 'acId', FILTER_VALIDATE_INT);
+// =========================================================================
+// LÓGICA ESPECIAL PARA EL ESTADO DE LA PREGUNTA 28 (GRID DE PROGRESO)
+// =========================================================================
 
-// Inicializar arrays para evitar warnings de tipo "Undefined variable" si no vienen cargados del include
-if (!isset($respuestasNormales)) {
-    $respuestasNormales = [];
-}
-if (!isset($answersSaved)) {
-    $answersSaved = [];
-}
-if (!isset($q28Saved)) {
-    $q28Saved = [];
-}
+// 1. Contar el número total de subpruebas configuradas para la pregunta 28
+$totalSubtestsQuery = $pdo->query("SELECT COUNT(*) FROM ac_q28_tests");
+$totalSubtests = (int)$totalSubtestsQuery->fetchColumn(); // Habitualmente 21
 
-// --- LÓGICA ESPECIAL PARA LA PREGUNTA 28 ---
-// 1. Contar el total de subpruebas configuradas en el sistema
-$stmtTotal28 = $pdo->query("SELECT COUNT(*) FROM ac_q28_tests");
-$totalSubtests = (int)$stmtTotal28->fetchColumn();
-
-// 2. Contar cuántas subpruebas ya han sido respondidas para este acId
-$stmtResp28 = $pdo->prepare("
+// 2. Contar cuántas subpruebas ya han sido guardadas y contestadas para esta evaluación ($acId)
+// Consideramos válidas las respuestas que no estén vacías, nulas o con valor 'Pendiente'
+$stmtAnswered = $pdo->prepare("
     SELECT COUNT(*) 
     FROM ac_q28_answers 
     WHERE acId = :acId 
       AND riskValue IS NOT NULL 
-      AND riskValue != ''
+      AND riskValue != '' 
+      AND riskValue != 'Pendiente'
 ");
-$stmtResp28->execute([':acId' => $acId]);
-$answeredSubtests = (int)$stmtResp28->fetchColumn();
+$stmtAnswered->execute(['acId' => $acId]);
+$answeredCount = (int)$stmtAnswered->fetchColumn();
 
-// 3. Determinar si la pregunta 28 está completamente lista
-$isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
+// 3. Definir la variable de estado para la pregunta 28
+if ($answeredCount === $totalSubtests) {
+    $estadoPregunta28 = 'lista';       // Completado (Verde)
+} elseif ($answeredCount > 0) {
+    $estadoPregunta28 = 'en-proceso';   // En progreso (Amarillo)
+} else {
+    $estadoPregunta28 = 'no-tocado';    // Pendiente (Gris)
+}
+// =========================================================================
+if (!$acId) {
+    die("Error: No se especificó una evaluación válida.");
+}
+
+// 1. Obtener la cabecera de la AC junto con el nombre del cliente
+try {
+    $stmtAC = $pdo->prepare("
+        SELECT ac.*, c.name AS clientName, t.typeName, s.serviceName 
+        FROM ac 
+        JOIN clientes c ON ac.clientId = c.id
+        JOIN ac_types t ON ac.typeId = t.typeId
+        JOIN ac_services s ON ac.serviceId = s.serviceId
+        WHERE ac.acId = :acId
+    ");
+    $stmtAC->execute([':acId' => $acId]);
+    $acData = $stmtAC->fetch(PDO::FETCH_OBJ);
+
+    if (!$acData) {
+        die("Error: La evaluación solicitada no existe.");
+    }
+} catch (PDOException $e) {
+    die("Error de base de datos: " . $e->getMessage());
+}
+
+// ==========================================
+// LÓGICA DE PROCESAMIENTO / GUARDADO (POST)
+// ==========================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        $pdo->beginTransaction();
+
+        // A. Guardar las respuestas a las 30 preguntas generales (Permitiendo vacíos)
+        if (isset($_POST['answers']) && is_array($_POST['answers'])) {
+            $stmtUpdateAnswer = $pdo->prepare("
+                UPDATE ac_general_answers 
+                SET response = :response, comment = :comment 
+                WHERE acId = :acId AND questionId = :questionId
+            ");
+            foreach ($_POST['answers'] as $qId => $data) {
+                $responseValue = (!empty($data['response'])) ? $data['response'] : null;
+
+                $stmtUpdateAnswer->execute([
+                    ':response'   => $responseValue,
+                    ':comment'    => $data['comment'] ?? '',
+                    ':acId'       => $acId,
+                    ':questionId' => $qId
+                ]);
+            }
+        }
+        
+        // B. Guardar las 21 subpruebas de la Pregunta 28 y calcular el Score
+        $totalScore = 0;
+        if (isset($_POST['q28']) && is_array($_POST['q28'])) {
+            
+            $stmtUpdateQ28 = $pdo->prepare("
+                INSERT INTO ac_q28_answers (acId, testId, riskValue, score) 
+                VALUES (:acId, :testId, :riskValue, :score)
+                ON DUPLICATE KEY UPDATE riskValue = :riskValueUpdate, score = :scoreUpdate
+            ");
+            
+            $pointsMap = [
+                'No Aplica'       => 0,
+                'Bajo'            => 1,
+                'Bajo-Moderado'   => 2,
+                'Moderado'        => 3,
+                'Moderado-Alto'   => 4,
+                'Alto'            => 5
+            ];
+
+            foreach ($_POST['q28'] as $tId => $riskValue) {
+                $score = $pointsMap[$riskValue] ?? 0;
+                $totalScore += $score;
+
+                $stmtUpdateQ28->execute([
+                    ':acId'             => $acId,
+                    ':testId'           => $tId,
+                    ':riskValue'        => $riskValue,
+                    ':score'            => $score,
+                    ':riskValueUpdate'  => $riskValue,
+                    ':scoreUpdate'      => $score
+                ]);
+            }
+        }
+        
+        // C. Determinar cualitativamente el Rango de riesgo
+        if ($totalScore <= 25) {
+            $riskLevel = 'Bajo';
+        } elseif ($totalScore <= 55) {
+            $riskLevel = 'Moderado';
+        } elseif ($totalScore <= 85) {
+            $riskLevel = 'Moderado-Alto';
+        } else {
+            $riskLevel = 'Alto';
+        }
+
+        // D. Actualizar totales en `ac`
+        $stmtUpdateAC = $pdo->prepare("
+            UPDATE ac SET riskScore = :riskScore, riskLevel = :riskLevel WHERE acId = :acId
+        ");
+        $stmtUpdateAC->execute([
+            ':riskScore' => $totalScore,
+            ':riskLevel' => $riskLevel,
+            ':acId'      => $acId
+        ]);
+
+        $pdo->commit();
+        
+        header("Location: responder.php?acId=" . $acId . "&success=1");
+        exit;
+
+    } catch (PDOException $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        die("Error al guardar las respuestas: " . $e->getMessage());
+    }
+}
+
+// Cargar respuestas guardadas
+$answersSaved = $pdo->query("SELECT questionId, response, comment FROM ac_general_answers WHERE acId = $acId")->fetchAll(PDO::FETCH_UNIQUE);
+$q28Saved = $pdo->query("SELECT testId, riskValue FROM ac_q28_answers WHERE acId = $acId")->fetchAll(PDO::FETCH_UNIQUE);
+
+$pageTitle = "Responder Cuestionario AC";
+include '../main/h.php';
 ?>
 
+<link rel="stylesheet" href="../main/layout.css">
+
 <style>
-    /* Estilos del Contenedor de la Tarjeta */
-    .activities-grid-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 1.25rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .activities-grid-card h3 {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin-top: 0;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+    /* Estilos internos específicos del Formulario y Acordeones */
+    .view-container-form { width: 100%; max-width: 1000px; margin: 0 auto; }
+    
+    .meta-summary { background: #fff; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color, #e2e8f0); margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; gap: 2rem; }
+    .meta-item { font-size: 0.9rem; color: var(--text-muted, #64748b); }
+    .meta-item strong { color: var(--text-main, #0f172a); display: block; font-size: 1.05rem; }
+    
+    /* CUADRÍCULA DE ACTIVIDADES (PROGRESO) */
+    .activities-grid-card { background: #fff; border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; }
+    .activities-grid-card h3 { font-size: 0.95rem; font-weight: 700; margin-top: 0; margin-bottom: 0.75rem; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; }
+    .activities-grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 0.5rem; }
+    .activity-box { display: flex; align-items: center; justify-content: center; height: 35px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; text-decoration: none; border: 1px solid #cbd5e1; transition: all 0.2s ease-in-out; cursor: pointer; }
+    
+    /* Estados de la Cuadrícula */
+    .activity-box.pending { background: #f1f5f9; color: #64748b; border-color: #cbd5e1; }
+    .activity-box.completed { background: #10b981; color: #ffffff; border-color: #059669; }
+    .activity-box:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
 
-    /* Cuadrícula de 5 columnas compacta */
-    .activities-grid {
-        display: grid !important;
-        grid-template-columns: repeat(5, 1fr) !important;
-        gap: 8px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
+    .accordion-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 0.5rem; overflow: hidden; }
+    .accordion-header { background: #fff; padding: 1rem 1.25rem; font-size: 0.95rem; font-weight: 600; color: #334155; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; transition: background 0.2s; border-left: 4px solid var(--accent, #0284c7); }
+    .accordion-header:hover { background: #f8fafc; }
+    .accordion-header i { font-size: 1.2rem; color: #64748b; transition: transform 0.2s; }
+    
+    .accordion-item.active .accordion-header { background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+    .accordion-item.active .accordion-header i { transform: rotate(180deg); }
+    .accordion-content { display: none; padding: 1.25rem; background: #fafafa; }
+    .accordion-item.active .accordion-content { display: block; }
 
-    /* Estilo de cada Cajita Numérica */
-    .activity-box {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        aspect-ratio: 1 / 1 !important; /* Cuadrados perfectos */
-        width: 100% !important;
-        border-radius: 6px !important;
-        font-size: 0.85rem !important;
-        font-weight: 700 !important;
-        text-decoration: none !important;
-        transition: all 0.2s ease-in-out !important;
-        box-sizing: border-box !important;
-        border: 1.5px solid #cbd5e1 !important;
-    }
+    .question-row { background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1.25rem; margin-bottom: 0.75rem; scroll-margin-top: 80px; }
+    .question-text { font-size: 0.95rem; font-weight: 500; color: #1e293b; margin-bottom: 1rem; line-height: 1.4; }
+    .question-inputs { display: grid; grid-template-columns: 180px 1fr; gap: 1.5rem; align-items: center; }
+    
+    .radio-group { display: flex; gap: 1.25rem; }
+    .radio-label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; cursor: pointer; font-weight: 600; color: #475569; }
+    .radio-label input { width: 17px; height: 17px; accent-color: var(--accent, #0284c7); }
+    
+    .comment-input { width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 0.5rem 0.75rem; font-size: 0.88rem; outline: none; transition: border-color 0.2s; }
+    .comment-input:focus { border-color: var(--accent, #0284c7); }
 
-    /* Estado Pendiente (Rojo / Gris Suave) */
-    .activity-box.pending {
-        background-color: #fef2f2 !important;
-        color: #ef4444 !important;
-        border-color: #fca5a5 !important;
-    }
-    .activity-box.pending:hover {
-        background-color: #fee2e2 !important;
-        border-color: #f87171 !important;
-        transform: translateY(-2px) !important;
-    }
+    .subtest-table { width: 100%; border-collapse: collapse; margin-top: 1.25rem; font-size: 0.88rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; }
+    .subtest-table th { background: #f8fafc; text-align: left; padding: 0.75rem; font-size: 0.8rem; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+    .subtest-table td { padding: 0.75rem; border-bottom: 1px solid #e2e8f0; color: #334155; }
+    .subtest-table select { padding: 0.4rem; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 0.85rem; width: 100%; max-width: 180px; background: #fff; outline: none; }
+    .subtest-table select:focus { border-color: var(--accent, #0284c7); }
+    
+    .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
 
-    /* Estado Completado / Listo (Verde) */
-    .activity-box.completed {
-        background-color: #ecfdf5 !important;
-        color: #10b981 !important;
-        border-color: #a7f3d0 !important;
-    }
-    .activity-box.completed:hover {
-        background-color: #d1fae5 !important;
-        border-color: #34d399 !important;
-        transform: translateY(-2px) !important;
+    .badge-risk { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.95rem; font-weight: 700; transition: all 0.3s ease; }
+    .badge-risk.risk-bajo { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-risk.risk-moderado { background-color: #fefce8; color: #854d0e; border: 1px solid #fef08a; }
+    .badge-risk.risk-moderado-alto { background-color: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; }
+    .badge-risk.risk-alto { background-color: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    @media (max-width: 768px) {
+        .meta-summary { flex-direction: column; gap: 1rem !important; }
+        .meta-item:last-child { align-items: flex-start !important; text-align: left !important; margin-left: 0 !important; }
+        .question-inputs { grid-template-columns: 1fr; gap: 1rem; }
+        .activities-grid { grid-template-columns: repeat(6, 1fr); }
     }
 </style>
+
+<?php
+// Mapeo dinámico de rutas del layout de la subcarpeta ac/
+$customLogoPath = '../main/logo.png'; 
+$customHomePath = '../index.php';     
+$customAcPath   = 'index.php';  
+$currentTab     = 'aceptacion'; 
+
+include '../main/layout_header.php'; 
+?>
 
 <div class="view-container">
     
@@ -148,57 +269,58 @@ $isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
     <?php endif; ?>
 
     <div class="meta-summary">
-        <div class="meta-item">Client / Empresa <strong><?= htmlspecialchars($acData->clientName ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></strong></div>
-        <div class="meta-item">Tipo Evaluación <strong><?= htmlspecialchars($acData->typeName ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></strong></div>
-        <div class="meta-item">Servicio Requerido <strong><?= htmlspecialchars($acData->serviceName ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></strong></div>
+        <div class="meta-item">Client / Empresa <strong><?= htmlspecialchars($acData->clientName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+        <div class="meta-item">Tipo Evaluación <strong><?= htmlspecialchars($acData->typeName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+        <div class="meta-item">Servicio Requerido <strong><?= htmlspecialchars($acData->serviceName, ENT_QUOTES, 'UTF-8') ?></strong></div>
 
         <div class="meta-item" style="margin-left: auto; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
             <span style="font-size: 0.8rem; color: var(--text-muted, #64748b); font-weight: 500;">Riesgo Calculado Matriz</span>
             <?php
             $riskClass = 'risk-bajo';
             $riskIcon = 'ri-checkbox-circle-line';
-            $riskLevel = $acData->riskLevel ?? 'Bajo';
-            $riskScore = $acData->riskScore ?? 0;
             
-            if ($riskLevel === 'Moderado') { $riskClass = 'risk-moderado'; $riskIcon = 'ri-alert-line'; }
-            elseif ($riskLevel === 'Moderado-Alto') { $riskClass = 'risk-moderado-alto'; $riskIcon = 'ri-error-warning-line'; }
-            elseif ($riskLevel === 'Alto') { $riskClass = 'risk-alto'; $riskIcon = 'ri-close-circle-line'; }
+            if ($acData->riskLevel === 'Moderado') { $riskClass = 'risk-moderado'; $riskIcon = 'ri-alert-line'; }
+            elseif ($acData->riskLevel === 'Moderado-Alto') { $riskClass = 'risk-moderado-alto'; $riskIcon = 'ri-error-warning-line'; }
+            elseif ($acData->riskLevel === 'Alto') { $riskClass = 'risk-alto'; $riskIcon = 'ri-close-circle-line'; }
             ?>
             <span id="live-risk-badge" class="badge-risk <?= $riskClass ?>">
-                <i class="<?= $riskIcon ?>"></i> <?= $riskScore ?> Pts (<?= $riskLevel ?>)
+                <i class="<?= $riskIcon ?>"></i> <?= $acData->riskScore ?> Pts (<?= $acData->riskLevel ?>)
             </span>
         </div>
     </div>
 
     <div class="activities-grid-card">
         <h3><i class="ri-grid-fill" style="color: var(--accent);"></i> Progreso General de Actividades (1-30)</h3>
-        
         <div class="activities-grid">
-            <?php for ($i = 1; $i <= 30; $i++): 
-                // Evaluamos el estado inicial de completación cargado desde la Base de Datos
-                if ($i === 28) {
-                    $statusClass = $isQ28Complete ? 'completed' : 'pending';
-                } else {
-                    $statusClass = isset($completedActivities[$i]) ? 'completed' : 'pending';
-                }
-            ?>
-                <a href="#question-<?php echo $i; ?>" 
-                   class="activity-box <?php echo $statusClass; ?>" 
-                   id="grid-box-<?php echo $i; ?>"
-                   onclick="scrollToQuestion(<?php echo $i; ?>, event)">
+            <?php for ($i = 1; $i <= 30; $i++): ?>
+                <?php 
+                    // Inicializamos la clase de estilo por defecto
+                    $claseEstado = 'pendiente'; // Gris por defecto
+
+                    if ($i === 28) {
+                        // --- CASO ESPECIAL: PREGUNTA 28 ---
+                        if ($estadoPregunta28 === 'lista') {
+                            $claseEstado = 'completado';  // Verde
+                        } elseif ($estadoPregunta28 === 'en-proceso') {
+                            $claseEstado = 'en-progreso'; // Amarillo
+                        } else {
+                            $claseEstado = 'pendiente';   // Gris
+                        }
+                    } else {
+                        // --- COMPROBACIÓN ESTÁNDAR PARA LAS PREGUNTAS 1 A 27 Y 29 A 30 ---
+                        // Aquí consultas si la pregunta normal tiene registro en tu tabla estándar de respuestas
+                        $stmtCheck = $pdo->prepare("SELECT id FROM ac_respuestas WHERE acId = :acId AND pregunta_num = :pNum LIMIT 1");
+                        $stmtCheck->execute(['acId' => $acId, 'pNum' => $i]);
+                        if ($stmtCheck->fetch()) {
+                            $claseEstado = 'completado'; // Si tiene respuesta guardada, se pinta de verde
+                        }
+                    }
+                ?>
+                
+                <a href="#pregunta-<?php echo $i; ?>" class="cuadro-progreso <?php echo $claseEstado; ?>" title="Pregunta <?php echo $i; ?>">
                     <?php echo $i; ?>
                 </a>
             <?php endfor; ?>
-        </div>
-
-        <div class="progress-container" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <span id="progress-text-label" style="font-size: 0.85rem; font-weight: 600; color: #475569;">Progreso del Formulario</span>
-                <span id="progress-percent-text" style="font-size: 0.85rem; font-weight: 700; color: #10b981;">0%</span>
-            </div>
-            <div style="width: 100%; height: 6px; background-color: #e2e8f0; border-radius: 9999px; overflow: hidden;">
-                <div id="progress-fill-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 9999px; transition: width 0.4s ease;"></div>
-            </div>
         </div>
     </div>
 
@@ -207,7 +329,7 @@ $isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
         <?php
         $categories = $pdo->query("SELECT * FROM ac_categories ORDER BY orderNum ASC")->fetchAll(PDO::FETCH_OBJ);
         
-        
+        // Mantendremos un mapeo JS de questionNumber => questionId para el progreso en vivo
         $qNumberToIdMap = [];
 
         foreach ($categories as $cat):
@@ -224,10 +346,13 @@ $isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
                 <div class="accordion-content">
                     <?php foreach ($questions as $q): 
                         $savedRes = $answersSaved[$q->questionId]['response'] ?? '';
-                        $savedComment = $answersSaved[$q->questionId]['comment'] ?? '' // <-- ¡Falta el punto y coma aquí!
-
+                        $savedComment = $answersSaved[$q->questionId]['comment'] ?? '';
+                        
                         // Guardar la correspondencia de número a ID
-                        $qNumberToIdMap[$q->questionNumber] = [ 'id' => $q->questionId, 'completed' => (!empty($savedRes)) ];
+                        $qNumberToIdMap[$q->questionNumber] = [
+                            'id' => $q->questionId,
+                            'completed' => (!empty($savedRes))
+                        ];
                     ?>
                         <div class="question-row" id="question-<?= $q->questionNumber ?>">
                             <div class="question-text">
@@ -284,7 +409,7 @@ $isQ28Complete = ($answeredSubtests >= $totalSubtests && $totalSubtests > 0);
                                                     <?= htmlspecialchars($sub->testText, ENT_QUOTES, 'UTF-8') ?>
                                                 </td>
                                                 <td style="text-align: center;">
-                                                    <select name="q28[<?= $sub->testId ?>]" class="q28-select" style="width: 100%; max-width: 200px;">
+                                                    <select name="q28[<?= $sub->testId ?>]" class="q28-select" onchange="calculateLiveRisk()" style="width: 100%; max-width: 200px;">
                                                         <option value="No Aplica" <?= $savedRisk === 'No Aplica' ? 'selected' : '' ?>>No Aplica (0 pts)</option>
                                                         <option value="Bajo" <?= $savedRisk === 'Bajo' ? 'selected' : '' ?>>Bajo (1 pts)</option>
                                                         <option value="Bajo-Moderado" <?= $savedRisk === 'Bajo-Moderado' ? 'selected' : '' ?>>Bajo-Moderado (2 pts)</option>
@@ -348,94 +473,29 @@ function scrollToQuestion(qNum, event) {
     }
 }
 
-// Función para verificar si la pregunta 28 está completamente respondida (todas las subpruebas asignadas)
-function isQ28FullyAnswered() {
-    const selects = document.querySelectorAll('.q28-select');
-    if (selects.length === 0) return false;
-    
-    let answeredCount = 0;
-    selects.forEach(select => {
-        if (select.value && select.value !== '') {
-            // Se considera completado si han elegido un valor válido
-            answeredCount++;
-        }
-    });
-    return answeredCount === selects.length;
-}
-
-// Recalcular porcentaje global y actualizar barra de progreso dinámicamente [cite: 363]
-function updateLiveProgressBar() {
-    const totalQuestions = 30;
-    const completedBoxes = document.querySelectorAll('.activities-grid .activity-box.completed').length;
-    const percent = Math.round((completedBoxes / totalQuestions) * 100);
-    
-    const percentText = document.getElementById('progress-percent-text');
-    const fillBar = document.getElementById('progress-fill-bar');
-    const progressTextLabel = document.getElementById('progress-text-label');
-    
-    if (percentText) percentText.innerText = `${percent}%`;
-    if (fillBar) fillBar.style.width = `${percent}%`;
-    if (progressTextLabel) progressTextLabel.innerText = `Progreso del Formulario (${percent}%)`;
-}
-
 function updateProgressGrid() {
-    // 1. Cargar estados iniciales desde PHP y mapear la cuadrícula
+    // 1. Cargar estados iniciales desde PHP
     Object.keys(backendProgress).forEach(qNum => {
         const box = document.getElementById(`grid-box-${qNum}`);
         if(box) {
-            // Caso Especial Pregunta 28: Depende de que todas las subpruebas estén llenas 
-            if (parseInt(qNum) === 28) {
-                if (isQ28FullyAnswered()) {
-                    box.classList.remove('pending');
-                    box.classList.add('completed');
-                } else {
-                    box.classList.remove('completed');
-                    box.classList.add('pending');
-                }
+            if(backendProgress[qNum].completed) {
+                box.classList.remove('pending');
+                box.classList.add('completed');
             } else {
-                // Flujo normal para las demás preguntas de Sí o No 
-                if(backendProgress[qNum].completed) {
-                    box.classList.remove('pending');
-                    box.classList.add('completed');
-                } else {
-                    box.classList.remove('completed');
-                    box.classList.add('pending');
-                }
+                box.classList.remove('completed');
+                box.classList.add('pending');
             }
         }
     });
 
-    // Calcular y renderizar el progreso inicial
-    updateLiveProgressBar();
-
-    // 2. Escuchar cambios dinámicos en los radios (Preguntas 1 - 27 y 29 - 30)
+    // 2. Escuchar cambios dinámicos en los radios para actualizar la UI sin guardar
     document.querySelectorAll('.q-radio').forEach(radio => {
         radio.addEventListener('change', function() {
             const qNum = this.getAttribute('data-qnum');
-            if (parseInt(qNum) === 28) return; // Ignoramos la 28 aquí
-
             const box = document.getElementById(`grid-box-${qNum}`);
             if (box && this.checked) {
                 box.classList.remove('pending');
                 box.classList.add('completed');
-                updateLiveProgressBar();
-            }
-        });
-    });
-
-    // 3. Escuchar cambios dinámicos en los Selects de la Pregunta 28
-    document.querySelectorAll('.q28-select').forEach(select => {
-        select.addEventListener('change', function() {
-            const box = document.getElementById('grid-box-28');
-            if (box) {
-                if (isQ28FullyAnswered()) {
-                    box.classList.remove('pending');
-                    box.classList.add('completed');
-                } else {
-                    box.classList.remove('completed');
-                    box.classList.add('pending');
-                }
-                updateLiveProgressBar();
             }
         });
     });
@@ -480,11 +540,6 @@ function calculateLiveRisk() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Escuchar cambios para actualizar el badge del cálculo del nivel de riesgo acumulado
-    document.querySelectorAll('.q28-select').forEach(select => {
-        select.addEventListener('change', calculateLiveRisk);
-    });
-
     calculateLiveRisk();
     updateProgressGrid();
 });
