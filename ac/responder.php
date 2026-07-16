@@ -52,7 +52,7 @@ include '../ac/conect-responder.php';
             }
             ?></strong></div>
 
-    <div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 2; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
+    <div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 3; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
         <div class="gauge-wrapper" style="width: 100%; max-width: 210px; height: auto; display: flex; justify-content: center; align-items: center;">
             <svg class="gauge-svg" viewBox="0 -12 200 122" width="100%" height="100%">
                 
