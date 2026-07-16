@@ -236,72 +236,51 @@ include '../ac/conect-responder.php';
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Función para actualizar barra de progreso analizando las clases del grid
-    function updateLiveProgressBar() {
-        const totalBoxes = 30;
-        let completedCount = 0;
-
-        for (let i = 1; i <= totalBoxes; i++) {
-            const box = document.getElementById(`grid-box-${i}`);
-            if (box && box.classList.contains('completed')) {
-                completedCount++;
-            }
-        }
-
-        const percentage = Math.round((completedCount / totalBoxes) * 100);
-        
-        // Elementos visuales
-        const barFill = document.getElementById('progress-bar-fill');
-        const percentageText = document.getElementById('progress-percentage-text');
-
-        if (barFill && percentageText) {
-            barFill.style.width = `${percentage}%`;
-            percentageText.textContent = `${completedCount} de ${totalBoxes} listos (${percentage}%)`;
-        }
-    }
-
-    // Escuchar cambios en los inputs de radio del cuestionario
-    const radioInputs = document.querySelectorAll('.q-radio');
-    radioInputs.forEach(radio => {
-        radio.addEventListener('change', function() {
-            const qNum = this.getAttribute('data-qnum');
-            const targetBox = document.getElementById(`grid-box-${qNum}`);
-            
-            // Si la pregunta 28 requiere lógica de subpruebas se valida diferente, 
-            // pero para las generales (o si se marca una opción válida):
-            if (targetBox) {
-                if (qNum == 28) {
-                    // Validación especial si es la pregunta 28 (se completa si todas las subpruebas tienen respuesta activa)
-                    if (isQ28FullyAnswered()) {
-                        targetBox.classList.remove('pending');
-                        targetBox.classList.add('completed');
-                    } else {
-                        targetBox.classList.remove('completed');
-                        targetBox.classList.add('pending');
-                    }
-                } else {
-                    targetBox.classList.remove('pending');
-                    targetBox.classList.add('completed');
-                }
-            }
-            updateLiveProgressBar();
-        });
-    });
-
-    // Función auxiliar de comprobación para la pregunta 28
+    
+    // Función para evaluar si la pregunta 28 está totalmente contestada
     function isQ28FullyAnswered() {
         const selects = document.querySelectorAll('.q28-select');
-        let fullyAnswered = true;
-        selects.forEach(sel => {
-            if (sel.value === 'No Aplica' || sel.value === '') {
-                // Si consideras que 'No Aplica' cuenta como respondida, puedes ajustar esta condición
+        if (selects.length === 0) return false;
+
+        let answeredCount = 0;
+        selects.forEach(select => {
+            // Se asume contestada si tiene un valor seleccionado válido y no vacío
+            if (select.value && select.value !== "" && select.value !== "Seleccione...") {
+                answeredCount++;
             }
         });
-        return fullyAnswered;
+
+        // Debug visual en consola de desarrollador (F12) para que verifiques cuántas van
+        console.log(`Progreso Pregunta 28: ${answeredCount} de ${selects.length} respondidas.`);
+
+        // Retorna TRUE únicamente si las 21 subpruebas están respondidas
+        return answeredCount === selects.length;
+    };
+
+    // Función principal para actualizar el estado visual de la cajita 28
+    function updateQ28VisualStatus() {
+        const box28 = document.getElementById('grid-box-28');
+        if (!box28) return;
+
+        if (isQ28FullyAnswered()) {
+            box28.classList.add('completed');
+        } else {
+            box28.classList.remove('completed');
+        }
+
+        // Llamar a la función global que recalcula la barra de progreso general (si existe)
+        if (typeof updateProgressBar === "function") {
+            updateProgressBar();
+        }
     }
 
-    // Primera ejecución al cargar el DOM para pintar el estado guardado
-    updateLiveProgressBar();
+    // Escuchar cambios en cualquiera de los selectores de la pregunta 28
+    document.querySelectorAll('.q28-select').forEach(select => {
+        select.addEventListener('change', updateQ28VisualStatus);
+    });
+
+    // Ejecución inicial al cargar la página para evaluar el estado guardado en BD
+    setTimeout(updateQ28VisualStatus, 500);
 });
 </script>
 <?php 
