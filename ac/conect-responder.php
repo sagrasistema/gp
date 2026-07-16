@@ -145,101 +145,115 @@ $rotationAngle = -90 + ($score * 1.8);
 ?>
 
 <style>
-/* Contenedor principal con espacio controlado para evitar desbordes */
-.gauge-container {
-    position: relative;
-    width: 140px; 
-    height: 90px; 
-    margin: 0;
-    overflow: visible; /* Permite que los números sobresalgan sutilmente */
+/* Contenedor exterior que agrupa el tacómetro y sus números */
+.gauge-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 180px; /* Tamaño ideal para que sea visible y detallado */
+    user-select: none;
 }
 
-/* Semicírculo de fondo con los COLORES MUCHO MÁS GRANDES (Grosor: 20px) */
+/* El contenedor que recorta el círculo para simular un semicírculo perfecto */
+.gauge-container {
+    position: relative;
+    width: 160px;
+    height: 80px; /* Exactamente la mitad del ancho para el semicírculo */
+    overflow: hidden;
+}
+
+/* Semicírculo de colores con un grosor de 24px para un look imponente */
 .gauge-arc {
     position: absolute;
     top: 0;
-    left: 10px; /* Centrado dentro de los 140px de ancho */
-    width: 120px; 
-    height: 120px; 
+    left: 0;
+    width: 160px;
+    height: 160px; /* Círculo completo que recortará el contenedor */
     border-radius: 50%;
     box-sizing: border-box;
-    border: 20px solid #e2e8f0; /* Subido a 20px para mayor impacto visual */
+    /* Borde de color grueso de 24px */
+    border: 24px solid transparent; 
     
-    /* Degradado cónico: Verde -> Amarillo -> Naranja -> Rojo */
+    /* Gradiente cónico con cortes de color limpios imitando la imagen de referencia */
     background: conic-gradient(
-        from 180deg at 50% 50%,
-        #22c55e 0deg,   /* Verde */
-        #eab308 60deg,  /* Amarillo */
-        #f97316 120deg, /* Naranja */
-        #ef4444 180deg, /* Rojo */
-        #e2e8f0 180deg
-    );
+        from 270deg at 50% 50%,
+        #22c55e 0deg,    /* Verde (Bajo) */
+        #eab308 45deg,   /* Amarillo (Moderado) */
+        #f97316 135deg,  /* Naranja (Moderado-Alto) */
+        #ef4444 180deg,  /* Rojo (Alto) */
+        transparent 180deg
+    ) border-box;
     
-    /* Máscara radial exacta: Radio total (60px) - grosor (20px) = 40px */
-    mask: radial-gradient(circle, transparent 39px, #000 40px);
-    -webkit-mask: radial-gradient(circle, transparent 39px, #000 40px);
-    transform: rotate(90deg); 
+    transform: rotate(-90deg); /* Alinea el inicio en el extremo izquierdo */
+    pointer-events: none;
 }
 
-/* Aguja del tacómetro ajustada al nuevo radio */
+/* Aguja estilizada tipo indicador real */
 .gauge-needle {
     position: absolute;
-    bottom: 30px; /* Alineado al nuevo eje central */
+    bottom: 0;
     left: 50%;
-    width: 4px; 
-    height: 44px; /* Longitud ideal para no pisar la franja gruesa de color */
+    width: 4px;
+    height: 62px; /* Largo de la aguja */
     background-color: #1e293b;
-    border-radius: 3px; 
+    border-radius: 4px 4px 0 0;
     transform-origin: bottom center;
-    /* La rotación se calcula dinámicamente con tu PHP */
-    transform: translateX(-50%) rotate(<?= $rotationAngle ?? 0 ?>deg);
-    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 2;
+    z-index: 5;
+    /* Transición fluida para simular el movimiento físico de la aguja */
+    transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Pin del centro de rotación */
+/* Pin central con estilo cromado/metálico como el de tu referencia */
 .gauge-center-pin {
     position: absolute;
-    bottom: 25px; /* Ajustado al eje de la aguja */
+    bottom: -10px; /* Centrado en la base del recorte */
     left: 50%;
-    width: 12px; 
-    height: 12px; 
-    background-color: #1e293b;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, #f8fafc 0%, #64748b 70%, #1e293b 100%);
+    border: 2px solid #ffffff;
     border-radius: 50%;
     transform: translateX(-50%);
-    border: 2px solid #fff; 
-    z-index: 3;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    z-index: 6;
 }
 
-/* --- ESTILOS DE LOS NÚMEROS DE CRITERIOS --- */
-.gauge-label {
+/* Contenedor de las etiquetas de criterios */
+.gauge-labels {
+    position: relative;
+    width: 176px; /* Ligeramente más ancho para acompañar la curva */
+    height: 20px;
+    margin-top: 6px;
+}
+
+/* Estilo común para los números */
+.label-item {
     position: absolute;
+    font-family: system-ui, -apple-system, sans-serif;
     font-size: 11px;
     font-weight: 700;
-    color: #64748b; /* Color slate intermedio elegante */
-    font-family: system-ui, -apple-system, sans-serif;
-    user-select: none;
-    line-height: 1;
+    color: #475569; /* Slate oscuro para legibilidad */
+    text-align: center;
 }
 
-/* Posiciones calculadas para calzar en las zonas de color */
-.lbl-criterio-1 {
-    bottom: 25px;
-    left: 0px; /* Esquina inferior izquierda (Zona Verde) */
+/* Posicionamiento exacto de los números según los arcos de color */
+.score-1 {
+    left: 8px;
+    top: -18px; /* Cerca de la base verde */
 }
 
-.lbl-criterio-2 {
-    top: 5px;
-    left: 32px; /* Cuadrante superior izquierdo (Zona Amarilla) */
+.score-2 {
+    left: 42px;
+    top: -42px; /* Debajo de la transición verde-amarillo */
 }
 
-.lbl-criterio-3 {
-    top: 5px;
-    right: 32px; /* Cuadrante superior derecho (Zona Naranja) */
+.score-3 {
+    right: 42px;
+    top: -42px; /* Debajo de la transición amarillo-naranja */
 }
 
-.lbl-criterio-4 {
-    bottom: 25px;
-    right: 0px; /* Esquina inferior derecha (Zona Roja) */
+.score-4 {
+    right: 8px;
+    top: -18px; /* Cerca de la base roja */
 }
 </style>
