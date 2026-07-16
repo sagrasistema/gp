@@ -136,7 +136,6 @@ $currentTab     = 'aceptacion';
 
 include '../main/layout_header.php'; 
 // 1. Lógica para determinar el ángulo del Tacómetro basado en el riskScore (0 a 100)
-// Mapeamos el score (0-100) a un ángulo de rotación de la aguja (de -90deg a 90deg)
 $score = isset($acData->riskScore) ? floatval($acData->riskScore) : 0;
 if ($score < 0) $score = 0;
 if ($score > 100) $score = 100;
@@ -148,9 +147,9 @@ $rotationAngle = -90 + ($score * 1.8);
 <style>
     .gauge-container {
         position: relative;
-        width: 80px;
-        height: 44px;
-        margin: 0 auto;
+        width: 160px; /* Tamaño aumentado al doble */
+        height: 88px;  /* Altura proporcional para el semicírculo */
+        margin: 0.5rem 0 0 auto; /* Alineado a la derecha con margen superior */
         overflow: hidden;
     }
     /* Semicírculo de fondo (el arco de colores) */
@@ -158,50 +157,50 @@ $rotationAngle = -90 + ($score * 1.8);
         position: absolute;
         top: 0;
         left: 0;
-        width: 80px;
-        height: 80px;
+        width: 160px;
+        height: 160px;
         border-radius: 50%;
         box-sizing: border-box;
-        border: 8px solid #e2e8f0; /* Color base gris */
-        /* Degradado cónico que simula: Verde -> Amarillo -> Naranja -> Rojo */
+        border: 15px solid #e2e8f0; /* Bordes más gruesos proporcionalmente */
+        /* Degradado cónico: Verde -> Amarillo -> Naranja -> Rojo */
         background: conic-gradient(
             from 180deg at 50% 50%,
-            #22c55e 0deg,   /* Verde (Riesgo Bajo) */
-            #eab308 60deg,  /* Amarillo (Moderado) */
-            #f97316 120deg, /* Naranja (Moderado-Alto) */
-            #ef4444 180deg, /* Rojo (Alto) */
+            #22c55e 0deg,   /* Verde */
+            #eab308 60deg,  /* Amarillo */
+            #f97316 120deg, /* Naranja */
+            #ef4444 180deg, /* Rojo */
             #e2e8f0 180deg
         );
-        mask: radial-gradient(circle, transparent 30px, #000 31px);
-        -webkit-mask: radial-gradient(circle, transparent 30px, #000 31px);
-        transform: rotate(90deg); /* Alinea el semicírculo hacia arriba */
+        mask: radial-gradient(circle, transparent 64px, #000 65px);
+        -webkit-mask: radial-gradient(circle, transparent 64px, #000 65px);
+        transform: rotate(90deg); /* Apunta el semicírculo hacia arriba */
     }
     /* La aguja del tacómetro */
     .gauge-needle {
         position: absolute;
         bottom: 0;
         left: 50%;
-        width: 4px;
-        height: 34px;
-        background-color: #1e293b; /* Color oscuro para la aguja */
+        width: 6px; /* Aguja ligeramente más gruesa para mejor visualización */
+        height: 70px; /* Más larga para el nuevo radio */
+        background-color: #1e293b;
         border-radius: 4px;
         transform-origin: bottom center;
         /* Aplicamos el ángulo dinámico calculado en PHP */
         transform: translateX(-50%) rotate(<?= $rotationAngle ?>deg);
-        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 2;
     }
     /* El pin o centro donde rota la aguja */
     .gauge-center-pin {
         position: absolute;
-        bottom: -4px;
+        bottom: -6px;
         left: 50%;
-        width: 12px;
-        height: 12px;
+        width: 20px; /* Pin central más robusto */
+        height: 20px;
         background-color: #1e293b;
         border-radius: 50%;
         transform: translateX(-50%);
-        border: 2px solid #fff;
+        border: 3px solid #fff;
         z-index: 3;
     }
 </style>
