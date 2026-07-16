@@ -52,24 +52,31 @@ include '../ac/conect-responder.php';
             }
             ?></strong></div>
 
-    <div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 3; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
+<div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 3; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
         <div class="gauge-wrapper" style="width: 100%; max-width: 210px; height: auto; display: flex; justify-content: center; align-items: center;">
             <svg class="gauge-svg" viewBox="0 -12 200 122" width="100%" height="100%">
                 
-                <path d="M 8 100 A 92 92 0 0 1 35 35 L 52 52 A 68 68 0 0 0 32 100 Z" fill="#22c55e" />
-                <path d="M 35 35 A 92 92 0 0 1 100 8 L 100 32 A 68 68 0 0 0 52 52 Z" fill="#eab308" />
-                <path d="M 100 8 A 92 92 0 0 1 165 35 L 148 52 A 68 68 0 0 0 100 32 Z" fill="#f97316" />
-                <path d="M 165 35 A 92 92 0 0 1 192 100 L 168 100 A 68 68 0 0 0 148 52 Z" fill="#ef4444" />
+                <path d="M 8 100 A 92 92 0 0 1 25.6 45.9 L 45.0 60.0 A 68 68 0 0 0 32 100 Z" fill="#22c55e" />
+                
+                <path d="M 25.6 45.9 A 92 92 0 0 1 71.6 12.5 L 79.0 35.3 A 68 68 0 0 0 45.0 60.0 Z" fill="#84cc16" />
+                
+                <path d="M 71.6 12.5 A 92 92 0 0 1 128.4 12.5 L 121.0 35.3 A 68 68 0 0 0 79.0 35.3 Z" fill="#eab308" />
+                
+                <path d="M 128.4 12.5 A 92 92 0 0 1 174.4 45.9 L 155.0 60.0 A 68 68 0 0 0 121.0 35.3 Z" fill="#f97316" />
+                
+                <path d="M 174.4 45.9 A 92 92 0 0 1 192 100 L 168 100 A 68 68 0 0 0 155.0 60.0 Z" fill="#ef4444" />
 
                 <text x="2" y="112" class="gauge-text">0</text>
-                <text x="22" y="22" class="gauge-text">25</text>
-                <text x="100" y="-3" class="gauge-text">50</text>
-                <text x="178" y="22" class="gauge-text">75</text>
+                <text x="21" y="34" class="gauge-text">20</text>
+                <text x="64" y="2" class="gauge-text">40</text>
+                <text x="136" y="2" class="gauge-text">60</text>
+                <text x="179" y="34" class="gauge-text">80</text>
                 <text x="198" y="112" class="gauge-text">100</text>
 
                 <?php
                 $score = isset($acData->riskScore) ? (float)$acData->riskScore : 0;
                 $clampedScore = max(0, min(100, $score));
+                // Mapeo perfecto de 0-100 puntos a -90deg hasta 90deg de rotación
                 $angle = -90 + (($clampedScore - 0) / (100 - 0)) * 180;
                 ?>
                 <g transform="rotate(<?= $angle ?>, 100, 100)">
