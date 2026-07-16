@@ -257,7 +257,7 @@
 .progress-footer span, 
 .progress-percentage {
     font-size: 11px !important; /* Tamaño sutil acorde al resto de la interfaz */
-    color: #64748b; /* Gris muted para que no compita visualmente */
+    color: #64748b; /* Gris muted para que no compita visualme */
     font-weight: 500;
 }
 
