@@ -39,61 +39,55 @@ include '../ac/conect-responder.php';
             <i class="ri-checkbox-circle-fill"></i> Respuestas guardadas y nivel de riesgo recalculado de forma correcta.
         </div>
     <?php endif; ?>
-<div class="meta-summary" style="display: flex; flex-direction: column; gap: 1.25rem; width: 100%;">
-    
-    <div class="meta-row-top" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; width: 100%;">
-        <div class="meta-item" style="width: 100%;">Client / Empresa <br><strong><?= htmlspecialchars($acData->clientName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-        <div class="meta-item" style="width: 100%;">Tipo Evaluación <br><strong><?= htmlspecialchars($acData->typeName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-        <div class="meta-item" style="width: 100%;">Naturaleza del Servicio <br><strong><?= htmlspecialchars($acData->serviceName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-        <div class="meta-item" style="width: 100%;">Período de la AC <br><strong><?php 
-                if (!empty($acData->startDate) && !empty($acData->endDate)) {
-                    echo "Desde " . date('Y-m-d', strtotime($acData->startDate)) . " Hasta " . date('Y-m-d', strtotime($acData->endDate));
-                } else {
-                    echo "SIN ASIGNAR";
-                }
-                ?></strong></div>
-
-        <div class="meta-item" style="grid-column: span 4; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color, #e2e8f0); padding-bottom: 0.75rem; margin-top: 0.25rem;">
-            </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; width: 100%; align-items: center;">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div class="meta-item" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem; width: 100%;">
-            <span style="font-size: 0.8rem; color: var(--text-muted, #64748b); font-weight: 500;">Riesgo Calculado Matriz</span>
-            <?php
-            $riskClass = 'risk-bajo';
-            $riskIcon = 'ri-checkbox-circle-line';
-            
-            if ($acData->riskLevel === 'Moderado') { $riskClass = 'risk-moderado'; $riskIcon = 'ri-alert-line'; }
-            elseif ($acData->riskLevel === 'Moderado-Alto') { $riskClass = 'risk-moderado-alto'; $riskIcon = 'ri-error-warning-line'; }
-            elseif ($acData->riskLevel === 'Alto') { $riskClass = 'risk-alto'; $riskIcon = 'ri-close-circle-line'; }
-            ?>
-            <span id="live-risk-badge" class="badge-risk <?= $riskClass ?>" style="white-space: nowrap;">
-                <i class="<?= $riskIcon ?>"></i> <?= $acData->riskScore ?> Pts (<?= $acData->riskLevel ?>)
-            </span>
-        </div>
-    </div>
-
-    <hr style="margin: 0; border: 0; border-top: 1px solid var(--border-color, #e2e8f0); opacity: 0.6;">
-
-    <div class="meta-row-bottom" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; width: 100%; align-items: center;">
-        <div class="meta-item" style="width: 100%;">Socio Líder de A&C <br><strong><?= htmlspecialchars($acData->partnerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-        <div class="meta-item" style="width: 100%;">Gerente de A&C <br><strong><?= htmlspecialchars($acData->managerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-        <div class="meta-item" style="width: 100%;">Socio de Riesgo <br><strong><?= htmlspecialchars($acData->riskUserId, ENT_QUOTES, 'UTF-8') ?></strong></div>
+    <div class="meta-summary" style="display: flex; flex-direction: column; gap: 1.25rem; width: 100%;">
         
-        <div class="meta-item" style="display: flex; justify-content: flex-end; width: 100%;">
-            <div class="gauge-container" style="margin: 0;">
-                <div class="gauge-arc"></div>
-                <div class="gauge-needle"></div>
-                <div class="gauge-center-pin"></div>
+        <div class="meta-row-top" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5rem; width: 100%; align-items: center;">
+            <div class="meta-item">Client / Empresa <br><strong><?= htmlspecialchars($acData->clientName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+            <div class="meta-item">Tipo Evaluación <br><strong><?= htmlspecialchars($acData->typeName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+            <div class="meta-item">Naturaleza del Servicio <br><strong><?= htmlspecialchars($acData->serviceName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+            <div class="meta-item">Período de la AC <br><strong><?php 
+                    if (!empty($acData->startDate) && !empty($acData->endDate)) {
+                        echo "Desde " . date('Y-m-d', strtotime($acData->startDate)) . " Hasta " . date('Y-m-d', strtotime($acData->endDate));
+                    } else {
+                        echo "SIN ASIGNAR";
+                    }
+                    ?></strong></div>
+
+            <div class="meta-item" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
+                <span style="font-size: 0.8rem; color: var(--text-muted, #64748b); font-weight: 500;">Riesgo Calculado Matriz</span>
+                <?php
+                $riskClass = 'risk-bajo';
+                $riskIcon = 'ri-checkbox-circle-line';
+                
+                if ($acData->riskLevel === 'Moderado') { $riskClass = 'risk-moderado'; $riskIcon = 'ri-alert-line'; }
+                elseif ($acData->riskLevel === 'Moderado-Alto') { $riskClass = 'risk-moderado-alto'; $riskIcon = 'ri-error-warning-line'; }
+                elseif ($acData->riskLevel === 'Alto') { $riskClass = 'risk-alto'; $riskIcon = 'ri-close-circle-line'; }
+                ?>
+                <span id="live-risk-badge" class="badge-risk <?= $riskClass ?>" style="white-space: nowrap;">
+                    <i class="<?= $riskIcon ?>"></i> <?= $acData->riskScore ?> Pts (<?= $acData->riskLevel ?>)
+                </span>
             </div>
         </div>
-    </div>
 
-</div>
+        <hr style="margin: 0; border: 0; border-top: 1px solid var(--border-color, #e2e8f0); opacity: 0.6;">
+
+        <div class="meta-row-bottom" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5rem; width: 100%; align-items: center;">
+            <div class="meta-item">Socio Líder de A&C <br><strong><?= htmlspecialchars($acData->partnerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+            <div class="meta-item">Gerente de A&C <br><strong><?= htmlspecialchars($acData->managerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+            <div class="meta-item">Socio de Riesgo <br><strong><?= htmlspecialchars($acData->riskUserId, ENT_QUOTES, 'UTF-8') ?></strong></div>
+            
+            <div class="meta-item"></div>
+            
+            <div class="meta-item" style="display: flex; justify-content: flex-end; width: 100%;">
+                <div class="gauge-container" style="margin: 0;">
+                    <div class="gauge-arc"></div>
+                    <div class="gauge-needle"></div>
+                    <div class="gauge-center-pin"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 
     <div class="activities-grid-card">
         <h3><i class="ri-grid-fill" style="color: var(--accent);"></i> Progreso General de Actividades (1-30)</h3>
