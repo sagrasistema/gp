@@ -52,8 +52,9 @@ include '../ac/conect-responder.php';
             }
             ?></strong></div>
 
-<div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 3; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
-        <div class="gauge-wrapper" style="width: 100%; max-width: 210px; height: auto; display: flex; justify-content: center; align-items: center;">
+    <div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 3; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
+        <div class="gauge-wrapper" style="width: 100%; max-width: 210px; height: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.5rem;">
+            
             <svg class="gauge-svg" viewBox="0 -12 200 122" width="100%" height="100%">
                 
                 <path d="M 8 100 A 92 92 0 0 1 25.6 45.9 L 45.0 60.0 A 68 68 0 0 0 32 100 Z" fill="#22c55e" />
@@ -76,7 +77,6 @@ include '../ac/conect-responder.php';
                 <?php
                 $score = isset($acData->riskScore) ? (float)$acData->riskScore : 0;
                 $clampedScore = max(0, min(100, $score));
-                // Mapeo perfecto de 0-100 puntos a -90deg hasta 90deg de rotación
                 $angle = -90 + (($clampedScore - 0) / (100 - 0)) * 180;
                 ?>
                 <g transform="rotate(<?= $angle ?>, 100, 100)">
@@ -86,6 +86,25 @@ include '../ac/conect-responder.php';
                 <circle cx="100" cy="100" r="11" fill="#1e293b" stroke="#ffffff" stroke-width="2.5" />
                 <circle cx="100" cy="100" r="4" fill="#94a3b8" />
             </svg>
+
+            <div class="gauge-legend" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; width: 100%; margin-top: -10px;">
+                <span style="font-size: 8.5px; font-weight: bold; display: flex; align-items: center; gap: 2.5px; color: #475569;">
+                    <span style="width: 7px; height: 7px; background-color: #22c55e; border-radius: 50%; display: inline-block;"></span>Bajo
+                </span>
+                <span style="font-size: 8.5px; font-weight: bold; display: flex; align-items: center; gap: 2.5px; color: #475569;">
+                    <span style="width: 7px; height: 7px; background-color: #84cc16; border-radius: 50%; display: inline-block;"></span>B-Mod
+                </span>
+                <span style="font-size: 8.5px; font-weight: bold; display: flex; align-items: center; gap: 2.5px; color: #475569;">
+                    <span style="width: 7px; height: 7px; background-color: #eab308; border-radius: 50%; display: inline-block;"></span>Mod
+                </span>
+                <span style="font-size: 8.5px; font-weight: bold; display: flex; align-items: center; gap: 2.5px; color: #475569;">
+                    <span style="width: 7px; height: 7px; background-color: #f97316; border-radius: 50%; display: inline-block;"></span>Mod-Alto
+                </span>
+                <span style="font-size: 8.5px; font-weight: bold; display: flex; align-items: center; gap: 2.5px; color: #475569;">
+                    <span style="width: 7px; height: 7px; background-color: #ef4444; border-radius: 50%; display: inline-block;"></span>Alto
+                </span>
+            </div>
+
         </div>
     </div>
 
