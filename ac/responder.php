@@ -68,11 +68,7 @@ include '../ac/conect-responder.php';
                     <i class="<?= $riskIcon ?>"></i> <?= $acData->riskScore ?> Pts (<?= $acData->riskLevel ?>)
                 </span>
                 
-                <div class="gauge-container">
-                    <div class="gauge-arc"></div>
-                    <div class="gauge-needle"></div>
-                    <div class="gauge-center-pin"></div>
-                </div>
+                
             </div>
         </div>
 
@@ -83,7 +79,13 @@ include '../ac/conect-responder.php';
             <div class="meta-item">Gerente de A&C <strong><?= htmlspecialchars($acData->managerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
             <div class="meta-item">Socio de Riesgo <strong><?= htmlspecialchars($acData->riskUserId, ENT_QUOTES, 'UTF-8') ?></strong></div>
             <div class="meta-item"></div>
-            <div class="meta-item"></div>
+            <div class="meta-item">
+                <div class="gauge-container">
+                    <div class="gauge-arc"></div>
+                    <div class="gauge-needle"></div>
+                    <div class="gauge-center-pin"></div>
+                </div>
+            </div>
         </div>
 
     </div>
