@@ -78,13 +78,13 @@ include '../ac/conect-responder.php';
                     <textPath href="#path-bajo" startOffset="50%">BAJO</textPath>
                 </text>
                 <text font-size="6.5" font-weight="800" fill="#1e293b" text-anchor="middle">
-                    <textPath href="#path-bajo-mod" startOffset="50%">B-MOD</textPath>
+                    <textPath href="#path-bajo-mod" startOffset="50%">BAJO-MODERADO</textPath>
                 </text>
                 <text font-size="7.5" font-weight="800" fill="#1e293b" text-anchor="middle">
-                    <textPath href="#path-mod" startOffset="50%">MOD</textPath>
+                    <textPath href="#path-mod" startOffset="50%">MODERADO</textPath>
                 </text>
                 <text font-size="6.5" font-weight="800" fill="#ffffff" text-anchor="middle">
-                    <textPath href="#path-mod-alto" startOffset="50%">M-ALTO</textPath>
+                    <textPath href="#path-mod-alto" startOffset="50%">MODERADO-ALTO</textPath>
                 </text>
                 <text font-size="7.5" font-weight="800" fill="#ffffff" text-anchor="middle">
                     <textPath href="#path-alto" startOffset="50%">ALTO</textPath>
