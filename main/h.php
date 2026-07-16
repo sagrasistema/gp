@@ -206,6 +206,28 @@
         .question-inputs { grid-template-columns: 1fr; gap: 1rem; }
         .activities-grid { grid-template-columns: repeat(6, 1fr); }
     }
+    .meta-item {
+    font-size: 11px !important; /* Tamaño pequeño y sutil para las etiquetas */
+    color: var(--text-muted, #64748b); /* Color gris elegante */
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+/* 2. Controla los valores principales en negrita (ej: MAXCA C.A., SIN ASIGNAR) */
+.meta-item strong {
+    display: inline-block;
+    margin-top: 3px; /* Pequeña separación vertical con la etiqueta */
+    font-size: 13px !important; /* Tamaño jerárquico perfecto para destacar la información */
+    color: var(--text-dark, #1e293b); /* Slate oscuro muy profesional */
+    font-weight: 700;
+}
+
+/* 3. Ajuste de tamaño para el Badge de Riesgo */
+.badge-risk {
+    font-size: 11px !important; /* Reduce el tamaño del badge de riesgo para que juegue con el entorno */
+    padding: 0.2rem 0.5rem !important;
+    font-weight: 600;
+}
 
     </style>
 </head>
