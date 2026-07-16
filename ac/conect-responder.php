@@ -146,6 +146,7 @@ $rotationAngle = -90 + ($score * 1.8);
 
 <style>
 /* Contenedor externo del Tacómetro */
+/* Contenedor externo para el tacómetro */
 .gauge-wrapper {
     display: inline-flex;
     justify-content: center;
@@ -156,23 +157,24 @@ $rotationAngle = -90 + ($score * 1.8);
     overflow: visible;
 }
 
-/* El elemento SVG se comporta de manera responsiva y fluida */
+/* Forzamos que el SVG renderice los colores con la máxima calidad */
 .gauge-svg {
     display: block;
     overflow: visible;
+    shape-rendering: geometricPrecision;
 }
 
-/* Estilos de los textos de los Criterios (1, 2, 3, 4) */
+/* Asegura el contraste, tamaño y fuente de tus etiquetas de riesgo */
 .gauge-text {
     font-family: system-ui, -apple-system, sans-serif;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 800;
-    fill: #475569; /* Color gris pizarra oscuro para excelente contraste */
+    fill: #475569; /* Gris pizarra oscuro */
     text-anchor: middle;
     dominant-baseline: middle;
 }
 
-/* Efecto de transición suave en caso de que la aguja se mueva dinámicamente */
+/* Transición suave para el movimiento físico de la aguja */
 .gauge-svg g {
     transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
 }

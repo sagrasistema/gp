@@ -77,43 +77,44 @@ include '../ac/conect-responder.php';
             <div class="meta-item">Socio de Riesgo <br><strong><?= htmlspecialchars($acData->riskUserId, ENT_QUOTES, 'UTF-8') ?></strong></div>
             
             <div class="meta-item"></div>
-            <div class="meta-item" style="display: flex; justify-content: flex-end; width: 100%;">
-                <div class="gauge-wrapper">
-                    <svg class="gauge-svg" viewBox="0 0 200 115" width="160" height="92">
-                        <defs>
-                            <linearGradient id="needleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stop-color="#1e293b" />
-                                <stop offset="50%" stop-color="#475569" />
-                                <stop offset="100%" stop-color="#0f172a" />
-                            </linearGradient>
-                            <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-                                <drop-shadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.15"/>
-                            </filter>
-                        </defs>
+<div class="meta-item" style="display: flex; justify-content: flex-end; width: 100%;">
+    <div class="gauge-wrapper">
+        <svg class="gauge-svg" viewBox="0 0 200 115" width="160" height="92">
+            <path d="M 20 100 A 80 80 0 0 1 56.5 43.5" fill="none" stroke="#22c55e" stroke-width="24"/>
+            <path d="M 56.5 43.5 A 80 80 0 0 1 100 20" fill="none" stroke="#eab308" stroke-width="24"/>
+            <path d="M 100 20 A 80 80 0 0 1 143.5 43.5" fill="none" stroke="#f97316" stroke-width="24"/>
+            <path d="M 143.5 43.5 A 80 80 0 0 1 180 100" fill="none" stroke="#ef4444" stroke-width="24"/>
 
-                        <path d="M 20 100 A 80 80 0 0 1 56.5 43.5" fill="none" stroke="#22c55e" stroke-width="24" filter="url(#shadow)"/>
-                        <path d="M 56.5 43.5 A 80 80 0 0 1 100 20" fill="none" stroke="#eab308" stroke-width="24" filter="url(#shadow)"/>
-                        <path d="M 100 20 A 80 80 0 0 1 143.5 43.5" fill="none" stroke="#f97316" stroke-width="24" filter="url(#shadow)"/>
-                        <path d="M 143.5 43.5 A 80 80 0 0 1 180 100" fill="none" stroke="#ef4444" stroke-width="24" filter="url(#shadow)"/>
+            <text x="12" y="112" class="gauge-text">0</text>
+            <text x="40" y="32" class="gauge-text">25</text>
+            <text x="100" y="15" class="gauge-text">50</text>
+            <text x="160" y="32" class="gauge-text">75</text>
+            <text x="184" y="112" class="gauge-text">100</text>
 
-                        <text x="12" y="112" class="gauge-text">1</text>
-                        <text x="40" y="32" class="gauge-text">2</text>
-                        <text x="148" y="32" class="gauge-text">3</text>
-                        <text x="180" y="112" class="gauge-text">4</text>
+            <?php
+            // Lógica para mapear tu score de riesgo (ej. de 0 a 100 Pts) a grados (-90 a 90)
+            $score = isset($acData->riskScore) ? (float)$acData->riskScore : 0;
+            
+            // Suponiendo un rango estándar de 0 a 100 pts:
+            // Mapeamos linealmente: 0 Pts -> -90° (Inicio del verde), 100 Pts -> 90° (Final del rojo)
+            $minScore = 0;
+            $maxScore = 100;
+            
+            // Limitamos los extremos para que la aguja no de vueltas locas
+            $clampedScore = max($minScore, min($maxScore, $score));
+            
+            // Fórmula de mapeo lineal a ángulo (-90 a +90)
+            $angle = -90 + (($clampedScore - $minScore) / ($maxScore - $minScore)) * 180;
+            ?>
+            <g transform="rotate(<?= $angle ?>, 100, 100)">
+                <path d="M 97 100 L 99.5 12 L 100.5 12 L 103 100 Z" fill="#1e293b" />
+            </g>
 
-                        <?php
-                        // Mapeo sugerido de tu valor o ángulo (ej: si $rotationAngle va de -90 a 90)
-                        $angle = $rotationAngle ?? 45; 
-                        ?>
-                        <g transform="rotate(<?= $angle ?>, 100, 100)">
-                            <path d="M 97 100 L 99 15 L 101 15 L 103 100 Z" fill="url(#needleGrad)" />
-                        </g>
-
-                        <circle cx="100" cy="100" r="10" fill="#1e293b" stroke="#ffffff" stroke-width="2.5" />
-                        <circle cx="100" cy="100" r="4" fill="#64748b" />
-                    </svg>
-                </div>
-            </div>
+            <circle cx="100" cy="100" r="11" fill="#1e293b" stroke="#ffffff" stroke-width="2" />
+            <circle cx="100" cy="100" r="4" fill="#94a3b8" />
+        </svg>
+    </div>
+</div>
 
             
         </div>
