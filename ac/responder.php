@@ -45,7 +45,7 @@ include '../ac/conect-responder.php';
     <div class="meta-row-top" style="display: flex; align-items: center; gap: 1.5rem; width: 100%; flex-wrap: wrap;">
         <div class="meta-item">Client / Empresa <strong><?= htmlspecialchars($acData->clientName, ENT_QUOTES, 'UTF-8') ?></strong></div>
         <div class="meta-item">Tipo Evaluación <strong><?= htmlspecialchars($acData->typeName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-        <div class="meta-item">Servicio Requerido <strong><?= htmlspecialchars($acData->serviceName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+        <div class="meta-item">Naturaleza del Servicio <strong><?= htmlspecialchars($acData->serviceName, ENT_QUOTES, 'UTF-8') ?></strong></div>
         <div class="meta-item">Período de la AC <strong><?php 
                 if (!empty($acData->startDate) && !empty($acData->endDate)) {
                     echo "Desde " . date('Y-m-d', strtotime($acData->startDate)) . " Hasta " . date('Y-m-d', strtotime($acData->endDate));
@@ -84,28 +84,8 @@ include '../ac/conect-responder.php';
             <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);"><?= htmlspecialchars($acData->managerName ?? 'SIN ASIGNAR', ENT_QUOTES, 'UTF-8') ?></strong>
         </div>
 
-        <div class="meta-item" style="display: flex; flex-direction: column; gap: 0.15rem;">
-            <span style="font-size: 0.75rem; color: var(--text-muted, #64748b); text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Naturaleza del Servicio</span>
-            <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);"><?= htmlspecialchars($acData->natureName ?? 'SIN ASIGNAR', ENT_QUOTES, 'UTF-8') ?></strong>
-        </div>
 
-        <div class="meta-item" style="display: flex; flex-direction: column; gap: 0.15rem;">
-            <span style="font-size: 0.75rem; color: var(--text-muted, #64748b); text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Servicio</span>
-            <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);"><?= htmlspecialchars($acData->serviceName ?? 'SIN ASIGNAR', ENT_QUOTES, 'UTF-8') ?></strong>
-        </div>
 
-        <div class="meta-item" style="display: flex; flex-direction: column; gap: 0.15rem;">
-            <span style="font-size: 0.75rem; color: var(--text-muted, #64748b); text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Período de la AC</span>
-            <strong style="font-size: 0.85rem; color: var(--text-color, #1e293b);">
-                <?php 
-                if (!empty($acData->startDate) && !empty($acData->endDate)) {
-                    echo "Desde " . date('Y-m-d', strtotime($acData->startDate)) . " Hasta " . date('Y-m-d', strtotime($acData->endDate));
-                } else {
-                    echo "SIN ASIGNAR";
-                }
-                ?>
-            </strong>
-        </div>
 
     </div>
 
