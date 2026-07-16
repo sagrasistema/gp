@@ -146,35 +146,35 @@ $rotationAngle = -90 + ($score * 1.8);
 
 <style>
 /* Contenedor externo del Tacómetro */
-/* Contenedor externo para el tacómetro */
+/* Contenedor del Tacómetro */
 .gauge-wrapper {
     display: inline-flex;
     justify-content: center;
     align-items: center;
     width: 160px;
-    height: 92px;
+    height: 94px;
     user-select: none;
     overflow: visible;
 }
 
-/* Forzamos que el SVG renderice los colores con la máxima calidad */
+/* Evita distorsiones en el renderizado vectorial */
 .gauge-svg {
     display: block;
     overflow: visible;
     shape-rendering: geometricPrecision;
 }
 
-/* Asegura el contraste, tamaño y fuente de tus etiquetas de riesgo */
+/* Estilo para los números del intervalo */
 .gauge-text {
     font-family: system-ui, -apple-system, sans-serif;
     font-size: 11px;
     font-weight: 800;
-    fill: #475569; /* Gris pizarra oscuro */
+    fill: #475569; /* Slate intermedio */
     text-anchor: middle;
     dominant-baseline: middle;
 }
 
-/* Transición suave para el movimiento físico de la aguja */
+/* Animación fluida de la aguja */
 .gauge-svg g {
     transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
 }

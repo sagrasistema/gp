@@ -79,38 +79,37 @@ include '../ac/conect-responder.php';
             <div class="meta-item"></div>
 <div class="meta-item" style="display: flex; justify-content: flex-end; width: 100%;">
     <div class="gauge-wrapper">
-        <svg class="gauge-svg" viewBox="0 0 200 115" width="160" height="92">
-            <path d="M 20 100 A 80 80 0 0 1 56.5 43.5" fill="none" stroke="#22c55e" stroke-width="24"/>
-            <path d="M 56.5 43.5 A 80 80 0 0 1 100 20" fill="none" stroke="#eab308" stroke-width="24"/>
-            <path d="M 100 20 A 80 80 0 0 1 143.5 43.5" fill="none" stroke="#f97316" stroke-width="24"/>
-            <path d="M 143.5 43.5 A 80 80 0 0 1 180 100" fill="none" stroke="#ef4444" stroke-width="24"/>
+        <svg class="gauge-svg" viewBox="0 -8 200 118" width="160" height="94">
+            
+            <path d="M 8 100 A 92 92 0 0 1 35 35 L 52 52 A 68 68 0 0 0 32 100 Z" fill="#22c55e" />
+            
+            <path d="M 35 35 A 92 92 0 0 1 100 8 L 100 32 A 68 68 0 0 0 52 52 Z" fill="#eab308" />
+            
+            <path d="M 100 8 A 92 92 0 0 1 165 35 L 148 52 A 68 68 0 0 0 100 32 Z" fill="#f97316" />
+            
+            <path d="M 165 35 A 92 92 0 0 1 192 100 L 168 100 A 68 68 0 0 0 148 52 Z" fill="#ef4444" />
 
-            <text x="12" y="112" class="gauge-text">0</text>
-            <text x="40" y="32" class="gauge-text">25</text>
-            <text x="100" y="15" class="gauge-text">50</text>
-            <text x="160" y="32" class="gauge-text">75</text>
-            <text x="184" y="112" class="gauge-text">100</text>
+            <text x="2" y="112" class="gauge-text">0</text>
+            <text x="23" y="24" class="gauge-text">25</text>
+            <text x="100" y="-1" class="gauge-text">50</text>
+            <text x="177" y="24" class="gauge-text">75</text>
+            <text x="198" y="112" class="gauge-text">100</text>
 
             <?php
-            // Lógica para mapear tu score de riesgo (ej. de 0 a 100 Pts) a grados (-90 a 90)
+            // Capturamos el score de riesgo de tu sistema (ej: 64 Pts)
             $score = isset($acData->riskScore) ? (float)$acData->riskScore : 0;
             
-            // Suponiendo un rango estándar de 0 a 100 pts:
-            // Mapeamos linealmente: 0 Pts -> -90° (Inicio del verde), 100 Pts -> 90° (Final del rojo)
-            $minScore = 0;
-            $maxScore = 100;
+            // Forzamos límites para evitar que la aguja se descontrole
+            $clampedScore = max(0, min(100, $score));
             
-            // Limitamos los extremos para que la aguja no de vueltas locas
-            $clampedScore = max($minScore, min($maxScore, $score));
-            
-            // Fórmula de mapeo lineal a ángulo (-90 a +90)
-            $angle = -90 + (($clampedScore - $minScore) / ($maxScore - $minScore)) * 180;
+            // Mapeo perfecto: 0 Pts -> -90° (Izquierda), 100 Pts -> 90° (Derecha)
+            $angle = -90 + (($clampedScore - 0) / (100 - 0)) * 180;
             ?>
             <g transform="rotate(<?= $angle ?>, 100, 100)">
-                <path d="M 97 100 L 99.5 12 L 100.5 12 L 103 100 Z" fill="#1e293b" />
+                <path d="M 97.5 100 L 99.5 10 L 100.5 10 L 102.5 100 Z" fill="#1e293b" />
             </g>
 
-            <circle cx="100" cy="100" r="11" fill="#1e293b" stroke="#ffffff" stroke-width="2" />
+            <circle cx="100" cy="100" r="11" fill="#1e293b" stroke="#ffffff" stroke-width="2.5" />
             <circle cx="100" cy="100" r="4" fill="#94a3b8" />
         </svg>
     </div>
