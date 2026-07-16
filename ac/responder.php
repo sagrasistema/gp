@@ -76,7 +76,7 @@ include '../ac/conect-responder.php';
             <div class="meta-item">Gerente de A&C <br><strong><?= htmlspecialchars($acData->managerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
             <div class="meta-item">Socio de Riesgo <br><strong><?= htmlspecialchars($acData->riskUserId, ENT_QUOTES, 'UTF-8') ?></strong></div>
             
-                 <div class="meta-item" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
+                <div class="meta-item">
                 <span style="font-size: 0.8rem; color: var(--text-muted, #64748b); font-weight: 500;">Riesgo Calculado Matriz</span>
                 <?php
                 $riskClass = 'risk-bajo';
