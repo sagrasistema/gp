@@ -52,9 +52,9 @@ include '../ac/conect-responder.php';
             }
             ?></strong></div>
 
-    <div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 3; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; width: 100%; height: 100%; padding: 0.25rem 0.75rem 0.25rem 0; box-sizing: border-box;">
+    <div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 3; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; padding: 0.25rem; box-sizing: border-box;">
         
-        <div class="gauge-wrapper" style="width: 100%; max-width: 260px; height: auto; display: flex; justify-content: center; align-items: center; margin-left: 0; margin-right: auto;">
+        <div class="gauge-wrapper" style="width: 100%; max-width: 260px; height: auto; display: flex; justify-content: center; align-items: center; margin: 0 auto;">
             <svg class="gauge-svg" viewBox="0 -12 200 122" width="100%" height="100%" style="display: block; overflow: visible;">
                 
                 <defs>
