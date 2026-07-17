@@ -138,7 +138,7 @@ include '../main/layout_header.php';
 // 1. Lógica para determinar el ángulo del Tacómetro basado en el riskScore (0 a 100)
 $score = isset($acData->riskScore) ? floatval($acData->riskScore) : 0;
 if ($score < 0) $score = 0;
-if ($score > 100) $score = 100;
+if ($score > 105) $score = 105;
 
 // Fórmula: -90 grados (mínimo, izquierda) a +90 grados (máximo, derecha)
 $rotationAngle = -90 + ($score * 1.8); 
