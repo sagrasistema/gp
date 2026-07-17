@@ -103,7 +103,6 @@ function calculateLiveRisk() {
         cssClass = 'risk-alto';
         iconClass = 'ri-close-circle-line';    // Círculo de error rojo (Peligro crítico)
     }
-
     const badge = document.getElementById('live-risk-badge');
     if (badge) {
         badge.className = `badge-risk ${cssClass}`;
