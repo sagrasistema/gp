@@ -141,7 +141,7 @@ include '../ac/conect-responder.php';
     <?php 
     // Generar los 30 botones del progreso interactivo
     for ($i = 1; $i <= 30; $i++): 
-        $isCompleted = false;
+        $isCompleted = true;
 
         if ($i === 28) {
             // Lógica ESPECIAL para la pregunta 28
