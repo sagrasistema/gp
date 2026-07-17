@@ -37,13 +37,13 @@ $activeTab = isset($currentTab) ? $currentTab : '';
                 <i class="ri-shield-check-line"></i>
                 <span>Aceptación</span>
             </a>
-            <a href="<?php echo $acPath; ?>" class="menu-item <?php echo ($activeTab === 'aceptacion') ? 'active' : ''; ?>">
+            <a href="<?php echo $acPath; ?>" class="menu-item <?php echo ($activeTab === 'terminos') ? 'active' : ''; ?>">
                 <i class="ri-shield-check-line"></i>
                 <span>Terminos y Condiciones</span>
             </a>
-            <a href="<?php echo $acPath; ?>" class="menu-item <?php echo ($activeTab === 'aceptacion') ? 'active' : ''; ?>">
+            <a href="<?php echo $acPath; ?>" class="menu-item <?php echo ($activeTab === 'proyecto') ? 'active' : ''; ?>">
                 <i class="ri-shield-check-line"></i>
-                <span>Projectos</span>
+                <span>Proyectos</span>
             </a>
             <a href="#" class="menu-item style-disabled">
                 <i class="ri-customer-service-2-line"></i>
