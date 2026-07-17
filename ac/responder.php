@@ -137,23 +137,37 @@ include '../ac/conect-responder.php';
 </div>
     <div class="activities-grid-card">
         <h3><i class="ri-grid-fill" style="color: var(--accent);"></i> Progreso General de Actividades (1-30)</h3>
-        <div class="activities-grid">
-            <?php 
-            // Generar los 30 botones del progreso interactivo
-            for ($i = 1; $i <= 30; $i++): 
-                // Verificar si esta pregunta ya fue respondida en BD
-                // Nota: se asume que las preguntas tienen IDs correlativos o que asociamos los números de forma directa.
-                // Buscaremos dinámicamente si la pregunta con questionNumber = $i tiene respuesta.
-                $isCompleted = false;
-                foreach($answersSaved as $qId => $ans) {
-                    // Como el ID de pregunta puede diferir, buscaremos más abajo la asociación exacta
-                }
-            ?>
-                <a href="#question-<?= $i ?>" id="grid-box-<?= $i ?>" class="activity-box pending" onclick="scrollToQuestion(<?= $i ?>, event)">
-                    <?= $i ?>
-                </a>
-            <?php endfor; ?>
-        </div>
+<div class="activities-grid">
+    <?php 
+    // Generar los 30 botones del progreso interactivo
+    for ($i = 1; $i <= 30; $i++): 
+        $isCompleted = false;
+
+        if ($i === 28) {
+            // Lógica ESPECIAL para la pregunta 28
+            // Se marca como completada solo si se han respondido las 21 subpruebas
+            $totalSubtests = 21;
+            $answeredSubtests = isset($q28Saved) ? count($q28Saved) : 0;
+            
+            if ($answeredSubtests >= $totalSubtests) {
+                $isCompleted = true;
+            }
+        } else {
+            // Lógica ESTÁNDAR para el resto de las preguntas (1 a 30, excepto 28)
+            $qId = $qNumberToIdMap[$i] ?? null;
+            if ($qId && isset($answersSaved[$qId]) && $answersSaved[$qId] !== '') {
+                $isCompleted = true;
+            }
+        }
+
+        // Definimos la clase CSS correspondiente según el estado
+        $statusClass = $isCompleted ? 'completed' : 'pending';
+    ?>
+        <a href="#question-<?= $i ?>" id="grid-box-<?= $i ?>" class="activity-box <?= $statusClass ?>" onclick="scrollToQuestion(<?= $i ?>, event)">
+            <?= $i ?>
+        </a>
+    <?php endfor; ?>
+</div>
         <div class="progress-bar-container" style="margin-top: 1.25rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #475569;">
                 <span>Progreso del Formulario</span>

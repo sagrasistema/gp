@@ -152,4 +152,40 @@ document.addEventListener("DOMContentLoaded", () => {
         observador.observe(caja, { attributes: true });
     });
 });
+// Monitorizar en tiempo real las respuestas de la pregunta 28
+function checkQ28RealTimeProgress() {
+    const selects = document.querySelectorAll('.q28-select');
+    let answeredCount = 0;
+
+    selects.forEach(select => {
+        // Contamos como respondida si tiene una opción seleccionada y no es un valor vacío
+        if (select.value && select.value !== '') {
+            answeredCount++;
+        }
+    });
+
+    const box28 = document.getElementById('grid-box-28');
+    if (box28) {
+        if (answeredCount >= 21) {
+            box28.classList.remove('pending');
+            box28.classList.add('completed');
+        } else {
+            box28.classList.remove('completed');
+            box28.classList.add('pending');
+        }
+    }
+
+    // Opcional: Actualizar la barra de progreso general si existe la función
+    if (typeof updateProgressBar === 'function') {
+        updateProgressBar();
+    }
+}
+
+// Escuchar cambios en cualquiera de los selectores de la Q28
+document.addEventListener('DOMContentLoaded', function() {
+    const selects = document.querySelectorAll('.q28-select');
+    selects.forEach(select => {
+        select.addEventListener('change', checkQ28RealTimeProgress);
+    });
+});
 </script>
