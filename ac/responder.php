@@ -179,63 +179,7 @@ include '../ac/conect-responder.php';
         </a>
     <?php endfor; ?>
 </div>
-<div class="mb-3 text-center">
-    <span class="fw-bold d-block mb-2">Actividades del Formulario</span>
-    <div class="activities-grid" style="display: grid !important; grid-template-columns: repeat(5, 1fr) !important; gap: 8px !important; width: 100% !important;">
-        <?php
-        // Recorremos las 30 actividades
-        for ($i = 1; $i <= 30; $i++):
-            $boxClass = '';
-            
-            if ($i == 28) {
-                // --- EVALUACIÓN ESTRICTA Y DINÁMICA DE LA PREGUNTA 28 ---
-                $isQ28Completed = false;
-                
-                // Obtenemos el total real de subpruebas registradas (usualmente 21)
-                $totalSubtests = isset($subtests) ? count($subtests) : 21;
-                
-                $answeredSubtestsCount = 0;
-                
-                if (!empty($q28Saved) && is_array($q28Saved)) {
-                    foreach ($q28Saved as $ans) {
-                        // Obtenemos el score de la subprueba (asegurándonos de que sea un número)
-                        $scoreVal = isset($ans['score']) ? (float)$ans['score'] : 0;
-                        
-                        // REGLA CLAVE: Solo se cuenta si el score es estrictamente mayor a 0
-                        if ($scoreVal > 0) {
-                            $answeredSubtestsCount++;
-                        }
-                    }
-                }
-                
-                // Se marca como completada SOLO si todas las subpruebas tienen score > 0
-                if ($answeredSubtestsCount === $totalSubtests && $totalSubtests > 0) {
-                    $isQ28Completed = true;
-                }
-                
-                if ($isQ28Completed) {
-                    $boxClass = 'completed';
-                }
-                // --- FIN DE LA EVALUACIÓN ESPECIAL 28 ---
-                
-            } else {
-                // Verificación normal para el resto de las preguntas (1 a 30)
-                $qId = $qNumberToIdMap[$i] ?? null;
-                if ($qId && isset($savedAnswers[$qId])) {
-                    $ans = $savedAnswers[$qId];
-                    // Si tiene respuesta física y no está en "No Aplica"
-                    if (!empty($ans->riskValue) && $ans->riskValue !== 'No Aplica') {
-                        $boxClass = 'completed';
-                    }
-                }
-            }
-            ?>
-            <div id="grid-box-<?php echo $i; ?>" class="grid-box <?php echo $boxClass; ?>">
-                <?php echo $i; ?>
-            </div>
-        <?php endfor; ?>
-    </div>
-</div>
+
         <div class="progress-bar-container" style="margin-top: 1.25rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #475569;">
                 <span>Progreso del Formulario</span>
