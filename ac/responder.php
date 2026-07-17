@@ -92,11 +92,11 @@ include '../ac/conect-responder.php';
                 </text>
 
                 <text x="2" y="112" class="gauge-text">0</text>
-                <text x="21" y="34" class="gauge-text">20</text>
-                <text x="64" y="2" class="gauge-text">40</text>
-                <text x="136" y="2" class="gauge-text">60</text>
-                <text x="179" y="34" class="gauge-text">80</text>
-                <text x="185" y="112" class="gauge-text">100</text>
+                <text x="21" y="34" class="gauge-text">21</text>
+                <text x="64" y="2" class="gauge-text">42</text>
+                <text x="136" y="2" class="gauge-text">63</text>
+                <text x="179" y="34" class="gauge-text">84</text>
+                <text x="185" y="112" class="gauge-text">105</text>
 
                 <?php
                 $score = isset($acData->riskScore) ? (float)$acData->riskScore : 0;
