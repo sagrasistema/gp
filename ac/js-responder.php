@@ -153,5 +153,62 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+// Monitorizar en tiempo real las respuestas de la pregunta 28
+function checkQ28RealTimeProgress() {
+    const selects = document.querySelectorAll('.q28-select');
+    let answeredCount = 0;
 
+    selects.forEach(select => {
+        const val = select.value;
+        const selectedOption = select.options[select.selectedIndex];
+        
+        // Evaluamos si la opción seleccionada es válida (mayor a 0 / no vacía)
+        let isValidAnswer = false;
+
+        if (val && val !== '' && val !== '0' && val !== 'No Aplica') {
+            // Si tus opciones tienen un atributo 'data-score', validamos que sea mayor a 0
+            if (selectedOption && selectedOption.hasAttribute('data-score')) {
+                const score = parseInt(selectedOption.getAttribute('data-score'), 10);
+                if (score > 0) {
+                    isValidAnswer = true;
+                }
+            } else {
+                // Si no usan 'data-score', el simple hecho de no ser vacío, '0' ni 'No Aplica' la hace válida
+                isValidAnswer = true;
+            }
+        }
+
+        if (isValidAnswer) {
+            answeredCount++;
+        }
+    });
+
+    const box28 = document.getElementById('grid-box-28');
+    if (box28) {
+        // Hacemos la validación dinámica comparando con el total de selects existentes (normalmente 21)
+        if (answeredCount >= selects.length && selects.length > 0) {
+            box28.classList.remove('pending');
+            box28.classList.add('completed');
+        } else {
+            box28.classList.remove('completed');
+            box28.classList.add('pending');
+        }
+    }
+
+    // Opcional: Actualizar la barra de progreso general si existe la función
+    if (typeof updateProgressBar === 'function') {
+        updateProgressBar();
+    }
+}
+
+// Escuchar cambios en cualquiera de los selectores de la Q28
+document.addEventListener('DOMContentLoaded', function() {
+    const selects = document.querySelectorAll('.q28-select');
+    selects.forEach(select => {
+        select.addEventListener('change', checkQ28RealTimeProgress);
+    });
+    
+    // Ejecutar una vez al cargar la página para sincronizar el estado inicial
+    checkQ28RealTimeProgress();
+});
 </script>
