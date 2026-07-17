@@ -86,16 +86,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // C. Determinar cualitativamente el Rango de riesgo
-        if ($totalScore <= 25) {
+        // Clasificación del nivel de riesgo basada en la escala simétrica de 105 puntos
+        if ($totalScore <= 21) {
             $riskLevel = 'Bajo';
-        } elseif ($totalScore <= 55) {
+            $riskClass = 'risk-bajo';
+        } elseif ($totalScore <= 42) {
+            $riskLevel = 'Bajo Moderado';
+            $riskClass = 'risk-bajo-mod';
+        } elseif ($totalScore <= 63) {
             $riskLevel = 'Moderado';
-        } elseif ($totalScore <= 85) {
-            $riskLevel = 'Moderado-Alto';
+            $riskClass = 'risk-mod';
+        } elseif ($totalScore <= 84) {
+            $riskLevel = 'Moderado Alto';
+            $riskClass = 'risk-mod-alto';
         } else {
             $riskLevel = 'Alto';
+            $riskClass = 'risk-alto';
         }
-
         // D. Actualizar totales en `ac`
         $stmtUpdateAC = $pdo->prepare("
             UPDATE ac SET riskScore = :riskScore, riskLevel = :riskLevel WHERE acId = :acId

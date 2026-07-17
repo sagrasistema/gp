@@ -81,14 +81,27 @@ function calculateLiveRisk() {
     let cssClass = 'risk-bajo';
     let iconClass = 'ri-checkbox-circle-line';
 
-    if (score <= 25) {
-        level = 'Bajo'; cssClass = 'risk-bajo'; iconClass = 'ri-checkbox-circle-line';
-    } else if (score <= 55) {
-        level = 'Moderado'; cssClass = 'risk-moderado'; iconClass = 'ri-alert-line';
-    } else if (score <= 85) {
-        level = 'Moderado-Alto'; cssClass = 'risk-moderado-alto'; iconClass = 'ri-error-warning-line';
+// Evaluación basada en la escala simétrica de 105 puntos (21 preguntas)
+    if (score <= 21) {
+        level = 'Bajo';
+        cssClass = 'risk-bajo';
+        iconClass = 'ri-checkbox-circle-line'; // Círculo de check verde (Seguro)
+    } else if (score <= 42) {
+        level = 'Bajo Moderado';
+        cssClass = 'risk-bajo-mod';
+        iconClass = 'ri-information-line';     // Icono de información azul/celeste (Atención)
+    } else if (score <= 63) {
+        level = 'Moderado';
+        cssClass = 'risk-mod';
+        iconClass = 'ri-alert-line';           // Triángulo de advertencia amarillo (Prevención)
+    } else if (score <= 84) {
+        level = 'Moderado Alto';
+        cssClass = 'risk-mod-alto';
+        iconClass = 'ri-error-warning-line';   // Advertencia naranja con signo de exclamación
     } else {
-        level = 'Alto'; cssClass = 'risk-alto'; iconClass = 'ri-close-circle-line';
+        level = 'Alto';
+        cssClass = 'risk-alto';
+        iconClass = 'ri-close-circle-line';    // Círculo de error rojo (Peligro crítico)
     }
 
     const badge = document.getElementById('live-risk-badge');
