@@ -102,4 +102,54 @@ document.addEventListener("DOMContentLoaded", () => {
     calculateLiveRisk();
     updateProgressGrid();
 });
+document.addEventListener("DOMContentLoaded", () => {
+    const totalActividades = 30;
+    const barraFill = document.getElementById("progress-bar-fill");
+    const porcentajeTexto = document.getElementById("progress-percentage-text");
+    const rejillaActividades = document.querySelector(".activities-grid");
+
+    if (!barraFill || !porcentajeTexto || !rejillaActividades) {
+        console.warn("No se encontraron los elementos de la barra de progreso o la rejilla de actividades.");
+        return;
+    }
+
+    /**
+     * Calcula cuántas actividades están completadas y actualiza la barra.
+     * Evaluamos que NO tengan la clase 'pending'. Si manejas otra clase como 'completed'
+     * o 'success', el script se adapta perfectamente.
+     */
+    function actualizarProgreso() {
+        // Contamos las cajas que no están pendientes
+        const cajasCompletadas = rejillaActividades.querySelectorAll(".activity-box:not(.pending)").length;
+        
+        // Calculamos el porcentaje real
+        const porcentaje = Math.round((cajasCompletadas / totalActividades) * 100);
+
+        // Limitamos entre 0 y 100 por seguridad visual
+        const porcentajeFinal = Math.min(Math.max(porcentaje, 0), 100);
+
+        // Aplicamos el cambio visual con la transición suave que ya tiene tu CSS inline
+        barraFill.style.width = `${porcentajeFinal}%`;
+        porcentajeTexto.textContent = `${porcentajeFinal}%`;
+    }
+
+    // 1. Ejecutar al cargar la página (para capturar lo que PHP ya marcó como completado desde la BD)
+    actualizarProgreso();
+
+    // 2. Crear un observador (MutationObserver) para detectar en tiempo real
+    // cuando cambias dinámicamente las clases (de 'pending' a completado) mediante JS
+    const observador = new MutationObserver((mutationsList) => {
+        for (const mutation of mutationsList) {
+            if (mutation.type === "attributes" && mutation.attributeName === "class") {
+                actualizarProgreso();
+            }
+        }
+    });
+
+    // Observar cambios de clase en cada uno de los 30 bloques
+    const cajas = rejillaActividades.querySelectorAll(".activity-box");
+    cajas.forEach(caja => {
+        observador.observe(caja, { attributes: true });
+    });
+});
 </script>
