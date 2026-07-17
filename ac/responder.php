@@ -163,6 +163,7 @@ include '../ac/conect-responder.php';
             if ($answeredSubtests >= $totalSubtests) {
                 $isCompleted = true;
             }
+            $isCompleted = true;
         } else {
             // Lógica ESTÁNDAR para el resto de las preguntas (1 a 30, excepto 28)
             $qId = $qNumberToIdMap[$i] ?? null;
