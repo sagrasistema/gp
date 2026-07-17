@@ -146,12 +146,7 @@ $rotationAngle = -90 + ($score * 1.8);
 
 <style>
 /* Contenedor externo del Tacómetro */
-/* Identifica el contenedor del velocímetro y añade espacio a la derecha */
-.gauge-container {
-    padding-right: 15px; /* Ajusta este valor según sea necesario */
-    display: inline-block;
-    vertical-align: middle;
-}
+
 /* Contenedor del Tacómetro */
 .gauge-wrapper {
     display: inline-flex;

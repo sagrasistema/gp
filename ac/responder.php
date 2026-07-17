@@ -96,7 +96,7 @@ include '../ac/conect-responder.php';
                 <text x="64" y="2" class="gauge-text">40</text>
                 <text x="136" y="2" class="gauge-text">60</text>
                 <text x="179" y="34" class="gauge-text">80</text>
-                <text x="198" y="112" class="gauge-text">100</text>
+                <text x="285" y="180" text-anchor="end" fill="#333" font-weight="bold">100</text>
 
                 <?php
                 $score = isset($acData->riskScore) ? (float)$acData->riskScore : 0;
