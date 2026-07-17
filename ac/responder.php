@@ -52,66 +52,78 @@ include '../ac/conect-responder.php';
             }
             ?></strong></div>
 
-    <div class="meta-item-gauge" style="grid-column: 5; grid-row: 1 / span 3; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; padding: 0.25rem; box-sizing: border-box;">
-        
-        <div class="gauge-wrapper" style="width: 100%; max-width: 260px; height: auto; display: flex; justify-content: center; align-items: center; margin: 0 auto;">
-            <svg class="gauge-svg" viewBox="0 -12 200 122" width="100%" height="100%" style="display: block; overflow: visible;">
-                
-                <defs>
-                    <path id="path-bajo" d="M 20 100 A 80 80 0 0 1 35.3 53.0" fill="none" />
-                    <path id="path-bajo-mod" d="M 35.3 53.0 A 80 80 0 0 1 75.3 23.9" fill="none" />
-                    <path id="path-mod" d="M 75.3 23.9 A 80 80 0 0 1 124.7 23.9" fill="none" />
-                    <path id="path-mod-alto" d="M 124.7 23.9 A 80 80 0 0 1 164.7 53.0" fill="none" />
-                    <path id="path-alto" d="M 164.7 53.0 A 80 80 0 0 1 180 100" fill="none" />
-                </defs>
+<?php
+// Lógica de cálculo adaptada al máximo de 105 puntos (21 preguntas)
+$score = isset($acData->riskScore) ? (float)$acData->riskScore : 0;
+$clampedScore = max(0, min(105, $score));
+$angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
+?>
 
-                <path d="M 8 100 A 92 92 0 0 1 25.6 45.9 L 45.0 60.0 A 68 68 0 0 0 32 100 Z" fill="#22c55e" />
-                
-                <path d="M 25.6 45.9 A 92 92 0 0 1 71.6 12.5 L 79.0 35.3 A 68 68 0 0 0 45.0 60.0 Z" fill="#84cc16" />
-                
-                <path d="M 71.6 12.5 A 92 92 0 0 1 128.4 12.5 L 121.0 35.3 A 68 68 0 0 0 79.0 35.3 Z" fill="#eab308" />
-                
-                <path d="M 128.4 12.5 A 92 92 0 0 1 174.4 45.9 L 155.0 60.0 A 68 68 0 0 0 121.0 35.3 Z" fill="#f97316" />
-                
-                <path d="M 174.4 45.9 A 92 92 0 0 1 192 100 L 168 100 A 68 68 0 0 0 155.0 60.0 Z" fill="#ef4444" />
+<div class="meta-item-gauge">
+    <div class="gauge-wrapper">
+        <svg class="gauge-svg" viewBox="0 -12 200 122" width="100%" height="100%">
+            
+            <defs>
+                <!-- Arcos guía para los textos de cada categoría -->
+                <path id="path-bajo" d="M 20 100 A 80 80 0 0 1 35.3 53.0" fill="none" />
+                <path id="path-bajo-mod" d="M 35.3 53.0 A 80 80 0 0 1 75.3 23.9" fill="none" />
+                <path id="path-mod" d="M 75.3 23.9 A 80 80 0 0 1 124.7 23.9" fill="none" />
+                <path id="path-mod-alto" d="M 124.7 23.9 A 80 80 0 0 1 164.7 53.0" fill="none" />
+                <path id="path-alto" d="M 164.7 53.0 A 80 80 0 0 1 180 100" fill="none" />
+            </defs>
 
-                <text font-size="6.2" font-weight="900" fill="#ffffff" text-anchor="middle">
-                    <textPath href="#path-bajo" startOffset="50%">BAJO</textPath>
-                </text>
-                <text font-size="5.4" font-weight="900" fill="#1e293b" text-anchor="middle">
-                    <textPath href="#path-bajo-mod" startOffset="50%">BAJO MODERADO</textPath>
-                </text>
-                <text font-size="6.2" font-weight="900" fill="#1e293b" text-anchor="middle">
-                    <textPath href="#path-mod" startOffset="50%">MODERADO</textPath>
-                </text>
-                <text font-size="5.4" font-weight="900" fill="#ffffff" text-anchor="middle">
-                    <textPath href="#path-mod-alto" startOffset="50%">MODERADO ALTO</textPath>
-                </text>
-                <text font-size="6.2" font-weight="900" fill="#ffffff" text-anchor="middle">
-                    <textPath href="#path-alto" startOffset="50%">ALTO</textPath>
-                </text>
+            <!-- Segmentos de colores del Tacómetro -->
+            <!-- 1. Bajo (0 - 21) -->
+            <path d="M 8 100 A 92 92 0 0 1 25.6 45.9 L 45.0 60.0 A 68 68 0 0 0 32 100 Z" fill="#22c55e" />
+            
+            <!-- 2. Bajo Moderado (21 - 42) -->
+            <path d="M 25.6 45.9 A 92 92 0 0 1 71.6 12.5 L 79.0 35.3 A 68 68 0 0 0 45.0 60.0 Z" fill="#84cc16" />
+            
+            <!-- 3. Moderado (42 - 63) -->
+            <path d="M 71.6 12.5 A 92 92 0 0 1 128.4 12.5 L 121.0 35.3 A 68 68 0 0 0 79.0 35.3 Z" fill="#eab308" />
+            
+            <!-- 4. Moderado Alto (63 - 84) -->
+            <path d="M 128.4 12.5 A 92 92 0 0 1 174.4 45.9 L 155.0 60.0 A 68 68 0 0 0 121.0 35.3 Z" fill="#f97316" />
+            
+            <!-- 5. Alto (84 - 105) -->
+            <path d="M 174.4 45.9 A 92 92 0 0 1 192 100 L 168 100 A 68 68 0 0 0 155.0 60.0 Z" fill="#ef4444" />
 
-                <text x="2" y="112" class="gauge-text">0</text>
-                <text x="21" y="34" class="gauge-text">21</text>
-                <text x="64" y="2" class="gauge-text">42</text>
-                <text x="136" y="2" class="gauge-text">63</text>
-                <text x="179" y="34" class="gauge-text">84</text>
-                <text x="185" y="112" class="gauge-text">105</text>
+            <!-- Textos sobre los arcos -->
+            <text font-size="6.2" fill="#ffffff" class="gauge-label-text">
+                <textPath href="#path-bajo" startOffset="50%">BAJO</textPath>
+            </text>
+            <text font-size="5.4" fill="#1e293b" class="gauge-label-text">
+                <textPath href="#path-bajo-mod" startOffset="50%">BAJO MODERADO</textPath>
+            </text>
+            <text font-size="6.2" fill="#1e293b" class="gauge-label-text">
+                <textPath href="#path-mod" startOffset="50%">MODERADO</textPath>
+            </text>
+            <text font-size="5.4" fill="#ffffff" class="gauge-label-text">
+                <textPath href="#path-mod-alto" startOffset="50%">MODERADO ALTO</textPath>
+            </text>
+            <text font-size="6.2" fill="#ffffff" class="gauge-label-text">
+                <textPath href="#path-alto" startOffset="50%">ALTO</textPath>
+            </text>
 
-                <?php
-                $score = isset($acData->riskScore) ? (float)$acData->riskScore : 0;
-                $clampedScore = max(0, min(100, $score));
-                $angle = -90 + (($clampedScore - 0) / (100 - 0)) * 180;
-                ?>
-                <g transform="rotate(<?= $angle ?>, 100, 100)">
-                    <path d="M 97 100 L 99.3 10 L 100.7 10 L 103 100 Z" fill="#1e293b" />
-                </g>
+            <!-- Etiquetas Numéricas (Ajustadas a escala 105) -->
+            <text x="2" y="112" class="gauge-text">0</text>
+            <text x="21" y="34" class="gauge-text">21</text>
+            <text x="64" y="2" class="gauge-text">42</text>
+            <text x="136" y="2" class="gauge-text">63</text>
+            <text x="179" y="34" class="gauge-text">84</text>
+            <text x="185" y="112" class="gauge-text">105</text>
 
-                <circle cx="100" cy="100" r="11" fill="#1e293b" stroke="#ffffff" stroke-width="2.5" />
-                <circle cx="100" cy="100" r="4" fill="#94a3b8" />
-            </svg>
-        </div>
+            <!-- Aguja Dinámica -->
+            <g transform="rotate(<?= $angle ?>, 100, 100)">
+                <path d="M 97 100 L 99.3 10 L 100.7 10 L 103 100 Z" fill="#1e293b" />
+            </g>
+
+            <!-- Pines de centro -->
+            <circle cx="100" cy="100" r="11" fill="#1e293b" stroke="#ffffff" stroke-width="2.5" />
+            <circle cx="100" cy="100" r="4" fill="#94a3b8" />
+        </svg>
     </div>
+</div>
 
     <hr style="grid-column: span 4; margin: 0; border: 0; border-top: 1px solid var(--border-color, #e2e8f0); opacity: 0.6;">
 

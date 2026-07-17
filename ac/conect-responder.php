@@ -138,7 +138,7 @@ include '../main/layout_header.php';
 // 1. Lógica para determinar el ángulo del Tacómetro basado en el riskScore (0 a 100)
 $score = isset($acData->riskScore) ? floatval($acData->riskScore) : 0;
 if ($score < 0) $score = 0;
-if ($score > 105) $score = 105;
+if ($score > 100) $score = 100;
 
 // Fórmula: -90 grados (mínimo, izquierda) a +90 grados (máximo, derecha)
 $rotationAngle = -90 + ($score * 1.8); 
@@ -147,33 +147,48 @@ $rotationAngle = -90 + ($score * 1.8);
 <style>
 /* Contenedor externo del Tacómetro */
 
+
 /* Contenedor del Tacómetro */
-.gauge-wrapper {
-    display: inline-flex;
-    user-select: none;
-    overflow: visible;
+.meta-item-gauge {
+    grid-column: 5;
+    grid-row: 1 / span 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 0.25rem;
+    box-sizing: border-box;
 }
 
-/* Evita distorsiones en el renderizado vectorial */
+.gauge-wrapper {
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
 .gauge-svg {
     display: block;
     overflow: visible;
-    shape-rendering: geometricPrecision;
 }
 
-/* Estilo para los números de intervalo */
-.gauge-text {
-    font-family: system-ui, -apple-system, sans-serif;
-    font-size: 11px;
-    font-weight: 800;
-    fill: #475569; /* Gris Slate oscuro */
+/* Tipografía y Etiquetas del SVG */
+.gauge-label-text {
+    font-weight: 900;
     text-anchor: middle;
-    dominant-baseline: middle;
 }
 
-/* Animación fluida de la aguja */
-.gauge-svg g {
-    transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+.gauge-text {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 8px; /* Ligeramente más legible */
+    font-weight: 700;
+    fill: #64748b; /* Slate 500 para un look moderno */
+    text-anchor: middle;
 }
 
 </style>
