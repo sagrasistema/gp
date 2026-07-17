@@ -38,11 +38,11 @@ $activeTab = isset($currentTab) ? $currentTab : '';
                 <span>Aceptación</span>
             </a>
             <a href="<?php echo $acPath; ?>" class="menu-item <?php echo ($activeTab === 'terminos') ? 'active' : ''; ?>">
-                <i class="ri-shield-check-line"></i>
+                <i class="ri-file-text-line"></i>
                 <span>Terminos y Condiciones</span>
             </a>
             <a href="<?php echo $acPath; ?>" class="menu-item <?php echo ($activeTab === 'proyecto') ? 'active' : ''; ?>">
-                <i class="ri-shield-check-line"></i>
+                <i class="ri-briefcase-line"></i>
                 <span>Proyectos</span>
             </a>
             <a href="#" class="menu-item style-disabled">
