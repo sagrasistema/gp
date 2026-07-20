@@ -22,15 +22,28 @@ include '../main/layout_header.php';
             <i class="ri-folders-line"></i> Control de Proyectos de Auditoría
         </h1>
     </div>
-
     <div class="table-actions-container">
-        <a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Proyecto">
-            <i class="ri-add-line"></i> Nuevo Proyecto
+        <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+            <i class="ri-arrow-go-back-line"></i> 
         </a>
-        <a href="../index.php" class="btn btn-secondary" data-tooltip="Volver al Inicio">
-            <i class="ri-home-4-line"></i>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+            <i class="ri-screenshot-2-line"></i>
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
+            <i class="ri-book-open-line"></i> 
+        </a>
+
+        <a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Registro">
+            <i class="ri-add-line"></i>
+        </a>
+
+        <a href="../index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+            <i class="ri-close-circle-line"></i> 
         </a>
     </div>
+
 
     <div class="table-container">
         <table class="custom-table">
