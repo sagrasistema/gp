@@ -96,11 +96,11 @@ include 'main/layout_header.php';
         </div>
         
         <a href="project/index.php" class="module-card">
-            <div class="module-card">
+            
                 <div class="icon-box"><i class="ri-folders-line"></i></div>
                 <h2>Proyecto</h2>
                 <p>Planificación de flujos de trabajo, entregables y asignación de tareas.</p>
-            </div>
+            
         </a>
 
     </div>
