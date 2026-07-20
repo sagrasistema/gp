@@ -1,7 +1,5 @@
 <?php
-
 // v/proyectos/nuevo.php
-$baseDir = "../main/";
 include '../main/config.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

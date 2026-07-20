@@ -7,8 +7,12 @@
     
     <?php
     // Detectamos dinámicamente la ruta base hacia la carpeta principal 'main'
-    $baseDir = (strpos($_SERVER['REQUEST_URI'], '/ac/') !== false) ? '../main/' : '';
+    //$baseDir = (strpos($_SERVER['REQUEST_URI'], '/ac/') !== false) ? '../main/' : '';
+    
+    // Evaluamos mediante expresiones regulares todas tus carpetas operativas en un único paso
+    $baseDir = preg_match('#/(ac|project|estrategia|ejecucion|conclusion)/#i', $_SERVER['REQUEST_URI'] ?? '') ? '../main/' : '';
     ?>
+    
 
     <link rel="shortcut icon" href="<?php echo $baseDir; ?>favicon.ico" type="image/x-icon">
     <link rel="icon" href="<?php echo $baseDir; ?>favicon.ico" type="image/x-icon">
