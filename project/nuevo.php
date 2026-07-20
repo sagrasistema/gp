@@ -1,4 +1,5 @@
 <?php
+$baseDir = "../";
 // v/proyectos/nuevo.php
 include '../main/config.php'; 
 
