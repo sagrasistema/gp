@@ -1,6 +1,6 @@
 <?php
 // v/proyectos/index.php
-$baseDir = "../";
+$baseDir = "../main/";
 $pageTitle = "Gestión de Proyectos de Auditoría";
 include '../main/h.php'; 
 include '../main/config.php'; 
