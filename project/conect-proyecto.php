@@ -2,15 +2,19 @@
 
 declare(strict_types=1);
 
-// v/proyectos/conect-proyecto.php
+/**
+ * Controlador de Planificación y Carga de Proyecto de Auditoría
+ * Ruta: v/proyectos/conect-proyecto.php
+ */
 
+// Validación estricta del ID del proyecto mediante filtro de entrada
 $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT);
 
 if (!$proyectoId) {
-    die("Error: Proyecto no especificado.");
+    die("Error: Proyecto no especificado o ID inválido.");
 }
 
-// 1. Cargar Cabecera del Proyecto con los campos exactos y prefijo audit_
+// 1. Cargar Cabecera del Proyecto (Tablas reales: proyectos y clientes)
 try {
     $stmt = $pdo->prepare("
         SELECT 
@@ -21,15 +25,15 @@ try {
             p.socio_calidad AS socioCalidad,
             p.fecha_remision AS fechaRemision,
             p.gerente AS gerente
-        FROM audit_proyectos p 
-        INNER JOIN audit_clientes c ON p.cliente_id = c.id 
+        FROM proyectos p 
+        INNER JOIN clientes c ON p.cliente_id = c.id 
         WHERE p.id = :id
     ");
     $stmt->execute([':id' => $proyectoId]);
     $projectData = $stmt->fetch(PDO::FETCH_OBJ);
 
     if (!$projectData) {
-        die("Error: El proyecto no existe.");
+        die("Error: El proyecto solicitado no existe.");
     }
 } catch (PDOException $e) {
     error_log("Error crítico en cabecera de proyecto: " . $e->getMessage());
@@ -41,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_P
     $pruebaId = filter_input(INPUT_POST, 'prueba_id', FILTER_VALIDATE_INT);
     $estado = trim($_POST['estado'] ?? 'en_proceso');
     
+    // Sanitización y normalización de indicadores binarios (checkboxes)
     $ci = isset($_POST['ci']) ? 1 : 0;
     $cg = isset($_POST['cg']) ? 1 : 0;
     $sc = isset($_POST['sc']) ? 1 : 0;
@@ -50,8 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_P
         try {
             $pdo->beginTransaction();
             
+            // Inserción segura con manejo de duplicados (ON DUPLICATE KEY UPDATE)
             $stmtUpdate = $pdo->prepare("
-                INSERT INTO audit_proyecto_pruebas_ejecucion 
+                INSERT INTO proyecto_pruebas_ejecucion 
                 (proyecto_id, prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado)
                 VALUES (:proyecto_id, :prueba_id, :ci, :cg, :sc, :aa, :estado)
                 ON DUPLICATE KEY UPDATE 
@@ -91,11 +97,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_P
     }
 }
 
-// 3. Cargar mapeo de estados guardados de las pruebas de forma segura (Sentencia Preparada)
+// 3. Cargar mapeo de estados guardados de las pruebas para renderizar la UI de forma segura
 try {
     $stmtPruebas = $pdo->prepare("
         SELECT prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado 
-        FROM audit_proyecto_pruebas_ejecucion 
+        FROM proyecto_pruebas_ejecucion 
         WHERE proyecto_id = :proyecto_id
     ");
     $stmtPruebas->execute([':proyecto_id' => $proyectoId]);
