@@ -121,8 +121,7 @@ include '../main/h.php';
             </p>
         <?php endif; ?>
     </div>
-</div>
-<!-- Barra de Carga de Progreso del Formulario -->
+    <!-- Barra de Carga de Progreso del Formulario -->
     <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #475569;">
             <span>Progreso del Formulario</span>
@@ -132,6 +131,8 @@ include '../main/h.php';
             <div style="width: <?= $porcentajeProgreso ?>%; background-color: #10b981; height: 100%; border-radius: 9999px; transition: width 0.4s ease;"></div>
         </div>
     </div>
+</div>
+
 
     <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS Y ACTIVIDADES) -->
     <div class="accordion-container">
