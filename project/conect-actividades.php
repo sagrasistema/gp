@@ -60,38 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $pdo->beginTransaction();
-        if ((int)$pruebaId === 11) {
-            if ($action === 'add_analitica_item') {
-                $tipo = filter_input(INPUT_POST, 'tipo', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-                $tipoRubro = trim($_POST['tipo_rubro'] ?? '');
-                $saldoActual = filter_input(INPUT_POST, 'saldo_actual', FILTER_VALIDATE_FLOAT) ?: 0.00;
-                $saldoAnterior = filter_input(INPUT_POST, 'saldo_anterior', FILTER_VALIDATE_FLOAT) ?: 0.00;
-                $observaciones = trim($_POST['observaciones'] ?? '');
-
-                if (in_array($tipo, ['activo', 'pasivo', 'patrimonio'], true) && !empty($tipoRubro)) {
-                    $stmtIns = $pdo->prepare("
-                        INSERT INTO proyecto_revision_analitica 
-                        (proyecto_id, prueba_id, tipo, tipo_rubro, saldo_actual, saldo_anterior, observaciones)
-                        VALUES (:proj, :pr, :tipo, :rubro, :actual, :anterior, :obs)
-                    ");
-                    $stmtIns->execute([
-                        ':proj'     => $proyectoId,
-                        ':pr'       => $pruebaId,
-                        ':tipo'     => $tipo,
-                        ':rubro'    => $tipoRubro,
-                        ':actual'   => $saldoActual,
-                        ':anterior' => $saldoAnterior,
-                        ':obs'      => $observaciones
-                    ]);
-                }
-            } elseif ($action === 'delete_analitica_item') {
-                $itemId = filter_input(INPUT_POST, 'item_id', FILTER_VALIDATE_INT);
-                if ($itemId) {
-                    $stmtDel = $pdo->prepare("DELETE FROM proyecto_revision_analitica WHERE id = :id AND proyecto_id = :proj AND prueba_id = :pr");
-                    $stmtDel->execute([':id' => $itemId, ':proj' => $proyectoId, ':pr' => $pruebaId]);
-                }
-            }
-        }
+        
 
         if ($action === 'add_indicador_detalle') {
             // Guardar un punto de control / detalle para un indicador específico
@@ -193,23 +162,6 @@ $allDetalles = $stmtIndDetalles->fetchAll(PDO::FETCH_OBJ);
 $detallesPorTipo = ['CI' => [], 'CG' => [], 'SC' => [], 'AA' => []];
 foreach ($allDetalles as $det) {
     $detallesPorTipo[$det->tipo_indicador][] = $det;
-}
-// Cargar partidas analíticas agrupadas para la vista (Prueba 11)
-$analiticaItems = ['activo' => [], 'pasivo' => [], 'patrimonio' => []];
-if ((int)$pruebaId === 11) {
-    try {
-        $stmtAnalitica = $pdo->prepare("
-            SELECT * FROM proyecto_revision_analitica 
-            WHERE proyecto_id = :proj AND prueba_id = :pr 
-            ORDER BY id ASC
-        ");
-        $stmtAnalitica->execute([':proj' => $proyectoId, ':pr' => $pruebaId]);
-        while ($row = $stmtAnalitica->fetch(PDO::FETCH_OBJ)) {
-            $analiticaItems[$row->tipo][] = $row;
-        }
-    } catch (PDOException $e) {
-        error_log("Error al cargar partidas analíticas: " . $e->getMessage());
-    }
 }
 
 $pageTitle = "Formulario de Actividades y Hallazgos";
