@@ -54,7 +54,7 @@ try {
     die("Error al cargar metadatos: " . $e->getMessage());
 }
 
-// 3. Procesamiento POST (Guardado de actividades, estatus y detalles de indicadores)
+// 3. Procesamiento POST (Guardado de actividades, estatus y sincronización de indicadores)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action_type'] ?? 'save_all';
 
@@ -109,29 +109,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ]);
                 }
             }
-
-            // Actualizar Estatus General y evaluar booleanos automáticos de indicadores según existencia de registros
-            $nuevoEstadoPrueba = trim($_POST['estado_prueba'] ?? 'en_proceso');
-            
-            // Verificamos si existen registros para cada indicador para mantener sincronizado el resumen
-            $hasCI = $pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='CI'")->fetchColumn() > 0 ? 1 : 0;
-            $hasCG = $pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='CG'")->fetchColumn() > 0 ? 1 : 0;
-            $hasSC = $pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='SC'")->fetchColumn() > 0 ? 1 : 0;
-            $hasAA = $pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='AA'")->fetchColumn() > 0 ? 1 : 0;
-
-            $stmtTestSave = $pdo->prepare("
-                INSERT INTO proyecto_pruebas_ejecucion 
-                (proyecto_id, prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado)
-                VALUES (:proyecto_id, :prueba_id, :ci, :cg, :sc, :aa, :estado)
-                ON DUPLICATE KEY UPDATE 
-                    indicador_ci = :ci_u, indicador_cg = :cg_u, indicador_sc = :sc_u, indicador_aa = :aa_u, estado = :estado_u
-            ");
-            $stmtTestSave->execute([
-                ':proyecto_id' => $proyectoId, ':prueba_id' => $pruebaId,
-                ':ci' => $hasCI, ':cg' => $hasCG, ':sc' => $hasSC, ':aa' => $hasAA, ':estado' => $nuevoEstadoPrueba,
-                ':ci_u' => $hasCI, ':cg_u' => $hasCG, ':sc_u' => $hasSC, ':aa_u' => $hasAA, ':estado_u' => $nuevoEstadoPrueba
-            ]);
         }
+
+        // SINCRONIZACIÓN AUTOMÁTICA: Verificar existencia de registros en detalles para cada indicador
+        $hasCI = $pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='CI'")->fetchColumn() > 0 ? 1 : 0;
+        $hasCG = $pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='CG'")->fetchColumn() > 0 ? 1 : 0;
+        $hasSC = $pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='SC'")->fetchColumn() > 0 ? 1 : 0;
+        $hasAA = $pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='AA'")->fetchColumn() > 0 ? 1 : 0;
+
+        $nuevoEstadoPrueba = trim($_POST['estado_prueba'] ?? $estadoActualPrueba);
+
+        // Actualizar o insertar en proyecto_pruebas_ejecucion
+        $stmtTestSave = $pdo->prepare("
+            INSERT INTO proyecto_pruebas_ejecucion 
+            (proyecto_id, prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado)
+            VALUES (:proyecto_id, :prueba_id, :ci, :cg, :sc, :aa, :estado)
+            ON DUPLICATE KEY UPDATE 
+                indicador_ci = :ci_u, indicador_cg = :cg_u, indicador_sc = :sc_u, indicador_aa = :aa_u, estado = :estado_u
+        ");
+        $stmtTestSave->execute([
+            ':proyecto_id' => $proyectoId, ':prueba_id' => $pruebaId,
+            ':ci' => $hasCI, ':cg' => $hasCG, ':sc' => $hasSC, ':aa' => $hasAA, ':estado' => $nuevoEstadoPrueba,
+            ':ci_u' => $hasCI, ':cg_u' => $hasCG, ':sc_u' => $hasSC, ':aa_u' => $hasAA, ':estado_u' => $nuevoEstadoPrueba
+        ]);
 
         $pdo->commit();
         header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&success=1");
@@ -143,7 +143,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Error al procesar la operación: " . $e->getMessage());
     }
 }
-
 // 4. Recuperar Catálogo de Actividades y Detalles de los Indicadores
 $sqlActividades = "
     SELECT a.id, a.descripcion, a.orden, COALESCE(ae.contenido_llenado, '') AS respuesta, COALESCE(ae.completado, 0) AS is_ok

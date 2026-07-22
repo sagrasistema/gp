@@ -31,53 +31,8 @@ try {
     error_log("Error crítico en cabecera de proyecto: " . $e->getMessage());
     die("Error crítico de base de datos al cargar el proyecto.");
 }
-// 2. Procesar Actualización de Indicadores y Estados de la Prueba (POST)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_POST['action_type'] === 'update_prueba') {
-    $pruebaId = filter_input(INPUT_POST, 'prueba_id', FILTER_VALIDATE_INT);
-    $estado = trim($_POST['estado'] ?? 'en_proceso');
-    
-    $ci = isset($_POST['ci']) ? 1 : 0;
-    $cg = isset($_POST['cg']) ? 1 : 0;
-    $sc = isset($_POST['sc']) ? 1 : 0;
-    $aa = isset($_POST['aa']) ? 1 : 0;
 
-    if ($pruebaId) {
-        try {
-            $pdo->beginTransaction();
-            
-            $stmtUpdate = $pdo->prepare("
-                INSERT INTO proyecto_pruebas_ejecucion 
-                (proyecto_id, prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado)
-                VALUES (:proyecto_id, :prueba_id, :ci, :cg, :sc, :aa, :estado)
-                ON DUPLICATE KEY UPDATE 
-                    indicador_ci = :ci_u, 
-                    indicador_cg = :cg_u, 
-                    indicador_sc = :sc_u, 
-                    indicador_aa = :aa_u, 
-                    estado = :estado_u
-            ");
-            
-            $stmtUpdate->execute([
-                ':proyecto_id' => $proyectoId, ':prueba_id' => $pruebaId,
-                ':ci' => $ci, ':cg' => $cg, ':sc' => $sc, ':aa' => $aa, ':estado' => $estado,
-                ':ci_u' => $ci, ':cg_u' => $cg, ':sc_u' => $sc, ':aa_u' => $aa, ':estado_u' => $estado
-            ]);
-            
-            $pdo->commit();
-            
-            header("Location: responder.php?proyectoId=" . $proyectoId . "&success=1");
-            exit;
-        } catch (PDOException $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-            error_log("Error al actualizar prueba: " . $e->getMessage());
-            die("Error al guardar estado de la prueba.");
-        }
-    }
-}
-
-// 3. Cargar mapeo de estados guardados de las pruebas
+// 2. Cargar mapeo de estados y banderas de indicadores de las pruebas desde la ejecución
 try {
     $stmtPruebas = $pdo->prepare("
         SELECT prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado 
@@ -85,13 +40,13 @@ try {
         WHERE proyecto_id = :proyecto_id
     ");
     $stmtPruebas->execute([':proyecto_id' => $proyectoId]);
-    $pruebasEjecutadas = $stmtPruebas->fetchAll(PDO::FETCH_UNIQUE);
+    $pruebasEjecutadas = $stmtPruebas->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log("Error al cargar ejecución de pruebas: " . $e->getMessage());
     $pruebasEjecutadas = [];
 }
 
-// 4. Cargar lista completa de pruebas para la Fase de Planificación (Etapa 1) con sus categorías
+// 3. Cargar lista completa de pruebas para la Fase de Planificación (Etapa 1) con sus categorías
 try {
     $stmtList = $pdo->prepare("
         SELECT p.id, p.nombre, p.orden, c.nombre as categoria_nombre 
@@ -107,7 +62,7 @@ try {
     $pruebasList = [];
 }
 
-// 5. Cargar métricas de progreso de actividades por prueba para este proyecto
+// 4. Cargar métricas de progreso de actividades por prueba para este proyecto
 try {
     $stmtActProgress = $pdo->prepare("
         SELECT 
@@ -128,7 +83,8 @@ try {
     error_log("Error al calcular progreso de actividades: " . $e->getMessage());
     $progresoActividades = [];
 }
-// 6. Calcular el porcentaje global de avance de la fase
+
+// 5. Calcular el porcentaje global de avance de la fase
 $totalPruebasCount = count($pruebasList);
 $completadasCount = 0;
 
