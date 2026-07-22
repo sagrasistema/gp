@@ -69,51 +69,59 @@ include '../main/h.php';
     </div>
 
     <!-- Bloque de Progreso General de Pruebas (Numerado Dinámico) -->
-    <div class="pruebas-progress-container" style="margin-bottom: 2rem; background: #ffffff; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h4 style="margin: 0; font-size: 0.95rem; color: #1e293b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.025em;">
-                Progreso General de Pruebas (1-<?= count($pruebasList) ?>)
-            </h4>
-            <span style="font-size: 0.75rem; background-color: #f1f5f9; color: #475569; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;">
-                Fase de Planificación
-            </span>
-        </div>
-
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-            <?php if (!empty($pruebasList)): ?>
-                <?php foreach ($pruebasList as $prueba): ?>
-                    <?php 
-                        $pId = $prueba['id'];
-                        $ejecucion = $pruebasEjecutadas[$pId] ?? null;
-                        $estadoPrueba = strtolower($ejecucion['estado'] ?? 'en_proceso');
-                        
-                        // Color dinámico basado en el estado real guardado
-                        if ($estadoPrueba === 'completado' || $estadoPrueba === 'cerrado') {
-                            $bgColor = '#10b981'; // Verde
-                        } elseif ($estadoPrueba === 'revisado') {
-                            $bgColor = '#3b82f6'; // Azul
-                        } elseif (str_contains($estadoPrueba, 'corregir')) {
-                            $bgColor = '#ef4444'; // Rojo / Advertencia
-                        } else {
-                            $bgColor = '#64748b'; // Gris (En proceso / Pendiente)
-                        }
-                        
-                        $safeId = htmlspecialchars((string)$pId, ENT_QUOTES, 'UTF-8');
-                        $safeOrden = htmlspecialchars((string)$prueba['orden'], ENT_QUOTES, 'UTF-8');
-                        $safeCat = htmlspecialchars($prueba['categoria_nombre'] ?? '', ENT_QUOTES, 'UTF-8');
-                    ?>
-                    <div title="Categoría: <?= $safeCat ?> | Estado: <?= ucfirst($estadoPrueba) ?>"
-                         style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; background-color: <?= $bgColor ?>; color: #ffffff; font-weight: 700; border-radius: 8px; font-size: 0.875rem;">
-                        <?= $safeOrden ?>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p style="color: #64748b; font-size: 0.875rem; margin: 0; font-style: italic;">
-                    No hay pruebas configuradas en la fase de planificación.
-                </p>
-            <?php endif; ?>
-        </div>
+<!-- Bloque de Progreso General de Pruebas (Numerado Consecutivo Global 1-19) -->
+<div class="pruebas-progress-container" style="margin-bottom: 2rem; background: #ffffff; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.0rem;">
+        <h4 style="margin: 0; font-size: 0.95rem; color: #1e293b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.025em;">
+            Progreso General de Pruebas (Fase de Planificación)
+        </h4>
+        <span style="font-size: 0.75rem; background-color: #f1f5f9; color: #475569; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;">
+            Total: 19 Actividades / Pruebas
+        </span>
     </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        <?php if (!empty($pruebasList)): ?>
+            <?php 
+            $globalIndex = 1;
+            foreach ($pruebasList as $prueba): 
+                $pId = $prueba['id'];
+                $ejecucion = $pruebasEjecutadas[$pId] ?? null;
+                $estadoPrueba = strtolower($ejecucion['estado'] ?? 'en_proceso');
+                
+                // Asignación de colores según estado de la prueba
+                if ($estadoPrueba === 'completado' || $estadoPrueba === 'cerrado') {
+                    $bgColor = '#10b981'; // Verde esmeralda
+                } elseif ($estadoPrueba === 'revisado') {
+                    $bgColor = '#3b82f6'; // Azul
+                } elseif (str_contains($estadoPrueba, 'corregir')) {
+                    $bgColor = '#ef4444'; // Rojo de alerta
+                } else {
+                    $bgColor = '#64748b'; // Gris pizarra (En proceso)
+                }
+                
+                $safeId = htmlspecialchars((string)$pId, ENT_QUOTES, 'UTF-8');
+                $safeCat = htmlspecialchars($prueba['categoria_nombre'] ?? '', ENT_QUOTES, 'UTF-8');
+                $safeNombrePrueba = htmlspecialchars($prueba['nombre'] ?? '', ENT_QUOTES, 'UTF-8');
+            ?>
+                <a href="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $safeId ?>" 
+                   title="Nº <?= $globalIndex ?>: <?= $safeNombrePrueba ?> | Categoría: <?= $safeCat ?> | Estado: <?= ucfirst($estadoPrueba) ?>"
+                   style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; background-color: <?= $bgColor ?>; color: #ffffff; font-weight: 700; border-radius: 8px; font-size: 0.875rem; text-decoration: none; transition: transform 0.15s ease, opacity 0.15s ease;"
+                   onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)';"
+                   onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)';">
+                    <?= $globalIndex ?>
+                </a>
+            <?php 
+                $globalIndex++;
+            endforeach; 
+            ?>
+        <?php else: ?>
+            <p style="color: #64748b; font-size: 0.875rem; margin: 0; font-style: italic;">
+                No hay pruebas configuradas en la fase de planificación.
+            </p>
+        <?php endif; ?>
+    </div>
+</div>
 
     <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS Y ACTIVIDADES) -->
     <div class="accordion-container">
