@@ -25,7 +25,7 @@ include '../main/h.php';
         </h1>
         
     </div>
-        <div class="table-actions-container">
+    <div class="table-actions-container">
         <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
             <i class="ri-arrow-go-back-line"></i> 
         </a>
@@ -88,6 +88,32 @@ include '../main/h.php';
             </div>
         </div>
     </div>
+    <div class="table-actions-container">
+    <!-- 1. Icono de Edición / Notas -->
+    <a href="#" class="btn-control-disabled" data-tooltip="Notas / Edición" onclick="return false;">
+        <i class="ri-file-edit-line"></i> 
+    </a>
+
+    <!-- 2. Icono de Bandera / Hitos -->
+    <a href="#" class="btn-control-disabled" data-tooltip="Hitos / Estado" onclick="return false;">
+        <i class="ri-flag-line"></i>
+    </a>
+
+    <!-- 3. Icono de Tiempo / Historial -->
+    <a href="#" class="btn-control-disabled" data-tooltip="Historial / Cronología" onclick="return false;">
+        <i class="ri-time-line"></i> 
+    </a>
+
+    <!-- 4. Icono Financiero / Moneda -->
+    <a href="#" class="btn-control-disabled" data-tooltip="Gestión Financiera" onclick="return false;">
+        <i class="ri-money-dollar-circle-line"></i>
+    </a>
+
+    <!-- 5. Icono de Cuadrícula / Panel de Control (Activo) -->
+    <a href="../ac/index.php" class="btn btn-primary" data-tooltip="Panel General">
+        <i class="ri-layout-grid-line"></i> 
+    </a>
+</div>
 
     <!-- Bloque de Progreso General de Pruebas (Numerado Dinámico) -->
 <!-- Bloque de Progreso General de Pruebas (Numerado Consecutivo Global 1-19) -->
