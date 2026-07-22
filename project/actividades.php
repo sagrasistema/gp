@@ -242,34 +242,34 @@ include '../main/h.php';
         <div style="margin: 2.5rem 0 1.5rem 0;">
             <h3 style="font-size: 1.1rem; color: #1e293b; font-weight: 700; margin-bottom: 1rem;">Indicadores y Puntos de Control</h3>
             
-            <?php 
+         <?php 
             $indicadoresMeta = [
-                'CI' => ['nombre' => 'Debilidades de Control Interno (CI)', 'color' => '#16a34a'],
-                'CG' => ['nombre' => 'Carta de Gerencia (CG)', 'color' => '#2563eb'],
-                'SC' => ['nombre' => 'Situaciones Críticas (SC)', 'color' => '#dc2626'],
-                'AA' => ['nombre' => 'Asuntos de Auditoría (AA)', 'color' => '#9333ea']
+                'CI' => ['nombre' => 'Debilidades de Control Interno (CI)', 'color' => '#ca8a04'], // Amarillo Riesgo
+                'CG' => ['nombre' => 'Carta de Gerencia (CG)', 'color' => '#ea580c'],          // Naranja Riesgo
+                'SC' => ['nombre' => 'Situaciones Críticas (SC)', 'color' => '#dc2626'],       // Rojo Riesgo
+                'AA' => ['nombre' => 'Asuntos de Auditoría (AA)', 'color' => '#2563eb']        // Azul Estándar
             ];
 
             foreach ($indicadoresMeta as $key => $meta):
                 $items = $detallesPorTipo[$key] ?? [];
             ?>
                 <div class="accordion-item" style="margin-bottom: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: #ffffff;">
-                    <!-- Cabecera del Acordeon -->
-                    <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 1rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid <?= $meta['color'] ?>;">
-                        <span style="color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="ri-file-list-3-line" style="color: <?= $meta['color'] ?>;"></i> <?= $meta['nombre'] ?> 
-                            <span style="font-size: 0.75rem; background: #e2e8f0; color: #334155; padding: 0.15rem 0.5rem; border-radius: 9999px;"><?= count($items) ?> registros</span>
-                        </span>
-                        <i class="ri-arrow-down-s-line"></i>
-                    </div>
+        <!-- Cabecera del Acordeón con color dinámico -->
+                <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 1rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid <?= $meta['color'] ?>;">
+                    <span style="color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="ri-file-list-3-line" style="color: <?= $meta['color'] ?>;"></i> <?= $meta['nombre'] ?> 
+                        <span style="font-size: 0.75rem; background: #e2e8f0; color: #334155; padding: 0.15rem 0.5rem; border-radius: 9999px;"><?= count($items) ?> registros</span>
+                    </span>
+                    <i class="ri-arrow-down-s-line"></i>
+                </div>
 
-                    <!-- Contenido del Acordeon -->
-                    <div class="accordion-content" style="display: none; padding: 1.25rem; background: #ffffff;">
-                        <div style="margin-bottom: 1rem;">
-                            <button type="button" class="btn btn-primary" onclick="openIndicatorModal('<?= $key ?>')" style="padding: 0.4rem 0.85rem; font-size: 0.85rem; background: <?= $meta['color'] ?>; border-color: <?= $meta['color'] ?>;">
-                                <i class="ri-add-line"></i> Punto de control
-                            </button>
-                        </div>
+                <!-- Contenido del Acordeón -->
+                <div class="accordion-content" style="display: none; padding: 1.25rem; background: #ffffff;">
+                    <div style="margin-bottom: 1rem;">
+                        <button type="button" class="btn btn-primary" onclick="openIndicatorModal('<?= $key ?>')" style="padding: 0.4rem 0.85rem; font-size: 0.85rem; background: <?= $meta['color'] ?>; border-color: <?= $meta['color'] ?>;">
+                            <i class="ri-add-line"></i> Punto de control
+                        </button>
+                    </div>
 
                         <!-- Tabla de Registros del Indicador -->
                         <div style="overflow-x: auto;">

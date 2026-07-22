@@ -231,27 +231,27 @@ include '../main/h.php';
                             <div class="prueba-actions" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end;">
                                 <!-- Indicadores de solo lectura (Disabled) cc-->
                          <!-- Indicadores visuales de solo lectura con colores personalizados -->
-<div style="display: flex; align-items: center; gap: 0.35rem;">
-    <?php 
-    $hasCI = !empty($saved['indicador_ci']);
-    $hasCG = !empty($saved['indicador_cg']);
-    $hasSC = !empty($saved['indicador_sc']);
-    $hasAA = !empty($saved['indicador_aa']);
-    ?>
-    <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasCI ? '#16a34a' : '#cbd5e1' ?>; background: <?= $hasCI ? '#dcfce7' : '#f8fafc' ?>; color: <?= $hasCI ? '#16a34a' : '#94a3b8' ?>;" title="Control Interno">
-        CI
-    </span>
-    <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasCG ? '#2563eb' : '#cbd5e1' ?>; background: <?= $hasCG ? '#dbeafe' : '#f8fafc' ?>; color: <?= $hasCG ? '#2563eb' : '#94a3b8' ?>;" title="Carta de Gerencia">
-        CG
-    </span>
-    <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasSC ? '#dc2626' : '#cbd5e1' ?>; background: <?= $hasSC ? '#fee2e2' : '#f8fafc' ?>; color: <?= $hasSC ? '#dc2626' : '#94a3b8' ?>;" title="Situaciones Críticas">
-        SC
-    </span>
-    <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasAA ? '#9333ea' : '#cbd5e1' ?>; background: <?= $hasAA ? '#f3e8ff' : '#f8fafc' ?>; color: <?= $hasAA ? '#9333ea' : '#94a3b8' ?>;" title="Asuntos de Auditoría">
-        AA
-    </span>
-</div>
-
+                            <!-- Indicadores visuales de solo lectura con escala de riesgo por color -->
+                            <div style="display: flex; align-items: center; gap: 0.35rem;">
+                                <?php 
+                                $hasCI = !empty($saved['indicador_ci']);
+                                $hasCG = !empty($saved['indicador_cg']);
+                                $hasSC = !empty($saved['indicador_sc']);
+                                $hasAA = !empty($saved['indicador_aa']);
+                                ?>
+                                <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasCI ? '#ca8a04' : '#cbd5e1' ?>; background: <?= $hasCI ? '#fef9c3' : '#f8fafc' ?>; color: <?= $hasCI ? '#ca8a04' : '#94a3b8' ?>;" title="Debilidades de Control Interno (Amarillo)">
+                                    CI
+                                </span>
+                                <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasCG ? '#ea580c' : '#cbd5e1' ?>; background: <?= $hasCG ? '#ffedd5' : '#f8fafc' ?>; color: <?= $hasCG ? '#ea580c' : '#94a3b8' ?>;" title="Carta de Gerencia (Naranja)">
+                                    CG
+                                </span>
+                                <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasSC ? '#dc2626' : '#cbd5e1' ?>; background: <?= $hasSC ? '#fee2e2' : '#f8fafc' ?>; color: <?= $hasSC ? '#dc2626' : '#94a3b8' ?>;" title="Situaciones Críticas (Rojo)">
+                                    SC
+                                </span>
+                                <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasAA ? '#2563eb' : '#cbd5e1' ?>; background: <?= $hasAA ? '#dbeafe' : '#f8fafc' ?>; color: <?= $hasAA ? '#2563eb' : '#94a3b8' ?>;" title="Asuntos de Auditoría (Azul)">
+                                    AA
+                                </span>
+                            </div>
                                 <!-- Estatus de solo lectura -->
                                 <span style="font-size: 0.8rem; font-weight: 600; padding: 0.35rem 0.75rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155;">
                                     <?= $statusText ?>
