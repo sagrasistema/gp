@@ -69,6 +69,56 @@ include '../main/h.php';
         </div>
 
     </div>
+    <?php 
+    include 'pruebas_etapa_1';?>
+    <?php
+// Aseguramos que la variable $pruebasList esté definida desde el controlador
+$pruebasList = $pruebasList ?? [];
+$totalPruebas = count($pruebasList);
+?>
+
+<!-- Control de Pruebas y Progreso Dinámico -->
+<div class="pruebas-progress-container" style="margin-top: 1.5rem; background: #ffffff; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+        <h4 style="margin: 0; font-size: 0.95rem; color: #1e293b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.025em;">
+            Progreso General de Pruebas (1-<?= $totalPruebas ?>)
+        </h4>
+        <span style="font-size: 0.75rem; background-color: #f1f5f9; color: #475569; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;">
+            Fase de Planificación
+        </span>
+    </div>
+
+    <!-- Contenedor de Bloques Numerados -->
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        <?php if ($totalPruebas > 0): ?>
+            <?php foreach ($pruebasList as $prueba): ?>
+                <?php 
+                    // Validación de estados para cambiar dinámicamente el color del bloque
+                    $isCompleted = ($prueba['estado'] === 'activo' || $prueba['estado'] === 'completado');
+                    $bgColor = $isCompleted ? '#10b981' : '#64748b'; // Verde esmeralda si está activo/completado, gris pizarra si está pendiente
+                    
+                    $safeId = htmlspecialchars((string)$prueba['id'], ENT_QUOTES, 'UTF-8');
+                    $safeOrden = htmlspecialchars((string)$prueba['orden'], ENT_QUOTES, 'UTF-8');
+                    $safeCategoria = htmlspecialchars($prueba['categoria_nombre'] ?? 'Sin Categoría', ENT_QUOTES, 'UTF-8');
+                    $safeEtapa = htmlspecialchars($prueba['etapa_nombre'] ?? 'Sin Etapa', ENT_QUOTES, 'UTF-8');
+                ?>
+                <a href="detalle_prueba.php?id=<?= $safeId ?>" 
+                   title="Categoría: <?= $safeCategoria ?> | Etapa: <?= $safeEtapa ?>"
+                   style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; background-color: <?= $bgColor ?>; color: #ffffff; font-weight: 700; border-radius: 8px; text-decoration: none; font-size: 0.875rem; transition: transform 0.15s ease, opacity 0.15s ease;"
+                   onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)';"
+                   onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)';">
+                    <?= $safeOrden ?>
+                </a>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p style="color: #64748b; font-size: 0.875rem; margin: 0; font-style: italic;">
+                No hay pruebas configuradas para este proyecto en la etapa actual de planificación.
+            </p>
+        <?php endif; ?>
+    </div>
+
+</div>
 
 
     <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS) -->
