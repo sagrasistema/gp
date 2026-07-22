@@ -473,7 +473,7 @@ window.onclick = function(event) {
     if (event.target === modalInd) modalInd.style.display = 'none';
 }
 </script>
-</script>
+
 
 <?php 
 include '../main/layout_footer.php'; 
