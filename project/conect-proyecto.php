@@ -98,7 +98,7 @@ try {
         FROM audit_pruebas p
         INNER JOIN audit_categorias c ON p.categoria_id = c.id
         WHERE c.etapa_id = 1
-        ORDER BY p.orden ASC
+        ORDER BY p.id ASC
     ");
     $stmtList->execute();
     $pruebasList = $stmtList->fetchAll(PDO::FETCH_ASSOC);
