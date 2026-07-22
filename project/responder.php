@@ -230,17 +230,17 @@ include '../main/h.php';
                             
                             <div class="prueba-actions" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end;">
                                 <!-- Indicadores de solo lectura (Disabled) -->
-                                <label class="indicator-chk" style="color: #16a34a; opacity: 0.85;">
-                                    <input type="checkbox" disabled <?= (!empty($saved['indicador_ci'])) ? 'checked' : '' ?>> CI
+                                <label class="indicator-chk" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; font-weight: 700; color: #16a34a;">
+                                    <input type="checkbox" disabled style="accent-color: #16a34a; width: 16px; height: 16px; cursor: not-allowed;" <?= (!empty($saved['indicador_ci'])) ? 'checked' : '' ?>> CI
                                 </label>
-                                <label class="indicator-chk" style="color: #2563eb; opacity: 0.85;">
-                                    <input type="checkbox" disabled <?= (!empty($saved['indicador_cg'])) ? 'checked' : '' ?>> CG
+                                <label class="indicator-chk" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; font-weight: 700; color: #2563eb;">
+                                    <input type="checkbox" disabled style="accent-color: #2563eb; width: 16px; height: 16px; cursor: not-allowed;" <?= (!empty($saved['indicador_cg'])) ? 'checked' : '' ?>> CG
                                 </label>
-                                <label class="indicator-chk" style="color: #dc2626; opacity: 0.85;">
-                                    <input type="checkbox" disabled <?= (!empty($saved['indicador_sc'])) ? 'checked' : '' ?>> SC
+                                <label class="indicator-chk" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; font-weight: 700; color: #dc2626;">
+                                    <input type="checkbox" disabled style="accent-color: #dc2626; width: 16px; height: 16px; cursor: not-allowed;" <?= (!empty($saved['indicador_sc'])) ? 'checked' : '' ?>> SC
                                 </label>
-                                <label class="indicator-chk" style="color: #9333ea; opacity: 0.85;">
-                                    <input type="checkbox" disabled <?= (!empty($saved['indicador_aa'])) ? 'checked' : '' ?>> AA
+                                <label class="indicator-chk" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; font-weight: 700; color: #9333ea;">
+                                    <input type="checkbox" disabled style="accent-color: #9333ea; width: 16px; height: 16px; cursor: not-allowed;" <?= (!empty($saved['indicador_aa'])) ? 'checked' : '' ?>> AA
                                 </label>
 
                                 <!-- Estatus de solo lectura -->
