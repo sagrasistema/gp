@@ -327,7 +327,7 @@ include '../main/h.php';
                     <option value="cerrado" <?= $estadoActualPrueba === 'cerrado' ? 'selected' : '' ?>>🔒 Cerrado</option>
                 </select>
             </div>
-            <div style="display:flex; justify-content:flex-end; gap:1rem; margin: 2rem 0 4rem 0;">
+            <div>
                 <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="btn btn-secondary">Volver al Panel</a>
                 <button type="submit" class="btn btn-primary" style="padding:0.75rem 2.5rem;"><i class="ri-save-3-line"></i> Guardar Todo</button>
             </div>
