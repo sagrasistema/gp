@@ -226,7 +226,63 @@ include 'conect-actividades.php';
         </form>
     <?php endforeach; ?>
 </div>
+<!-- Formularios ocultos para eliminar filas analíticas (FUERA DEL FORM PRINCIPAL) -->
+    <?php if ((int)$pruebaId === 11): ?>
+        <?php foreach (array_merge($analiticaItems['activo'], $analiticaItems['pasivo'], $analiticaItems['patrimonio']) as $it): ?>
+            <form id="delAnalitica_<?= $it->id ?>" action="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pruebaId ?>" method="POST" style="display:none;">
+                <input type="hidden" name="action_type" value="delete_analitica_item">
+                <input type="hidden" name="item_id" value="<?= $it->id ?>">
+            </form>
+        <?php endforeach; ?>
 
+        <!-- Modal para Agregar Partida Analítica (FUERA DEL FORM PRINCIPAL) -->
+        <div id="analiticaModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1150; align-items:center; justify-content:center;">
+            <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:550px; width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.15);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:0.75rem;">
+                    <h3 id="modalAnaliticaTitle" style="margin:0; color:#1e293b; font-size:1.1rem;">Agregar Partida</h3>
+                    <button type="button" onclick="closeAnaliticaModal()" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748b;"><i class="ri-close-line"></i></button>
+                </div>
+                <form action="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pruebaId ?>" method="POST">
+                    <input type="hidden" name="action_type" value="add_analitica_item">
+                    <input type="hidden" id="modalTipoAnalitica" name="tipo" value="">
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Tipo / Rubro (Ej. Efectivo, Cuentas por Cobrar...)</label>
+                        <input type="text" name="tipo_rubro" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Saldo Actual</label>
+                            <input type="number" step="0.01" name="saldo_actual" value="0.00" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Saldo Anterior</label>
+                            <input type="number" step="0.01" name="saldo_anterior" value="0.00" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Observaciones (ID de referencia)</label>
+                        <input type="text" name="observaciones" placeholder="Ej. 6, 7..." style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                    </div>
+                    <div style="text-align:right; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeAnaliticaModal()" style="padding: 0.5rem 1rem;">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.25rem;">Guardar Partida</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+        function openAnaliticaModal(tipo) {
+            document.getElementById('modalTipoAnalitica').value = tipo;
+            document.getElementById('modalAnaliticaTitle').innerText = 'Nuevo Registro en ' + tipo.toUpperCase();
+            document.getElementById('analiticaModal').style.display = 'flex';
+        }
+        function closeAnaliticaModal() {
+            document.getElementById('analiticaModal').style.display = 'none';
+        }
+        </script>
+    <?php endif; ?>
 <!-- MODAL PARA AGREGAR PUNTO DE CONTROL DE INDICADOR -->
 <div id="indicatorModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1100; align-items:center; justify-content:center;">
     <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:650px; width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid var(--border-color);">
