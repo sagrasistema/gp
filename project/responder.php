@@ -31,7 +31,8 @@ include '../main/h.php';
         </div>
     <?php endif; ?>
 
-    <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; background: #f8fafc; padding: 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+    <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.25rem; border-radius: 12px;">
+    
         <div>Cliente / Empresa<br><strong><?= htmlspecialchars($projectData->clientName, ENT_QUOTES, 'UTF-8') ?></strong></div>
         <div>RIF Contribuyente<br><strong><?= htmlspecialchars($projectData->clientRif, ENT_QUOTES, 'UTF-8') ?></strong></div>
         <div>Proyecto / Alcance<br><strong><?= htmlspecialchars($projectData->nombre, ENT_QUOTES, 'UTF-8') ?></strong></div>

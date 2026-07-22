@@ -12,6 +12,7 @@ include '../main/config.php';
 $customLogoPath = '../main/logo.png';
 $customHomePath = '../index.php';
 $customAcPath   = '../ac/index.php';
+$customAcPath   = '../project/index.php';
 $currentTab     = 'proyectos'; 
 
 include '../main/layout_header.php';
