@@ -30,7 +30,7 @@ include '../main/h.php';
             <i class="ri-checkbox-circle-fill"></i> Parámetros e indicadores de prueba sincronizados correctamente.
         </div>
     <?php endif; ?>
-    <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: 12px; background-color: #f8fafc;">
+    <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.25rem; border-radius: 12px;">
         
         <!-- Columna 1: Cliente y Socio Líder -->
         <div style="display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid #e2e8f0; padding-right: 1rem;">
