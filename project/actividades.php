@@ -117,6 +117,8 @@ include 'conect-actividades.php';
                 <textarea name="actividades_data[<?= $act->id ?>][contenido]" placeholder="Escriba aquí los hallazgos, papeles de trabajo o evidencias analizadas..." rows="4" style="width:100%; padding:0.75rem; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit; resize:vertical;"><?= htmlspecialchars($act->respuesta, ENT_QUOTES, 'UTF-8') ?></textarea>
             </div>
         <?php endforeach; ?>
+        <!-- INCLUSIÓN AUTOMÁTICA DE LA REVISIÓN ANALÍTICA SÓLO PARA LA PRUEBA 11 -->
+        <?php include 'prueba11.php'; ?>
 
         <!-- SECCIÓN DE ACORDEONES POR CADA INDICADOR (CI, CG, SC, AA) -->
         <div style="margin: 2.5rem 0 1.5rem 0;">
