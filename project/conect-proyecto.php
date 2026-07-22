@@ -16,11 +16,7 @@ try {
         SELECT 
             p.*, 
             c.name AS clientName, 
-            c.rif AS clientRif,
-            p.socio_lider AS socioLider,
-            p.socio_calidad AS socioCalidad,
-            p.fecha_remision AS fechaRemision,
-            p.gerente AS gerente
+            c.rif AS clientRif
         FROM proyectos p 
         INNER JOIN clientes c ON p.cliente_id = c.id 
         WHERE p.id = :id
@@ -35,7 +31,6 @@ try {
     error_log("Error crítico en cabecera de proyecto: " . $e->getMessage());
     die("Error crítico de base de datos al cargar el proyecto.");
 }
-
 // 2. Procesar Actualización de Indicadores y Estados de la Prueba (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_POST['action_type'] === 'update_prueba') {
     $pruebaId = filter_input(INPUT_POST, 'prueba_id', FILTER_VALIDATE_INT);
