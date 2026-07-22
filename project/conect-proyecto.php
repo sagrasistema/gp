@@ -128,3 +128,16 @@ try {
     error_log("Error al calcular progreso de actividades: " . $e->getMessage());
     $progresoActividades = [];
 }
+// 6. Calcular el porcentaje global de avance de la fase
+$totalPruebasCount = count($pruebasList);
+$completadasCount = 0;
+
+foreach ($pruebasList as $pruebaItem) {
+    $pIdCheck = $pruebaItem['id'];
+    $estadoActual = strtolower($pruebasEjecutadas[$pIdCheck]['estado'] ?? 'en_proceso');
+    if ($estadoActual === 'completado' || $estadoActual === 'cerrado') {
+        $completadasCount++;
+    }
+}
+
+$porcentajeProgreso = $totalPruebasCount > 0 ? round(($completadasCount / $totalPruebasCount) * 100) : 0;
