@@ -1,5 +1,5 @@
 <?php
-include 'concet-actividades.php';
+include 'conect-actividades.php';
 ?>
 <div class="view-container">
     <div class="table-actions-container">
