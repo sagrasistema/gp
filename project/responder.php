@@ -30,13 +30,46 @@ include '../main/h.php';
             <i class="ri-checkbox-circle-fill"></i> Parámetros e indicadores de prueba sincronizados correctamente.
         </div>
     <?php endif; ?>
+    <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: 12px; background-color: #f8fafc;">
+        
+        <!-- Columna 1: Cliente y Socio Líder -->
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid #e2e8f0; padding-right: 1rem;">
+            <div>
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Cliente / Empresa</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->clientName ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.5rem;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Socio Líder</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->socioLider ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+        </div>
 
-    <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.25rem; border-radius: 12px;">
-    
-        <div>Cliente / Empresa<br><strong><?= htmlspecialchars($projectData->clientName, ENT_QUOTES, 'UTF-8') ?></strong></div>
-        <div>RIF Contribuyente<br><strong><?= htmlspecialchars($projectData->clientRif, ENT_QUOTES, 'UTF-8') ?></strong></div>
-        <div>Proyecto / Alcance<br><strong><?= htmlspecialchars($projectData->nombre, ENT_QUOTES, 'UTF-8') ?></strong></div>
+        <!-- Columna 2: Proyecto y Socio de Calidad -->
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid #e2e8f0; padding-right: 1rem; padding-left: 0.5rem;">
+            <div>
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Proyecto / Alcance</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->nombre ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.5rem;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Socio de Calidad</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->socioCalidad ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+        </div>
+
+        <!-- Columna 3: Fecha de Remisión y Gerente -->
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; padding-left: 0.5rem;">
+            <div>
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Fecha de Remisión</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->fechaRemision ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.5rem;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Gerente Encargado</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->gerente ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+        </div>
+
     </div>
+
 
     <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS) -->
     <div class="accordion-container">
