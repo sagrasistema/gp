@@ -31,7 +31,7 @@ try {
     die("Error crítico de base de datos al cargar el proyecto.");
 }
 
-// 2. Cargar metadatos de la Prueba seleccionada y su Estatus Actual en ejecución
+// 2. Cargar metadatos de la Prueba seleccionada y su Ejecución actual (Estatus e Indicadores)
 try {
     $stmtPrueba = $pdo->prepare("
         SELECT p.nombre, p.norma, c.nombre AS catNombre 
@@ -42,24 +42,31 @@ try {
     $stmtPrueba->execute([':pId' => $pruebaId]);
     $metaPrueba = $stmtPrueba->fetch(PDO::FETCH_OBJ);
 
-    if (! $metaPrueba) {
+    if (!$metaPrueba) {
         die("Error: La prueba especificada no existe.");
     }
 
-    // Obtener estatus actual de la prueba en este proyecto
+    // Obtener estatus e indicadores actuales de la prueba en este proyecto
     $stmtStatus = $pdo->prepare("
-        SELECT estado FROM proyecto_pruebas_ejecucion 
+        SELECT estado, indicador_ci, indicador_cg, indicador_sc, indicador_aa 
+        FROM proyecto_pruebas_ejecucion 
         WHERE proyecto_id = :projId AND prueba_id = :prId
     ");
     $stmtStatus->execute([':projId' => $proyectoId, ':prId' => $pruebaId]);
-    $estadoActualPrueba = $stmtStatus->fetchColumn() ?: 'en_proceso';
+    $testExecution = $stmtStatus->fetch(PDO::FETCH_OBJ);
+
+    $estadoActualPrueba = $testExecution->estado ?? 'en_proceso';
+    $ciVal = $testExecution->indicador_ci ?? 0;
+    $cgVal = $testExecution->indicador_cg ?? 0;
+    $scVal = $testExecution->indicador_sc ?? 0;
+    $aaVal = $testExecution->indicador_aa ?? 0;
 
 } catch (PDOException $e) {
     die("Error al cargar metadatos: " . $e->getMessage());
 }
 
-// 3. Procesar el guardado masivo de actividades + Estatus de la Prueba (POST)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['actividades_data']) || isset($_POST['estado_prueba']))) {
+// 3. Procesar el guardado masivo de actividades + Estatus e Indicadores de la Prueba (POST)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
@@ -86,17 +93,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['actividades_data']) 
             }
         }
 
-        // B. Guardar/Actualizar Estatus General de la Prueba
+        // B. Guardar/Actualizar Estatus e Indicadores de la Prueba
         $nuevoEstadoPrueba = trim($_POST['estado_prueba'] ?? 'en_proceso');
+        $ci = isset($_POST['ci']) ? 1 : 0;
+        $cg = isset($_POST['cg']) ? 1 : 0;
+        $sc = isset($_POST['sc']) ? 1 : 0;
+        $aa = isset($_POST['aa']) ? 1 : 0;
+
         $stmtTestSave = $pdo->prepare("
-            INSERT INTO proyecto_pruebas_ejecucion (proyecto_id, prueba_id, estado)
-            VALUES (:proyecto_id, :prueba_id, :estado)
-            ON DUPLICATE KEY UPDATE estado = :estado_u
+            INSERT INTO proyecto_pruebas_ejecucion 
+            (proyecto_id, prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado)
+            VALUES (:proyecto_id, :prueba_id, :ci, :cg, :sc, :aa, :estado)
+            ON DUPLICATE KEY UPDATE 
+                indicador_ci = :ci_u, 
+                indicador_cg = :cg_u, 
+                indicador_sc = :sc_u, 
+                indicador_aa = :aa_u, 
+                estado = :estado_u
         ");
         $stmtTestSave->execute([
             ':proyecto_id' => $proyectoId,
             ':prueba_id'   => $pruebaId,
+            ':ci'          => $ci,
+            ':cg'          => $cg,
+            ':sc'          => $sc,
+            ':aa'          => $aa,
             ':estado'      => $nuevoEstadoPrueba,
+            ':ci_u'        => $ci,
+            ':cg_u'        => $cg,
+            ':sc_u'        => $sc,
+            ':aa_u'        => $aa,
             ':estado_u'    => $nuevoEstadoPrueba
         ]);
 
@@ -173,7 +199,7 @@ include '../main/h.php';
 
     <?php if (isset($_GET['success'])): ?>
         <div class="alert-success" style="padding:1rem; background:#d1fae5; color:#065f46; border-radius:8px; margin-bottom:1.5rem;">
-            <i class="ri-checkbox-circle-fill"></i> Respuestas de auditoría y estatus guardados con éxito.
+            <i class="ri-checkbox-circle-fill"></i> Respuestas de auditoría, indicadores y estatus guardados con éxito.
         </div>
     <?php endif; ?>
 
@@ -194,27 +220,46 @@ include '../main/h.php';
             </div>
         <?php endforeach; ?>
 
-        <!-- CAJA FINAL: Estatus General de la Prueba -->
-        <div style="background: #ffffff; border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <div>
-                <h4 style="margin: 0 0 0.25rem 0; font-size: 1rem; color: #1e293b;">Estatus General de la Prueba</h4>
-                <p style="margin: 0; font-size: 0.85rem; color: #64748b;">Seleccione el estado en el que se encuentra esta prueba al guardar el formulario.</p>
-            </div>
-            <div>
-                <select name="estado_prueba" class="status-select" style="padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.9rem; border: 1px solid #cbd5e1; font-weight: 600; background: #f8fafc;">
-                    <option value="en_proceso" <?= $estadoActualPrueba === 'en_proceso' ? 'selected' : '' ?>>⏳ En proceso</option>
-                    <option value="completado" <?= $estadoActualPrueba === 'completado' ? 'selected' : '' ?>>✅ Completado</option>
-                    <option value="por_corregir_lider" <?= $estadoActualPrueba === 'por_corregir_lider' ? 'selected' : '' ?>>⚠️ Por Corregir Lider</option>
-                    <option value="por_corregir_riesgo" <?= $estadoActualPrueba === 'por_corregir_riesgo' ? 'selected' : '' ?>>🚨 Por Corregir Riesgo</option>
-                    <option value="revisado" <?= $estadoActualPrueba === 'revisado' ? 'selected' : '' ?>>🔹 Revisado</option>
-                    <option value="cerrado" <?= $estadoActualPrueba === 'cerrado' ? 'selected' : '' ?>>🔒 Cerrado</option>
-                </select>
+        <!-- CAJA FINAL: Control de Indicadores y Estatus General de la Prueba -->
+        <div style="background: #ffffff; border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+            <h4 style="margin: 0 0 1rem 0; font-size: 1rem; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem;">Control y Estatus de la Prueba</h4>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <!-- Indicadores Editables CI, CG, SC, AA -->
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-size: 0.85rem; font-weight: 600; color: #475569;">Indicadores:</span>
+                    <label style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; font-weight: 700; border: 1px solid #cbd5e1; padding: 0.4rem 0.6rem; border-radius: 6px; cursor: pointer; color: #16a34a;">
+                        <input type="checkbox" name="ci" value="1" <?= $ciVal ? 'checked' : '' ?>> CI
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; font-weight: 700; border: 1px solid #cbd5e1; padding: 0.4rem 0.6rem; border-radius: 6px; cursor: pointer; color: #2563eb;">
+                        <input type="checkbox" name="cg" value="1" <?= $cgVal ? 'checked' : '' ?>> CG
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; font-weight: 700; border: 1px solid #cbd5e1; padding: 0.4rem 0.6rem; border-radius: 6px; cursor: pointer; color: #dc2626;">
+                        <input type="checkbox" name="sc" value="1" <?= $scVal ? 'checked' : '' ?>> SC
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; font-weight: 700; border: 1px solid #cbd5e1; padding: 0.4rem 0.6rem; border-radius: 6px; cursor: pointer; color: #9333ea;">
+                        <input type="checkbox" name="aa" value="1" <?= $aaVal ? 'checked' : '' ?>> AA
+                    </label>
+                </div>
+
+                <!-- Selector de Estatus -->
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 0.85rem; font-weight: 600; color: #475569;">Estatus:</span>
+                    <select name="estado_prueba" class="status-select" style="padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; border: 1px solid #cbd5e1; font-weight: 600; background: #f8fafc;">
+                        <option value="en_proceso" <?= $estadoActualPrueba === 'en_proceso' ? 'selected' : '' ?>>⏳ En proceso</option>
+                        <option value="completado" <?= $estadoActualPrueba === 'completado' ? 'selected' : '' ?>>✅ Completado</option>
+                        <option value="por_corregir_lider" <?= $estadoActualPrueba === 'por_corregir_lider' ? 'selected' : '' ?>>⚠️ Por Corregir Lider</option>
+                        <option value="por_corregir_riesgo" <?= $estadoActualPrueba === 'por_corregir_riesgo' ? 'selected' : '' ?>>🚨 Por Corregir Riesgo</option>
+                        <option value="revisado" <?= $estadoActualPrueba === 'revisado' ? 'selected' : '' ?>>🔹 Revisado</option>
+                        <option value="cerrado" <?= $estadoActualPrueba === 'cerrado' ? 'selected' : '' ?>>🔒 Cerrado</option>
+                    </select>
+                </div>
             </div>
         </div>
 
         <div style="display:flex; justify-content:flex-end; gap:1rem; margin: 2rem 0 4rem 0;">
             <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="btn btn-secondary">Volver al Panel</a>
-            <button type="submit" class="btn btn-primary" style="padding:0.75rem 2.5rem;"><i class="ri-save-3-line"></i> Guardar Respuestas y Estatus</button>
+            <button type="submit" class="btn btn-primary" style="padding:0.75rem 2.5rem;"><i class="ri-save-3-line"></i> Guardar Todo</button>
         </div>
     </form>
 </div>

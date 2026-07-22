@@ -202,7 +202,6 @@ include '../main/h.php';
                         $saved = $pruebasEjecutadas[$pr->id] ?? null;
                         $savedStatus = $saved['estado'] ?? 'en_proceso';
                         
-                        // Traducción legible y etiqueta visual del estatus
                         $statusLabels = [
                             'en_proceso' => '⏳ En proceso',
                             'completado' => '✅ Completado',
@@ -213,7 +212,7 @@ include '../main/h.php';
                         ];
                         $statusText = $statusLabels[$savedStatus] ?? '⏳ En proceso';
                         
-                        // Obtener métricas de actividades para esta prueba específica
+                        // Métricas de actividades
                         $metricaAct = $progresoActividades[$pr->id] ?? ['total_actividades' => 0, 'actividades_completadas' => 0];
                         $totalAct = (int)$metricaAct['total_actividades'];
                         $completadasAct = (int)$metricaAct['actividades_completadas'];
@@ -230,9 +229,23 @@ include '../main/h.php';
                             </div>
                             
                             <div class="prueba-actions" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end;">
-                                <!-- Indicadores CI, CG, SC, AA (se mantienen intactos o según tu lógica) -->
-                                <span style="font-size: 0.8rem; font-weight: 600; padding: 0.3rem 0.6rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; color: #475569;">
-                                    Estatus: <strong><?= $statusText ?></strong>
+                                <!-- Indicadores de solo lectura (Disabled) -->
+                                <label class="indicator-chk" style="color: #16a34a; opacity: 0.85;">
+                                    <input type="checkbox" disabled <?= (!empty($saved['indicador_ci'])) ? 'checked' : '' ?>> CI
+                                </label>
+                                <label class="indicator-chk" style="color: #2563eb; opacity: 0.85;">
+                                    <input type="checkbox" disabled <?= (!empty($saved['indicador_cg'])) ? 'checked' : '' ?>> CG
+                                </label>
+                                <label class="indicator-chk" style="color: #dc2626; opacity: 0.85;">
+                                    <input type="checkbox" disabled <?= (!empty($saved['indicador_sc'])) ? 'checked' : '' ?>> SC
+                                </label>
+                                <label class="indicator-chk" style="color: #9333ea; opacity: 0.85;">
+                                    <input type="checkbox" disabled <?= (!empty($saved['indicador_aa'])) ? 'checked' : '' ?>> AA
+                                </label>
+
+                                <!-- Estatus de solo lectura -->
+                                <span style="font-size: 0.8rem; font-weight: 600; padding: 0.35rem 0.75rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155;">
+                                    <?= $statusText ?>
                                 </span>
 
                                 <!-- Enlace a la pantalla de actividades para edición -->
