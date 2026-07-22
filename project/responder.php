@@ -90,27 +90,27 @@ include '../main/h.php';
     </div>
     <div class="table-actions-container">
     <!-- 1. Icono de Edición / Notas -->
-    <a href="#" class="btn-control-disabled" data-tooltip="Notas / Edición" onclick="return false;">
+    <a href="#" class="btn btn-primary" data-tooltip="Reporte de avance" onclick="return false;">
         <i class="ri-file-edit-line"></i> 
     </a>
 
     <!-- 2. Icono de Bandera / Hitos -->
-    <a href="#" class="btn-control-disabled" data-tooltip="Hitos / Estado" onclick="return false;">
+    <a href="#" class="btn btn-primary" data-tooltip="Reporte de debilidades" onclick="return false;">
         <i class="ri-flag-line"></i>
     </a>
 
     <!-- 3. Icono de Tiempo / Historial -->
-    <a href="#" class="btn-control-disabled" data-tooltip="Historial / Cronología" onclick="return false;">
+    <a href="#" class="btn btn-primary" data-tooltip="Reporte de Horas" onclick="return false;">
         <i class="ri-time-line"></i> 
     </a>
 
     <!-- 4. Icono Financiero / Moneda -->
-    <a href="#" class="btn-control-disabled" data-tooltip="Gestión Financiera" onclick="return false;">
+    <a href="#" class="btn btn-primary" data-tooltip="Reporte de asientos" onclick="return false;">
         <i class="ri-money-dollar-circle-line"></i>
     </a>
 
     <!-- 5. Icono de Cuadrícula / Panel de Control (Activo) -->
-    <a href="../ac/index.php" class="btn btn-primary" data-tooltip="Panel General">
+    <a href="#" class="btn btn-primary" data-tooltip="Reporte general">
         <i class="ri-layout-grid-line"></i> 
     </a>
 </div>
