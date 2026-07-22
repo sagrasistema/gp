@@ -8,6 +8,27 @@ $pruebaId = filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT);
 if (!$proyectoId || !$pruebaId) {
     die("Error: Parámetros relacionales faltantes.");
 }
+// 1. Cargar Cabecera del Proyecto y Datos del Cliente
+try {
+    $stmt = $pdo->prepare("
+        SELECT 
+            p.*, 
+            c.name AS clientName, 
+            c.rif AS clientRif
+        FROM proyectos p 
+        INNER JOIN clientes c ON p.cliente_id = c.id 
+        WHERE p.id = :id
+    ");
+    $stmt->execute([':id' => $proyectoId]);
+    $projectData = $stmt->fetch(PDO::FETCH_OBJ);
+
+    if (!$projectData) {
+        die("Error: El proyecto solicitado no existe.");
+    }
+} catch (PDOException $e) {
+    error_log("Error crítico en cabecera de proyecto: " . $e->getMessage());
+    die("Error crítico de base de datos al cargar el proyecto.");
+}
 
 // 1. Cargar metadatos de la Prueba seleccionada
 $stmtPrueba = $pdo->prepare("SELECT p.nombre, c.nombre AS catNombre FROM audit_pruebas p INNER JOIN audit_categorias c ON p.categoria_id = c.id WHERE p.id = :pId");
