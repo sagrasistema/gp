@@ -10,9 +10,10 @@ include '../main/h.php';
 <style>
     .prueba-row-container { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); background: #ffffff; gap: 1rem; }
     .prueba-title { font-size: 0.95rem; font-weight: 600; color: #334155; flex-grow: 1; }
-    .prueba-actions { display: flex; align-items: center; gap: 0.75rem; }
+    .prueba-actions { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end; }
     .indicator-chk { display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; font-weight: 700; border: 1px solid #cbd5e1; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; }
     .status-select { padding: 0.4rem; border-radius: 6px; font-size: 0.85rem; border: 1px solid #cbd5e1; font-weight: 600; }
+    .badge-progress { font-size: 0.75rem; background: #f1f5f9; color: #475569; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: 600; white-space: nowrap; }
 </style>
 
 <?php include '../main/layout_header.php'; ?>
@@ -30,9 +31,9 @@ include '../main/h.php';
             <i class="ri-checkbox-circle-fill"></i> Parámetros e indicadores de prueba sincronizados correctamente.
         </div>
     <?php endif; ?>
-    <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.25rem; border-radius: 12px;">
-        
-        <!-- Columna 1: Cliente y Socio Líder -->
+
+    <!-- Cabecera de Metadatos del Proyecto -->
+    <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.25rem; border-radius: 12px; background: #ffffff; border: 1px solid var(--border-color);">
         <div style="display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid #e2e8f0; padding-right: 1rem; font-size: 0.9rem;">
             <div>
                 <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Cliente / Empresa</span><br>
@@ -44,7 +45,6 @@ include '../main/h.php';
             </div>
         </div>
 
-        <!-- Columna 2: Proyecto y Socio de Calidad -->
         <div style="display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid #e2e8f0; padding-right: 1rem; padding-left: 0.5rem; font-size: 0.9rem;">
             <div>
                 <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Proyecto / Alcance</span><br>
@@ -56,7 +56,6 @@ include '../main/h.php';
             </div>
         </div>
 
-        <!-- Columna 3: Fecha de Remisión y Gerente -->
         <div style="display: flex; flex-direction: column; gap: 0.75rem; padding-left: 0.5rem; font-size: 0.9rem;">
             <div>
                 <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Fecha de Remisión</span><br>
@@ -67,61 +66,56 @@ include '../main/h.php';
                 <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->gerente ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
         </div>
-
-    </div>
-    <?php 
-    include 'pruebas_etapa_1';?>
-    <?php
-// Aseguramos que la variable $pruebasList esté definida desde el controlador
-$pruebasList = $pruebasList ?? [];
-$totalPruebas = count($pruebasList);
-?>
-
-<!-- Control de Pruebas y Progreso Dinámico -->
-<div class="pruebas-progress-container" style="margin-top: 1.5rem; background: #ffffff; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-    
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-        <h4 style="margin: 0; font-size: 0.95rem; color: #1e293b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.025em;">
-            Progreso General de Pruebas (1-<?= $totalPruebas ?>)
-        </h4>
-        <span style="font-size: 0.75rem; background-color: #f1f5f9; color: #475569; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;">
-            Fase de Planificación
-        </span>
     </div>
 
-    <!-- Contenedor de Bloques Numerados -->
-    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-        <?php if ($totalPruebas > 0): ?>
-            <?php foreach ($pruebasList as $prueba): ?>
-                <?php 
-                    // Validación de estados para cambiar dinámicamente el color del bloque
-                    $isCompleted = ($prueba['estado'] === 'activo' || $prueba['estado'] === 'completado');
-                    $bgColor = $isCompleted ? '#10b981' : '#64748b'; // Verde esmeralda si está activo/completado, gris pizarra si está pendiente
-                    
-                    $safeId = htmlspecialchars((string)$prueba['id'], ENT_QUOTES, 'UTF-8');
-                    $safeOrden = htmlspecialchars((string)$prueba['orden'], ENT_QUOTES, 'UTF-8');
-                    $safeCategoria = htmlspecialchars($prueba['categoria_nombre'] ?? 'Sin Categoría', ENT_QUOTES, 'UTF-8');
-                    $safeEtapa = htmlspecialchars($prueba['etapa_nombre'] ?? 'Sin Etapa', ENT_QUOTES, 'UTF-8');
-                ?>
-                <a href="detalle_prueba.php?id=<?= $safeId ?>" 
-                   title="Categoría: <?= $safeCategoria ?> | Etapa: <?= $safeEtapa ?>"
-                   style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; background-color: <?= $bgColor ?>; color: #ffffff; font-weight: 700; border-radius: 8px; text-decoration: none; font-size: 0.875rem; transition: transform 0.15s ease, opacity 0.15s ease;"
-                   onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)';"
-                   onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)';">
-                    <?= $safeOrden ?>
-                </a>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p style="color: #64748b; font-size: 0.875rem; margin: 0; font-style: italic;">
-                No hay pruebas configuradas para este proyecto en la etapa actual de planificación.
-            </p>
-        <?php endif; ?>
+    <!-- Bloque de Progreso General de Pruebas (Numerado Dinámico) -->
+    <div class="pruebas-progress-container" style="margin-bottom: 2rem; background: #ffffff; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+            <h4 style="margin: 0; font-size: 0.95rem; color: #1e293b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.025em;">
+                Progreso General de Pruebas (1-<?= count($pruebasList) ?>)
+            </h4>
+            <span style="font-size: 0.75rem; background-color: #f1f5f9; color: #475569; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;">
+                Fase de Planificación
+            </span>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+            <?php if (!empty($pruebasList)): ?>
+                <?php foreach ($pruebasList as $prueba): ?>
+                    <?php 
+                        $pId = $prueba['id'];
+                        $ejecucion = $pruebasEjecutadas[$pId] ?? null;
+                        $estadoPrueba = strtolower($ejecucion['estado'] ?? 'en_proceso');
+                        
+                        // Color dinámico basado en el estado real guardado
+                        if ($estadoPrueba === 'completado' || $estadoPrueba === 'cerrado') {
+                            $bgColor = '#10b981'; // Verde
+                        } elseif ($estadoPrueba === 'revisado') {
+                            $bgColor = '#3b82f6'; // Azul
+                        } elseif (str_contains($estadoPrueba, 'corregir')) {
+                            $bgColor = '#ef4444'; // Rojo / Advertencia
+                        } else {
+                            $bgColor = '#64748b'; // Gris (En proceso / Pendiente)
+                        }
+                        
+                        $safeId = htmlspecialchars((string)$pId, ENT_QUOTES, 'UTF-8');
+                        $safeOrden = htmlspecialchars((string)$prueba['orden'], ENT_QUOTES, 'UTF-8');
+                        $safeCat = htmlspecialchars($prueba['categoria_nombre'] ?? '', ENT_QUOTES, 'UTF-8');
+                    ?>
+                    <div title="Categoría: <?= $safeCat ?> | Estado: <?= ucfirst($estadoPrueba) ?>"
+                         style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; background-color: <?= $bgColor ?>; color: #ffffff; font-weight: 700; border-radius: 8px; font-size: 0.875rem;">
+                        <?= $safeOrden ?>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p style="color: #64748b; font-size: 0.875rem; margin: 0; font-style: italic;">
+                    No hay pruebas configuradas en la fase de planificación.
+                </p>
+            <?php endif; ?>
+        </div>
     </div>
 
-</div>
-
-
-    <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS) -->
+    <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS Y ACTIVIDADES) -->
     <div class="accordion-container">
         <?php
         $categories = $pdo->query("SELECT * FROM audit_categorias WHERE etapa_id = 1 ORDER BY orden ASC")->fetchAll(PDO::FETCH_OBJ);
@@ -140,15 +134,27 @@ $totalPruebas = count($pruebasList);
                     <?php foreach ($pruebas as $pr): 
                         $saved = $pruebasEjecutadas[$pr->id] ?? null;
                         $savedStatus = $saved['estado'] ?? 'en_proceso';
+                        
+                        // Obtener métricas de actividades para esta prueba específica
+                        $metricaAct = $progresoActividades[$pr->id] ?? ['total_actividades' => 0, 'actividades_completadas' => 0];
+                        $totalAct = (int)$metricaAct['total_actividades'];
+                        $completadasAct = (int)$metricaAct['actividades_completadas'];
                     ?>
                         <form action="responder.php?proyectoId=<?= $proyectoId ?>" method="POST" class="prueba-row-container">
                             <input type="hidden" name="action_type" value="update_prueba">
                             <input type="hidden" name="prueba_id" value="<?= $pr->id ?>">
                             
-                            <div class="prueba-title"><?= htmlspecialchars($pr->nombre, ENT_QUOTES, 'UTF-8') ?></div>
+                            <div class="prueba-title">
+                                <?= htmlspecialchars($pr->nombre, ENT_QUOTES, 'UTF-8') ?>
+                                <div style="margin-top: 0.25rem;">
+                                    <span class="badge-progress">
+                                        <i class="ri-checkbox-circle-line"></i> Actividades: <?= $completadasAct ?> / <?= $totalAct ?> completadas
+                                    </span>
+                                </div>
+                            </div>
                             
                             <div class="prueba-actions">
-                                <!-- Checkbox de Indicadores Estilo Botón Corto -->
+                                <!-- Checkboxes de Indicadores -->
                                 <label class="indicator-chk" style="color: #16a34a;">
                                     <input type="checkbox" name="ci" value="1" <?= (!empty($saved['indicador_ci'])) ? 'checked' : '' ?> onchange="this.form.submit()"> CI
                                 </label>
@@ -162,7 +168,7 @@ $totalPruebas = count($pruebasList);
                                     <input type="checkbox" name="aa" value="1" <?= (!empty($saved['indicador_aa'])) ? 'checked' : '' ?> onchange="this.form.submit()"> AA
                                 </label>
 
-                                <!-- Selector de Estados del Flujo de Trabajo -->
+                                <!-- Selector de Estados -->
                                 <select name="estado" class="status-select" onchange="this.form.submit()">
                                     <option value="en_proceso" <?= $savedStatus === 'en_proceso' ? 'selected' : '' ?>>⏳ En proceso</option>
                                     <option value="completado" <?= $savedStatus === 'completado' ? 'selected' : '' ?>>✅ Completado</option>
@@ -172,7 +178,7 @@ $totalPruebas = count($pruebasList);
                                     <option value="cerrado" <?= $savedStatus === 'cerrado' ? 'selected' : '' ?>>🔒 Cerrado</option>
                                 </select>
 
-                                <!-- LINK A LA OTRA PANTALLA EXCLUSIVA DE ACTIVIDADES -->
+                                <!-- Enlace a la pantalla de actividades -->
                                 <a href="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pr->id ?>" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.85rem;" data-tooltip="Llenar Cuestionario de Actividades">
                                     <i class="ri-survey-line"></i> Actividades
                                 </a>
