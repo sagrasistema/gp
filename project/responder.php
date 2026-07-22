@@ -229,7 +229,7 @@ include '../main/h.php';
                             </div>
                             
                             <div class="prueba-actions" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end;">
-                                <!-- Indicadores de solo lectura (Disabled) -->
+                                <!-- Indicadores de solo lectura (Disabled) cc-->
                                 <label class="indicator-chk" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; font-weight: 700; color: #16a34a;">
                                     <input type="checkbox" disabled style="accent-color: #16a34a; width: 16px; height: 16px; cursor: not-allowed;" <?= (!empty($saved['indicador_ci'])) ? 'checked' : '' ?>> CI
                                 </label>
