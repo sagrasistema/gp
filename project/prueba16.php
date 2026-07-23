@@ -21,7 +21,7 @@ if (isset($pdo, $proyectoId, $pruebaId) && (int)$pruebaId === 16) {
         $materialidadData = $stmtMatGet->fetch(PDO::FETCH_OBJ);
         
     } catch (PDOException $e) {
-        // Manejo de errores silencioso para producción o registro en log
+        // Manejo de errores silencioso para registro en log
         error_log("Error al recuperar materialidad: " . $e->getMessage());
     }
 }
@@ -190,7 +190,7 @@ if ((int)$pruebaId === 16):
     </div>
 </div>
 
-<!-- Script en tiempo real para automatizar el cálculo del tramo y la importancia relativa -->
+<!-- Script en tiempo real y formateo dinámico al salir del campo (blur) -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const inputBeneficios = document.getElementById('beneficios_monto');
@@ -229,6 +229,20 @@ document.addEventListener('DOMContentLoaded', function () {
     if (inputBeneficios && inputTramoPorc) {
         inputBeneficios.addEventListener('input', recalcularMaterialidad);
         inputTramoPorc.addEventListener('input', recalcularMaterialidad);
+
+        // Formatear automáticamente el campo de beneficios al perder el foco (blur)
+        inputBeneficios.addEventListener('blur', function() {
+            let val = parseVenezuelanNumber(this.value);
+            this.value = formatVenezuelanNumber(val, 2);
+            recalcularMaterialidad();
+        });
+
+        // Formatear también el campo de porcentaje al salir si es necesario
+        inputTramoPorc.addEventListener('blur', function() {
+            let val = parseVenezuelanNumber(this.value);
+            this.value = formatVenezuelanNumber(val, 2);
+            recalcularMaterialidad();
+        });
     }
 });
 </script>
