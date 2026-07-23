@@ -26,7 +26,6 @@ if (isset($pdo, $proyectoId, $pruebaId) && (int)$pruebaId === 16) {
     }
 }
 
-declare(strict_types=1);
 
 // Asegurar valores por defecto si aún no existen registros guardados
 $m = $materialidadData ?? (object)[
