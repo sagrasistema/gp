@@ -1,5 +1,7 @@
 <?php
 // v/proyectos/actividades.php
+declare(strict_types=1);
+
 include '../main/config.php';
 
 $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT);
@@ -7,6 +9,20 @@ $pruebaId = filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT);
 
 if (!$proyectoId || !$pruebaId) {
     die("Error: Parámetros relacionales faltantes.");
+}
+
+/**
+ * Convierte un número en formato venezolano (ej. "5.000.000,00") a un float estándar de PHP.
+ */
+function parseVenezuelanNumber(?string $value): float {
+    if ($value === null || trim($value) === '') {
+        return 0.00;
+    }
+    // Eliminar puntos de miles y espacios, luego reemplazar la coma decimal por punto
+    $clean = str_replace(['.', ' '], ['', ''], $value);
+    $clean = str_replace(',', '.', $clean);
+    
+    return filter_var($clean, FILTER_VALIDATE_FLOAT) !== false ? (float)$clean : 0.00;
 }
 
 // 1. Cargar Cabecera del Proyecto y Datos del Cliente
@@ -65,6 +81,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ((int)$pruebaId === 16 && isset($_POST['materialidad']) && is_array($_POST['materialidad'])) {
             $mat = $_POST['materialidad'];
             
+            // Sanitización y conversión correcta del formato venezolano a flotante
+            $ben_m   = parseVenezuelanNumber($mat['beneficios_monto'] ?? null);
+            $tram_p  = parseVenezuelanNumber($mat['tramo_porc'] ?? null);
+            $tram_m  = parseVenezuelanNumber($mat['tramo_monto'] ?? null);
+            $imp_ini = parseVenezuelanNumber($mat['importancia_inicial_monto'] ?? null);
+            $rec_p   = parseVenezuelanNumber($mat['recorte_porc'] ?? null);
+            $rec_m   = parseVenezuelanNumber($mat['recorte_monto'] ?? null);
+            $imp_aju = parseVenezuelanNumber($mat['importancia_ajustada_monto'] ?? null);
+            $min_p   = parseVenezuelanNumber($mat['minimis_porc'] ?? null);
+            $min_m   = parseVenezuelanNumber($mat['minimis_monto'] ?? null);
+            $min_s   = parseVenezuelanNumber($mat['minimis_secundario_monto'] ?? null);
+
             $stmtMatSave = $pdo->prepare("
                 INSERT INTO proyecto_materialidad 
                 (proyecto_id, prueba_id, beneficios_monto, tramo_porc, tramo_monto, importancia_inicial_monto, recorte_porc, recorte_monto, importancia_ajustada_monto, minimis_porc, minimis_monto, minimis_secundario_monto)
@@ -83,29 +111,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ");
 
             $dataMat = [
-                ':proj'     => $proyectoId,
-                ':pr'       => $pruebaId,
-                ':ben_m'    => filter_var($mat['beneficios_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':tram_p'   => filter_var($mat['tramo_porc'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':tram_m'   => filter_var($mat['tramo_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':imp_ini'  => filter_var($mat['importancia_inicial_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':rec_p'    => filter_var($mat['recorte_porc'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':rec_m'    => filter_var($mat['recorte_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':imp_aju'  => filter_var($mat['importancia_ajustada_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':min_p'    => filter_var($mat['minimis_porc'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':min_m'    => filter_var($mat['minimis_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':min_s'    => filter_var($mat['minimis_secundario_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':proj'      => $proyectoId,
+                ':pr'        => $pruebaId,
+                ':ben_m'     => $ben_m,
+                ':tram_p'    => $tram_p,
+                ':tram_m'    => $tram_m,
+                ':imp_ini'   => $imp_ini,
+                ':rec_p'     => $rec_p,
+                ':rec_m'     => $rec_m,
+                ':imp_aju'   => $imp_aju,
+                ':min_p'     => $min_p,
+                ':min_m'     => $min_m,
+                ':min_s'     => $min_s,
                 
-                ':ben_m_u'  => filter_var($mat['beneficios_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':tram_p_u' => filter_var($mat['tramo_porc'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':tram_m_u' => filter_var($mat['tramo_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':imp_ini_u'=> filter_var($mat['importancia_inicial_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':rec_p_u'  => filter_var($mat['recorte_porc'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':rec_m_u'  => filter_var($mat['recorte_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':imp_aju_u'=> filter_var($mat['importancia_ajustada_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':min_p_u'  => filter_var($mat['minimis_porc'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':min_m_u'  => filter_var($mat['minimis_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
-                ':min_s_u'  => filter_var($mat['minimis_secundario_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':ben_m_u'   => $ben_m,
+                ':tram_p_u'  => $tram_p,
+                ':tram_m_u'  => $tram_m,
+                ':imp_ini_u' => $imp_ini,
+                ':rec_p_u'   => $rec_p,
+                ':rec_m_u'   => $rec_m,
+                ':imp_aju_u' => $imp_aju,
+                ':min_p_u'   => $min_p,
+                ':min_m_u'   => $min_m,
+                ':min_s_u'   => $min_s,
             ];
 
             $stmtMatSave->execute($dataMat);
@@ -118,6 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmtMatGet->execute([':proj' => $proyectoId, ':pr' => $pruebaId]);
             $materialidadData = $stmtMatGet->fetch(PDO::FETCH_OBJ);
         }
+
         if ($action === 'add_indicador_detalle') {
             // Guardar un punto de control / detalle para un indicador específico
             $tipoInd = filter_input(INPUT_POST, 'tipo_indicador', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
