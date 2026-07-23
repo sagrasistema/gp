@@ -148,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($action === 'add_indicador_detalle') {
-            // Guardar un punto de control / detalle para un indicador específicoss
+            // Guardar un punto de control / detalle para un indicador específicossu
             $tipoInd = filter_input(INPUT_POST, 'tipo_indicador', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $rubro = trim($_POST['rubro'] ?? '');
             $titulo = trim($_POST['titulo'] ?? '');
