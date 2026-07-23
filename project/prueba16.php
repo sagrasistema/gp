@@ -266,5 +266,28 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+// Añade estas variables y lógica dentro de tu función de recálculo existente:
+
+const inputMinimisPorc  = document.getElementById('minimis_porc');
+const inputMinimisMonto = document.getElementById('minimis_monto');
+// inputMinimisSecundarioMonto si aplica por ID en tu HTML
+
+function recalcularMinimis() {
+    let importanciaInicial = parseVenezuelanNumber(inputImportancia.value);
+    let minimisPorc = parseVenezuelanNumber(inputMinimisPorc.value);
+
+    // Calcular el monto minimis basado en el porcentaje y la importancia inicial
+    let minimisMonto = importanciaInicial * (minimisPorc / 100);
+    
+    if (inputMinimisMonto) {
+        // Generalmente se muestra con 2 decimales o sin decimales según el estándar de la firma
+        inputMinimisMonto.value = formatVenezuelanNumber(minimisMonto, 2);
+    }
+}
+
+// Escuchar cambios en el porcentaje minimis
+if (inputMinimisPorc) {
+    inputMinimisPorc.addEventListener('input', recalcularMinimis);
+}
 </script>
 <?php endif; ?>
