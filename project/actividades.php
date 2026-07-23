@@ -199,7 +199,49 @@ include 'conect-actividades.php';
                 </div>
             <?php endforeach; ?>
         </div>
+<!-- caja de comentarios socios -->
+    <div class="accordion-socios" style="margin-top: 2rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div class="accordion-header" onclick="toggleAcordeonSocios(this)" style="padding: 1rem 1.25rem; background: #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0; font-weight: 600; color: #1e293b;">
+            <span><i class="ri-shield-user-line" style="margin-right: 8px; color: #2563eb;"></i> Observaciones de Socios (Líder y Calidad)</span>
+            <i class="ri-arrow-down-s-line" style="transition: transform 0.3s ease;"></i>
+        </div>
+        
+        <div class="accordion-body" style="display: none; padding: 1.5rem; border-top: 1px solid #e2e8f0;">
+            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                
+                <!-- Campo Socio Líder -->
+                <div style="flex: 1; min-width: 280px;">
+                    <label for="observacion_socio_lider" style="display: block; font-weight: 500; font-size: 0.9rem; color: #334155; margin-bottom: 0.5rem;">
+                        Observaciones del Socio Líder
+                    </label>
+                    <textarea name="observacion_socio_lider" id="observacion_socio_lider" rows="5" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; resize: vertical;"><?php echo htmlspecialchars($obsSocioLider, ENT_QUOTES, 'YOUTUBE' ? 'UTF-8' : 'UTF-8'); ?></textarea>
+                </div>
 
+                <!-- Campo Socio de Calidad -->
+                <div style="flex: 1; min-width: 280px;">
+                    <label for="observacion_socio_calidad" style="display: block; font-weight: 500; font-size: 0.9rem; color: #334155; margin-bottom: 0.5rem;">
+                        Observaciones del Socio de Calidad
+                    </label>
+                    <textarea name="observacion_socio_calidad" id="observacion_socio_calidad" rows="5" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; resize: vertical;"><?php echo htmlspecialchars($obsSocioCalidad, ENT_QUOTES, 'UTF-8'); ?></textarea>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function toggleAcordeonSocios(header) {
+        const body = header.nextElementSibling;
+        const icon = header.querySelector('.ri-arrow-down-s-line');
+        if (body.style.display === 'none' || body.style.display === '') {
+            body.style.display = 'block';
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            body.style.display = 'none';
+            icon.style.transform = 'rotate(0deg)';
+        }
+    }
+    </script>
         <!-- CAJA DE ESTATUS GENERAL DE LA PRUEBA -->
         <div style="background: #ffffff; border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
             <div>

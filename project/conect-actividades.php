@@ -222,19 +222,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hasCG =$pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='CG'")->fetchColumn() > 0 ? 1 : 0;
         $hasSC =$pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='SC'")->fetchColumn() > 0 ? 1 : 0;
         $hasAA =$pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='AA'")->fetchColumn() > 0 ? 1 : 0;
+        $obsLider = trim($_POST['observacion_socio_lider'] ?? '');
+        $obsCalidad = trim($_POST['observacion_socio_calidad'] ?? '');
 
-        // Actualizar o insertar en proyecto_pruebas_ejecucion
-        $stmtTestSave =$pdo->prepare("
+        // En la sentencia SQL de inserción/actualización (INSERT ... ON DUPLICATE KEY UPDATE) incluye las columnas:
+        $stmtTestSave = $pdo->prepare("
             INSERT INTO proyecto_pruebas_ejecucion 
-            (proyecto_id, prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado)
-            VALUES (:proyecto_id, :prueba_id, :ci, :cg, :sc, :aa, :estado)
+            (proyecto_id, prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado, observacion_socio_lider, observacion_socio_calidad)
+            VALUES (:proyecto_id, :prueba_id, :ci, :cg, :sc, :aa, :estado, :obs_lider, :obs_calidad)
             ON DUPLICATE KEY UPDATE 
-                indicador_ci = :ci_u, indicador_cg = :cg_u, indicador_sc = :sc_u, indicador_aa = :aa_u, estado = :estado_u
+                indicador_ci = :ci_u, indicador_cg = :cg_u, indicador_sc = :sc_u, indicador_aa = :aa_u, 
+                estado = :estado_u, observacion_socio_lider = :obs_lider_u, observacion_socio_calidad = :obs_calidad_u
         ");
         $stmtTestSave->execute([
-            ':proyecto_id' => $proyectoId, ':prueba_id' =>$pruebaId,
-            ':ci' => $hasCI, ':cg' => $hasCG, ':sc' =>$hasSC, ':aa' => $hasAA, ':estado' =>$nuevoEstadoPrueba,
-            ':ci_u' => $hasCI, ':cg_u' => $hasCG, ':sc_u' =>$hasSC, ':aa_u' => $hasAA, ':estado_u' =>$nuevoEstadoPrueba
+            ':proyecto_id' => $proyectoId, ':prueba_id' => $pruebaId,
+            ':ci' => $hasCI, ':cg' => $hasCG, ':sc' => $hasSC, ':aa' => $hasAA, ':estado' => $nuevoEstadoPrueba,
+            ':obs_lider' => $obsLider, ':obs_calidad' => $obsCalidad,
+            ':ci_u' => $hasCI, ':cg_u' => $hasCG, ':sc_u' => $hasSC, ':aa_u' => $hasAA, 
+            ':estado_u' => $nuevoEstadoPrueba, ':obs_lider_u' => $obsLider, ':obs_calidad_u' => $obsCalidad
         ]);
 
         $pdo->commit();
@@ -267,7 +272,17 @@ $allDetalles =$stmtIndDetalles->fetchAll(PDO::FETCH_OBJ);
 $detallesPorTipo = ['CI' => [], 'CG' => [], 'SC' => [], 'AA' => []];
 foreach ($allDetalles as $det) {$detallesPorTipo[$det->tipo_indicador][] =$det;
 }
+$stmtStatus = $pdo->prepare("
+    SELECT estado, observacion_socio_lider, observacion_socio_calidad 
+    FROM proyecto_pruebas_ejecucion 
+    WHERE proyecto_id = :projId AND prueba_id = :prId
+");
+$stmtStatus->execute([':projId' => $proyectoId, ':prId' => $pruebaId]);
+$datosEjecucion = $stmtStatus->fetch(PDO::FETCH_OBJ);
 
+$estadoActualPrueba = $datosEjecucion->estado ?? 'en_proceso';
+$obsSocioLider = $datosEjecucion->observacion_socio_lider ?? '';
+$obsSocioCalidad = $datosEjecucion->observacion_socio_calidad ?? '';
 $pageTitle = "Formulario de Actividades y Hallazgos";
 include '../main/h.php';
 ?>
