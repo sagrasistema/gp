@@ -120,7 +120,7 @@ include 'conect-actividades.php';
         <!-- INCLUSIÓN AUTOMÁTICA DE LA REVISIÓN ANALÍTICA SÓLO PARA LA PRUEBA 11 -->
         <?php 
             if ((int)$pruebaId === 11) {
-                include 'revision-analitica.php';
+                include 'prueba11.php';
             } elseif ((int)$pruebaId === 16) {
                 include 'prueba16.php';
             }
