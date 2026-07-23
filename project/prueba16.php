@@ -29,7 +29,7 @@ if (isset($pdo, $proyectoId, $pruebaId) && (int)$pruebaId === 16) {
 // Asegurar valores por defecto si aún no existen registros guardados
 $m = $materialidadData ?? (object)[
     'beneficios_monto'           => '0.00',
-    'tramo_porc'                 => '5.00', // Valor por defecto dentro del rango mínimo permitido
+    'tramo_porc'                 => '5.00', // Valor por defecto dentro del rango válido
     'tramo_monto'                => '0.00',
     'importancia_inicial_monto'  => '0.00',
     'recorte_porc'               => '0.00',
@@ -91,7 +91,7 @@ if ((int)$pruebaId === 16):
                     </div>
                 </div>
                 <div style="font-size: 0.8rem; color: #64748b; line-height: 1.4;">
-                    Ingrese un porcentaje estrictamente entre 5% y 10% para aplicar el punto de referencia.
+                    Debe ingresar un porcentaje entre 5% y 10%. Si sale del rango, se restablecerá a 0.
                 </div>
             </div>
         </div>
@@ -102,7 +102,7 @@ if ((int)$pruebaId === 16):
                 <div>
                     <label style="display: block; font-size: 0.85rem; color: #334155; font-weight: 600;">Importancia relativa seleccionada*:</label>
                     <p style="font-size: 0.75rem; color: #64748b; margin: 0.25rem 0 0 0; line-height: 1.4;">
-                        Seleccione la cifra de la importancia relativa o materialidad. Este importe habrá que ajustarlo para obtener la "materialidad ajustada". Recuerde que el auditor es el responsable de decidir el importe.
+                        Seleccione la cifra de la importancia relativa o materialidad. Este importe habrá que ajustarlo para obtener la "materialidad ajustada".
                     </p>
                 </div>
                 <div>
@@ -158,7 +158,7 @@ if ((int)$pruebaId === 16):
             <div style="margin-bottom: 1rem;">
                 <strong style="font-size: 0.9rem; color: #1e293b; display: block; margin-bottom: 0.25rem;">Nivel de mínimo registro de incorrecciones (Norma NIA 450) *</strong>
                 <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.4;">
-                    Umbral o nivel <em>De Minimis</em> conforme a la <strong>NIA 450</strong> (Evaluación de las incorrecciones identificadas durante la auditoría). Establece el límite por debajo del cual las diferencias acumuladas se consideran claramente insignificantes y no requieren acumulación.
+                    Umbral o nivel <em>De Minimis</em> conforme a la <strong>NIA 450</strong> (Evaluación de las incorrecciones identificadas durante la auditoría). Establece el límite por debajo del cual las diferencias acumuladas se consideran claramente insignificantes.
                 </p>
             </div>
             
@@ -192,7 +192,7 @@ if ((int)$pruebaId === 16):
     </div>
 </div>
 
-<!-- Script en tiempo real con validación estricta para el tramo (5% - 10%) y automatización -->
+<!-- Script con validación de rango (5% - 10%) y reseteo a 0 al perder el foco si no cumple -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const inputBeneficios       = document.getElementById('beneficios_monto');
@@ -224,9 +224,9 @@ document.addEventListener('DOMContentLoaded', function () {
         let beneficios = parseVenezuelanNumber(inputBeneficios ? inputBeneficios.value : 0);
         let tramoPorc  = parseVenezuelanNumber(inputTramoPorc ? inputTramoPorc.value : 0);
 
-        // Validación estricta en tiempo real para el rango del tramo (5% a 10%)
+        // Alerta visual en tiempo real si está fuera de rango mientras se escribe
         if (tramoPorc > 0 && (tramoPorc < 5 || tramoPorc > 10)) {
-            inputTramoPorc.style.borderColor = '#ef4444'; // Alerta visual roja
+            inputTramoPorc.style.borderColor = '#ef4444'; 
         } else {
             inputTramoPorc.style.borderColor = '#cbd5e1';
         }
@@ -278,7 +278,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 if (this.id === 'importancia_inicial_monto' || this.id === 'importancia_ajustada_monto') {
                     decimals = 0;
-                } else if (this.id === 'tramo_porc' || this.id === 'recorte_porc' || this.id === 'minimis_porc') {
+                } else if (this.id === 'tramo_porc') {
+                    decimals = 2;
+                    // RESTRICCIÓN: Si al salir del campo no está entre 5 y 10, se fuerza a 0
+                    if (val < 5 || val > 10) {
+                        val = 0;
+                        this.style.borderColor = '#cbd5e1'; // Limpiar borde de alerta
+                    }
+                } else if (this.id === 'recorte_porc' || this.id === 'minimis_porc') {
                     decimals = 2;
                 }
                 
