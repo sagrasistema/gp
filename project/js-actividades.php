@@ -107,7 +107,38 @@ function mostrarModalAlertaActividades() {
     `;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
+document.addEventListener('DOMContentLoaded', function () {
+    // Seleccionar todos los textareas de las actividades
+    const textareas = document.querySelectorAll('.activity-textarea');
+
+    textareas.forEach(textarea => {
+        // Encontrar el contenedor o la fila padre de esta actividad específica
+        const row = textarea.closest('.activity-row') || textarea.parentElement;
+        const checkboxContainer = row.querySelector('.activity-checkbox-container');
+        const checkbox = checkboxContainer ? checkboxContainer.querySelector('input[type="checkbox"]') : null;
+
+        function toggleCheckboxVisibility() {
+            if (!checkboxContainer) return;
+
+            if (textarea.value.trim() === '') {
+                // Si está vacío: ocultar el checkbox y desmarcarlo
+                checkboxContainer.style.display = 'none';
+                if (checkbox) checkbox.checked = false;
+            } else {
+                // Si tiene texto: mostrar el checkbox
+                checkboxContainer.style.display = 'inline-block'; // o 'flex' según tu diseño
+            }
+        }
+
+        // Ejecutar al cargar la página (por si ya tienen datos guardados)
+        toggleCheckboxVisibility();
+
+        // Escuchar cada vez que el usuario escriba o borre en el textarea
+        textarea.addEventListener('input', toggleCheckboxVisibility);
+    });
+});
 </script>
+
 
 
 <?php 
