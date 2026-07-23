@@ -58,7 +58,7 @@ if ((int)$pruebaId === 16):
                 <div><span style="color: #64748b; font-weight: 600;">Punto de referencia:</span></div>
                 <div style="color: #1e293b; font-weight: 500;">Empresas con beneficios normales</div>
             </div>
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: center;">
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: right;">
                 <div>
                     <label style="display: block; font-size: 0.85rem; color: #334155;">Beneficios operaciones continuas antes de impuestos:</label>
                 </div>
