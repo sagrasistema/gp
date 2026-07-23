@@ -26,7 +26,6 @@ if (isset($pdo, $proyectoId, $pruebaId) && (int)$pruebaId === 16) {
     }
 }
 
-
 // Asegurar valores por defecto si aún no existen registros guardados
 $m = $materialidadData ?? (object)[
     'beneficios_monto'           => '0.00',
@@ -65,7 +64,7 @@ if ((int)$pruebaId === 16):
                 </div>
                 <div>
                     <span style="font-size: 0.75rem; color: #64748b; display: block; text-align: right; margin-bottom: 0.2rem;">Monto</span>
-                    <input type="number" step="0.01" name="materialidad[beneficios_monto]" value="<?= htmlspecialchars(number_format((float)($m->beneficios_monto ?? 0), 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
+                    <input type="text" name="materialidad[beneficios_monto]" value="<?= htmlspecialchars(number_format((float)($m->beneficios_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
                 </div>
             </div>
         </div>
@@ -84,14 +83,13 @@ if ((int)$pruebaId === 16):
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: center;">%</span>
-                        <input type="number" step="0.01" name="materialidad[tramo_porc]" value="<?= htmlspecialchars(number_format((float)($m->tramo_porc ?? 0), 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+                        <input type="text" name="materialidad[tramo_porc]" value="<?= htmlspecialchars(number_format((float)($m->tramo_porc ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
                     </div>
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: right;">Monto</span>
-                        <input type="number" step="0.01" name="materialidad[tramo_monto]" value="<?= htmlspecialchars(number_format((float)($m->tramo_monto ?? 0), 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right;">
+                        <input type="text" name="materialidad[tramo_monto]" value="<?= htmlspecialchars(number_format((float)($m->tramo_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right;">
                     </div>
                 </div>
-                <!-- Nota original restaurada -->
                 <div style="font-size: 0.8rem; color: #64748b; line-height: 1.4;">
                     Ingrese el porcentaje apropiado (medición empírica) para aplicar el punto de referencia
                 </div>
@@ -103,14 +101,13 @@ if ((int)$pruebaId === 16):
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: center;">
                 <div>
                     <label style="display: block; font-size: 0.85rem; color: #334155; font-weight: 600;">Importancia relativa seleccionada*:</label>
-                    <!-- Nota explicativa original restaurada -->
                     <p style="font-size: 0.75rem; color: #64748b; margin: 0.25rem 0 0 0; line-height: 1.4;">
                         Seleccione la cifra de la importancia relativa o materialidad. Este importe habrá que ajustarlo para obtener la "materialidad ajustada". Recuerde que el auditor es el responsable de decidir el importe de la importancia relativa o materialidad.
                     </p>
                 </div>
                 <div>
                     <span style="font-size: 0.75rem; color: #64748b; display: block; text-align: right; margin-bottom: 0.2rem;">Monto</span>
-                    <input type="number" step="0.01" name="materialidad[importancia_inicial_monto]" value="<?= htmlspecialchars(number_format((float)($m->importancia_inicial_monto ?? 0), 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
+                    <input type="text" name="materialidad[importancia_inicial_monto]" value="<?= htmlspecialchars(number_format((float)($m->importancia_inicial_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
                 </div>
             </div>
         </div>
@@ -119,7 +116,6 @@ if ((int)$pruebaId === 16):
         <div style="margin-bottom: 1.5rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 1.25rem; background: #f8fafc; padding: 1rem; border-radius: 8px;">
             <div style="margin-bottom: 1rem;">
                 <strong style="font-size: 0.9rem; color: #1e293b; display: block; margin-bottom: 0.25rem;">Ajustar la importancia relativa global *</strong>
-                <!-- Nota y advertencias originales restauradas -->
                 <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.4;">
                     Se trata de corregir la materialidad inicial teniendo en cuenta factores cualitativos de carácter general, como los siguientes:<br>
                     - Riesgos inherentes derivados de la "naturaleza de la actividad" de la entidad.<br>
@@ -134,11 +130,11 @@ if ((int)$pruebaId === 16):
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: center;">%</span>
-                        <input type="number" step="0.01" name="materialidad[recorte_porc]" value="<?= htmlspecialchars(number_format((float)($m->recorte_porc ?? 0), 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+                        <input type="text" name="materialidad[recorte_porc]" value="<?= htmlspecialchars(number_format((float)($m->recorte_porc ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
                     </div>
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: right;">Monto</span>
-                        <input type="number" step="0.01" name="materialidad[recorte_monto]" value="<?= htmlspecialchars(number_format((float)($m->recorte_monto ?? 0), 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right;">
+                        <input type="text" name="materialidad[recorte_monto]" value="<?= htmlspecialchars(number_format((float)($m->recorte_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right;">
                     </div>
                 </div>
             </div>
@@ -152,7 +148,7 @@ if ((int)$pruebaId === 16):
                 </div>
                 <div>
                     <span style="font-size: 0.75rem; color: #64748b; display: block; text-align: right; margin-bottom: 0.2rem;">Monto</span>
-                    <input type="number" step="0.01" name="materialidad[importancia_ajustada_monto]" value="<?= htmlspecialchars(number_format((float)($m->importancia_ajustada_monto ?? 0), 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
+                    <input type="text" name="materialidad[importancia_ajustada_monto]" value="<?= htmlspecialchars(number_format((float)($m->importancia_ajustada_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
                 </div>
             </div>
         </div>
@@ -161,7 +157,6 @@ if ((int)$pruebaId === 16):
         <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
             <div style="margin-bottom: 1rem;">
                 <strong style="font-size: 0.9rem; color: #1e293b; display: block; margin-bottom: 0.25rem;">Nivel de mínimo registro de incorrecciones (opcional) *</strong>
-                <!-- Nota explicativa original restaurada -->
                 <p style="font-size: 0.8rem; color: #475569; margin: 0;">Los factores que influirían al decidir la selección del umbral para el nivel de registro del resumen de ajustes no registrados.</p>
             </div>
             
@@ -172,11 +167,11 @@ if ((int)$pruebaId === 16):
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: center;">%</span>
-                        <input type="number" step="0.01" name="materialidad[minimis_porc]" value="<?= htmlspecialchars(number_format((float)($m->minimis_porc ?? 0), 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+                        <input type="text" name="materialidad[minimis_porc]" value="<?= htmlspecialchars(number_format((float)($m->minimis_porc ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
                     </div>
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: right;">Monto</span>
-                        <input type="number" step="0.01" name="materialidad[minimis_monto]" value="<?= htmlspecialchars(number_format((float)($m->minimis_monto ?? 0), 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right;">
+                        <input type="text" name="materialidad[minimis_monto]" value="<?= htmlspecialchars(number_format((float)($m->minimis_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right;">
                     </div>
                 </div>
             </div>
@@ -187,7 +182,7 @@ if ((int)$pruebaId === 16):
                 </div>
                 <div>
                     <span style="font-size: 0.75rem; color: #64748b; display: block; text-align: right; margin-bottom: 0.2rem;">Monto</span>
-                    <input type="number" step="0.01" name="materialidad[minimis_secundario_monto]" value="<?= htmlspecialchars(number_format((float)($m->minimis_secundario_monto ?? 0), 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
+                    <input type="text" name="materialidad[minimis_secundario_monto]" value="<?= htmlspecialchars(number_format((float)($m->minimis_secundario_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
                 </div>
             </div>
         </div>
