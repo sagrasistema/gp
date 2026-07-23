@@ -216,44 +216,54 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function recalcularTodo() {
-        // 1. Beneficios y Tramo
+        // 1. Obtener valores base
         let beneficios = parseVenezuelanNumber(inputBeneficios.value);
         let tramoPorc  = parseVenezuelanNumber(inputTramoPorc.value);
 
+        // 2. Calcular monto del tramo (con 2 decimales)
         let tramoMonto = beneficios * (tramoPorc / 100);
-        inputTramoMonto.value = formatVenezuelanNumber(tramoMonto, 2);
+        if (inputTramoMonto) {
+            inputTramoMonto.value = formatVenezuelanNumber(tramoMonto, 2);
+        }
 
-        // Si la importancia inicial no ha sido alterada o se quiere sincronizar con el tramo:
-        // (Nota: mantenemos la importancia inicial si el usuario ya la ingresó manualmente, 
-        // pero aquí calculamos el recorte en base a la Importancia Relativa Seleccionada actual).
-        let importanciaInicial = parseVenezuelanNumber(inputImportancia.value);
+        // 3. Importancia relativa seleccionada: Monto del tramo redondeado sin decimales
+        let importanciaInicial = Math.round(tramoMonto);
+        if (inputImportancia) {
+            inputImportancia.value = formatVenezuelanNumber(importanciaInicial, 0);
+        }
 
-        // 2. Recorte e Importancia Ajustada
+        // 4. Calcular Recorte basado en la importancia inicial
         let recortePorc = parseVenezuelanNumber(inputRecortePorc.value);
         let recorteMonto = importanciaInicial * (recortePorc / 100);
-        inputRecorteMonto.value = formatVenezuelanNumber(recorteMonto, 2);
+        if (inputRecorteMonto) {
+            inputRecorteMonto.value = formatVenezuelanNumber(recorteMonto, 2);
+        }
 
+        // 5. Importancia relativa ajustada: Inicial menos recorte, redondeado sin decimales
         let importanciaAjustada = Math.round(importanciaInicial - recorteMonto);
-        inputImportanciaAjust.value = formatVenezuelanNumber(importanciaAjustada, 2);
+        if (inputImportanciaAjust) {
+            inputImportanciaAjust.value = formatVenezuelanNumber(importanciaAjustada, 0);
+        }
     }
 
-    // Eventos de entrada en tiempo real
+    // Escuchar eventos de entrada en tiempo real
     if (inputBeneficios) inputBeneficios.addEventListener('input', recalcularTodo);
     if (inputTramoPorc) inputTramoPorc.addEventListener('input', recalcularTodo);
-    if (inputImportancia) inputImportancia.addEventListener('input', recalcularTodo);
     if (inputRecortePorc) inputRecortePorc.addEventListener('input', recalcularTodo);
+    if (inputImportancia) inputImportancia.addEventListener('input', recalcularTodo);
 
-    // Formateo automático al salir de los inputs (blur)
+    // Formateo automático al salir de los campos (blur)
     const inputsFormato = [inputBeneficios, inputTramoPorc, inputImportancia, inputRecortePorc];
     inputsFormato.forEach(input => {
         if (input) {
             input.addEventListener('blur', function() {
                 let val = parseVenezuelanNumber(this.value);
-                this.value = formatVenezuelanNumber(val, 2);
+                let decimals = (this.id === 'importancia_inicial_monto' || this.id === 'tramo_porc') ? 0 : 2;
+                if (this.id === 'tramo_porc' || this.id === 'recorte_porc') decimals = 2;
+                this.value = formatVenezuelanNumber(val, decimals);
                 recalcularTodo();
             });
         }
     });
 });
-</script>
 <?php endif; ?>
