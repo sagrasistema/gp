@@ -61,6 +61,52 @@ window.onclick = function(event) {
     if (event.target === modalNorma) modalNorma.style.display = 'none';
     if (event.target === modalInd) modalInd.style.display = 'none';
 }
+document.addEventListener('DOMContentLoaded', function () {
+    const selectEstado = document.getElementById('estado_prueba_selector'); // Ajusta el ID según tu HTML
+    
+    if (selectEstado) {
+        selectEstado.addEventListener('change', function(e) {
+            if (this.value === 'completado') {
+                // Verificar si existen actividades pendientes en el DOM (ej. checkboxes o estados de actividades)
+                const actividadesPendientes = document.querySelectorAll('.actividad-item:not(.completada), input.check-actividad:not(:checked)');
+                
+                if (actividadesPendientes.length > 0) {
+                    e.preventDefault();
+                    // Revertir temporalmente el selector al estado anterior
+                    this.value = this.dataset.estadoAnterior || 'en_proceso';
+                    
+                    // Mostrar Modal de Advertencia
+                    mostrarModalAlertaActividades();
+                }
+            } else {
+                // Guardar el estado válido actual por si se rechaza el cambio
+                this.dataset.estadoAnterior = this.value;
+            }
+        });
+    }
+});
+
+function mostrarModalAlertaActividades() {
+    // Si ya existe un modal previo, lo removemos
+    let modalExistente = document.getElementById('modal-alerta-actividades');
+    if (modalExistente) modalExistente.remove();
+
+    const modalHtml = `
+        <div id="modal-alerta-actividades" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+            <div style="background: #ffffff; padding: 2rem; border-radius: 10px; max-width: 400px; width: 90%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+                <div style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 1rem;"><i class="ri-alert-line"></i></div>
+                <h3 style="margin: 0 0 0.5rem 0; color: #1e293b; font-size: 1.25rem;">Acción No Permitida</h3>
+                <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;">
+                    No es posible cambiar el estado a <strong>Completado</strong>. Debes finalizar y marcar todas las actividades correspondientes de la prueba antes de continuar.
+                </p>
+                <button type="button" onclick="document.getElementById('modal-alerta-actividades').remove()" style="background: #2563eb; color: white; border: none; padding: 0.65rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
 </script>
 
 
