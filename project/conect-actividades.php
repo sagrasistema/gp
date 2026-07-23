@@ -15,17 +15,17 @@ if (!$proyectoId || !$pruebaId) {
 /**
  * Convierte un número en formato venezolano (ej. "5.000.000,00") a un float estándar de PHP.
  */
+
 function parseVenezuelanNumber(?string $value): float {
-    if ($value === null \vert{}\vert{} trim($value) === '') {
+    if ($value === null || trim($value) === '') {
         return 0.00;
     }
     // Eliminar puntos de miles y espacios, luego reemplazar la coma decimal por punto
-    $clean = str_replace(['.', ' '], ['', ''],$value);
-    $clean = str_replace(',', '.',$clean);
+    $clean = str_replace(['.', ' '], ['', ''], $value);
+    $clean = str_replace(',', '.', $clean);
     
     return filter_var($clean, FILTER_VALIDATE_FLOAT) !== false ? (float)$clean : 0.00;
 }
-
 // 1. Cargar Cabecera del Proyecto y Datos del Cliente
 try {
     $stmt =$pdo->prepare("
