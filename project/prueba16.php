@@ -200,7 +200,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputRecortePorc      = document.getElementById('recorte_porc');
     const inputRecorteMonto     = document.getElementById('recorte_monto');
     const inputImportanciaAjust = document.getElementById('importancia_ajustada_monto');
+    const inputMinimisPorc      = document.getElementById('minimis_porc');
+    const inputMinimisMonto     = document.getElementById('minimis_monto');
+    const inputMinimisSec       = document.getElementById('minimis_secundario_monto');
 
+    // Función para convertir string con formato venezolano ("5.000,00") a float de JS
     function parseVenezuelanNumber(value) {
         if (!value) return 0;
         let clean = value.toString().replace(/\./g, '').replace(',', '.');
@@ -208,6 +212,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return isNaN(num) ? 0 : num;
     }
 
+    // Función para formatear un número al estándar venezolano en pantalla
     function formatVenezuelanNumber(value, decimals = 2) {
         return value.toLocaleString('es-VE', {
             minimumFractionDigits: decimals,
@@ -216,9 +221,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function recalcularTodo() {
-        // 1. Obtener valores base
-        let beneficios = parseVenezuelanNumber(inputBeneficios.value);
-        let tramoPorc  = parseVenezuelanNumber(inputTramoPorc.value);
+        // 1. Obtener valores base de beneficios y tramo
+        let beneficios = parseVenezuelanNumber(inputBeneficios ? inputBeneficios.value : 0);
+        let tramoPorc  = parseVenezuelanNumber(inputTramoPorc ? inputTramoPorc.value : 0);
 
         // 2. Calcular monto del tramo (con 2 decimales)
         let tramoMonto = beneficios * (tramoPorc / 100);
@@ -233,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // 4. Calcular Recorte basado en la importancia inicial
-        let recortePorc = parseVenezuelanNumber(inputRecortePorc.value);
+        let recortePorc = parseVenezuelanNumber(inputRecortePorc ? inputRecortePorc.value : 0);
         let recorteMonto = importanciaInicial * (recortePorc / 100);
         if (inputRecorteMonto) {
             inputRecorteMonto.value = formatVenezuelanNumber(recorteMonto, 2);
@@ -244,50 +249,45 @@ document.addEventListener('DOMContentLoaded', function () {
         if (inputImportanciaAjust) {
             inputImportanciaAjust.value = formatVenezuelanNumber(importanciaAjustada, 0);
         }
+
+        // 6. Nivel Mínimis (Bloque 3): Porcentaje aplicado sobre la importancia inicial
+        let minimisPorc = parseVenezuelanNumber(inputMinimisPorc ? inputMinimisPorc.value : 0);
+        let minimisMonto = importanciaInicial * (minimisPorc / 100);
+        if (inputMinimisMonto) {
+            inputMinimisMonto.value = formatVenezuelanNumber(minimisMonto, 2);
+        }
     }
 
-    // Escuchar eventos de entrada en tiempo real
-    if (inputBeneficios) inputBeneficios.addEventListener('input', recalcularTodo);
-    if (inputTramoPorc) inputTramoPorc.addEventListener('input', recalcularTodo);
-    if (inputRecortePorc) inputRecortePorc.addEventListener('input', recalcularTodo);
-    if (inputImportancia) inputImportancia.addEventListener('input', recalcularTodo);
+    // Registrar eventos de escucha en tiempo real (input)
+    const inputsEscucha = [
+        inputBeneficios, inputTramoPorc, inputRecortePorc, 
+        inputImportancia, inputMinimisPorc, inputMinimisSec
+    ];
 
-    // Formateo automático al salir de los campos (blur)
-    const inputsFormato = [inputBeneficios, inputTramoPorc, inputImportancia, inputRecortePorc];
-    inputsFormato.forEach(input => {
+    inputsEscucha.forEach(input => {
+        if (input) {
+            input.addEventListener('input', recalcularTodo);
+        }
+    });
+
+    // Formateo automático de visualización al perder el foco (blur)
+    inputsEscucha.forEach(input => {
         if (input) {
             input.addEventListener('blur', function() {
                 let val = parseVenezuelanNumber(this.value);
-                let decimals = (this.id === 'importancia_inicial_monto' || this.id === 'tramo_porc') ? 0 : 2;
-                if (this.id === 'tramo_porc' || this.id === 'recorte_porc') decimals = 2;
+                let decimals = 2;
+                
+                if (this.id === 'importancia_inicial_monto' || this.id === 'importancia_ajustada_monto') {
+                    decimals = 0; // Sin decimales para importancias principales/ajustadas
+                } else if (this.id === 'tramo_porc' || this.id === 'recorte_porc' || this.id === 'minimis_porc') {
+                    decimals = 2; // Dos decimales para porcentajes
+                }
+                
                 this.value = formatVenezuelanNumber(val, decimals);
                 recalcularTodo();
             });
         }
     });
 });
-// Añade estas variables y lógica dentro de tu función de recálculo existente:
-
-const inputMinimisPorc  = document.getElementById('minimis_porc');
-const inputMinimisMonto = document.getElementById('minimis_monto');
-// inputMinimisSecundarioMonto si aplica por ID en tu HTML
-
-function recalcularMinimis() {
-    let importanciaInicial = parseVenezuelanNumber(inputImportancia.value);
-    let minimisPorc = parseVenezuelanNumber(inputMinimisPorc.value);
-
-    // Calcular el monto minimis basado en el porcentaje y la importancia inicial
-    let minimisMonto = importanciaInicial * (minimisPorc / 100);
-    
-    if (inputMinimisMonto) {
-        // Generalmente se muestra con 2 decimales o sin decimales según el estándar de la firma
-        inputMinimisMonto.value = formatVenezuelanNumber(minimisMonto, 2);
-    }
-}
-
-// Escuchar cambios en el porcentaje minimis
-if (inputMinimisPorc) {
-    inputMinimisPorc.addEventListener('input', recalcularMinimis);
-}
 </script>
 <?php endif; ?>
