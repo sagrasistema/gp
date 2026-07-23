@@ -294,7 +294,7 @@ function mostrarModalAlertaPersonalizado(mensaje) {
                 <div style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 1rem;"><i class="ri-alert-line"></i></div>
                 <h3 style="margin: 0 0 0.5rem 0; color: #1e293b; font-size: 1.25rem;">Acción No Permitida</h3>
                 <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;">
-                    \${mensaje}
+                    Debe realizar todas las actividades de esta prueba para porder completarla 
                 </p>
                 <button type="button" onclick="document.getElementById('modal-alerta-actividades').remove()" style="background: #2563eb; color: white; border: none; padding: 0.65rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
                     Entendido
