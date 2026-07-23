@@ -64,7 +64,7 @@ if ((int)$pruebaId === 16):
                 </div>
                 <div>
                     <span style="font-size: 0.75rem; color: #64748b; display: block; text-align: right; margin-bottom: 0.2rem;">Monto</span>
-                    <input type="text" name="materialidad[beneficios_monto]" value="<?= htmlspecialchars(number_format((float)($m->beneficios_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
+                    <input type="text" id="beneficios_monto" name="materialidad[beneficios_monto]" value="<?= htmlspecialchars(number_format((float)($m->beneficios_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
                 </div>
             </div>
         </div>
@@ -83,11 +83,11 @@ if ((int)$pruebaId === 16):
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: center;">%</span>
-                        <input type="text" name="materialidad[tramo_porc]" value="<?= htmlspecialchars(number_format((float)($m->tramo_porc ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+                        <input type="text" id="tramo_porc" name="materialidad[tramo_porc]" value="<?= htmlspecialchars(number_format((float)($m->tramo_porc ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
                     </div>
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: right;">Monto</span>
-                        <input type="text" name="materialidad[tramo_monto]" value="<?= htmlspecialchars(number_format((float)($m->tramo_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right;">
+                        <input type="text" id="tramo_monto" name="materialidad[tramo_monto]" value="<?= htmlspecialchars(number_format((float)($m->tramo_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right;" readonly>
                     </div>
                 </div>
                 <div style="font-size: 0.8rem; color: #64748b; line-height: 1.4;">
@@ -107,7 +107,7 @@ if ((int)$pruebaId === 16):
                 </div>
                 <div>
                     <span style="font-size: 0.75rem; color: #64748b; display: block; text-align: right; margin-bottom: 0.2rem;">Monto</span>
-                    <input type="text" name="materialidad[importancia_inicial_monto]" value="<?= htmlspecialchars(number_format((float)($m->importancia_inicial_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
+                    <input type="text" id="importancia_inicial_monto" name="materialidad[importancia_inicial_monto]" value="<?= htmlspecialchars(number_format((float)($m->importancia_inicial_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
                 </div>
             </div>
         </div>
@@ -189,4 +189,47 @@ if ((int)$pruebaId === 16):
 
     </div>
 </div>
+
+<!-- Script en tiempo real para automatizar el cálculo del tramo y la importancia relativa -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const inputBeneficios = document.getElementById('beneficios_monto');
+    const inputTramoPorc  = document.getElementById('tramo_porc');
+    const inputTramoMonto = document.getElementById('tramo_monto');
+    const inputImportancia= document.getElementById('importancia_inicial_monto');
+
+    function parseVenezuelanNumber(value) {
+        if (!value) return 0;
+        // Limpiar puntos de miles y reemplazar coma decimal por punto estándar
+        let clean = value.toString().replace(/\./g, '').replace(',', '.');
+        let num = parseFloat(clean);
+        return isNaN(num) ? 0 : num;
+    }
+
+    function formatVenezuelanNumber(value, decimals = 2) {
+        return value.toLocaleString('es-VE', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        });
+    }
+
+    function recalcularMaterialidad() {
+        let beneficios = parseVenezuelanNumber(inputBeneficios.value);
+        let porc = parseVenezuelanNumber(inputTramoPorc.value);
+
+        // Cálculo del monto del tramo
+        let tramoMonto = beneficios * (porc / 100);
+        inputTramoMonto.value = formatVenezuelanNumber(tramoMonto, 2);
+
+        // Importancia relativa seleccionada (Redondeada sin decimales)
+        let importanciaRedondeada = Math.round(tramoMonto);
+        inputImportancia.value = formatVenezuelanNumber(importanciaRedondeada, 2);
+    }
+
+    if (inputBeneficios && inputTramoPorc) {
+        inputBeneficios.addEventListener('input', recalcularMaterialidad);
+        inputTramoPorc.addEventListener('input', recalcularMaterialidad);
+    }
+});
+</script>
 <?php endif; ?>
