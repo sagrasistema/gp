@@ -19,6 +19,7 @@ include 'conect-actividades.php';
             <i class="ri-close-circle-line"></i> 
         </a>
     </div>
+
     <!-- Cabecera de Metadatos del Proyecto -->
     <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.25rem; border-radius: 12px; background: #ffffff; border: 1px solid var(--border-color);">
         <div style="display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid #e2e8f0; padding-right: 1rem; font-size: 0.9rem;">
@@ -103,20 +104,51 @@ include 'conect-actividades.php';
         <input type="hidden" name="action_type" value="save_all">
         
         <?php foreach ($listaActividades as $act): ?>
-            <div class="card-actividad" style="background:#ffffff; border: 1px solid var(--border-color); padding:1.5rem; border-radius:8px; margin-bottom:1.25rem;">
+            <div class="card-actividad activity-row" style="background:#ffffff; border: 1px solid var(--border-color); padding:1.5rem; border-radius:8px; margin-bottom:1.25rem;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:1rem; gap:1rem;">
                     <div style="font-size:1rem; color:#334155; line-height:1.4;">
                         <strong>Actividad <?= $act->orden ?>:</strong> <?= $act->descripcion; ?>
                     </div>
-                    <div>
+                    <div class="activity-checkbox-container">
                         <label style="font-weight:700; font-size:0.85rem; color:#475569; display:flex; align-items:center; gap:0.25rem; cursor:pointer;">
                             <input type="checkbox" name="actividades_data[<?= $act->id ?>][completado]" value="1" <?= $act->is_ok ? 'checked' : '' ?>> Realizado
                         </label>
                     </div>
                 </div>
-                <textarea name="actividades_data[<?= $act->id ?>][contenido]" placeholder="Escriba aquí los hallazgos, papeles de trabajo o evidencias analizadas..." rows="4" style="width:100%; padding:0.75rem; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit; resize:vertical;"><?= htmlspecialchars($act->respuesta, ENT_QUOTES, 'UTF-8') ?></textarea>
+                <textarea name="actividades_data[<?= $act->id ?>][contenido]" class="activity-textarea" placeholder="Escriba aquí los hallazgos, papeles de trabajo o evidencias analizadas..." rows="4" style="width:100%; padding:0.75rem; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit; resize:vertical;"><?= htmlspecialchars($act->respuesta, ENT_QUOTES, 'UTF-8') ?></textarea>
             </div>
         <?php endforeach; ?>
+
+        <!-- SCRIPT PARA CONTROLAR LA VISIBILIDAD DEL CHECKBOX SEGÚN EL TEXTAREA -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const textareas = document.querySelectorAll('.activity-textarea');
+
+            textareas.forEach(textarea => {
+                const row = textarea.closest('.activity-row');
+                const checkboxContainer = row ? row.querySelector('.activity-checkbox-container') : null;
+                const checkbox = checkboxContainer ? checkboxContainer.querySelector('input[type="checkbox"]') : null;
+
+                function updateCheckboxVisibility() {
+                    if (!checkboxContainer) return;
+
+                    if (textarea.value.trim() === '') {
+                        checkboxContainer.style.display = 'none';
+                        if (checkbox) checkbox.checked = false;
+                    } else {
+                        checkboxContainer.style.display = 'block';
+                    }
+                }
+
+                // Evaluar al cargar la página
+                updateCheckboxVisibility();
+
+                // Evaluar en tiempo real al escribir
+                textarea.addEventListener('input', updateCheckboxVisibility);
+            });
+        });
+        </script>
+
         <!-- INCLUSIÓN AUTOMÁTICA DE LA REVISIÓN ANALÍTICA SÓLO PARA LA PRUEBA 11 -->
         <?php 
             if ((int)$pruebaId === 11) {
@@ -124,43 +156,39 @@ include 'conect-actividades.php';
             } elseif ((int)$pruebaId === 16) {
                 include 'prueba16.php';
             }
-            
         ?>
 
         <!-- SECCIÓN DE ACORDEONES POR CADA INDICADOR (CI, CG, SC, AA) -->
         <div style="margin: 2.5rem 0 1.5rem 0;">
             <h3 style="font-size: 1.1rem; color: #1e293b; font-weight: 700; margin-bottom: 1rem;">Indicadores y Puntos de Control</h3>
             
-         <?php 
+            <?php 
             $indicadoresMeta = [
-                'CI' => ['nombre' => 'Debilidades de Control Interno (CI)', 'color' => '#ca8a04'], // Amarillo Riesgo
-                'CG' => ['nombre' => 'Carta de Gerencia (CG)', 'color' => '#ea580c'],          // Naranja Riesgo
-                'SC' => ['nombre' => 'Situaciones Críticas (SC)', 'color' => '#dc2626'],       // Rojo Riesgo
-                'AA' => ['nombre' => 'Asuntos de Auditoría (AA)', 'color' => '#2563eb']        // Azul Estándar
+                'CI' => ['nombre' => 'Debilidades de Control Interno (CI)', 'color' => '#ca8a04'],
+                'CG' => ['nombre' => 'Carta de Gerencia (CG)', 'color' => '#ea580c'],
+                'SC' => ['nombre' => 'Situaciones Críticas (SC)', 'color' => '#dc2626'],
+                'AA' => ['nombre' => 'Asuntos de Auditoría (AA)', 'color' => '#2563eb']
             ];
 
             foreach ($indicadoresMeta as $key => $meta):
                 $items = $detallesPorTipo[$key] ?? [];
             ?>
                 <div class="accordion-item" style="margin-bottom: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: #ffffff;">
-        <!-- Cabecera del Acordeón con color dinámico -->
-                <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 1rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid <?= $meta['color'] ?>;">
-                    <span style="color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="ri-file-list-3-line" style="color: <?= $meta['color'] ?>;"></i> <?= $meta['nombre'] ?> 
-                        <span style="font-size: 0.75rem; background: #e2e8f0; color: #334155; padding: 0.15rem 0.5rem; border-radius: 9999px;"><?= count($items) ?> registros</span>
-                    </span>
-                    <i class="ri-arrow-down-s-line"></i>
-                </div>
-
-                <!-- Contenido del Acordeón -->
-                <div class="accordion-content" style="display: none; padding: 1.25rem; background: #ffffff;">
-                    <div style="margin-bottom: 1rem;">
-                        <button type="button" class="btn btn-primary" onclick="openIndicatorModal('<?= $key ?>')" style="padding: 0.4rem 0.85rem; font-size: 0.85rem; background: <?= $meta['color'] ?>; border-color: <?= $meta['color'] ?>;">
-                            <i class="ri-add-line"></i> Punto de control
-                        </button>
+                    <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 1rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid <?= $meta['color'] ?>;">
+                        <span style="color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="ri-file-list-3-line" style="color: <?= $meta['color'] ?>;"></i> <?= $meta['nombre'] ?> 
+                            <span style="font-size: 0.75rem; background: #e2e8f0; color: #334155; padding: 0.15rem 0.5rem; border-radius: 9999px;"><?= count($items) ?> registros</span>
+                        </span>
+                        <i class="ri-arrow-down-s-line"></i>
                     </div>
 
-                        <!-- Tabla de Registros del Indicador -->
+                    <div class="accordion-content" style="display: none; padding: 1.25rem; background: #ffffff;">
+                        <div style="margin-bottom: 1rem;">
+                            <button type="button" class="btn btn-primary" onclick="openIndicatorModal('<?= $key ?>')" style="padding: 0.4rem 0.85rem; font-size: 0.85rem; background: <?= $meta['color'] ?>; border-color: <?= $meta['color'] ?>;">
+                                <i class="ri-add-line"></i> Punto de control
+                            </button>
+                        </div>
+
                         <div style="overflow-x: auto;">
                             <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
                                 <thead>
@@ -199,51 +227,49 @@ include 'conect-actividades.php';
                 </div>
             <?php endforeach; ?>
         </div>
-<!-- caja de comentarios socios -->
-    <div class="accordion-socios" style="margin-top: 2rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <div class="accordion-header" onclick="toggleAcordeonSocios(this)" style="padding: 1rem 1.25rem; background: #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0; font-weight: 600; color: #1e293b;">
-            <span><i class="ri-shield-user-line" style="margin-right: 8px; color: #2563eb;"></i> Observaciones de Socios (Líder y Calidad)</span>
-            <i class="ri-arrow-down-s-line" style="transition: transform 0.3s ease;"></i>
-        </div>
-        
-        <div class="accordion-body" style="display: none; padding: 1.5rem; border-top: 1px solid #e2e8f0;">
-            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-                
-                <!-- Campo Socio Líder -->
-                <div style="flex: 1; min-width: 280px;">
-                    <label for="observacion_socio_lider" style="display: block; font-weight: 500; font-size: 0.9rem; color: #334155; margin-bottom: 0.5rem;">
-                        Observaciones del Socio Líder
-                    </label>
-                    <textarea name="observacion_socio_lider" id="observacion_socio_lider" rows="5" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; resize: vertical;"><?php echo htmlspecialchars($obsSocioLider, ENT_QUOTES, 'YOUTUBE' ? 'UTF-8' : 'UTF-8'); ?></textarea>
-                </div>
 
-                <!-- Campo Socio de Calidad -->
-                <div style="flex: 1; min-width: 280px;">
-                    <label for="observacion_socio_calidad" style="display: block; font-weight: 500; font-size: 0.9rem; color: #334155; margin-bottom: 0.5rem;">
-                        Observaciones del Socio de Calidad
-                    </label>
-                    <textarea name="observacion_socio_calidad" id="observacion_socio_calidad" rows="5" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; resize: vertical;"><?php echo htmlspecialchars($obsSocioCalidad, ENT_QUOTES, 'UTF-8'); ?></textarea>
-                </div>
+        <!-- CAJA DE COMENTARIOS SOCIOS -->
+        <div class="accordion-socios" style="margin-top: 2rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div class="accordion-header" onclick="toggleAcordeonSocios(this)" style="padding: 1rem 1.25rem; background: #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0; font-weight: 600; color: #1e293b;">
+                <span><i class="ri-shield-user-line" style="margin-right: 8px; color: #2563eb;"></i> Observaciones de Socios (Líder y Calidad)</span>
+                <i class="ri-arrow-down-s-line" style="transition: transform 0.3s ease;"></i>
+            </div>
+            
+            <div class="accordion-body" style="display: none; padding: 1.5rem; border-top: 1px solid #e2e8f0;">
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 280px;">
+                        <label for="observacion_socio_lider" style="display: block; font-weight: 500; font-size: 0.9rem; color: #334155; margin-bottom: 0.5rem;">
+                            Observaciones del Socio Líder
+                        </label>
+                        <textarea name="observacion_socio_lider" id="observacion_socio_lider" rows="5" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; resize: vertical;"><?= htmlspecialchars($obsSocioLider ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                    </div>
 
+                    <div style="flex: 1; min-width: 280px;">
+                        <label for="observacion_socio_calidad" style="display: block; font-weight: 500; font-size: 0.9rem; color: #334155; margin-bottom: 0.5rem;">
+                            Observaciones del Socio de Calidad
+                        </label>
+                        <textarea name="observacion_socio_calidad" id="observacion_socio_calidad" rows="5" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; resize: vertical;"><?= htmlspecialchars($obsSocioCalidad ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script>
-    function toggleAcordeonSocios(header) {
-        const body = header.nextElementSibling;
-        const icon = header.querySelector('.ri-arrow-down-s-line');
-        if (body.style.display === 'none' || body.style.display === '') {
-            body.style.display = 'block';
-            icon.style.transform = 'rotate(180deg)';
-        } else {
-            body.style.display = 'none';
-            icon.style.transform = 'rotate(0deg)';
+        <script>
+        function toggleAcordeonSocios(header) {
+            const body = header.nextElementSibling;
+            const icon = header.querySelector('.ri-arrow-down-s-line');
+            if (body.style.display === 'none' || body.style.display === '') {
+                body.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                body.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            }
         }
-    }
-    </script>
+        </script>
+
         <!-- CAJA DE ESTATUS GENERAL DE LA PRUEBA -->
-        <div style="background: #ffffff; border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <div style="background: #ffffff; border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; margin-top: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
             <div>
                 <h4 style="margin: 0 0 0.25rem 0; font-size: 1rem; color: #1e293b;">Estatus General de la Prueba</h4>
                 <p style="margin: 0; font-size: 0.85rem; color: #64748b;">El estatus se actualizará al guardar todo el formulario.</p>
@@ -263,8 +289,6 @@ include 'conect-actividades.php';
                 <button type="submit" class="btn btn-primary" style="padding:0.75rem 2.5rem;"><i class="ri-save-3-line"></i> Guardar Todo</button>
             </div>
         </div>
-
-       
     </form>
 
     <!-- Formularios ocultos individuales para eliminar registros de indicadores -->
@@ -319,63 +343,54 @@ include 'conect-actividades.php';
         </form>
     </div>
 </div>
-<!-- Formularios ocultos para eliminar filas analíticas (FUERA DEL FORM PRINCIPAL) -->
-    <?php if ((int)$pruebaId === 11): ?>
-        <?php foreach (array_merge($analiticaItems['activo'], $analiticaItems['pasivo'], $analiticaItems['patrimonio']) as $it): ?>
-            <form id="delAnalitica_<?= $it->id ?>" action="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pruebaId ?>" method="POST" style="display:none;">
-                <input type="hidden" name="action_type" value="delete_analitica_item">
-                <input type="hidden" name="item_id" value="<?= $it->id ?>">
-            </form>
-        <?php endforeach; ?>
 
-        <!-- Modal para Agregar Partida Analítica (FUERA DEL FORM PRINCIPAL) -->
-        <div id="analiticaModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1150; align-items:center; justify-content:center;">
-            <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:550px; width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.15);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:0.75rem;">
-                    <h3 id="modalAnaliticaTitle" style="margin:0; color:#1e293b; font-size:1.1rem;">Agregar Partida</h3>
-                    <button type="button" onclick="closeAnaliticaModal()" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748b;"><i class="ri-close-line"></i></button>
-                </div>
-                <form action="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pruebaId ?>" method="POST">
-                    <input type="hidden" name="action_type" value="add_analitica_item">
-                    <input type="hidden" id="modalTipoAnalitica" name="tipo" value="">
+<?php if ((int)$pruebaId === 11): ?>
+    <!-- Formularios ocultos para eliminar filas analíticas -->
+    <?php foreach (array_merge($analiticaItems['activo'], $analiticaItems['pasivo'], $analiticaItems['patrimonio']) as $it): ?>
+        <form id="delAnalitica_<?= $it->id ?>" action="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pruebaId ?>" method="POST" style="display:none;">
+            <input type="hidden" name="action_type" value="delete_analitica_item">
+            <input type="hidden" name="item_id" value="<?= $it->id ?>">
+        </form>
+    <?php endforeach; ?>
 
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Tipo / Rubro (Ej. Efectivo, Cuentas por Cobrar...)</label>
-                        <input type="text" name="tipo_rubro" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                        <div>
-                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Saldo Actual</label>
-                            <input type="number" step="0.01" name="saldo_actual" value="0.00" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Saldo Anterior</label>
-                            <input type="number" step="0.01" name="saldo_anterior" value="0.00" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
-                        </div>
-                    </div>
-                    <div style="margin-bottom: 1.5rem;">
-                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Observaciones (ID de referencia)</label>
-                        <input type="text" name="observaciones" placeholder="Ej. 6, 7..." style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
-                    </div>
-                    <div style="text-align:right; display: flex; justify-content: flex-end; gap: 0.75rem;">
-                        <button type="button" class="btn btn-secondary" onclick="closeAnaliticaModal()" style="padding: 0.5rem 1rem;">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.25rem;">Guardar Partida</button>
-                    </div>
-                </form>
+    <!-- Modal para Agregar Partida Analítica -->
+    <div id="analiticaModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1150; align-items:center; justify-content:center;">
+        <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:550px; width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.15);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:0.75rem;">
+                <h3 id="modalAnaliticaTitle" style="margin:0; color:#1e293b; font-size:1.1rem;">Agregar Partida</h3>
+                <button type="button" onclick="closeAnaliticaModal()" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748b;"><i class="ri-close-line"></i></button>
             </div>
-        </div>
+            <form action="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pruebaId ?>" method="POST">
+                <input type="hidden" name="action_type" value="add_analitica_item">
+                <input type="hidden" id="modalTipoAnalitica" name="tipo" value="">
 
-        <script>
-        function openAnaliticaModal(tipo) {
-            document.getElementById('modalTipoAnalitica').value = tipo;
-            document.getElementById('modalAnaliticaTitle').innerText = 'Nuevo Registro en ' + tipo.toUpperCase();
-            document.getElementById('analiticaModal').style.display = 'flex';
-        }
-        function closeAnaliticaModal() {
-            document.getElementById('analiticaModal').style.display = 'none';
-        }
-        </script>
-    <?php endif; ?>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Tipo / Rubro (Ej. Efectivo, Cuentas por Cobrar...)</label>
+                    <input type="text" name="tipo_rubro" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Saldo Actual</label>
+                        <input type="number" step="0.01" name="saldo_actual" value="0.00" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Saldo Anterior</label>
+                        <input type="number" step="0.01" name="saldo_anterior" value="0.00" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                    </div>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Observaciones (ID de referencia)</label>
+                    <input type="text" name="observaciones" placeholder="Ej. 6, 7..." style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                </div>
+                <div style="text-align:right; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeAnaliticaModal()" style="padding: 0.5rem 1rem;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.25rem;">Guardar Partida</button>
+                </div>
+            </form>
+        </div>
+    </div>
+<?php endif; ?>
+
 <!-- Modal de la Norma -->
 <div id="normaModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1000; align-items:center; justify-content:center;">
     <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:650px; width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid var(--border-color);">
@@ -395,6 +410,7 @@ include 'conect-actividades.php';
         </div>
     </div>
 </div>
+
 <?php 
 include 'js-actividades.php'; 
 ?>
