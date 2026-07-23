@@ -167,11 +167,11 @@ if ((int)$pruebaId === 16):
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: center;">%</span>
-                        <input type="text" name="materialidad[minimis_porc]" value="<?= htmlspecialchars(number_format((float)($m->minimis_porc ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+                        <input type="text" id="minimis_porc" name="materialidad[minimis_porc]" value="<?= htmlspecialchars(number_format((float)($m->minimis_porc ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
                     </div>
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: right;">Monto</span>
-                        <input type="text" name="materialidad[minimis_monto]" value="<?= htmlspecialchars(number_format((float)($m->minimis_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right;">
+                        <input type="text" id="minimis_monto" name="materialidad[minimis_monto]" value="<?= htmlspecialchars(number_format((float)($m->minimis_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right;">
                     </div>
                 </div>
             </div>
@@ -182,7 +182,7 @@ if ((int)$pruebaId === 16):
                 </div>
                 <div>
                     <span style="font-size: 0.75rem; color: #64748b; display: block; text-align: right; margin-bottom: 0.2rem;">Monto</span>
-                    <input type="text" name="materialidad[minimis_secundario_monto]" value="<?= htmlspecialchars(number_format((float)($m->minimis_secundario_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
+                    <input type="text" id="minimis_secundario_monto" name="materialidad[minimis_secundario_monto]" value="<?= htmlspecialchars(number_format((float)($m->minimis_secundario_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
                 </div>
             </div>
         </div>
@@ -190,7 +190,7 @@ if ((int)$pruebaId === 16):
     </div>
 </div>
 
-<!-- Script en tiempo real para automatización de tramos, recortes y materialidad ajustada -->
+<!-- Script en tiempo real para automatización completa -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const inputBeneficios       = document.getElementById('beneficios_monto');
@@ -204,7 +204,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputMinimisMonto     = document.getElementById('minimis_monto');
     const inputMinimisSec       = document.getElementById('minimis_secundario_monto');
 
-    // Función para convertir string con formato venezolano ("5.000,00") a float de JS
     function parseVenezuelanNumber(value) {
         if (!value) return 0;
         let clean = value.toString().replace(/\./g, '').replace(',', '.');
@@ -212,7 +211,6 @@ document.addEventListener('DOMContentLoaded', function () {
         return isNaN(num) ? 0 : num;
     }
 
-    // Función para formatear un número al estándar venezolano en pantalla
     function formatVenezuelanNumber(value, decimals = 2) {
         return value.toLocaleString('es-VE', {
             minimumFractionDigits: decimals,
@@ -221,36 +219,30 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function recalcularTodo() {
-        // 1. Obtener valores base de beneficios y tramo
         let beneficios = parseVenezuelanNumber(inputBeneficios ? inputBeneficios.value : 0);
         let tramoPorc  = parseVenezuelanNumber(inputTramoPorc ? inputTramoPorc.value : 0);
 
-        // 2. Calcular monto del tramo (con 2 decimales)
         let tramoMonto = beneficios * (tramoPorc / 100);
         if (inputTramoMonto) {
             inputTramoMonto.value = formatVenezuelanNumber(tramoMonto, 2);
         }
 
-        // 3. Importancia relativa seleccionada: Monto del tramo redondeado sin decimales
         let importanciaInicial = Math.round(tramoMonto);
         if (inputImportancia) {
             inputImportancia.value = formatVenezuelanNumber(importanciaInicial, 0);
         }
 
-        // 4. Calcular Recorte basado en la importancia inicial
         let recortePorc = parseVenezuelanNumber(inputRecortePorc ? inputRecortePorc.value : 0);
         let recorteMonto = importanciaInicial * (recortePorc / 100);
         if (inputRecorteMonto) {
             inputRecorteMonto.value = formatVenezuelanNumber(recorteMonto, 2);
         }
 
-        // 5. Importancia relativa ajustada: Inicial menos recorte, redondeado sin decimales
         let importanciaAjustada = Math.round(importanciaInicial - recorteMonto);
         if (inputImportanciaAjust) {
             inputImportanciaAjust.value = formatVenezuelanNumber(importanciaAjustada, 0);
         }
 
-        // 6. Nivel Mínimis (Bloque 3): Porcentaje aplicado sobre la importancia inicial
         let minimisPorc = parseVenezuelanNumber(inputMinimisPorc ? inputMinimisPorc.value : 0);
         let minimisMonto = importanciaInicial * (minimisPorc / 100);
         if (inputMinimisMonto) {
@@ -258,7 +250,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Registrar eventos de escucha en tiempo real (input)
     const inputsEscucha = [
         inputBeneficios, inputTramoPorc, inputRecortePorc, 
         inputImportancia, inputMinimisPorc, inputMinimisSec
@@ -270,7 +261,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Formateo automático de visualización al perder el foco (blur)
     inputsEscucha.forEach(input => {
         if (input) {
             input.addEventListener('blur', function() {
@@ -278,9 +268,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 let decimals = 2;
                 
                 if (this.id === 'importancia_inicial_monto' || this.id === 'importancia_ajustada_monto') {
-                    decimals = 0; // Sin decimales para importancias principales/ajustadas
+                    decimals = 0;
                 } else if (this.id === 'tramo_porc' || this.id === 'recorte_porc' || this.id === 'minimis_porc') {
-                    decimals = 2; // Dos decimales para porcentajes
+                    decimals = 2;
                 }
                 
                 this.value = formatVenezuelanNumber(val, decimals);
