@@ -1,15 +1,17 @@
 <?php
 // v/proyectos/actividades.php
+
+// v/proyectos/actividades.php
 declare(strict_types=1);
 
 include '../main/config.php';
 
-$proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT);$pruebaId = filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT);
+$proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT);
+$pruebaId = filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT);
 
-if (!$proyectoId \vert{}\vert{} !$pruebaId) {
+if (!$proyectoId || !$pruebaId) {
     die("Error: Parámetros relacionales faltantes.");
 }
-
 /**
  * Convierte un número en formato venezolano (ej. "5.000.000,00") a un float estándar de PHP.
  */
