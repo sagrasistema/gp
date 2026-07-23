@@ -29,7 +29,7 @@ if (isset($pdo, $proyectoId, $pruebaId) && (int)$pruebaId === 16) {
 // Asegurar valores por defecto si aún no existen registros guardados
 $m = $materialidadData ?? (object)[
     'beneficios_monto'           => '0.00',
-    'tramo_porc'                 => '0.00',
+    'tramo_porc'                 => '5.00', // Valor por defecto dentro del rango mínimo permitido
     'tramo_monto'                => '0.00',
     'importancia_inicial_monto'  => '0.00',
     'recorte_porc'               => '0.00',
@@ -69,7 +69,7 @@ if ((int)$pruebaId === 16):
             </div>
         </div>
 
-        <!-- Fila 2: Escoger medición empírica (Tramo) -->
+        <!-- Fila 2: Escoger medición empírica (Tramo 5% - 10%) -->
         <div style="margin-bottom: 1.5rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 1.25rem;">
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem; font-size: 0.85rem; color: #64748b; font-weight: 600;">
                 <div>Escoger medición empírica:</div>
@@ -82,8 +82,8 @@ if ((int)$pruebaId === 16):
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                     <div>
-                        <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: center;">%</span>
-                        <input type="text" id="tramo_porc" name="materialidad[tramo_porc]" value="<?= htmlspecialchars(number_format((float)($m->tramo_porc ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+                        <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: center;">% (5 - 10)</span>
+                        <input type="text" id="tramo_porc" name="materialidad[tramo_porc]" min="5" max="10" value="<?= htmlspecialchars(number_format((float)($m->tramo_porc ?? 5), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
                     </div>
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: right;">Monto</span>
@@ -91,7 +91,7 @@ if ((int)$pruebaId === 16):
                     </div>
                 </div>
                 <div style="font-size: 0.8rem; color: #64748b; line-height: 1.4;">
-                    Ingrese el porcentaje apropiado (medición empírica) para aplicar el punto de referencia
+                    Ingrese un porcentaje estrictamente entre 5% y 10% para aplicar el punto de referencia.
                 </div>
             </div>
         </div>
@@ -102,7 +102,7 @@ if ((int)$pruebaId === 16):
                 <div>
                     <label style="display: block; font-size: 0.85rem; color: #334155; font-weight: 600;">Importancia relativa seleccionada*:</label>
                     <p style="font-size: 0.75rem; color: #64748b; margin: 0.25rem 0 0 0; line-height: 1.4;">
-                        Seleccione la cifra de la importancia relativa o materialidad. Este importe habrá que ajustarlo para obtener la "materialidad ajustada". Recuerde que el auditor es el responsable de decidir el importe de la importancia relativa o materialidad.
+                        Seleccione la cifra de la importancia relativa o materialidad. Este importe habrá que ajustarlo para obtener la "materialidad ajustada". Recuerde que el auditor es el responsable de decidir el importe.
                     </p>
                 </div>
                 <div>
@@ -117,10 +117,10 @@ if ((int)$pruebaId === 16):
             <div style="margin-bottom: 1rem;">
                 <strong style="font-size: 0.9rem; color: #1e293b; display: block; margin-bottom: 0.25rem;">Ajustar la importancia relativa global *</strong>
                 <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.4;">
-                    Se trata de corregir la materialidad inicial teniendo en cuenta factores cualitativos de carácter general, como los siguientes:<br>
-                    - Riesgos inherentes derivados de la "naturaleza de la actividad" de la entidad.<br>
-                    - Evaluación global del "control interno".<br>
-                    Estas correcciones no deben suponer una reducción en la materialidad inicial de más del 25% y en ningún caso deben aumentar la materialidad.
+                    Se trata de corregir la materialidad inicial teniendo en cuenta factores cualitativos de carácter general:<br>
+                    - Riesgos inherentes derivados de la naturaleza de la actividad.<br>
+                    - Evaluación global del control interno.<br>
+                    Estas correcciones no deben suponer una reducción mayor al 25% ni aumentar la materialidad.
                 </p>
             </div>
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: center;">
@@ -153,11 +153,13 @@ if ((int)$pruebaId === 16):
             </div>
         </div>
 
-        <!-- Fila 6: Nivel de mínimo registro de incorrecciones -->
+        <!-- Fila 6: Nivel de mínimo registro de incorrecciones (Norma NIA 450 / De Minimis) -->
         <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
             <div style="margin-bottom: 1rem;">
-                <strong style="font-size: 0.9rem; color: #1e293b; display: block; margin-bottom: 0.25rem;">Nivel de mínimo registro de incorrecciones (opcional) *</strong>
-                <p style="font-size: 0.8rem; color: #475569; margin: 0;">Los factores que influirían al decidir la selección del umbral para el nivel de registro del resumen de ajustes no registrados.</p>
+                <strong style="font-size: 0.9rem; color: #1e293b; display: block; margin-bottom: 0.25rem;">Nivel de mínimo registro de incorrecciones (Norma NIA 450) *</strong>
+                <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.4;">
+                    Umbral o nivel <em>De Minimis</em> conforme a la <strong>NIA 450</strong> (Evaluación de las incorrecciones identificadas durante la auditoría). Establece el límite por debajo del cual las diferencias acumuladas se consideran claramente insignificantes y no requieren acumulación.
+                </p>
             </div>
             
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: center; margin-bottom: 1rem;">
@@ -190,7 +192,7 @@ if ((int)$pruebaId === 16):
     </div>
 </div>
 
-<!-- Script en tiempo real para automatización completa -->
+<!-- Script en tiempo real con validación estricta para el tramo (5% - 10%) y automatización -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const inputBeneficios       = document.getElementById('beneficios_monto');
@@ -221,6 +223,13 @@ document.addEventListener('DOMContentLoaded', function () {
     function recalcularTodo() {
         let beneficios = parseVenezuelanNumber(inputBeneficios ? inputBeneficios.value : 0);
         let tramoPorc  = parseVenezuelanNumber(inputTramoPorc ? inputTramoPorc.value : 0);
+
+        // Validación estricta en tiempo real para el rango del tramo (5% a 10%)
+        if (tramoPorc > 0 && (tramoPorc < 5 || tramoPorc > 10)) {
+            inputTramoPorc.style.borderColor = '#ef4444'; // Alerta visual roja
+        } else {
+            inputTramoPorc.style.borderColor = '#cbd5e1';
+        }
 
         let tramoMonto = beneficios * (tramoPorc / 100);
         if (inputTramoMonto) {
