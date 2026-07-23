@@ -130,11 +130,11 @@ if ((int)$pruebaId === 16):
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: center;">%</span>
-                        <input type="text" name="materialidad[recorte_porc]" value="<?= htmlspecialchars(number_format((float)($m->recorte_porc ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+                        <input type="text" id="recorte_porc" name="materialidad[recorte_porc]" value="<?= htmlspecialchars(number_format((float)($m->recorte_porc ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
                     </div>
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: right;">Monto</span>
-                        <input type="text" name="materialidad[recorte_monto]" value="<?= htmlspecialchars(number_format((float)($m->recorte_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right;">
+                        <input type="text" id="recorte_monto" name="materialidad[recorte_monto]" value="<?= htmlspecialchars(number_format((float)($m->recorte_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right;" readonly>
                     </div>
                 </div>
             </div>
@@ -148,7 +148,7 @@ if ((int)$pruebaId === 16):
                 </div>
                 <div>
                     <span style="font-size: 0.75rem; color: #64748b; display: block; text-align: right; margin-bottom: 0.2rem;">Monto</span>
-                    <input type="text" name="materialidad[importancia_ajustada_monto]" value="<?= htmlspecialchars(number_format((float)($m->importancia_ajustada_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
+                    <input type="text" id="importancia_ajustada_monto" name="materialidad[importancia_ajustada_monto]" value="<?= htmlspecialchars(number_format((float)($m->importancia_ajustada_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;" readonly>
                 </div>
             </div>
         </div>
@@ -190,17 +190,19 @@ if ((int)$pruebaId === 16):
     </div>
 </div>
 
-<!-- Script en tiempo real y formateo dinámico al salir del campo (blur) -->
+<!-- Script en tiempo real para automatización de tramos, recortes y materialidad ajustada -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const inputBeneficios = document.getElementById('beneficios_monto');
-    const inputTramoPorc  = document.getElementById('tramo_porc');
-    const inputTramoMonto = document.getElementById('tramo_monto');
-    const inputImportancia= document.getElementById('importancia_inicial_monto');
+    const inputBeneficios       = document.getElementById('beneficios_monto');
+    const inputTramoPorc        = document.getElementById('tramo_porc');
+    const inputTramoMonto       = document.getElementById('tramo_monto');
+    const inputImportancia      = document.getElementById('importancia_inicial_monto');
+    const inputRecortePorc      = document.getElementById('recorte_porc');
+    const inputRecorteMonto     = document.getElementById('recorte_monto');
+    const inputImportanciaAjust = document.getElementById('importancia_ajustada_monto');
 
     function parseVenezuelanNumber(value) {
         if (!value) return 0;
-        // Limpiar puntos de miles y reemplazar coma decimal por punto estándar
         let clean = value.toString().replace(/\./g, '').replace(',', '.');
         let num = parseFloat(clean);
         return isNaN(num) ? 0 : num;
@@ -213,37 +215,45 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function recalcularMaterialidad() {
+    function recalcularTodo() {
+        // 1. Beneficios y Tramo
         let beneficios = parseVenezuelanNumber(inputBeneficios.value);
-        let porc = parseVenezuelanNumber(inputTramoPorc.value);
+        let tramoPorc  = parseVenezuelanNumber(inputTramoPorc.value);
 
-        // Cálculo del monto del tramo
-        let tramoMonto = beneficios * (porc / 100);
+        let tramoMonto = beneficios * (tramoPorc / 100);
         inputTramoMonto.value = formatVenezuelanNumber(tramoMonto, 2);
 
-        // Importancia relativa seleccionada (Redondeada sin decimales)
-        let importanciaRedondeada = Math.round(tramoMonto);
-        inputImportancia.value = formatVenezuelanNumber(importanciaRedondeada, 2);
+        // Si la importancia inicial no ha sido alterada o se quiere sincronizar con el tramo:
+        // (Nota: mantenemos la importancia inicial si el usuario ya la ingresó manualmente, 
+        // pero aquí calculamos el recorte en base a la Importancia Relativa Seleccionada actual).
+        let importanciaInicial = parseVenezuelanNumber(inputImportancia.value);
+
+        // 2. Recorte e Importancia Ajustada
+        let recortePorc = parseVenezuelanNumber(inputRecortePorc.value);
+        let recorteMonto = importanciaInicial * (recortePorc / 100);
+        inputRecorteMonto.value = formatVenezuelanNumber(recorteMonto, 2);
+
+        let importanciaAjustada = Math.round(importanciaInicial - recorteMonto);
+        inputImportanciaAjust.value = formatVenezuelanNumber(importanciaAjustada, 2);
     }
 
-    if (inputBeneficios && inputTramoPorc) {
-        inputBeneficios.addEventListener('input', recalcularMaterialidad);
-        inputTramoPorc.addEventListener('input', recalcularMaterialidad);
+    // Eventos de entrada en tiempo real
+    if (inputBeneficios) inputBeneficios.addEventListener('input', recalcularTodo);
+    if (inputTramoPorc) inputTramoPorc.addEventListener('input', recalcularTodo);
+    if (inputImportancia) inputImportancia.addEventListener('input', recalcularTodo);
+    if (inputRecortePorc) inputRecortePorc.addEventListener('input', recalcularTodo);
 
-        // Formatear automáticamente el campo de beneficios al perder el foco (blur)
-        inputBeneficios.addEventListener('blur', function() {
-            let val = parseVenezuelanNumber(this.value);
-            this.value = formatVenezuelanNumber(val, 2);
-            recalcularMaterialidad();
-        });
-
-        // Formatear también el campo de porcentaje al salir si es necesario
-        inputTramoPorc.addEventListener('blur', function() {
-            let val = parseVenezuelanNumber(this.value);
-            this.value = formatVenezuelanNumber(val, 2);
-            recalcularMaterialidad();
-        });
-    }
+    // Formateo automático al salir de los inputs (blur)
+    const inputsFormato = [inputBeneficios, inputTramoPorc, inputImportancia, inputRecortePorc];
+    inputsFormato.forEach(input => {
+        if (input) {
+            input.addEventListener('blur', function() {
+                let val = parseVenezuelanNumber(this.value);
+                this.value = formatVenezuelanNumber(val, 2);
+                recalcularTodo();
+            });
+        }
+    });
 });
 </script>
 <?php endif; ?>
