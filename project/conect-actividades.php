@@ -61,7 +61,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
         
+        // Procesamiento específico para la Prueba 16 (Materialidad) en el Guardado General
+        if ((int)$pruebaId === 16 && isset($_POST['materialidad']) && is_array($_POST['materialidad'])) {
+            $mat = $_POST['materialidad'];
+            
+            $stmtMatSave = $pdo->prepare("
+                INSERT INTO proyecto_materialidad 
+                (proyecto_id, prueba_id, beneficios_monto, tramo_porc, tramo_monto, importancia_inicial_monto, recorte_porc, recorte_monto, importancia_ajustada_monto, minimis_porc, minimis_monto, minimis_secundario_monto)
+                VALUES (:proj, :pr, :ben_m, :tram_p, :tram_m, :imp_ini, :rec_p, :rec_m, :imp_aju, :min_p, :min_m, :min_s)
+                ON DUPLICATE KEY UPDATE 
+                    beneficios_monto = :ben_m_u, 
+                    tramo_porc = :tram_p_u, 
+                    tramo_monto = :tram_m_u, 
+                    importancia_inicial_monto = :imp_ini_u, 
+                    recorte_porc = :rec_p_u, 
+                    recorte_monto = :rec_m_u, 
+                    importancia_ajustada_monto = :imp_aju_u, 
+                    minimis_porc = :min_p_u, 
+                    minimis_monto = :min_m_u, 
+                    minimis_secundario_monto = :min_s_u
+            ");
 
+            $dataMat = [
+                ':proj'     => $proyectoId,
+                ':pr'       => $pruebaId,
+                ':ben_m'    => filter_var($mat['beneficios_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':tram_p'   => filter_var($mat['tramo_porc'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':tram_m'   => filter_var($mat['tramo_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':imp_ini'  => filter_var($mat['importancia_inicial_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':rec_p'    => filter_var($mat['recorte_porc'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':rec_m'    => filter_var($mat['recorte_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':imp_aju'  => filter_var($mat['importancia_ajustada_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':min_p'    => filter_var($mat['minimis_porc'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':min_m'    => filter_var($mat['minimis_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':min_s'    => filter_var($mat['minimis_secundario_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                
+                ':ben_m_u'  => filter_var($mat['beneficios_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':tram_p_u' => filter_var($mat['tramo_porc'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':tram_m_u' => filter_var($mat['tramo_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':imp_ini_u'=> filter_var($mat['importancia_inicial_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':rec_p_u'  => filter_var($mat['recorte_porc'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':rec_m_u'  => filter_var($mat['recorte_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':imp_aju_u'=> filter_var($mat['importancia_ajustada_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':min_p_u'  => filter_var($mat['minimis_porc'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':min_m_u'  => filter_var($mat['minimis_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+                ':min_s_u'  => filter_var($mat['minimis_secundario_monto'] ?? 0, FILTER_VALIDATE_FLOAT) ?: 0.00,
+            ];
+
+            $stmtMatSave->execute($dataMat);
+        }
+
+        // Cargar los datos de materialidad para la vista si es la prueba 16
+        $materialidadData = null;
+        if ((int)$pruebaId === 16) {
+            $stmtMatGet = $pdo->prepare("SELECT * FROM proyecto_materialidad WHERE proyecto_id = :proj AND prueba_id = :pr");
+            $stmtMatGet->execute([':proj' => $proyectoId, ':pr' => $pruebaId]);
+            $materialidadData = $stmtMatGet->fetch(PDO::FETCH_OBJ);
+        }
         if ($action === 'add_indicador_detalle') {
             // Guardar un punto de control / detalle para un indicador específico
             $tipoInd = filter_input(INPUT_POST, 'tipo_indicador', FILTER_SANITIZE_FULL_SPECIAL_CHARS);

@@ -118,7 +118,14 @@ include 'conect-actividades.php';
             </div>
         <?php endforeach; ?>
         <!-- INCLUSIÓN AUTOMÁTICA DE LA REVISIÓN ANALÍTICA SÓLO PARA LA PRUEBA 11 -->
-        <?php include 'prueba11.php'; ?>
+        <?php 
+            if ((int)$pruebaId === 11) {
+                include 'revision-analitica.php';
+            } elseif ((int)$pruebaId === 16) {
+                include 'prueba16.php';
+            }
+            
+        ?>
 
         <!-- SECCIÓN DE ACORDEONES POR CADA INDICADOR (CI, CG, SC, AA) -->
         <div style="margin: 2.5rem 0 1.5rem 0;">
