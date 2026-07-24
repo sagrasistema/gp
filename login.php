@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'conect-proyecto.php'; // Asume que este archivo inicializa $pdo de forma segura
+#require_once 'conect-proyecto.php'; // Asume que este archivo inicializa $pdo de forma segura
 
 $error = '';
 
