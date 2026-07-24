@@ -6,7 +6,7 @@
  */
 
 // Inclusión del archivo de configuración (Asegúrate de que la ruta sea correcta)
-require_once 'main/config';
+require_once 'main/config.php';
 
 // 1. Validar que la conexión PDO se haya establecido correctamente en 'main/config'
 if (!isset($pdo) || !$pdo instanceof PDO) {
