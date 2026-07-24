@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <?php 
-include 'main/user.php'; // Tu cabecera PHP normal de base de datos / sesionesd
+include 'user.php'; // Tu cabecera PHP normal de base de datos / sesionesd
 ?>
 <head>
     <meta charset="UTF-8">
