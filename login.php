@@ -15,7 +15,7 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
 }
 
 // Inclusión del archivo de configuración y conexión PDO desde la carpeta main
-require_once 'main/config';
+require_once 'main/config.php';
 
 // Validación defensiva para asegurar que la conexión $pdo está disponible
 if (!isset($pdo) || !$pdo instanceof PDO) {
