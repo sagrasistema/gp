@@ -1,4 +1,7 @@
 <?php
+/**
+ * Configuración y Conexión a Base de Datos - PDO
+ */
 $host = 'localhost';
 $db_name = 'sagracom_alberto_1';
 $username = 'sagracom_alberto_t';
@@ -11,7 +14,10 @@ try {
         PDO::ATTR_EMULATE_PREPARES => false,
     ]);
 } catch (PDOException $e) {
+    // Registrar el error en los logs del servidor por seguridad
+    error_log("Error de conexión a BD: " . $e->getMessage());
+    
+    // Detener la ejecución con un mensaje limpio para evitar romper la interfaz
     http_response_code(500);
-    echo json_encode(["error" => "Error de conexión: " . $e->getMessage()]);
-    exit;
+    exit('Error crítico: No se pudo establecer la conexión con la base de datos.');
 }

@@ -14,7 +14,14 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
     exit;
 }
 
-require_once 'project/conect-proyecto.php'; // Archivo que inicializa la conexión PDO ($pdo)
+// Inclusión del archivo de configuración y conexión PDO desde la carpeta main
+require_once 'main/config';
+
+// Validación defensiva para asegurar que la conexión $pdo está disponible
+if (!isset($pdo) || !$pdo instanceof PDO) {
+    error_log('Error crítico: La variable $pdo no está inicializada correctamente.');
+    exit('Error del sistema: Configuración de base de datos inválida.');
+}
 
 $error = '';
 
@@ -49,8 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Usuario o contraseña incorrectos.';
             }
         } catch (PDOException $e) {
-            // Registro interno de errores (no exponer detalles técnicos al usuario)
-            error_log('Error en login.php: ' . $e->getMessage());
+            error_log('Error en consulta de login.php: ' . $e->getMessage());
             $error = 'Ocurrió un error en el sistema. Intente más tarde.';
         }
     }
@@ -65,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
-        /* VARIABLES DE DISEÑO (Estética del Sistema) */
         :root {
             --bg-dark: #0f0f11;
             --bg-form: #16161a;
@@ -92,14 +97,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             overflow: hidden;
         }
 
-        /* LAYOUT DIVIDIDO (50/50) */
         .split-container {
             display: flex;
             width: 100%;
             height: 100vh;
         }
 
-        /* COLUMNA IZQUIERDA: FORMULARIO */
         .login-column {
             width: 50%;
             background-color: var(--bg-form);
@@ -123,7 +126,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ALERTA DE ERROR ESTILIZADA */
         .alert-error {
             background-color: rgba(239, 68, 68, 0.15);
             border: 1px solid #ef4444;
@@ -137,7 +139,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             gap: 10px;
         }
 
-        /* TEXTOS DE BIENVENIDA */
         .brand-logo {
             margin-bottom: 30px;
             font-size: 24px;
@@ -168,7 +169,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 14px;
         }
 
-        /* ENTRADAS Y FORMULARIOS */
         .form-group {
             margin-bottom: 22px;
             position: relative;
@@ -219,7 +219,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: var(--accent-cian);
         }
 
-        /* MOSTRAR / OCULTAR CONTRASEÑA */
         .password-toggle {
             position: absolute;
             right: 14px;
@@ -234,7 +233,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: var(--text-main);
         }
 
-        /* BOTÓN DE ENTRADA */
         .btn-submit {
             width: 100%;
             padding: 14px;
@@ -259,7 +257,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transform: translateY(1px);
         }
 
-        /* RECUPERACIÓN */
         .forgot-link {
             display: block;
             text-align: center;
@@ -275,7 +272,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             text-decoration: underline;
         }
 
-        /* COLUMNA DERECHA: IMAGEN / MOSAICO CORPORATIVO */
         .hero-column {
             width: 50%;
             background-color: var(--bg-dark);
