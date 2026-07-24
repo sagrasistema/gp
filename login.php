@@ -14,7 +14,7 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
     exit;
 }
 
-require_once 'conect-proyecto.php'; // Archivo que inicializa la conexión PDO ($pdo)
+#require_once 'conect-proyecto.php'; // Archivo que inicializa la conexión PDO ($pdo)
 
 $error = '';
 
