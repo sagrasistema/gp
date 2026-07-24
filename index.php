@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
+<?php 
+include 'main/user.php'; // Tu cabecera PHP normal de base de datos / sesiones
+?>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

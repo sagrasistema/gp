@@ -3,6 +3,7 @@
 $pageTitle = "Aceptación y Continuidad";
 include '../main/h.php'; // Tu cabecera PHP normal de base de datos / sesiones
 include '../main/config.php'; 
+include '../main/user.php'; // Tu cabecera PHP normal de base de datos / sesiones
 ?>
 
 <link rel="stylesheet" href="../main/layout.css">
