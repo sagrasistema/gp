@@ -1,8 +1,18 @@
+<?php
+/**
+ * 1. El control de sesión y redirección DEBE ir obligatoriamente 
+ * en la primera línea, antes de cualquier etiqueta HTML o espacio.
+ */
+include 'user.php'; 
+
+// Configuramos las rutas relativas porque estamos en la raíz del index principal
+$customLogoPath = 'client/logo.png';
+$customHomePath = 'index.php';
+$customAcPath   = 'ac/index.php';
+$currentTab     = 'inicio'; // Marca "Inicio" activo en el sidebar
+?>
 <!DOCTYPE html>
 <html lang="es">
-<?php 
-include 'user.php'; // Tu cabecera PHP normal de base de datos / sesionesd
-?>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,7 +52,7 @@ include 'user.php'; // Tu cabecera PHP normal de base de datos / sesionesd
             display: flex;
             flex-direction: column;
         }
-        /* Aquí dejas únicamente los estilos específicos de la cuadrícula de tarjetas */
+
         .container { width: 100%; max-width: 1100px; margin: 0 auto; }
         .view-header { margin-bottom: 3rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); }
         .view-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--text-main); }
@@ -62,13 +72,8 @@ include 'user.php'; // Tu cabecera PHP normal de base de datos / sesionesd
 </head>
 <body>
 
-<?php
-// Configuramos las rutas relativas porque estamos en la raíz del index principal
-$customLogoPath = 'client/logo.png';
-$customHomePath = 'index.php';
-$customAcPath   = 'ac/index.php';
-$currentTab     = 'inicio'; // Marca "Inicio" activo en el sidebar
-
+<?php 
+// Incluimos la cabecera del layout visual después de validar la sesión
 include 'main/layout_header.php'; 
 ?>
 
@@ -99,13 +104,10 @@ include 'main/layout_header.php';
         </div>
         
         <a href="project/index.php" class="module-card">
-            
-                <div class="icon-box"><i class="ri-folders-line"></i></div>
-                <h2>Proyecto</h2>
-                <p>Planificación de flujos de trabajo, entregables y asignación de tareas.</p>
-            
+            <div class="icon-box"><i class="ri-folders-line"></i></div>
+            <h2>Proyecto</h2>
+            <p>Planificación de flujos de trabajo, entregables y asignación de tareas.</p>
         </a>
-
     </div>
 </div>
 
