@@ -185,7 +185,7 @@ include '../main/h.php';
     <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS Y ACTIVIDADES) -->
     <div class="accordion-container">
         <?php
-        $categories = $pdo->query("SELECT * FROM audit_categorias WHERE etapa_id = 2 ORDER BY orden ASC")->fetchAll(PDO::FETCH_OBJ);
+        $categories = $pdo->query("SELECT * FROM audit_categorias WHERE etapa_id = 1 ORDER BY orden ASC")->fetchAll(PDO::FETCH_OBJ);
         foreach ($categories as $cat):
             $stmtP = $pdo->prepare("SELECT * FROM audit_pruebas WHERE categoria_id = :catId ORDER BY orden ASC");
             $stmtP->execute([':catId' => $cat->id]);
