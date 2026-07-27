@@ -90,17 +90,10 @@ try {
     $stmtUsuarios = $pdo->query('SELECT id, nombre_completo, username FROM usuarios ORDER BY nombre_completo ASC');
     $listaUsuarios = $stmtUsuarios->fetchAll(PDO::FETCH_ASSOC);
 
-    // Obtener el equipo actual asignado a este proyecto
+
+// Obtener el equipo actual asignado a este proyecto de forma limpia
     $stmtEquipo = $pdo->prepare('
-        ，pu.id as asignacion_id, u.nombre_completo, u.username, pu.rol_proyecto, pu.fecha_asignacion 
-        FROM proyecto_usuarios pu
-        JOIN usuarios u ON pu.usuario_id = u.id
-        WHERE pu.proyecto_id = :proyecto_id
-        ORDER BY pu.fecha_asignacion DESC
-    ');
-    // Corrección limpia del query anterior para evitar problemas tipográficos:
-    $stmtEquipo = $pdo->prepare('
-        SELECT pu.id as asignacion_id, u.nombre_completo, u.username, pu.rol_proyecto, pu.fecha_asignacion 
+        SELECT pu.id AS asignacion_id, u.nombre_completo, u.username, pu.rol_proyecto, pu.fecha_asignacion 
         FROM proyecto_usuarios pu
         JOIN usuarios u ON pu.usuario_id = u.id
         WHERE pu.proyecto_id = :proyecto_id
