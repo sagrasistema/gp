@@ -156,6 +156,7 @@ include '../main/layout_header.php';
         }*/
         :root {
             --bg-primary: #f8fafc;
+            --bg-form: #f8fafc;
             --bg-card: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
