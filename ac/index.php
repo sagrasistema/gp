@@ -9,7 +9,7 @@ include '../main/user.php'; // Tu cabecera PHP normal de base de datos / sesione
 <link rel="stylesheet" href="../main/layout.css">
 
 <?php
-include '../user.php'; 
+
 // Configuración para que el componente apunte a las carpetas correctas desde v/ac/
 $customLogoPath = '../main/logo.png';
 $customHomePath = '../index.php';
