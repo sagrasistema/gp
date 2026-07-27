@@ -22,17 +22,23 @@ include '../main/h.php';
 <div class="view-container">
 <!-- Barra de Navegación Rápida por Etapas del Proyecto -->
 <!-- Barra de Navegación Rápida por Etapas del Proyecto -->
+<?php
+// Capturar y validar el ID del proyecto desde la URL de forma segura
+$proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
+?>
+
+<!-- Barra de Navegación Rápida por Etapas del Proyecto -->
 <div class="project-stages-bar">
-    <a href="#" class="stage-btn active">
+    <a href="responder.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn active">
         <i class="ri-calendar-check-line"></i> Planificación
     </a>
-    <a href="#" class="stage-btn">
+    <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
         <i class="ri-compass-3-line"></i> Estrategia
     </a>
-    <a href="#" class="stage-btn">
+    <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
         <i class="ri-play-circle-line"></i> Ejecución
     </a>
-    <a href="#" class="stage-btn">
+    <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
         <i class="ri-flag-line"></i> Conclusión
     </a>
 </div>

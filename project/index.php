@@ -83,7 +83,7 @@ include '../main/layout_header.php';
                             echo "<a href='responder.php?proyectoId={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; margin-right: 4px;' data-tooltip='Gestionar Pruebas'>";
                             echo "<i class='ri-folder-open-line'></i>";
                             echo "</a>";
-                            // Botón de Pruebas / Gestionar (responder.php)
+                            // Botón de Pruebas / Gestionar (responder2.php)
                             echo "<a href='responder2.php?proyectoId={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; margin-right: 4px;' data-tooltip='Gestionar Pruebas'>";
                             echo "<i class='ri-folder-open-line'></i>";
                             echo "</a>";
