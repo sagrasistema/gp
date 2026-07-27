@@ -12,7 +12,6 @@ include '../main/config.php';
 $customLogoPath = '../main/logo.png';
 $customHomePath = '../index.php';
 $customAcPath   = '../ac/index.php';
-$customAcPath   = '../project/index.php';
 $currentTab     = 'proyectos'; 
 
 include '../main/layout_header.php';
@@ -46,16 +45,15 @@ include '../main/layout_header.php';
         </a>
     </div>
 
-
     <div class="table-container">
         <table class="custom-table">
             <thead>
                 <tr>
                     <th style="width: 10%;">ID Proj</th>
-                    <th style="width: 40%;">Cliente / Empresa</th>
+                    <th style="width: 35%;">Cliente / Empresa</th>
                     <th style="width: 25%;">Proyecto / Alcance</th>
                     <th style="width: 15%;">Fecha Inicio</th>
-                    <th style="width: 10%; text-align: center;">Acciones</th>
+                    <th style="width: 15%; text-align: center;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -79,17 +77,26 @@ include '../main/layout_header.php';
                             echo "<td><strong>{$clientName}</strong></td>";
                             echo "<td>{$projName}</td>";
                             echo "<td>{$fecha}</td>";
-                            echo "<td style='text-align: center;'>
-                                    <a href='responder.php?proyectoId={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.8rem; font-size: 0.85rem;'>
-                                        <i class='ri-folder-open-line'></i> Gestionar
-                                    </a>
-                                  </td>";
+                            echo "<td style='text-align: center; white-space: nowrap;'>";
+                            
+                            // Botón de Pruebas / Gestionar (responder.php)
+                            echo "<a href='responder.php?proyectoId={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; margin-right: 4px;' data-tooltip='Gestionar Pruebas'>";
+                            echo "<i class='ri-folder-open-line'></i>";
+                            echo "</a>";
+
+                            // Botón de Asignación de Equipo (proyecto_equipo.php)
+                            echo "<a href='proyecto_equipo.php?id={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; background-color: rgba(0, 188, 212, 0.1); color: var(--accent-cian, #00bcd4); border: 1px solid var(--accent-cian, #00bcd4);' data-tooltip='Asignar Equipo'>";
+                            echo "<i class='ri-team-line'></i>";
+                            echo "</a>";
+
+                            echo "</td>";
                             echo "</tr>";
                         }
                     } else {
                         echo "<tr><td colspan='5' style='text-align: center; color: #64748b; padding: 3rem;'>No se han encontrado proyectos de auditoría registrados.</td></tr>";
                     }
                 } catch (PDOException $e) {
+                    error_log("Error al listar proyectos en index.php: " . $e->getMessage());
                     echo "<tr><td colspan='5' style='text-align: center; color: red; padding: 2rem;'>Error al cargar los proyectos desde el servidor.</td></tr>";
                 }
                 ?>
