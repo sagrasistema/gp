@@ -141,7 +141,7 @@ include '../main/layout_header.php';
 ?>
 
     <style>
-        :root {
+        /*:root {
             --bg-dark: #0f0f11;
             --bg-form: #16161a;
             --bg-card: #1c1c21;
@@ -153,6 +153,17 @@ include '../main/layout_header.php';
             --success-color: #10b981;
             --error-color: #ef4444;
             --font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }*/
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #0284c7;
+            --accent-hover: #0369a1;
+            --border-color: #e2e8f0;
+            --status-activo: #10b981;
+            --status-inactivo: #ef4444;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
