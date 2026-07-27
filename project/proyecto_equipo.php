@@ -4,9 +4,17 @@
  * PHP 8.x + PDO
  */
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-include '../main/config.php';
-include '../main/h.php'; 
+// Validar sesión activa
+if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+require_once '../main/config.php';
 
 if (!isset($pdo) || !$pdo instanceof PDO) {
     error_log('Error crítico: La variable $pdo no está inicializada.');
@@ -23,6 +31,14 @@ if (!$proyecto_id) {
 $mensaje = '';
 $tipo_alerta = '';
 
+// Definición estricta de roles permitidos en el negocio
+$rolesPermitidos = [
+    'Socio Lider',
+    'Socio de Calidad',
+    'Gerente de Proyecto',
+    'Auditor'
+];
+
 // Procesar el formulario de asignación o eliminación
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $accion = $_POST['accion'] ?? '';
@@ -31,7 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $usuario_id = filter_input(INPUT_POST, 'usuario_id', FILTER_VALIDATE_INT);
         $rol_proyecto = trim($_POST['rol_proyecto'] ?? '');
 
-        if ($usuario_id && !empty($rol_proyecto)) {
+        // Validación cruzada: verificar usuario válido y que el rol esté dentro de los permitidos
+        if ($usuario_id && in_array($rol_proyecto, $rolesPermitidos, true)) {
             try {
                 // Insertar o actualizar el rol si ya existe en el proyecto
                 $stmt = $pdo->prepare('
@@ -53,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $tipo_alerta = 'error';
             }
         } else {
-            $mensaje = 'Debe seleccionar un usuario y definir un rol válido.';
+            $mensaje = 'Debe seleccionar un usuario y un rol válido del listado.';
             $tipo_alerta = 'error';
         }
     } elseif ($accion === 'remover') {
@@ -77,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 try {
-    // Obtener información del proyecto (Asegúrate de que la tabla de proyectos se llame 'proyectos')
+    // Obtener información del proyecto
     $stmtProyecto = $pdo->prepare('SELECT * FROM proyectos WHERE id = :id LIMIT 1');
     $stmtProyecto->execute(['id' => $proyecto_id]);
     $proyecto = $stmtProyecto->fetch(PDO::FETCH_ASSOC);
@@ -91,8 +108,7 @@ try {
     $stmtUsuarios = $pdo->query('SELECT id, nombre_completo, username FROM usuarios ORDER BY nombre_completo ASC');
     $listaUsuarios = $stmtUsuarios->fetchAll(PDO::FETCH_ASSOC);
 
-
-// Obtener el equipo actual asignado a este proyecto de forma limpia
+    // Obtener el equipo actual asignado a este proyecto
     $stmtEquipo = $pdo->prepare('
         SELECT pu.id AS asignacion_id, u.nombre_completo, u.username, pu.rol_proyecto, pu.fecha_asignacion 
         FROM proyecto_usuarios pu
@@ -178,7 +194,7 @@ try {
             </div>
         <?php endif; ?>
 
-        <!-- Formulario de Asignación -->
+        <!-- Formulario de Asignación con Selector de Roles -->
         <div class="card">
             <h2><i class="fas fa-user-plus" style="color: var(--accent-cian);"></i> Asignar Usuario al Proyecto</h2>
             <form action="proyecto_equipo.php?id=<?php echo $proyecto_id; ?>" method="POST">
@@ -187,7 +203,7 @@ try {
                     <div class="form-group">
                         <label for="usuario_id" class="form-label">Seleccionar Usuario</label>
                         <select name="usuario_id" id="usuario_id" class="form-control" required>
-                            <option value="">-- Seleccione --</option>
+                            <option value="">-- Seleccione Usuario --</option>
                             <?php foreach ($listaUsuarios as $usr): ?>
                                 <option value="<?php echo $usr['id']; ?>">
                                     <?php echo htmlspecialchars($usr['nombre_completo'] . ' (' . $usr['username'] . ')', ENT_QUOTES, 'UTF-8'); ?>
@@ -198,7 +214,12 @@ try {
 
                     <div class="form-group">
                         <label for="rol_proyecto" class="form-label">Rol en el Proyecto</label>
-                        <input type="text" id="rol_proyecto" name="rol_proyecto" class="form-control" placeholder="Ej. Auditor Líder, Revisor, Administrador" required>
+                        <select name="rol_proyecto" id="rol_proyecto" class="form-control" required>
+                            <option value="">-- Seleccione Rol --</option>
+                            <?php foreach ($rolesPermitidos as $rol): ?>
+                                <option value="<?php echo $rol; ?>"><?php echo $rol; ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
 
                     <button type="submit" class="btn">Asignar Rol</button>
