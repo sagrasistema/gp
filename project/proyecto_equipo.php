@@ -5,7 +5,7 @@
  */
 
 
-require_once '../main/config.php';
+include '../main/config.php';
 
 if (!isset($pdo) || !$pdo instanceof PDO) {
     error_log('Error crítico: La variable $pdo no está inicializada.');
