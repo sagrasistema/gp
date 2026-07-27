@@ -19,6 +19,81 @@ include '../main/h.php';
 <?php include '../main/layout_header.php'; ?>
 
 <div class="view-container">
+<?php
+// Capturar y validar el ID del proyecto desde la URL de forma segura
+$proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
+?>
+
+<!-- Barra de Navegación Rápida por Etapas del Proyecto -->
+<div class="project-stages-bar">
+    <a href="responder.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
+        <i class="ri-calendar-check-line"></i> Planificación
+    </a>
+    <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn active">
+        <i class="ri-compass-3-line"></i> Estrategia
+    </a>
+    <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
+        <i class="ri-play-circle-line"></i> Ejecución
+    </a>
+    <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
+        <i class="ri-flag-line"></i> Conclusión
+    </a>
+</div>
+
+<style>
+.project-stages-bar {
+    display: flex;
+    gap: 12px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.stage-btn {
+    flex: 1;
+    min-width: 180px;
+    padding: 14px 20px;
+    /* Azul corporativo base (coincidente con el navbar superior) */
+    background-color: #1e3a5f; 
+    border: 1px solid #2b4c7e;
+    border-radius: 8px;
+    color: #ffffff; /* Texto blanco garantizado */
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.25s ease-in-out;
+    text-transform: uppercase;
+}
+
+.stage-btn i {
+    font-size: 16px;
+    color: #00bcd4; /* Icono en acento cian corporativo */
+}
+
+.stage-btn:hover {
+    background-color: #2b4c7e;
+    border-color: #00bcd4;
+    transform: translateY(-2px);
+}
+
+/* Estado Activo: Un tono de azul más oscuro, elegante y con borde de contraste */
+.stage-btn.active {
+    background-color: #0f1c2e; /* Azul significativamente más oscuro */
+    border: 2px solid #00bcd4;
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 188, 212, 0.25);
+}
+
+.stage-btn.active i {
+    color: #00bcd4;
+}
+</style>
+
+
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
             <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 2 Estrategia 
