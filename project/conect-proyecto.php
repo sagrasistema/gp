@@ -52,7 +52,7 @@ try {
         SELECT p.id, p.nombre, p.orden, c.nombre as categoria_nombre 
         FROM audit_pruebas p
         INNER JOIN audit_categorias c ON p.categoria_id = c.id
-        WHERE c.etapa_id = 1
+        WHERE c.etapa_id = 2
         ORDER BY p.id ASC
     ");
     $stmtList->execute();
@@ -73,7 +73,7 @@ try {
         INNER JOIN audit_categorias c ON p.categoria_id = c.id
         LEFT JOIN audit_actividades a ON a.prueba_id = p.id
         LEFT JOIN proyecto_actividades_ejecucion ae ON ae.actividad_id = a.id AND ae.proyecto_id = :proyecto_id
-        WHERE c.etapa_id = 1
+        WHERE c.etapa_id = 2
         GROUP BY p.id
     ");
     $stmtActProgress->execute([':proyecto_id' => $proyectoId]);
