@@ -140,7 +140,53 @@ $currentTab     = 'proyectos';
 include '../main/layout_header.php';
 ?>
 
+    <style>
+        :root {
+            --bg-dark: #0f0f11;
+            --bg-form: #16161a;
+            --bg-card: #1c1c21;
+            --accent-cian: #00bcd4;
+            --accent-glow: rgba(0, 188, 212, 0.15);
+            --text-main: #ffffff;
+            --text-muted: #8e9297;
+            --border-color: #2a2b2f;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); background-color: var(--bg-dark); color: var(--text-main); padding: 30px; }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .back-link { color: var(--accent-cian); text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .back-link:hover { text-decoration: underline; }
+
+        .card { background-color: var(--bg-form); border: 1px solid var(--border-color); border-radius: 10px; padding: 25px; margin-bottom: 25px; }
+        .card h2 { font-size: 20px; margin-bottom: 15px; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+
+        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+        .alert-success { background-color: rgba(16, 185, 129, 0.15); border: 1px solid var(--success-color); color: var(--success-color); }
+        .alert-error { background-color: rgba(239, 68, 68, 0.15); border: 1px solid var(--error-color); color: var(--error-color); }
+
+        .form-grid { display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 15px; align-items: flex-end; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-label { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
+        .form-control { padding: 12px; background-color: var(--bg-dark); border: 1.5px solid var(--border-color); border-radius: 6px; color: var(--text-main); font-size: 14px; }
+        .form-control:focus { outline: none; border-color: var(--accent-cian); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+        .btn { padding: 12px 20px; background-color: var(--accent-cian); color: #121212; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.3s; }
+        .btn:hover { background-color: #00acc1; }
+        .btn-danger { background-color: rgba(239, 68, 68, 0.2); color: var(--error-color); border: 1px solid var(--error-color); padding: 6px 12px; font-size: 13px; }
+        .btn-danger:hover { background-color: var(--error-color); color: #ffffff; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 12px; }
+        tr:hover { background-color: rgba(255, 255, 255, 0.01); }
+    </style>
     <div class="container">
         <div class="header-nav">
             <a href="index.php" class="back-link"><i class="fas fa-arrow-left"></i> Volver a Proyectos</a>
