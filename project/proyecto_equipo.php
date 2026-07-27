@@ -162,7 +162,7 @@ include '../main/layout_header.php';
             --text-muted: #64748b;
             --accent: #0284c7;
             --accent-hover: #0369a1;
-            --border-color: #2a2b2f;
+            --border-color: #bbbbbb;
             --status-activo: #10b981;
             --status-inactivo: #ef4444;
             --success-color: #10b981;
