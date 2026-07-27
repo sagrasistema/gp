@@ -162,9 +162,11 @@ include '../main/layout_header.php';
             --text-muted: #64748b;
             --accent: #0284c7;
             --accent-hover: #0369a1;
-            --border-color: #e2e8f0;
+            --border-color: #2a2b2f;
             --status-activo: #10b981;
             --status-inactivo: #ef4444;
+            --success-color: #10b981;
+            --error-color: #ef4444;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
