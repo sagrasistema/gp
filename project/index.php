@@ -1,5 +1,5 @@
 <?php
-// v/proyectos/index.php
+// v/proyectos/index.phpss
 
 $pageTitle = "Gestión de Proyectos de Auditoría";
 include '../main/h.php'; 
