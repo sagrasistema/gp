@@ -14,11 +14,74 @@ include '../main/h.php';
     .indicator-chk { display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; font-weight: 700; border: 1px solid #cbd5e1; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; }
     .status-select { padding: 0.4rem; border-radius: 6px; font-size: 0.85rem; border: 1px solid #cbd5e1; font-weight: 600; }
     .badge-progress { font-size: 0.75rem; background: #f1f5f9; color: #475569; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: 600; white-space: nowrap; }
+.project-stages-bar {
+    display: flex;
+    gap: 12px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.stage-btn {
+    flex: 1;
+    min-width: 180px;
+    padding: 14px 20px;
+    background-color: #1c1c21; /* Coincide con --bg-card */
+    border: 1px solid #2a2b2f;  /* Coincide con --border-color */
+    border-radius: 8px;
+    color: #8e9297;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.25s ease-in-out;
+    text-transform: uppercase;
+}
+
+.stage-btn i {
+    font-size: 16px;
+    color: #00bcd4;
+}
+
+.stage-btn:hover {
+    border-color: #00bcd4;
+    color: #ffffff;
+    background-color: rgba(0, 188, 212, 0.05);
+    transform: translateY(-2px);
+}
+
+/* Estado activo para indicar la etapa actual visualizada */
+.stage-btn.active {
+    background: linear-gradient(135deg, rgba(0, 188, 212, 0.15) 0%, rgba(0, 188, 212, 0.05) 100%);
+    border-color: #00bcd4;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 188, 212, 0.15);
+}
 </style>
 
 <?php include '../main/layout_header.php'; ?>
 
 <div class="view-container">
+<!-- Barra de Navegación Rápida por Etapas del Proyecto -->
+<div class="project-stages-bar">
+    <a href="#" class="stage-btn active">
+        <i class="ri-puzzle-line"></i> Planificación
+    </a>
+    <a href="#" class="stage-btn">
+        <i class="ri-puzzle-line"></i> Estrategia
+    </a>
+    <a href="#" class="stage-btn">
+        <i class="ri-puzzle-line"></i> Ejecución
+    </a>
+    <a href="#" class="stage-btn">
+        <i class="ri-puzzle-line"></i> Conclusión
+    </a>
+</div>
+
+
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
             <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 1 Planificación
