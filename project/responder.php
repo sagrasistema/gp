@@ -14,6 +14,30 @@ include '../main/h.php';
     .indicator-chk { display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; font-weight: 700; border: 1px solid #cbd5e1; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; }
     .status-select { padding: 0.4rem; border-radius: 6px; font-size: 0.85rem; border: 1px solid #cbd5e1; font-weight: 600; }
     .badge-progress { font-size: 0.75rem; background: #f1f5f9; color: #475569; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: 600; white-space: nowrap; }
+
+</style>
+
+<?php include '../main/layout_header.php'; ?>
+
+<div class="view-container">
+<!-- Barra de Navegación Rápida por Etapas del Proyecto -->
+<!-- Barra de Navegación Rápida por Etapas del Proyecto -->
+<div class="project-stages-bar">
+    <a href="#" class="stage-btn active">
+        <i class="ri-calendar-check-line"></i> Planificación
+    </a>
+    <a href="#" class="stage-btn">
+        <i class="ri-compass-3-line"></i> Estrategia
+    </a>
+    <a href="#" class="stage-btn">
+        <i class="ri-play-circle-line"></i> Ejecución
+    </a>
+    <a href="#" class="stage-btn">
+        <i class="ri-flag-line"></i> Conclusión
+    </a>
+</div>
+
+<style>
 .project-stages-bar {
     display: flex;
     gap: 12px;
@@ -25,10 +49,11 @@ include '../main/h.php';
     flex: 1;
     min-width: 180px;
     padding: 14px 20px;
-    background-color: #1c1c21; /* Coincide con --bg-card */
-    border: 1px solid #2a2b2f;  /* Coincide con --border-color */
+    /* Azul corporativo base (coincidente con el navbar superior) */
+    background-color: #1e3a5f; 
+    border: 1px solid #2b4c7e;
     border-radius: 8px;
-    color: #8e9297;
+    color: #ffffff; /* Texto blanco garantizado */
     text-decoration: none;
     font-weight: 600;
     font-size: 13px;
@@ -43,43 +68,27 @@ include '../main/h.php';
 
 .stage-btn i {
     font-size: 16px;
-    color: #00bcd4;
+    color: #00bcd4; /* Icono en acento cian corporativo */
 }
 
 .stage-btn:hover {
+    background-color: #2b4c7e;
     border-color: #00bcd4;
-    color: #ffffff;
-    background-color: rgba(0, 188, 212, 0.05);
     transform: translateY(-2px);
 }
 
-/* Estado activo para indicar la etapa actual visualizada */
+/* Estado Activo: Un tono de azul más oscuro, elegante y con borde de contraste */
 .stage-btn.active {
-    background: linear-gradient(135deg, rgba(0, 188, 212, 0.15) 0%, rgba(0, 188, 212, 0.05) 100%);
-    border-color: #00bcd4;
+    background-color: #0f1c2e; /* Azul significativamente más oscuro */
+    border: 2px solid #00bcd4;
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 188, 212, 0.15);
+    box-shadow: 0 4px 15px rgba(0, 188, 212, 0.25);
+}
+
+.stage-btn.active i {
+    color: #00bcd4;
 }
 </style>
-
-<?php include '../main/layout_header.php'; ?>
-
-<div class="view-container">
-<!-- Barra de Navegación Rápida por Etapas del Proyecto -->
-<div class="project-stages-bar">
-    <a href="#" class="stage-btn active">
-        <i class="ri-puzzle-line"></i> Planificación
-    </a>
-    <a href="#" class="stage-btn">
-        <i class="ri-puzzle-line"></i> Estrategia
-    </a>
-    <a href="#" class="stage-btn">
-        <i class="ri-puzzle-line"></i> Ejecución
-    </a>
-    <a href="#" class="stage-btn">
-        <i class="ri-puzzle-line"></i> Conclusión
-    </a>
-</div>
 
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
