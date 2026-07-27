@@ -6,6 +6,7 @@
 
 
 include '../main/config.php';
+include '../main/h.php'; 
 
 if (!isset($pdo) || !$pdo instanceof PDO) {
     error_log('Error crítico: La variable $pdo no está inicializada.');
