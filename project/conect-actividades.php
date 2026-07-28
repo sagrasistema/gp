@@ -137,9 +137,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // NUEVO: Procesamiento específico para la Pregunta 23 (Matriz de Riesgos / Formulario de 8 campos)
-        if ((int)$pruebaId === 23 && isset($_POST['matriz_riesgos']) && is_array($_POST['matriz_riesgos'])) {
-            $mr = $_POST['matriz_riesgos'];
-
+        #if ((int)$pruebaId === 23 && isset($_POST['matriz_riesgos']) && is_array($_POST['matriz_riesgos'])) {
+         #   $mr = $_POST['matriz_riesgos'];
+            
+        if (($_POST['accion_riesgo'] ?? '') === 'guardar_riesgo') {
+            $proyectoIdPost = filter_input(INPUT_POST, 'proyecto_id', FILTER_VALIDATE_INT) ?: $proyectoId;
+          
             $campo1 = trim($mr['campo1'] ?? '');
             $campo2 = trim($mr['campo2'] ?? '');
             $campo3 = trim($mr['campo3'] ?? '');
@@ -150,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $campo8 = trim($mr['campo8'] ?? '');
 
             $stmtMrSave = $pdo->prepare("
-                INSERT INTO proyecto_matriz_riesgos 
+                INSERT INTO prueba_23_riesgos 
                 (proyecto_id, prueba_id, campo1, campo2, campo3, campo4, campo5, campo6, campo7, campo8)
                 VALUES (:proj, :pr, :c1, :c2, :c3, :c4, :c5, :c6, :c7, :c8)
                 ON DUPLICATE KEY UPDATE 
@@ -191,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // NUEVO: Cargar los datos de la Matriz de Riesgos para la vista si es la prueba 23
         $matrizRiesgosData = null;
         if ((int)$pruebaId === 23) {
-            $stmtMrGet = $pdo->prepare("SELECT * FROM proyecto_matriz_riesgos WHERE proyecto_id = :proj AND prueba_id = :pr");
+            $stmtMrGet = $pdo->prepare("SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :proj AND prueba_id = :pr");
             $stmtMrGet->execute([':proj' => $proyectoId, ':pr' => $pruebaId]);
             $matrizRiesgosData = $stmtMrGet->fetch(PDO::FETCH_OBJ);
         }
@@ -337,63 +340,13 @@ $obsSocioLider = $datosEjecucion->observacion_socio_lider ?? '';
 $obsSocioCalidad = $datosEjecucion->observacion_socio_calidad ?? '';
 
 // Cargar datos de la Matriz de Riesgos si es la prueba 23 para la vista
-// NUEVO: Procesamiento específico para la Pregunta 23 usando la tabla correcta 'prueba_23_riesgos'
-        if ((int)$pruebaId === 23 && isset($_POST['matriz_riesgos']) && is_array($_POST['matriz_riesgos'])) {
-            $mr = $_POST['matriz_riesgos'];
-
-            $campo1 = trim($mr['campo1'] ?? '');
-            $campo2 = trim($mr['campo2'] ?? '');
-            $campo3 = trim($mr['campo3'] ?? '');
-            $campo4 = trim($mr['campo4'] ?? '');
-            $campo5 = trim($mr['campo5'] ?? '');
-            $campo6 = trim($mr['campo6'] ?? '');
-            $campo7 = trim($mr['campo7'] ?? '');
-            $campo8 = trim($mr['campo8'] ?? '');
-
-            $stmtMrSave = $pdo->prepare("
-                INSERT INTO prueba_23_riesgos 
-                (proyecto_id, prueba_id, campo1, campo2, campo3, campo4, campo5, campo6, campo7, campo8)
-                VALUES (:proj, :pr, :c1, :c2, :c3, :c4, :c5, :c6, :c7, :c8)
-                ON DUPLICATE KEY UPDATE 
-                    campo1 = :c1_u, campo2 = :c2_u, campo3 = :c3_u, campo4 = :c4_u, 
-                    campo5 = :c5_u, campo6 = :c6_u, campo7 = :c7_u, campo8 = :c8_u
-            ");
-
-            $stmtMrSave->execute([
-                ':proj' => $proyectoId,
-                ':pr'   => $pruebaId,
-                ':c1'   => $campo1 !== '' ? $campo1 : null,
-                ':c2'   => $campo2 !== '' ? $campo2 : null,
-                ':c3'   => $campo3 !== '' ? $campo3 : null,
-                ':c4'   => $campo4 !== '' ? $campo4 : null,
-                ':c5'   => $campo5 !== '' ? $campo5 : null,
-                ':c6'   => $campo6 !== '' ? $campo6 : null,
-                ':c7'   => $campo7 !== '' ? $campo7 : null,
-                ':c8'   => $campo8 !== '' ? $campo8 : null,
-                ':c1_u' => $campo1 !== '' ? $campo1 : null,
-                ':c2_u' => $campo2 !== '' ? $campo2 : null,
-                ':c3_u' => $campo3 !== '' ? $campo3 : null,
-                ':c4_u' => $campo4 !== '' ? $campo4 : null,
-                ':c5_u' => $campo5 !== '' ? $campo5 : null,
-                ':c6_u' => $campo6 !== '' ? $campo6 : null,
-                ':c7_u' => $campo7 !== '' ? $campo7 : null,
-                ':c8_u' => $campo8 !== '' ? $campo8 : null,
-            ]);
-        }
-
-// ... (resto de tu lógica de negocio)
-
-// Cargar datos de la Matriz de Riesgos para la vista (Línea aproximada 342 del error)
 $matrizRiesgosData = null;
 if ((int)$pruebaId === 23) {
-    try {
-        $stmtMrGet = $pdo->prepare("SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :proj AND prueba_id = :pr");
-        $stmtMrGet->execute([':proj' => $proyectoId, ':pr' => $pruebaId]);
-        $matrizRiesgosData = $stmtMrGet->fetch(PDO::FETCH_OBJ);
-    } catch (PDOException $e) {
-        error_log("Error al recuperar prueba_23_riesgos: " . $e->getMessage());
-    }
+    $stmtMrGet = $pdo->prepare("SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :proj AND prueba_id = :pr");
+    $stmtMrGet->execute([':proj' => $proyectoId, ':pr' => $pruebaId]);
+    $matrizRiesgosData = $stmtMrGet->fetch(PDO::FETCH_OBJ);
 }
+
 $pageTitle = "Formulario de Actividades y Hallazgos";
 include '../main/h.php';
 ?>
