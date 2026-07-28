@@ -155,6 +155,8 @@ include 'conect-actividades.php';
                 include 'prueba11.php';
             } elseif ((int)$pruebaId === 16) {
                 include 'prueba16.php';
+            } elseif  ((int)$pruebaId === 23) {
+                include 'prueba23.php';
             }
         ?>
 
