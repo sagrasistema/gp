@@ -342,8 +342,8 @@ $obsSocioCalidad = $datosEjecucion->observacion_socio_calidad ?? '';
 // Cargar datos de la Matriz de Riesgos si es la prueba 23 para la vista
 $matrizRiesgosData = null;
 if ((int)$pruebaId === 23) {
-    $stmtMrGet = $pdo->prepare("SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :proj AND prueba_id = :pr");
-    $stmtMrGet->execute([':proj' => $proyectoId, ':pr' => $pruebaId]);
+    $stmtMrGet = $pdo->prepare("SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :proj");
+    $stmtMrGet->execute([':proj' => $proyectoId]);
     $matrizRiesgosData = $stmtMrGet->fetch(PDO::FETCH_OBJ);
 }
 
