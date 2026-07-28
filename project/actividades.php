@@ -345,26 +345,24 @@ include 'conect-actividades.php';
         </form>
     </div>
 </div>
-
 <?php if ((int)$pruebaId === 11): ?>
     <!-- Formularios ocultos para eliminar filas analíticas -->
     <?php foreach (array_merge($analiticaItems['activo'], $analiticaItems['pasivo'], $analiticaItems['patrimonio']) as $it): ?>
-        <form id="delAnalitica_<?= $it->id ?>" action="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pruebaId ?>" method="POST" style="display:none;">
+        <form id="delAnalitica_<?= (int)$it->id ?>" action="actividades.php?proyectoId=<?= (int)$proyectoId ?>&pruebaId=<?= (int)$pruebaId ?>" method="POST" style="display:none;">
             <input type="hidden" name="action_type" value="delete_analitica_item">
-            <input type="hidden" name="item_id" value="<?= $it->id ?>">
+            <input type="hidden" name="item_id" value="<?= (int)$it->id ?>">
         </form>
     <?php endforeach; ?>
 
     <!-- Modal para Agregar Partida Analítica -->
-    <div id="analiticaModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1150; align-items:center; justify-content:center;">
-        <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:550px; width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.15);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:0.75rem;">
-                <h3 id="modalAnaliticaTitle" style="margin:0; color:#1e293b; font-size:1.1rem;">Agregar Partida</h3>
-                <button type="button" onclick="closeAnaliticaModal()" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748b;"><i class="ri-close-line"></i></button>
+    <div id="analiticaModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 1150; align-items: center; justify-content: center;">
+        <div style="background: #ffffff; padding: 2rem; border-radius: 12px; max-width: 550px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem;">
+                <h3 id="modalAnaliticaTitle" style="margin: 0; color: #1e293b; font-size: 1.1rem;">Agregar Partida</h3>
+                <button type="button" onclick="closeAnaliticaModal()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #64748b;"><i class="ri-close-line"></i></button>
             </div>
             
-          
-            <form action="guardar_analitica.php?proyectoId=<?= $proyectoId ?>&pruebaId=11" method="POST">
+            <form action="guardar_analitica.php?proyectoId=<?= (int)$proyectoId ?>&pruebaId=11" method="POST">
                 <!-- Campos ocultos y inputs del modal -->
                 <input type="hidden" name="action_type" value="add_analitica_item">
                 <input type="hidden" name="tipo" id="modal_tipo_input">
@@ -373,6 +371,7 @@ include 'conect-actividades.php';
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Tipo / Rubro (Ej. Efectivo, Cuentas por Cobrar...)</label>
                     <input type="text" name="tipo_rubro" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
                 </div>
+                
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                     <div>
                         <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Saldo Actual</label>
@@ -383,17 +382,55 @@ include 'conect-actividades.php';
                         <input type="number" step="0.01" name="saldo_anterior" value="0.00" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
                     </div>
                 </div>
+
                 <div style="margin-bottom: 1.5rem;">
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Observaciones (ID de referencia)</label>
                     <input type="text" name="observaciones" placeholder="Ej. 6, 7..." style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
                 </div>
-                <div style="text-align:right; display: flex; justify-content: flex-end; gap: 0.75rem;">
+
+                <div style="text-align: right; display: flex; justify-content: flex-end; gap: 0.75rem;">
                     <button type="button" class="btn btn-secondary" onclick="closeAnaliticaModal()" style="padding: 0.5rem 1rem;">Cancelar</button>
                     <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.25rem;">Guardar Partida</button>
                 </div>
             </form>
         </div>
     </div>
+
+    <script>
+    /**
+     * Abre el modal de analítica y configura dinámicamente el tipo de partida.
+     */
+    function openAnaliticaModal(tipo) {
+        const modal = document.getElementById('analiticaModal');
+        const tipoInput = document.getElementById('modal_tipo_input');
+        const titleEl = document.getElementById('modalAnaliticaTitle');
+        
+        if (modal && tipoInput && titleEl) {
+            tipoInput.value = tipo;
+            const tipoFormateado = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+            titleEl.textContent = 'Agregar Partida de ' + tipoFormateado;
+            modal.style.display = 'flex';
+        }
+    }
+
+    /**
+     * Cierra el modal de analítica.
+     */
+    function closeAnaliticaModal() {
+        const modal = document.getElementById('analiticaModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    // Cierre al hacer clic fuera del contenido del modal
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('analiticaModal');
+        if (event.target === modal) {
+            closeAnaliticaModal();
+        }
+    });
+    </script>
 <?php endif; ?>
 <!-- 2. MODAL COLOCADO FUERA DEL FLUJO DE FORMULARIOS PADRES (AISLADO ABAJO) -->
 <div id="modalRiesgo" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
