@@ -1,25 +1,66 @@
 <script>
+// ==========================================
+// 1. GESTIÓN DE MODALES (Indicadores, Normas y Partidas Analíticas / Prueba 11)
+// ==========================================
 function openIndicatorModal(tipo) {
-    document.getElementById('modalTipoIndicador').value = tipo;
-    document.getElementById('indicatorModal').style.display = 'flex';
-}
-function closeIndicatorModal() {
-    document.getElementById('indicatorModal').style.display = 'none';
-}
-function openNormaModal() {
-    document.getElementById('normaModal').style.display = 'flex';
-}
-function closeNormaModal() {
-    document.getElementById('normaModal').style.display = 'none';
-}
-window.onclick = function(event) {
-    let modalNorma = document.getElementById('normaModal');
-    let modalInd = document.getElementById('indicatorModal');
-    if (event.target === modalNorma) modalNorma.style.display = 'none';
-    if (event.target === modalInd) modalInd.style.display = 'none';
+    const input = document.getElementById('modalTipoIndicador');
+    const modal = document.getElementById('indicatorModal');
+    if (input) input.value = tipo;
+    if (modal) modal.style.display = 'flex';
 }
 
-// Función estándar para controlar los acordeones de la vista
+function closeIndicatorModal() {
+    const modal = document.getElementById('indicatorModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function openNormaModal() {
+    const modal = document.getElementById('normaModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeNormaModal() {
+    const modal = document.getElementById('normaModal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Funciones específicas requeridas para los botones de Prueba 11 (Activo, Pasivo, Patrimonio)
+function openAnaliticaModal(tipo) {
+    const modal = document.getElementById('analiticaModal');
+    const inputTipo = document.getElementById('modalTipoAnalitica');
+    const title = document.getElementById('modalAnaliticaTitle');
+
+    if (modal && inputTipo) {
+        inputTipo.value = tipo;
+        
+        if (title) {
+            const tipoFormateado = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+            title.textContent = 'Agregar Partida de ' + tipoFormateado;
+        }
+        
+        modal.style.display = 'flex';
+    }
+}
+
+function closeAnaliticaModal() {
+    const modal = document.getElementById('analiticaModal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Cierre global de modales al hacer clic fuera de su contenido
+window.onclick = function(event) {
+    const modalNorma = document.getElementById('normaModal');
+    const modalInd = document.getElementById('indicatorModal');
+    const modalAnalitica = document.getElementById('analiticaModal');
+
+    if (event.target === modalNorma) modalNorma.style.display = 'none';
+    if (event.target === modalInd) modalInd.style.display = 'none';
+    if (event.target === modalAnalitica) modalAnalitica.style.display = 'none';
+};
+
+// ==========================================
+// 2. CONTROL DE ACORDEONES
+// ==========================================
 function toggleAccordion(header) {
     const content = header.nextElementSibling;
     const icon = header.querySelector('.ri-arrow-down-s-line, i[class*="ri-arrow"]');
@@ -38,48 +79,25 @@ function toggleAccordion(header) {
     }
 }
 
-function openIndicatorModal(tipo) {
-    document.getElementById('modalTipoIndicador').value = tipo;
-    document.getElementById('indicatorModal').style.display = 'flex';
-}
-
-function closeIndicatorModal() {
-    document.getElementById('indicatorModal').style.display = 'none';
-}
-
-function openNormaModal() {
-    document.getElementById('normaModal').style.display = 'flex';
-}
-
-function closeNormaModal() {
-    document.getElementById('normaModal').style.display = 'none';
-}
-
-window.onclick = function(event) {
-    let modalNorma = document.getElementById('normaModal');
-    let modalInd = document.getElementById('indicatorModal');
-    if (event.target === modalNorma) modalNorma.style.display = 'none';
-    if (event.target === modalInd) modalInd.style.display = 'none';
-}
+// ==========================================
+// 3. VALIDACIÓN DE ESTADO Y ACTIVIDADES PENDIENTES
+// ==========================================
 document.addEventListener('DOMContentLoaded', function () {
-    const selectEstado = document.getElementById('estado_prueba_selector'); // Ajusta el ID según tu HTML
+    const selectEstado = document.getElementById('estado_prueba_selector');
     
     if (selectEstado) {
+        selectEstado.dataset.estadoAnterior = selectEstado.value;
+
         selectEstado.addEventListener('change', function(e) {
             if (this.value === 'completado') {
-                // Verificar si existen actividades pendientes en el DOM (ej. checkboxes o estados de actividades)
                 const actividadesPendientes = document.querySelectorAll('.actividad-item:not(.completada), input.check-actividad:not(:checked)');
                 
                 if (actividadesPendientes.length > 0) {
                     e.preventDefault();
-                    // Revertir temporalmente el selector al estado anterior
                     this.value = this.dataset.estadoAnterior || 'en_proceso';
-                    
-                    // Mostrar Modal de Advertencia
                     mostrarModalAlertaActividades();
                 }
             } else {
-                // Guardar el estado válido actual por si se rechaza el cambio
                 this.dataset.estadoAnterior = this.value;
             }
         });
@@ -87,7 +105,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function mostrarModalAlertaActividades() {
-    // Si ya existe un modal previo, lo removemos
     let modalExistente = document.getElementById('modal-alerta-actividades');
     if (modalExistente) modalExistente.remove();
 
@@ -107,38 +124,46 @@ function mostrarModalAlertaActividades() {
     `;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
-document.getElementById('btnGuardarRiesgo23').addEventListener('click', function(e) {
-    e.preventDefault();
-    
-    const form = document.getElementById('formRiesgo23');
-    const formData = new FormData(form);
 
-    fetch('guardar-riesgo-23.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            // Crear notificación toast flotante con los colores del sistema (#1e3a5f)
-            const toast = document.createElement('div');
-            toast.style.cssText = "position: fixed; bottom: 20px; right: 20px; background-color: #1e3a5f; color: #ffffff; padding: 12px 20px; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); z-index: 10000; font-family: inherit; font-size: 14px; font-weight: 600;";
-            toast.innerHTML = '<i class="ri-check-line" style="margin-right: 8px;"></i> ¡Riesgo guardado con éxito!';
-            document.body.appendChild(toast);
+// ==========================================
+// 4. GUARDAR RIESGO 23 (AJAX)
+// ==========================================
 
-            // Recargar la página tras 1 segundo para que el usuario alcance a leer el aviso
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            alert('Error al guardar: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Ocurrió un error inesperado al procesar la solicitud.');
+const btnGuardarRiesgo23 = document.getElementById('btnGuardarRiesgo23');
+if (btnGuardarRiesgo23) {
+    btnGuardarRiesgo23.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const form = document.getElementById('formRiesgo23');
+        if (!form) return;
+        
+        const formData = new FormData(form);
+
+        fetch('guardar-riesgo-23.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const toast = document.createElement('div');
+                toast.style.cssText = "position: fixed; bottom: 20px; right: 20px; background-color: #1e3a5f; color: #ffffff; padding: 12px 20px; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); z-index: 10000; font-family: inherit; font-size: 14px; font-weight: 600;";
+                toast.innerHTML = '<i class="ri-check-line" style="margin-right: 8px;"></i> ¡Riesgo guardado con éxito!';
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                alert('Error al guardar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ocurrió un error inesperado al procesar la solicitud.');
+        });
     });
-});
+}
 </script>
 
 
