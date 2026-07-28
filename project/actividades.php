@@ -363,7 +363,7 @@ include 'conect-actividades.php';
             </div>
             
             <form action="guardar_analitica.php?proyectoId=<?= (int)$proyectoId ?>&pruebaId=11" method="POST">
-                <!-- Campos ocultos y inputs del modal -->
+                <!-- Campos ocultos y inputs del modffal -->
                 <input type="hidden" name="action_type" value="add_analitica_item">
                 <input type="hidden" name="tipo" id="modal_tipo_input">
 
