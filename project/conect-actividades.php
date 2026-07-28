@@ -339,14 +339,16 @@ $estadoActualPrueba = $datosEjecucion->estado ?? 'en_proceso';
 $obsSocioLider = $datosEjecucion->observacion_socio_lider ?? '';
 $obsSocioCalidad = $datosEjecucion->observacion_socio_calidad ?? '';
 
-// Cargar datos de la Matriz de Riesgos si es la prueba 23 para la vista
 $matrizRiesgosData = null;
 if ((int)$pruebaId === 23) {
-    $stmtMrGet = $pdo->prepare("SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :proj");
-    $stmtMrGet->execute([':proj' => $proyectoId]);
-    $matrizRiesgosData = $stmtMrGet->fetch(PDO::FETCH_OBJ);
+    try {
+        $stmtMrGet = $pdo->prepare("SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :proj");
+        $stmtMrGet->execute([':proj' => $proyectoId]);
+        $matrizRiesgosData = $stmtMrGet->fetch(PDO::FETCH_OBJ);
+    } catch (PDOException $e) {
+        error_log("Error al recuperar prueba_23_riesgos: " . $e->getMessage());
+    }
 }
-
 $pageTitle = "Formulario de Actividades y Hallazgos";
 include '../main/h.php';
 ?>
