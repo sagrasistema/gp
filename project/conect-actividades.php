@@ -77,84 +77,99 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->beginTransaction();
         ##
         // Interceptar la petición POST del modal de la Prueba 11
+        // ==========================================
+    // CONTROLADOR DE ACCIONES POST - PRUEBA 11
+    // ==========================================
+    
+        $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT);
+        $pruebaId = filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT);
+        $actionType = trim($_POST['action_type']);
 
-// Interceptar la petición POST del modal de la Prueba 11
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_POST['action_type'] === 'add_analitica_item') {
-            try {
-                // ⚠️ PASO DE DEBUGO: Comprueba si la conexión PDO existe y está disponible
-                if (!isset($pdo) || !($pdo instanceof PDO)) {
-                    throw new Exception("La conexión a la base de datos (\$pdo) no está disponible o no es una instancia válida de PDO.");
+        if ($pruebaId === 11 && $proyectoId) {
+            
+            // A. AGREGAR PARTIDA ANALÍTICA
+            if ($actionType === 'add_analitica_item') {
+                try {
+                    $tipo = trim($_POST['tipo'] ?? '');
+                    $tipoRubro = trim($_POST['tipo_rubro'] ?? '');
+                    
+                    // Normalización estricta de valores float (soporta comas decimales)
+                    $rawActual = str_replace(',', '.', trim((string)($_POST['saldo_actual'] ?? '0')));
+                    $rawAnterior = str_replace(',', '.', trim((string)($_POST['saldo_anterior'] ?? '0')));
+                    
+                    $saldoActual = is_numeric($rawActual) ? (float)$rawActual : 0.00;
+                    $saldoAnterior = is_numeric($rawAnterior) ? (float)$rawAnterior : 0.00;
+                    $observaciones = trim($_POST['observaciones'] ?? '');
+
+                    // Validaciones de negocio
+                    $tiposPermitidos = ['activo', 'pasivo', 'patrimonio'];
+                    if (!in_array($tipo, $tiposPermitidos, true)) {
+                        throw new InvalidArgumentException("El tipo de partida '{$tipo}' no es válido.");
+                    }
+
+                    if (empty($tipoRubro)) {
+                        throw new InvalidArgumentException("El campo Rubro es requerido.");
+                    }
+
+                    // Inserción segura con PDO utilizando Sentencias Preparadas
+                    $sqlIns = "INSERT INTO proyecto_revision_analitica 
+                            (proyecto_id, prueba_id, tipo, tipo_rubro, saldo_actual, saldo_anterior, observaciones, created_at)
+                            VALUES (:proj, :pr, :tipo, :rubro, :actual, :anterior, :obs, NOW())";
+
+                    $stmtIns = $pdo->prepare($sqlIns);
+                    $stmtIns->execute([
+                        ':proj'     => $proyectoId,
+                        ':pr'       => $pruebaId,
+                        ':tipo'     => $tipo,
+                        ':rubro'    => htmlspecialchars($tipoRubro, ENT_QUOTES, 'UTF-8'),
+                        ':actual'   => $saldoActual,
+                        ':anterior' => $saldoAnterior,
+                        ':obs'      => !empty($observaciones) ? htmlspecialchars($observaciones, ENT_QUOTES, 'UTF-8') : null
+                    ]);
+
+                    // Redirección limpia (Patrón Post/Redirect/Get)
+                    header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&success=item_agregado");
+                    exit;
+
+                } catch (Throwable $e) {
+                    error_log("Error SQL/Backend en Prueba 11: " . $e->getMessage());
+                    $errorMsg = urlencode($e->getMessage());
+                    header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&error={$errorMsg}");
+                    exit;
                 }
+            }
 
-                // 1. Obtener y validar parámetros de la URL de forma estricta
-                $pruebaId = filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT);
-                $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT);
+            // B. ELIMINAR PARTIDA ANALÍTICA
+            if ($actionType === 'delete_analitica_item') {
+                try {
+                    $itemId = filter_input(INPUT_POST, 'item_id', FILTER_VALIDATE_INT);
+                    
+                    if (!$itemId) {
+                        throw new InvalidArgumentException("Identificador de partida no válido.");
+                    }
 
-                if (!$pruebaId || $pruebaId !== 11) {
-                    throw new Exception('Identificador de prueba no válido (debe ser 11). Valor recibido: ' . var_export($_GET['pruebaId'] ?? null, true));
+                    $sqlDel = "DELETE FROM proyecto_revision_analitica 
+                            WHERE id = :id AND proyecto_id = :proj AND prueba_id = :pr";
+                    
+                    $stmtDel = $pdo->prepare($sqlDel);
+                    $stmtDel->execute([
+                        ':id'   => $itemId,
+                        ':proj' => $proyectoId,
+                        ':pr'   => $pruebaId
+                    ]);
+
+                    header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&success=item_eliminado");
+                    exit;
+
+                } catch (Throwable $e) {
+                    error_log("Error al eliminar en Prueba 11: " . $e->getMessage());
+                    $errorMsg = urlencode($e->getMessage());
+                    header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&error={$errorMsg}");
+                    exit;
                 }
-
-                if (!$proyectoId) {
-                    throw new Exception('Identificador de proyecto no válido o ausente en la URL.');
-                }
-
-                // 2. Sanitizar y validar el tipo ('activo', 'pasivo', 'patrimonio')
-                $tipo = trim($_POST['tipo'] ?? '');
-                $tiposPermitidos = ['activo', 'pasivo', 'patrimonio'];
-                if (!in_array($tipo, $tiposPermitidos, true)) {
-                    throw new Exception("El tipo de partida analítica seleccionado ('{$tipo}') no es válido para el campo ENUM.");
-                }
-
-                // 3. Sanitizar el resto de campos del formulario
-                $tipoRubro = trim($_POST['tipo_rubro'] ?? '');
-                if (empty($tipoRubro)) {
-                    throw new Exception('El rubro o tipo de cuenta es obligatorio.');
-                }
-
-                $saldoActual = filter_input(INPUT_POST, 'saldo_actual', FILTER_VALIDATE_FLOAT);
-                $saldoAnterior = filter_input(INPUT_POST, 'saldo_anterior', FILTER_VALIDATE_FLOAT);
-                $observaciones = trim($_POST['observaciones'] ?? '');
-
-                if ($saldoActual === false || $saldoAnterior === false) {
-                    throw new Exception('Los montos de saldo deben ser numéricos válidos.');
-                }
-
-                // 4. Inserción segura con PDO en la tabla 'proyecto_revision_analitica'
-                $sql = "INSERT INTO proyecto_revision_analitica 
-                        (proyecto_id, prueba_id, tipo, tipo_rubro, saldo_actual, saldo_anterior, observaciones, created_at) 
-                        VALUES (:proyecto_id, :prueba_id, :tipo, :tipo_rubro, :saldo_actual, :saldo_anterior, :observaciones, NOW())";
-
-                $stmt = $pdo->prepare($sql);
-                $executeResult = $stmt->execute([
-                    ':proyecto_id'    => $proyectoId,
-                    ':prueba_id'      => $pruebaId,
-                    ':tipo'           => $tipo,
-                    ':tipo_rubro'     => $tipoRubro,
-                    ':saldo_actual'   => $saldoActual,
-                    ':saldo_anterior' => $saldoAnterior,
-                    ':observaciones'  => $observaciones !== '' ? $observaciones : null
-                ]);
-
-                if (!$executeResult) {
-                    $errorInfo = $stmt->errorInfo();
-                    throw new Exception("Error SQL en execute(): " . ($errorInfo[2] ?? 'Desconocido'));
-                }
-
-                // 5. Redirección exitosa si todo salió bien
-                header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&success=analitica_guardada");
-                exit;
-
-            } catch (Throwable $e) {
-                // 🔴 MODO DIAGNÓSTICO: Muestra el error exacto en pantalla en lugar de ocultarlo
-                echo "<div style='background:#fee2e2; color:#991b1b; padding:20px; margin:20px; border:1px solid #f87171; border-radius:8px; font-family:sans-serif;'>";
-                echo "<h3 style='margin-top:0;'>⚠️ Error al procesar la partida analítica:</h3>";
-                echo "<p><strong>Mensaje:</strong> " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . "</p>";
-                echo "<p><strong>Archivo:</strong> " . $e->getFile() . " en la línea " . $e->getLine() . "</p>";
-                echo "<hr><p style='font-size: 0.9em; color: #555;'>Corrige este detalle técnico y vuelve a intentar el envío del formulario.</p>";
-                echo "</div>";
-                exit;
             }
         }
+    
         // Procesamiento específico para la Prueba 16 (Materialidad)
         if ((int)$pruebaId === 16 && isset($_POST['materialidad']) && is_array($_POST['materialidad'])) {
             $mat = $_POST['materialidad'];
