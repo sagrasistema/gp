@@ -13,6 +13,32 @@ $proyectoId = filter_input(INPUT_POST, 'proyecto_id', FILTER_VALIDATE_INT)
     ?? filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) 
     ?? 0;
 
+$mensajeRiesgo = '';
+$tipoAlertaRiesgo = '';
+
+// Catálogos estandarizados de selección única para la matriz de riesgo
+$catalogosRiesgo = [
+    'origen_riesgo' => ['Estratégico', 'Operativo', 'Financiero', 'Cumplimiento', 'Tecnológico'],
+    'objetivos_negocio' => ['Crecimiento de ingresos', 'Optimización de costos', 'Continuidad operativa', 'Integridad de reportes', 'Cumplimiento regulatorio'],
+    'riesgo_negocio' => ['Pérdida de mercado', 'Fraude interno/externo', 'Error en estados financieros', 'Interrupción de sistemas', 'Sanciones legales'],
+    'riesgo_clave' => ['Alto impacto financiero', 'Deficiencia de control interno significativa', 'Riesgo de incorrección material', 'Incumplimiento crítico'],
+    'respuesta_controles' => ['Mitigación mediante supervisión', 'Controles automáticos de sistema', 'Conciliaciones periódicas', 'Segregación de funciones', 'Monitoreo gerencial'],
+    'area_asercion' => ['Existencia / Ocurrencia', 'Integralidad', 'Valoración y asignación', 'Derechos y obligaciones', 'Presentación y revelación'],
+    'enfoque_auditoria' => ['Pruebas sustantivas detalladas', 'Pruebas de controles', 'Revisión analítica sustantiva', 'Procedimientos duales'],
+    'emision_informe' => ['Carta de recomendaciones', 'Salvedad en opinión', 'Párrafo de énfasis', 'Informe estándar limpio']
+];
+
+// Consultar registros existentes para este proyecto de forma segura
+$listaRiesgos = [];
+if ($proyectoId > 0) {
+    try {
+        $stmtRiesgos = $pdo->prepare('SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :pid ORDER BY id DESC');
+        $stmtRiesgos->execute(['pid' => $proyectoId]);
+        $listaRiesgos = $stmtRiesgos->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $listaRiesgos = [];
+    }
+}
 ?>
 
 <!-- 1. ACORDEÓN Y CONTENIDO VISUAL PRINCIPAL -->
