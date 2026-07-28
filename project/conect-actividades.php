@@ -1,7 +1,5 @@
 <?php
 // v/proyectos/actividades.php
-
-// v/proyectos/actividades.php
 declare(strict_types=1);
 
 include '../main/config.php';
@@ -12,30 +10,30 @@ $pruebaId = filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT);
 if (!$proyectoId || !$pruebaId) {
     die("Error: Parámetros relacionales faltantes.");
 }
+
 /**
  * Convierte un número en formato venezolano (ej. "5.000.000,00") a un float estándar de PHP.
  */
-
 function parseVenezuelanNumber(?string $value): float {
     if ($value === null || trim($value) === '') {
         return 0.00;
     }
-    // Eliminar puntos de miles y espacios, luego reemplazar la coma decimal por punto
     $clean = str_replace(['.', ' '], ['', ''], $value);
     $clean = str_replace(',', '.', $clean);
     
     return filter_var($clean, FILTER_VALIDATE_FLOAT) !== false ? (float)$clean : 0.00;
 }
+
 // 1. Cargar Cabecera del Proyecto y Datos del Cliente
 try {
-    $stmt =$pdo->prepare("
+    $stmt = $pdo->prepare("
         SELECT p.*, c.name AS clientName, c.rif AS clientRif
         FROM proyectos p 
         INNER JOIN clientes c ON p.cliente_id = c.id 
         WHERE p.id = :id
     ");
-    $stmt->execute([':id' =>$proyectoId]);
-    $projectData =$stmt->fetch(PDO::FETCH_OBJ);
+    $stmt->execute([':id' => $proyectoId]);
+    $projectData = $stmt->fetch(PDO::FETCH_OBJ);
 
     if (!$projectData) {
         die("Error: El proyecto solicitado no existe.");
@@ -47,42 +45,41 @@ try {
 
 // 2. Cargar metadatos de la Prueba y su Estatus Actual
 try {
-    $stmtPrueba =$pdo->prepare("
+    $stmtPrueba = $pdo->prepare("
         SELECT p.nombre, p.norma, c.nombre AS catNombre 
         FROM audit_pruebas p 
         INNER JOIN audit_categorias c ON p.categoria_id = c.id 
         WHERE p.id = :pId
     ");
-    $stmtPrueba->execute([':pId' =>$pruebaId]);
-    $metaPrueba =$stmtPrueba->fetch(PDO::FETCH_OBJ);
+    $stmtPrueba->execute([':pId' => $pruebaId]);
+    $metaPrueba = $stmtPrueba->fetch(PDO::FETCH_OBJ);
 
     if (!$metaPrueba) {
         die("Error: La prueba especificada no existe.");
     }
 
-    $stmtStatus =$pdo->prepare("
+    $stmtStatus = $pdo->prepare("
         SELECT estado FROM proyecto_pruebas_ejecucion 
         WHERE proyecto_id = :projId AND prueba_id = :prId
     ");
-    $stmtStatus->execute([':projId' => $proyectoId, ':prId' =>$pruebaId]);
-    $estadoActualPrueba =$stmtStatus->fetchColumn() ?: 'en_proceso';
+    $stmtStatus->execute([':projId' => $proyectoId, ':prId' => $pruebaId]);
+    $estadoActualPrueba = $stmtStatus->fetchColumn() ?: 'en_proceso';
 
 } catch (PDOException $e) {
     die("Error al cargar metadatos: " . $e->getMessage());
 }
 
-// 3. Procesamiento POST (Guardado de actividades, estatus y sincronización de indicadores)
+// 3. Procesamiento POST (Guardado de actividades, estatus, materialidad, matriz de riesgos e indicadores)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action =$_POST['action_type'] ?? 'save_all';
+    $action = $_POST['action_type'] ?? 'save_all';
 
     try {
         $pdo->beginTransaction();
         
-        // Procesamiento específico para la Prueba 16 (Materialidad) en el Guardado General
+        // Procesamiento específico para la Prueba 16 (Materialidad)
         if ((int)$pruebaId === 16 && isset($_POST['materialidad']) && is_array($_POST['materialidad'])) {
-            $mat =$_POST['materialidad'];
+            $mat = $_POST['materialidad'];
             
-            // Sanitización y conversión correcta del formato venezolano a flotante
             $ben_m   = parseVenezuelanNumber($mat['beneficios_monto'] ?? null);
             $tram_p  = parseVenezuelanNumber($mat['tramo_porc'] ?? null);
             $tram_m  = parseVenezuelanNumber($mat['tramo_monto'] ?? null);
@@ -94,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $min_m   = parseVenezuelanNumber($mat['minimis_monto'] ?? null);
             $min_s   = parseVenezuelanNumber($mat['minimis_secundario_monto'] ?? null);
 
-            $stmtMatSave =$pdo->prepare("
+            $stmtMatSave = $pdo->prepare("
                 INSERT INTO proyecto_materialidad 
                 (proyecto_id, prueba_id, beneficios_monto, tramo_porc, tramo_monto, importancia_inicial_monto, recorte_porc, recorte_monto, importancia_ajustada_monto, minimis_porc, minimis_monto, minimis_secundario_monto)
                 VALUES (:proj, :pr, :ben_m, :tram_p, :tram_m, :imp_ini, :rec_p, :rec_m, :imp_aju, :min_p, :min_m, :min_s)
@@ -112,82 +109,135 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ");
 
             $dataMat = [
-                ':proj'      => $proyectoId,
-                ':pr'        => $pruebaId,
-                ':ben_m'     => $ben_m,
-                ':tram_p'    => $tram_p,
-                ':tram_m'    => $tram_m,
-                ':imp_ini'   => $imp_ini,
-                ':rec_p'     => $rec_p,
-                ':rec_m'     => $rec_m,
-                ':imp_aju'   => $imp_aju,
-                ':min_p'     => $min_p,
-                ':min_m'     => $min_m,
-                ':min_s'     => $min_s,
-                
-                ':ben_m_u'   => $ben_m,
-                ':tram_p_u'  => $tram_p,
-                ':tram_m_u'  => $tram_m,
-                ':imp_ini_u' => $imp_ini,
-                ':rec_p_u'   => $rec_p,
-                ':rec_m_u'   => $rec_m,
-                ':imp_aju_u' => $imp_aju,
-                ':min_p_u'   => $min_p,
-                ':min_m_u'   => $min_m,
-                ':min_s_u'   => $min_s,
+                ':proj'     => $proyectoId,
+                ':pr'       => $pruebaId,
+                ':ben_m'    => $ben_m,
+                ':tram_p'   => $tram_p,
+                ':tram_m'   => $tram_m,
+                ':imp_ini'  => $imp_ini,
+                ':rec_p'    => $rec_p,
+                ':rec_m'    => $rec_m,
+                ':imp_aju'  => $imp_aju,
+                ':min_p'    => $min_p,
+                ':min_m'    => $min_m,
+                ':min_s'    => $min_s,
+                ':ben_m_u'  => $ben_m,
+                ':tram_p_u' => $tram_p,
+                ':tram_m_u' => $tram_m,
+                ':imp_ini_u'=> $imp_ini,
+                ':rec_p_u'  => $rec_p,
+                ':rec_m_u'  => $rec_m,
+                ':imp_aju_u'=> $imp_aju,
+                ':min_p_u'  => $min_p,
+                ':min_m_u'  => $min_m,
+                ':min_s_u'  => $min_s,
             ];
 
             $stmtMatSave->execute($dataMat);
         }
 
+        // NUEVO: Procesamiento específico para la Pregunta 23 (Matriz de Riesgos / Formulario de 8 campos)
+        if ((int)$pruebaId === 23 && isset($_POST['matriz_riesgos']) && is_array($_POST['matriz_riesgos'])) {
+            $mr = $_POST['matriz_riesgos'];
+
+            $campo1 = trim($mr['campo1'] ?? '');
+            $campo2 = trim($mr['campo2'] ?? '');
+            $campo3 = trim($mr['campo3'] ?? '');
+            $campo4 = trim($mr['campo4'] ?? '');
+            $campo5 = trim($mr['campo5'] ?? '');
+            $campo6 = trim($mr['campo6'] ?? '');
+            $campo7 = trim($mr['campo7'] ?? '');
+            $campo8 = trim($mr['campo8'] ?? '');
+
+            $stmtMrSave = $pdo->prepare("
+                INSERT INTO proyecto_matriz_riesgos 
+                (proyecto_id, prueba_id, campo1, campo2, campo3, campo4, campo5, campo6, campo7, campo8)
+                VALUES (:proj, :pr, :c1, :c2, :c3, :c4, :c5, :c6, :c7, :c8)
+                ON DUPLICATE KEY UPDATE 
+                    campo1 = :c1_u, campo2 = :c2_u, campo3 = :c3_u, campo4 = :c4_u, 
+                    campo5 = :c5_u, campo6 = :c6_u, campo7 = :c7_u, campo8 = :c8_u
+            ");
+
+            $stmtMrSave->execute([
+                ':proj' => $proyectoId,
+                ':pr'   => $pruebaId,
+                ':c1'   => $campo1 !== '' ? $campo1 : null,
+                ':c2'   => $campo2 !== '' ? $campo2 : null,
+                ':c3'   => $campo3 !== '' ? $campo3 : null,
+                ':c4'   => $campo4 !== '' ? $campo4 : null,
+                ':c5'   => $campo5 !== '' ? $campo5 : null,
+                ':c6'   => $campo6 !== '' ? $campo6 : null,
+                ':c7'   => $campo7 !== '' ? $campo7 : null,
+                ':c8'   => $campo8 !== '' ? $campo8 : null,
+                ':c1_u' => $campo1 !== '' ? $campo1 : null,
+                ':c2_u' => $campo2 !== '' ? $campo2 : null,
+                ':c3_u' => $campo3 !== '' ? $campo3 : null,
+                ':c4_u' => $campo4 !== '' ? $campo4 : null,
+                ':c5_u' => $campo5 !== '' ? $campo5 : null,
+                ':c6_u' => $campo6 !== '' ? $campo6 : null,
+                ':c7_u' => $campo7 !== '' ? $campo7 : null,
+                ':c8_u' => $campo8 !== '' ? $campo8 : null,
+            ]);
+        }
+
         // Cargar los datos de materialidad para la vista si es la prueba 16
         $materialidadData = null;
         if ((int)$pruebaId === 16) {
-            $stmtMatGet =$pdo->prepare("SELECT * FROM proyecto_materialidad WHERE proyecto_id = :proj AND prueba_id = :pr");
-            $stmtMatGet->execute([':proj' => $proyectoId, ':pr' =>$pruebaId]);
-            $materialidadData =$stmtMatGet->fetch(PDO::FETCH_OBJ);
+            $stmtMatGet = $pdo->prepare("SELECT * FROM proyecto_materialidad WHERE proyecto_id = :proj AND prueba_id = :pr");
+            $stmtMatGet->execute([':proj' => $proyectoId, ':pr' => $pruebaId]);
+            $materialidadData = $stmtMatGet->fetch(PDO::FETCH_OBJ);
         }
 
-        if ($action === 'add_indicador_detalle') {$tipoInd = filter_input(INPUT_POST, 'tipo_indicador', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        // NUEVO: Cargar los datos de la Matriz de Riesgos para la vista si es la prueba 23
+        $matrizRiesgosData = null;
+        if ((int)$pruebaId === 23) {
+            $stmtMrGet = $pdo->prepare("SELECT * FROM proyecto_matriz_riesgos WHERE proyecto_id = :proj AND prueba_id = :pr");
+            $stmtMrGet->execute([':proj' => $proyectoId, ':pr' => $pruebaId]);
+            $matrizRiesgosData = $stmtMrGet->fetch(PDO::FETCH_OBJ);
+        }
+
+        if ($action === 'add_indicador_detalle') {
+            $tipoInd = filter_input(INPUT_POST, 'tipo_indicador', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $rubro = trim($_POST['rubro'] ?? '');
             $titulo = trim($_POST['titulo'] ?? '');
             $descripcion = trim($_POST['descripcion'] ?? '');
             $recomendacion = trim($_POST['recomendacion'] ?? '');
 
             if (in_array($tipoInd, ['CI', 'CG', 'SC', 'AA']) && !empty($titulo)) {
-                $stmtIns =$pdo->prepare("
+                $stmtIns = $pdo->prepare("
                     INSERT INTO proyecto_indicador_detalles (proyecto_id, prueba_id, tipo_indicador, rubro, titulo, descripcion, recomendacion)
                     VALUES (:proj, :pr, :tipo, :rubro, :titulo, :desc, :rec)
                 ");
                 $stmtIns->execute([
-                    ':proj' => $proyectoId, ':pr' => $pruebaId, ':tipo' =>$tipoInd,
-                    ':rubro' => $rubro, ':titulo' =>$titulo, ':desc' => $descripcion, ':rec' =>$recomendacion
+                    ':proj' => $proyectoId, ':pr' => $pruebaId, ':tipo' => $tipoInd,
+                    ':rubro' => $rubro, ':titulo' => $titulo, ':desc' => $descripcion, ':rec' => $recomendacion
                 ]);
             }
-        } elseif ($action === 'delete_indicador_detalle') {$detalleId = filter_input(INPUT_POST, 'detalle_id', FILTER_VALIDATE_INT);
+        } elseif ($action === 'delete_indicador_detalle') {
+            $detalleId = filter_input(INPUT_POST, 'detalle_id', FILTER_VALIDATE_INT);
             if ($detalleId) {
-                $stmtDel =$pdo->prepare("DELETE FROM proyecto_indicador_detalles WHERE id = :id AND proyecto_id = :proj AND prueba_id = :pr");
-                $stmtDel->execute([':id' =>$detalleId, ':proj' => $proyectoId, ':pr' =>$pruebaId]);
+                $stmtDel = $pdo->prepare("DELETE FROM proyecto_indicador_detalles WHERE id = :id AND proyecto_id = :proj AND prueba_id = :pr");
+                $stmtDel->execute([':id' => $detalleId, ':proj' => $proyectoId, ':pr' => $pruebaId]);
             }
         } else {
             // Guardado General (Actividades + Estatus de Prueba)
             if (isset($_POST['actividades_data']) && is_array($_POST['actividades_data'])) {
-                $stmtSave =$pdo->prepare("
+                $stmtSave = $pdo->prepare("
                     INSERT INTO proyecto_actividades_ejecucion (proyecto_id, actividad_id, contenido_llenado, completado)
                     VALUES (:proyecto_id, :actividad_id, :contenido, :completado)
                     ON DUPLICATE KEY UPDATE contenido_llenado = :contenido_u, completado = :completado_u
                 ");
 
-                foreach ($_POST['actividades_data'] as $actId =>$v) {
+                foreach ($_POST['actividades_data'] as $actId => $v) {
                     $contenido = trim($v['contenido'] ?? '');
                     $completado = isset($v['completado']) ? 1 : 0;
 
                     $stmtSave->execute([
                         ':proyecto_id'  => $proyectoId,
                         ':actividad_id' => $actId,
-                        ':contenido'    => $contenido !== '' ?$contenido : null,
+                        ':contenido'    => $contenido !== '' ? $contenido : null,
                         ':completado'   => $completado,
-                        ':contenido_u'  => $contenido !== '' ?$contenido : null,
+                        ':contenido_u'  => $contenido !== '' ? $contenido : null,
                         ':completado_u' => $completado
                     ]);
                 }
@@ -198,7 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // VALIDACIÓN DE NEGOCIO: Si intenta colocar el estado como 'completado', verificar que todas las actividades estén finalizadas
         if ($nuevoEstadoPrueba === 'completado') {
-            $stmtCheckAct =$pdo->prepare("
+            $stmtCheckAct = $pdo->prepare("
                 SELECT 
                     (SELECT COUNT(*) FROM audit_actividades WHERE prueba_id = :prId1) AS total_actividades,
                     (SELECT COUNT(*) FROM proyecto_actividades_ejecucion ae 
@@ -210,7 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':projId1' => $proyectoId,
                 ':prId2'   => $pruebaId
             ]);
-            $resAct =$stmtCheckAct->fetch(PDO::FETCH_OBJ);
+            $resAct = $stmtCheckAct->fetch(PDO::FETCH_OBJ);
 
             if ($resAct && (int)$resAct->total_actividades > 0 && (int)$resAct->completadas < (int)$resAct->total_actividades) {
                 throw new Exception("Acción no permitida: No se puede cambiar el estado a 'Completado' porque existen actividades pendientes de finalizar.");
@@ -218,14 +268,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // SINCRONIZACIÓN AUTOMÁTICA: Verificar existencia de registros en detalles para cada indicador
-        $hasCI =$pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='CI'")->fetchColumn() > 0 ? 1 : 0;
-        $hasCG =$pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='CG'")->fetchColumn() > 0 ? 1 : 0;
-        $hasSC =$pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='SC'")->fetchColumn() > 0 ? 1 : 0;
-        $hasAA =$pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='AA'")->fetchColumn() > 0 ? 1 : 0;
+        $hasCI = $pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='CI'")->fetchColumn() > 0 ? 1 : 0;
+        $hasCG = $pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='CG'")->fetchColumn() > 0 ? 1 : 0;
+        $hasSC = $pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='SC'")->fetchColumn() > 0 ? 1 : 0;
+        $hasAA = $pdo->query("SELECT COUNT(*) FROM proyecto_indicador_detalles WHERE proyecto_id=$proyectoId AND prueba_id=$pruebaId AND tipo_indicador='AA'")->fetchColumn() > 0 ? 1 : 0;
         $obsLider = trim($_POST['observacion_socio_lider'] ?? '');
         $obsCalidad = trim($_POST['observacion_socio_calidad'] ?? '');
 
-        // En la sentencia SQL de inserción/actualización (INSERT ... ON DUPLICATE KEY UPDATE) incluye las columnas:
         $stmtTestSave = $pdo->prepare("
             INSERT INTO proyecto_pruebas_ejecucion 
             (proyecto_id, prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado, observacion_socio_lider, observacion_socio_calidad)
@@ -246,9 +295,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&success=1");
         exit;
     } catch (Exception $e) {
-        if ($pdo->inTransaction()) {$pdo->rollBack();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
         }
-        // Redirigir de regreso pasando el mensaje de error de forma segura en la URL
         $errorMsg = urlencode($e->getMessage());
         header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&error={$errorMsg}");
         exit;
@@ -261,17 +310,20 @@ $sqlActividades = "
     FROM audit_actividades a
     LEFT JOIN proyecto_actividades_ejecucion ae ON ae.actividad_id = a.id AND ae.proyecto_id = :projId
     WHERE a.prueba_id = :prId ORDER BY a.orden ASC";
-$stmtA =$pdo->prepare($sqlActividades);$stmtA->execute([':projId' => $proyectoId, ':prId' =>$pruebaId]);
-$listaActividades =$stmtA->fetchAll(PDO::FETCH_OBJ);
+$stmtA = $pdo->prepare($sqlActividades);
+$stmtA->execute([':projId' => $proyectoId, ':prId' => $pruebaId]);
+$listaActividades = $stmtA->fetchAll(PDO::FETCH_OBJ);
 
 // Cargar detalles de indicadores agrupados por tipo
-$stmtIndDetalles =$pdo->prepare("SELECT * FROM proyecto_indicador_detalles WHERE proyecto_id = :proj AND prueba_id = :pr ORDER BY id DESC");
-$stmtIndDetalles->execute([':proj' => $proyectoId, ':pr' =>$pruebaId]);
-$allDetalles =$stmtIndDetalles->fetchAll(PDO::FETCH_OBJ);
+$stmtIndDetalles = $pdo->prepare("SELECT * FROM proyecto_indicador_detalles WHERE proyecto_id = :proj AND prueba_id = :pr ORDER BY id DESC");
+$stmtIndDetalles->execute([':proj' => $proyectoId, ':pr' => $pruebaId]);
+$allDetalles = $stmtIndDetalles->fetchAll(PDO::FETCH_OBJ);
 
 $detallesPorTipo = ['CI' => [], 'CG' => [], 'SC' => [], 'AA' => []];
-foreach ($allDetalles as $det) {$detallesPorTipo[$det->tipo_indicador][] =$det;
+foreach ($allDetalles as $det) {
+    $detallesPorTipo[$det->tipo_indicador][] = $det;
 }
+
 $stmtStatus = $pdo->prepare("
     SELECT estado, observacion_socio_lider, observacion_socio_calidad 
     FROM proyecto_pruebas_ejecucion 
@@ -283,6 +335,15 @@ $datosEjecucion = $stmtStatus->fetch(PDO::FETCH_OBJ);
 $estadoActualPrueba = $datosEjecucion->estado ?? 'en_proceso';
 $obsSocioLider = $datosEjecucion->observacion_socio_lider ?? '';
 $obsSocioCalidad = $datosEjecucion->observacion_socio_calidad ?? '';
+
+// Cargar datos de la Matriz de Riesgos si es la prueba 23 para la vista
+$matrizRiesgosData = null;
+if ((int)$pruebaId === 23) {
+    $stmtMrGet = $pdo->prepare("SELECT * FROM proyecto_matriz_riesgos WHERE proyecto_id = :proj AND prueba_id = :pr");
+    $stmtMrGet->execute([':proj' => $proyectoId, ':pr' => $pruebaId]);
+    $matrizRiesgosData = $stmtMrGet->fetch(PDO::FETCH_OBJ);
+}
+
 $pageTitle = "Formulario de Actividades y Hallazgos";
 include '../main/h.php';
 ?>
@@ -290,7 +351,6 @@ include '../main/h.php';
 <?php include '../main/layout_header.php'; ?>
 
 <?php 
-// Capturar si existe un error pasado por URL para renderizar el modal automáticamente
 $errorMensaje = filter_input(INPUT_GET, 'error', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 if (!empty($errorMensaje)): 
 ?>
@@ -309,7 +369,7 @@ function mostrarModalAlertaPersonalizado(mensaje) {
                 <div style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 1rem;"><i class="ri-alert-line"></i></div>
                 <h3 style="margin: 0 0 0.5rem 0; color: #1e293b; font-size: 1.25rem;">Acción No Permitida</h3>
                 <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;">
-                    Debe realizar todas las actividades de esta prueba para porder completarla 
+                    Debe realizar todas las actividades de esta prueba para poder completarla 
                 </p>
                 <button type="button" onclick="document.getElementById('modal-alerta-actividades').remove()" style="background: #2563eb; color: white; border: none; padding: 0.65rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
                     Entendido
