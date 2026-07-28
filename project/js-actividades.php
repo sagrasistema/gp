@@ -120,8 +120,16 @@ document.getElementById('btnGuardarRiesgo23').addEventListener('click', function
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert('¡Guardado con éxito!');
-            location.reload(); // Recarga para reflejar los datos guardados
+            // Crear notificación toast flotante con los colores del sistema (#1e3a5f)
+            const toast = document.createElement('div');
+            toast.style.cssText = "position: fixed; bottom: 20px; right: 20px; background-color: #1e3a5f; color: #ffffff; padding: 12px 20px; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); z-index: 10000; font-family: inherit; font-size: 14px; font-weight: 600;";
+            toast.innerHTML = '<i class="ri-check-line" style="margin-right: 8px;"></i> ¡Riesgo guardado con éxito!';
+            document.body.appendChild(toast);
+
+            // Recargar la página tras 1 segundo para que el usuario alcance a leer el aviso
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
         } else {
             alert('Error al guardar: ' + data.message);
         }
