@@ -65,18 +65,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($actionType === 'delete_analitica_item') {
             $itemId = filter_input(INPUT_POST, 'item_id', FILTER_VALIDATE_INT);
             
-            if ($itemId) {
-                $sql = "DELETE FROM proyecto_revision_analitica WHERE id = :id AND proyecto_id = :proj AND prueba_id = :pr";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([
-                    ':id'   => $itemId, 
-                    ':proj' => $proyectoId, 
-                    ':pr'   => $pruebaId
-                ]);
-
-                header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&success=1");
-                exit;
+            if (!$itemId) {
+                throw new Exception("El identificador del registro a eliminar no es válido.");
             }
+
+            $sql = "DELETE FROM proyecto_revision_analitica WHERE id = :id AND proyecto_id = :proj AND prueba_id = :pr";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':id'   => $itemId, 
+                ':proj' => $proyectoId, 
+                ':pr'   => $pruebaId
+            ]);
+
+            header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&success=1");
+            exit;
         }
 
     } catch (Throwable $e) {
