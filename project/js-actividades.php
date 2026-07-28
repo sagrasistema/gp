@@ -164,6 +164,30 @@ if (btnGuardarRiesgo23) {
         });
     });
 }
+document.getElementById('btnGuardarAnalitica').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    const form = document.getElementById('formAnalitica11');
+    const formData = new FormData(form);
+
+    fetch('guardar-analitica-11.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Cerrar modal y recargar o actualizar la tabla dinámicamente
+            location.reload(); 
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error de red:', error);
+        alert('Ocurrió un error al procesar la solicitud.');
+    });
+});
 </script>
 
 
