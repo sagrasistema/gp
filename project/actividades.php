@@ -403,9 +403,10 @@ include 'conect-actividades.php';
         </div>
 
         <!-- Formulario Independiente del Modal -->
-        <form action="" method="POST" style="padding: 30px; max-height: 80vh; overflow-y: auto;">
-            <input type="hidden" name="accion_riesgo" value="guardar_riesgo">
-            <input type="hidden" name="proyecto_id" value="<?php echo htmlspecialchars((string)$proyectoId, ENT_QUOTES, 'UTF-8'); ?>">
+        <!-- Formulario Independiente del Modal apuntando a su propio script -->
+        <form action="guardar-riesgo-23.php" method="POST" style="padding: 30px; max-height: 80vh; overflow-y: auto;">
+        <input type="hidden" name="proyecto_id" value="<?php echo htmlspecialchars((string)$proyectoId, ENT_QUOTES, 'UTF-8'); ?>">
+
 
             <!-- Caja Interna Clara para Selects -->
             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 25px;">
