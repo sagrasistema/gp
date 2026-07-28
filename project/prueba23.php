@@ -146,54 +146,7 @@ if ($proyectoId > 0) {
     </div>
 </div>
 
-<!-- 2. MODAL COLOCADO FUERA DEL FLUJO DE FORMULARIOS PADRES (AISLADO ABAJO) -->
-<div id="modalRiesgo" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
-    <div style="background-color: #ffffff; border: 1px solid #cbd5e1; width: 95%; max-width: 1200px; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
-        
-        <!-- Cabecera del Modal (Azul Navbar) -->
-        <div style="background-color: #1e3a5f; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="color: #ffffff; font-size: 16px; margin: 0; font-weight: 600;">Agregar &gt; Riesgo</h3>
-            <button type="button" onclick="closeModalRiesgo()" style="background: transparent; border: none; color: #ffffff; font-size: 20px; cursor: pointer;"><i class="ri-close-line"></i></button>
-        </div>
 
-        <!-- Formulario Independiente del Modal -->
-        <form action="" method="POST" style="padding: 30px; max-height: 80vh; overflow-y: auto;">
-            <input type="hidden" name="accion_riesgo" value="guardar_riesgo">
-            <input type="hidden" name="proyecto_id" value="<?php echo htmlspecialchars((string)$proyectoId, ENT_QUOTES, 'UTF-8'); ?>">
-
-            <!-- Caja Interna Clara para Selects -->
-            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 25px;">
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
-                    <?php foreach ($catalogosRiesgo as $nameKey => $opciones): ?>
-                        <div class="form-group" style="display: flex; flex-direction: column;">
-                            <label style="font-size: 11px; text-transform: uppercase; color: #334155; margin-bottom: 8px; font-weight: 700; letter-spacing: 0.5px;">
-                                <?php echo ucwords(str_replace('_', ' ', $nameKey)); ?>
-                            </label>
-                            <select name="<?php echo $nameKey; ?>" class="form-control" style="width: 100%; background-color: #ffffff; border: 1px solid #cbd5e1; color: #0f172a; padding: 10px 12px; border-radius: 6px; font-size: 13px;" required>
-                                <option value="">-- Seleccione --</option>
-                                <?php foreach ($opciones as $opt): ?>
-                                    <option value="<?php echo htmlspecialchars($opt, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($opt, ENT_QUOTES, 'UTF-8'); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-
-            <!-- Caja Contenedora Inferior (Checkbox y Botón Guardar) -->
-            <div style="background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <input type="checkbox" id="acuerdo_informacion" name="acuerdo_informacion" value="1" required style="width: 18px; height: 18px; accent-color: #1e3a5f; cursor: pointer;">
-                    <label for="acuerdo_informacion" style="color: #334155; font-size: 13px; font-weight: 600; cursor: pointer;">Estoy de acuerdo con la información suministrada!</label>
-                </div>
-
-                <button type="submit" class="btn" style="background-color: #1e3a5f; color: #ffffff; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                    <i class="ri-save-line" style="font-size: 16px;"></i> Guardar
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
 
 <script>
 function toggleAccordion(id) {
