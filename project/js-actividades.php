@@ -25,27 +25,6 @@ function closeNormaModal() {
 }
 
 // Funciones específicas requeridas para los botones de Prueba 11 (Activo, Pasivo, Patrimonio)
-function openAnaliticaModal(tipo) {
-    const modal = document.getElementById('analiticaModal');
-    const inputTipo = document.getElementById('modalTipoAnalitica');
-    const title = document.getElementById('modalAnaliticaTitle');
-
-    if (modal && inputTipo) {
-        inputTipo.value = tipo;
-        
-        if (title) {
-            const tipoFormateado = tipo.charAt(0).toUpperCase() + tipo.slice(1);
-            title.textContent = 'Agregar Partida de ' + tipoFormateado;
-        }
-        
-        modal.style.display = 'flex';
-    }
-}
-
-function closeAnaliticaModal() {
-    const modal = document.getElementById('analiticaModal');
-    if (modal) modal.style.display = 'none';
-}
 
 // Cierre global de modales al hacer clic fuera de su contenido
 window.onclick = function(event) {
@@ -164,30 +143,7 @@ if (btnGuardarRiesgo23) {
         });
     });
 }
-document.getElementById('btnGuardarAnalitica').addEventListener('click', function(e) {
-    e.preventDefault();
 
-    const form = document.getElementById('formAnalitica11');
-    const formData = new FormData(form);
-
-    fetch('guardar-analitica-11.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            // Cerrar modal y recargar o actualizar la tabla dinámicamente
-            location.reload(); 
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error de red:', error);
-        alert('Ocurrió un error al procesar la solicitud.');
-    });
-});
 </script>
 
 
