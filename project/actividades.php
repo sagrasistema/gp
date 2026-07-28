@@ -348,7 +348,7 @@ include 'conect-actividades.php';
 <?php if ((int)$pruebaId === 11): ?>
     <!-- Formularios ocultos para eliminar filas analíticas -->
     <?php foreach (array_merge($analiticaItems['activo'], $analiticaItems['pasivo'], $analiticaItems['patrimonio']) as $it): ?>
-        <form id="delAnalitica_<?= (int)$it->id ?>" action="actividades.php?proyectoId=<?= (int)$proyectoId ?>&pruebaId=<?= (int)$pruebaId ?>" method="POST" style="display:none;">
+        <form id="delAnalitica_<?= (int)$it->id ?>" action="guardar_analitica.php?proyectoId=<?= (int)$proyectoId ?>&pruebaId=11" method="POST" style="display:none;">
             <input type="hidden" name="action_type" value="delete_analitica_item">
             <input type="hidden" name="item_id" value="<?= (int)$it->id ?>">
         </form>
