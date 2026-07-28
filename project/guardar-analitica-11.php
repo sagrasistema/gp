@@ -1,73 +1,89 @@
 <?php
 declare(strict_types=1);
 
-// Establecer cabecera estricta para respuestas JSON
-header('Content-Type: application/json; charset=UTF-8');
+// 1. Incluir la conexión a la base de datos (ajusta el nombre del archivo de conexión si es diferente, ej: conexion.php, db.php)
+require_once __DIR__ . '/conexion.php'; 
 
-session_start();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        // Obtener identificadores desde la URL de forma estricta
+        $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT);
+        $pruebaId = filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT);
 
-try {
-    // 1. Validar estrictamente el método HTTP
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Método de solicitud no permitido.');
+        if (!$proyectoId || $pruebaId !== 11) {
+            throw new Exception("Parámetros de identificación de proyecto o prueba no válidos.");
+        }
+
+        $actionType = trim($_POST['action_type'] ?? '');
+
+        // 2. ACCIÓN: AGREGAR PARTIDA ANALÍTICA
+        if ($actionType === 'add_analitica_item') {
+            $tipo = trim($_POST['tipo'] ?? '');
+            $tipoRubro = trim($_POST['tipo_rubro'] ?? '');
+            
+            // Normalización de montos flotantes (manejo seguro de comas o puntos decimales)
+            $rawActual = str_replace(',', '.', trim((string)($_POST['saldo_actual'] ?? '0')));
+            $rawAnterior = str_replace(',', '.', trim((string)($_POST['saldo_anterior'] ?? '0')));
+            
+            $saldoActual = is_numeric($rawActual) ? (float)$rawActual : 0.00;
+            $saldoAnterior = is_numeric($rawAnterior) ? (float)$rawAnterior : 0.00;
+            $observaciones = trim($_POST['observaciones'] ?? '');
+
+            // Validaciones de negocio
+            $tiposPermitidos = ['activo', 'pasivo', 'patrimonio'];
+            if (!in_array($tipo, $tiposPermitidos, true)) {
+                throw new Exception("El tipo de cuenta seleccionado no es válido.");
+            }
+
+            if (empty($tipoRubro)) {
+                throw new Exception("El campo rubro o descripción es obligatorio.");
+            }
+
+            // Inserción segura mediante PDO (Sentencias Preparadas)
+            $sql = "INSERT INTO proyecto_revision_analitica 
+                    (proyecto_id, prueba_id, tipo, tipo_rubro, saldo_actual, saldo_anterior, observaciones, created_at) 
+                    VALUES (:proj, :pr, :tipo, :rubro, :actual, :anterior, :obs, NOW())";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':proj'     => $proyectoId,
+                ':pr'       => $pruebaId,
+                ':tipo'     => $tipo,
+                ':rubro'    => htmlspecialchars($tipoRubro, ENT_QUOTES, 'UTF-8'),
+                ':actual'   => $saldoActual,
+                ':anterior' => $saldoAnterior,
+                ':obs'      => !empty($observaciones) ? htmlspecialchars($observaciones, ENT_QUOTES, 'UTF-8') : null
+            ]);
+
+            // Redirección exitosa (Patrón PRG)
+            header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&success=1");
+            exit;
+        }
+
+        // 3. ACCIÓN: ELIMINAR PARTIDA ANALÍTICA
+        if ($actionType === 'delete_analitica_item') {
+            $itemId = filter_input(INPUT_POST, 'item_id', FILTER_VALIDATE_INT);
+            
+            if ($itemId) {
+                $sql = "DELETE FROM proyecto_revision_analitica WHERE id = :id AND proyecto_id = :proj AND prueba_id = :pr";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ':id'   => $itemId, 
+                    ':proj' => $proyectoId, 
+                    ':pr'   => $pruebaId
+                ]);
+
+                header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&success=1");
+                exit;
+            }
+        }
+
+    } catch (Throwable $e) {
+        // Registro interno de errores y redirección controlada con mensaje de error
+        error_log("Error en procesador de analítica (Prueba 11): " . $e->getMessage());
+        $errorMsg = urlencode($e->getMessage());
+        $pId = $proyectoId ?? 0;
+        header("Location: actividades.php?proyectoId={$pId}&pruebaId=11&error={$errorMsg}");
+        exit;
     }
-
-    // 2. Incluir la conexión a la base de datos (ajusta la ruta según tu estructura)
-    require_once '../main/config.php'; // Debe retornar una instancia válida de PDO ($pdo)
-
-    // 3. Sanitizar y validar los datos recibidos del formulario modal
-    $idPrueba = filter_input(INPUT_POST, 'id_prueba', FILTER_VALIDATE_INT);
-    $tipo = trim($_POST['tipo'] ?? ''); // Recibe 'activo', 'pasivo' o 'patrimonio' del input oculto
-    $descripcion = trim($_POST['descripcion'] ?? '');
-    $monto = filter_input(INPUT_POST, 'monto', FILTER_VALIDATE_FLOAT);
-
-    // Validaciones de negocio
-    if (!$idPrueba) {
-        throw new Exception('Identificador de prueba inválido.');
-    }
-
-    $tiposPermitidos = ['activo', 'pasivo', 'patrimonio'];
-    if (!in_array($tipo, $tiposPermitidos, true)) {
-        throw new Exception('El tipo de partida analítica especificado no es válido.');
-    }
-
-    if (empty($descripcion)) {
-        throw new Exception('La descripción o nombre de la cuenta es obligatoria.');
-    }
-
-    // 4. Inserción segura en base de datos usando PDO (Sentencias Preparadas)
-    $sql = "INSERT INTO partidas_analiticas_prueba11 (id_prueba, tipo, descripcion, monto, fecha_creacion) 
-            VALUES (:id_prueba, :tipo, :descripcion, :monto, NOW())";
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':id_prueba'   => $idPrueba,
-        ':tipo'        => $tipo,
-        ':descripcion' => htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8'),
-        ':monto'       => $monto !== false ? $monto : 0.00
-    ]);
-
-    // 5. Respuesta exitosa al cliente
-    echo json_encode([
-        'status'  => 'success',
-        'message' => 'Partida analítica guardada exitosamente.'
-    ]);
-
-} catch (PDOException $e) {
-    // Registro interno del error de BD (no exponer detalles sensibles al usuario)
-    error_log('Error en BD (guardar-analitica-11.php): ' . $e->getMessage());
-
-    http_response_code(500);
-    echo json_encode([
-        'status'  => 'error',
-        'message' => 'Ocurrió un error interno al intentar guardar la información.'
-    ]);
-
-} catch (Exception $e) {
-    // Manejo de errores de validación de negocio
-    http_response_code(400);
-    echo json_encode([
-        'status'  => 'error',
-        'message' => $e->getMessage()
-    ]);
 }
