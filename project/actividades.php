@@ -362,7 +362,7 @@ include 'conect-actividades.php';
                 <button type="button" onclick="closeAnaliticaModal()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #64748b;"><i class="ri-close-line"></i></button>
             </div>
             
-            <form action="guardar_analitica.php?proyectoId=<?= (int)$proyectoId ?>&pruebaId=11" method="POST">
+            <form action="guardar-analitica.php?proyectoId=<?= (int)$proyectoId ?>&pruebaId=11" method="POST">
                 <!-- Campos ocultos y inputs del modal -->
                 <input type="hidden" name="action_type" value="add_analitica_item">
                 <input type="hidden" name="tipo" id="modal_tipo_input">

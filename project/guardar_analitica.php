@@ -2,7 +2,8 @@
 declare(strict_types=1);
 
 // 1. Incluir la conexión a la base de datos (ajusta el nombre del archivo de conexión si es diferente, ej: conexion.php, db.php)
-require_once __DIR__ . '/conexion.php'; 
+include '../main/config.php';
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
