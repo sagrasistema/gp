@@ -404,9 +404,8 @@ include 'conect-actividades.php';
 
         <!-- Formulario Independiente del Modal -->
         <!-- Formulario Independiente del Modal apuntando a su propio script -->
-        <form action="guardar-riesgo-23.php" method="POST" style="padding: 30px; max-height: 80vh; overflow-y: auto;">
+        <form id="formRiesgo23" style="padding: 30px; max-height: 80vh; overflow-y: auto;">
         <input type="hidden" name="proyecto_id" value="<?php echo htmlspecialchars((string)$proyectoId, ENT_QUOTES, 'UTF-8'); ?>">
-
 
             <!-- Caja Interna Clara para Selects -->
             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 25px;">
@@ -434,8 +433,8 @@ include 'conect-actividades.php';
                     <label for="acuerdo_informacion" style="color: #334155; font-size: 13px; font-weight: 600; cursor: pointer;">Estoy de acuerdo con la información suministrada!</label>
                 </div>
 
-                <button type="submit" class="btn" style="background-color: #1e3a5f; color: #ffffff; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                    <i class="ri-save-line" style="font-size: 16px;"></i> Guardar
+                <button type="button" id="btnGuardarRiesgo23" class="btn" style="background-color: #1e3a5f; color: #ffffff; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                    <i class="ri-save-line"></i> Guardar
                 </button>
             </div>
         </form>

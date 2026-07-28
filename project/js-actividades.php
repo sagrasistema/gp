@@ -107,7 +107,30 @@ function mostrarModalAlertaActividades() {
     `;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
+document.getElementById('btnGuardarRiesgo23').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    const form = document.getElementById('formRiesgo23');
+    const formData = new FormData(form);
 
+    fetch('guardar-riesgo-23.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('¡Guardado con éxito!');
+            location.reload(); // Recarga para reflejar los datos guardados
+        } else {
+            alert('Error al guardar: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ocurrió un error inesperado al procesar la solicitud.');
+    });
+});
 </script>
 
 
