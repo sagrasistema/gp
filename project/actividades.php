@@ -368,6 +368,7 @@ include 'conect-actividades.php';
                 <!-- Campos ocultos y inputs del modal -->
                 <input type="hidden" name="action_type" value="add_analitica_item">
                 <input type="hidden" name="tipo" id="modal_tipo_input">
+
                 <div style="margin-bottom: 1rem;">
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Tipo / Rubro (Ej. Efectivo, Cuentas por Cobrar...)</label>
                     <input type="text" name="tipo_rubro" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
