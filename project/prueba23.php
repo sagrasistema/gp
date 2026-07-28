@@ -1,15 +1,17 @@
 <?php
 /**
- * Módulo: Prueba 23 - Matriz de Riesgo (Diseño Claro / Sistema Corporativo)
- * Compatible con PHP 8.x + PDO
+ * Módulo: Prueba 23 - Matriz de Riesgo 
+ * Arquitectura Backend: PHP 8.x + PDO (Seguro contra Inyección SQL)
  */
 
 if (!isset($pdo) || !$pdo instanceof PDO) {
     exit('Error de inicialización de base de datos.');
 }
 
-// Obtener ID del proyecto actual de forma segura
-$proyectoId = $proyectoId ?? filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
+// Obtener ID del proyecto de forma robusta (priorizando POST, luego GET)
+$proyectoId = filter_input(INPUT_POST, 'proyecto_id', FILTER_VALIDATE_INT) 
+    ?? filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) 
+    ?? 0;
 
 $mensajeRiesgo = '';
 $tipoAlertaRiesgo = '';
@@ -26,7 +28,7 @@ $catalogosRiesgo = [
     'emision_informe' => ['Carta de recomendaciones', 'Salvedad en opinión', 'Párrafo de énfasis', 'Informe estándar limpio']
 ];
 
-// Procesamiento del formulario POST para inserción de nuevos riesgos
+// Procesamiento seguro del formulario POST para inserción
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion_riesgo']) && $_POST['accion_riesgo'] === 'guardar_riesgo') {
     try {
         $origen = trim($_POST['origen_riesgo'] ?? '');
@@ -45,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion_riesgo']) && $
                 (proyecto_id, origen_riesgo, objetivos_negocio, riesgo_negocio, riesgo_clave, respuesta_controles, area_asercion, enfoque_auditoria, emision_informe) 
                 VALUES (:pid, :origen, :objetivos, :r_neg, :r_clave, :resp, :area, :enf, :emi)
             ');
+            
             $stmt->execute([
                 'pid' => $proyectoId,
                 'origen' => $origen,
@@ -56,30 +59,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion_riesgo']) && $
                 'enf' => $enfoque,
                 'emi' => $emision
             ]);
+
             $mensajeRiesgo = 'Registro de matriz de riesgo guardado exitosamente.';
             $tipoAlertaRiesgo = 'success';
         } else {
-            $mensajeRiesgo = 'Debe completar los campos obligatorios y aceptar los términos de la información suministrada.';
+            $mensajeRiesgo = 'Debe seleccionar un proyecto válido, completar los campos obligatorios y aceptar los términos.';
             $tipoAlertaRiesgo = 'error';
         }
     } catch (PDOException $e) {
-        error_log('Error al guardar riesgo: ' . $e->getMessage());
-        $mensajeRiesgo = 'Ocurrió un error en la base de datos al guardar el registro.';
+        error_log('Error al guardar riesgo (Prueba 23): ' . $e->getMessage());
+        $mensajeRiesgo = 'Ocurrió un error en la base de datos al procesar la solicitud.';
         $tipoAlertaRiesgo = 'error';
     }
 }
 
-// Consultar registros existentes para este proyecto
-try {
-    $stmtRiesgos = $pdo->prepare('SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :pid ORDER BY id DESC');
-    $stmtRiesgos->execute(['pid' => $proyectoId]);
-    $listaRiesgos = $stmtRiesgos->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    $listaRiesgos = [];
+// Consultar registros existentes para este proyecto de forma segura
+$listaRiesgos = [];
+if ($proyectoId > 0) {
+    try {
+        $stmtRiesgos = $pdo->prepare('SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :pid ORDER BY id DESC');
+        $stmtRiesgos->execute(['pid' => $proyectoId]);
+        $listaRiesgos = $stmtRiesgos->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $listaRiesgos = [];
+    }
 }
 ?>
 
-<!-- Acordeón de Matriz de Riesgo -->
+<!-- 1. ACORDEÓN Y CONTENIDO VISUAL PRINCIPAL -->
 <div class="card accordion-card" style="margin-bottom: 20px; background-color: var(--bg-form, #16161a); border: 1px solid var(--border-color, #2a2b2f); border-radius: 8px; overflow: hidden;">
     <div class="accordion-header" onclick="toggleAccordion('acordeonRiesgo')" style="background-color: #1e3a5f; color: #ffffff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
         <h3 style="font-size: 16px; margin: 0; font-weight: 600;">Matriz de riesgo</h3>
@@ -94,7 +101,7 @@ try {
             </div>
         <?php endif; ?>
 
-        <!-- Botón para abrir Modal -->
+        <!-- Botón para abrir el Modal -->
         <button type="button" class="btn" onclick="openModalRiesgo()" style="background-color: #1e3a5f; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 15px;">
             <i class="ri-add-line"></i> Riesgo
         </button>
@@ -139,23 +146,23 @@ try {
     </div>
 </div>
 
-<!-- Modal con Diseño Claro / Fondo Blanco y Cabecera Navbar Blue -->
-<div id="modalRiesgo" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
+<!-- 2. MODAL COLOCADO FUERA DEL FLUJO DE FORMULARIOS PADRES (AISLADO ABAJO) -->
+<div id="modalRiesgo" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
     <div style="background-color: #ffffff; border: 1px solid #cbd5e1; width: 95%; max-width: 1200px; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
         
-        <!-- Cabecera con el Azul del Navbar -->
+        <!-- Cabecera del Modal (Azul Navbar) -->
         <div style="background-color: #1e3a5f; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
             <h3 style="color: #ffffff; font-size: 16px; margin: 0; font-weight: 600;">Agregar &gt; Riesgo</h3>
             <button type="button" onclick="closeModalRiesgo()" style="background: transparent; border: none; color: #ffffff; font-size: 20px; cursor: pointer;"><i class="ri-close-line"></i></button>
         </div>
 
-        <!-- Formulario principal con fondo blanco y espaciado -->
+        <!-- Formulario Independiente del Modal -->
         <form action="" method="POST" style="padding: 30px; max-height: 80vh; overflow-y: auto;">
             <input type="hidden" name="accion_riesgo" value="guardar_riesgo">
+            <input type="hidden" name="proyecto_id" value="<?php echo htmlspecialchars((string)$proyectoId, ENT_QUOTES, 'UTF-8'); ?>">
 
-            <!-- CAJA INTERNA CLARA CON MÁRGENES Y BORDES SUAVES -->
+            <!-- Caja Interna Clara para Selects -->
             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 25px;">
-                <!-- Rejilla de 4 Columnas -->
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
                     <?php foreach ($catalogosRiesgo as $nameKey => $opciones): ?>
                         <div class="form-group" style="display: flex; flex-direction: column;">
@@ -173,14 +180,14 @@ try {
                 </div>
             </div>
 
-            <!-- CAJA CONTENEDORA INFERIOR (Checkbox de acuerdo + Botón Guardar) -->
+            <!-- Caja Contenedora Inferior (Checkbox y Botón Guardar) -->
             <div style="background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <input type="checkbox" id="acuerdo_informacion" name="acuerdo_informacion" value="1" required style="width: 18px; height: 18px; accent-color: #1e3a5f; cursor: pointer;">
                     <label for="acuerdo_informacion" style="color: #334155; font-size: 13px; font-weight: 600; cursor: pointer;">Estoy de acuerdo con la información suministrada!</label>
                 </div>
 
-                <button type="submit" class="btn" style="background-color: #1e3a5f; color: #ffffff; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background-color 0.2s;">
+                <button type="submit" class="btn" style="background-color: #1e3a5f; color: #ffffff; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                     <i class="ri-save-line" style="font-size: 16px;"></i> Guardar
                 </button>
             </div>
