@@ -1,6 +1,6 @@
 <?php
 /**
- * Módulo: Prueba 23 - Matriz de Riesgo
+ * Módulo: Prueba 23 - Matriz de Riesgo (Selección Única)
  * Compatible con PHP 8.x + PDO
  */
 
@@ -8,13 +8,13 @@ if (!isset($pdo) || !$pdo instanceof PDO) {
     exit('Error de inicialización de base de datos.');
 }
 
-// Obtener ID del proyecto actual (Asegurar que $proyectoId esté disponible en el ámbito superior)
+// Obtener ID del proyecto actual
 $proyectoId = $proyectoId ?? filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 
 $mensajeRiesgo = '';
 $tipoAlertaRiesgo = '';
 
-// Catálogos estandarizados para los selectores múltiples
+// Catálogos estandarizados de selección única para la matriz de riesgo
 $catalogosRiesgo = [
     'origen_riesgo' => ['Estratégico', 'Operativo', 'Financiero', 'Cumplimiento', 'Tecnológico'],
     'objetivos_negocio' => ['Crecimiento de ingresos', 'Optimización de costos', 'Continuidad operativa', 'Integridad de reportes', 'Cumplimiento regulatorio'],
@@ -29,18 +29,18 @@ $catalogosRiesgo = [
 // Procesamiento del formulario POST para inserción de nuevos riesgos
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion_riesgo']) && $_POST['accion_riesgo'] === 'guardar_riesgo') {
     try {
-        // Sanitizar y empaquetar arreglos múltiples
-        $origen = isset($_POST['origen_riesgo']) && is_array($_POST['origen_riesgo']) ? implode(', ', array_map('strip_tags', $_POST['origen_riesgo'])) : '';
-        $objetivos = isset($_POST['objetivos_negocio']) && is_array($_POST['objetivos_negocio']) ? implode(', ', array_map('strip_tags', $_POST['objetivos_negocio'])) : '';
-        $riesgoNeg = isset($_POST['riesgo_negocio']) && is_array($_POST['riesgo_negocio']) ? implode(', ', array_map('strip_tags', $_POST['riesgo_negocio'])) : '';
-        $riesgoClave = isset($_POST['riesgo_clave']) && is_array($_POST['riesgo_clave']) ? implode(', ', array_map('strip_tags', $_POST['riesgo_clave'])) : '';
-        $respControles = isset($_POST['respuesta_controles']) && is_array($_POST['respuesta_controles']) ? implode(', ', array_map('strip_tags', $_POST['respuesta_controles'])) : '';
-        $areaAsercion = isset($_POST['area_asercion']) && is_array($_POST['area_asercion']) ? implode(', ', array_map('strip_tags', $_POST['area_asercion'])) : '';
-        $enfoque = isset($_POST['enfoque_auditoria']) && is_array($_POST['enfoque_auditoria']) ? implode(', ', array_map('strip_tags', $_POST['enfoque_auditoria'])) : '';
-        $emision = isset($_POST['emision_informe']) && is_array($_POST['emision_informe']) ? implode(', ', array_map('strip_tags', $_POST['emision_informe'])) : '';
+        // Capturar y sanitizar los valores de selección única
+        $origen = trim($_POST['origen_riesgo'] ?? '');
+        $objetivos = trim($_POST['objetivos_negocio'] ?? '');
+        $riesgoNeg = trim($_POST['riesgo_negocio'] ?? '');
+        $riesgoClave = trim($_POST['riesgo_clave'] ?? '');
+        $respControles = trim($_POST['respuesta_controles'] ?? '');
+        $areaAsercion = trim($_POST['area_asercion'] ?? '');
+        $enfoque = trim($_POST['enfoque_auditoria'] ?? '');
+        $emision = trim($_POST['emision_informe'] ?? '');
         $acuerdo = isset($_POST['acuerdo_informacion']) ? 1 : 0;
 
-        if ($proyectoId > 0 && $acuerdo === 1) {
+        if ($proyectoId > 0 && $acuerdo === 1 && !empty($origen)) {
             $stmt = $pdo->prepare('
                 INSERT INTO prueba_23_riesgos 
                 (proyecto_id, origen_riesgo, objetivos_negocio, riesgo_negocio, riesgo_clave, respuesta_controles, area_asercion, enfoque_auditoria, emision_informe) 
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion_riesgo']) && $
             $mensajeRiesgo = 'Registro de matriz de riesgo guardado exitosamente.';
             $tipoAlertaRiesgo = 'success';
         } else {
-            $mensajeRiesgo = 'Debe aceptar los términos de la información suministrada y poseer un proyecto válido.';
+            $mensajeRiesgo = 'Debe completar los campos obligatorios y aceptar los términos de la información suministrada.';
             $tipoAlertaRiesgo = 'error';
         }
     } catch (PDOException $e) {
@@ -140,38 +140,38 @@ try {
     </div>
 </div>
 
-<!-- Modal de Captura de Riesgo -->
+<!-- Modal Ancho de Captura de Riesgo (4 columnas) -->
 <div id="modalRiesgo" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background-color: #1c1c21; border: 1px solid #2a2b2f; width: 90%; max-width: 900px; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+    <div style="background-color: #1c1c21; border: 1px solid #2a2b2f; width: 95%; max-width: 1150px; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
         
         <div style="background-color: #374151; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
             <h3 style="color: #ffffff; font-size: 16px; margin: 0;">Agregar &gt; Riesgo</h3>
             <button type="button" onclick="closeModalRiesgo()" style="background: transparent; border: none; color: #ffffff; font-size: 18px; cursor: pointer;"><i class="ri-close-line"></i></button>
         </div>
 
-        <form action="" method="POST" style="padding: 20px; max-height: 75vh; overflow-y: auto;">
+        <form action="" method="POST" style="padding: 20px; max-height: 80vh; overflow-y: auto;">
             <input type="hidden" name="accion_riesgo" value="guardar_riesgo">
 
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px;">
+            <!-- Rejilla de 4 columnas (4 campos arriba, 4 campos abajo) -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
                 
-                <!-- Bucle para generar cada campo de selección múltiple -->
                 <?php foreach ($catalogosRiesgo as $nameKey => $opciones): ?>
-                    <div class="form-group">
-                        <label style="display: block; font-size: 12px; text-transform: uppercase; color: #9ca3af; margin-bottom: 6px; font-weight: 600;">
-                            <?php echo ucwords(str_replace('_', ' ', $nameKey)); ?> <small style="color: #00bcd4;">(Múltiple)</small>
+                    <div class="form-group" style="display: flex; flex-direction: column;">
+                        <label style="font-size: 11px; text-transform: uppercase; color: #9ca3af; margin-bottom: 6px; font-weight: 600;">
+                            <?php echo ucwords(str_replace('_', ' ', $nameKey)); ?>
                         </label>
-                        <select name="<?php echo $nameKey; ?>[]" multiple class="form-control" style="width: 100%; background-color: #0f0f11; border: 1px solid #2a2b2f; color: #ffffff; padding: 10px; border-radius: 6px; height: 95px;" required>
+                        <select name="<?php echo $nameKey; ?>" class="form-control" style="width: 100%; background-color: #0f0f11; border: 1px solid #2a2b2f; color: #ffffff; padding: 10px; border-radius: 6px; font-size: 13px;" required>
+                            <option value="">-- Seleccione --</option>
                             <?php foreach ($opciones as $opt): ?>
                                 <option value="<?php echo htmlspecialchars($opt, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($opt, ENT_QUOTES, 'UTF-8'); ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <small style="color: #6b7280; font-size: 11px; margin-top: 4px; display: block;">Mantén presionado Ctrl (o Cmd) para seleccionar varias opciones.</small>
                     </div>
                 <?php endforeach; ?>
 
             </div>
 
-            <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-top: 1px solid #2a2b2f; padding-top: 15px;">
                 <input type="checkbox" id="acuerdo_informacion" name="acuerdo_informacion" value="1" required style="width: 18px; height: 18px; accent-color: #00bcd4;">
                 <label for="acuerdo_informacion" style="color: #d1d5db; font-size: 13px; cursor: pointer;">Estoy de acuerdo con la información suministrada!</label>
             </div>
