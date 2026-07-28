@@ -291,12 +291,13 @@ $estadoActualPrueba = $datosEjecucion->estado ?? 'en_proceso';
 $obsSocioLider = $datosEjecucion->observacion_socio_lider ?? '';
 $obsSocioCalidad = $datosEjecucion->observacion_socio_calidad ?? '';
 
-$matrizRiesgosData = null;
+// Cargar todos los riesgos registrados para la Prueba 23 en este proyecto
+$listaRiesgosProyecto = [];
 if ((int)$pruebaId === 23) {
     try {
-        $stmtMrGet = $pdo->prepare("SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :proj");
+        $stmtMrGet = $pdo->prepare("SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :proj ORDER BY id DESC");
         $stmtMrGet->execute([':proj' => $proyectoId]);
-        $matrizRiesgosData = $stmtMrGet->fetch(PDO::FETCH_OBJ);
+        $listaRiesgosProyecto = $stmtMrGet->fetchAll(PDO::FETCH_OBJ);
     } catch (PDOException $e) {
         error_log("Error al recuperar prueba_23_riesgos: " . $e->getMessage());
     }

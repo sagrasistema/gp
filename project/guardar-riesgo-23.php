@@ -18,7 +18,7 @@ if (!$proyectoId) {
     exit;
 }
 
-// Captura y sanitización usando los nombres exactos de tus columnas de la base de datos
+// Sanitización rigurosa de cada campo proveniente de los selectores del modal
 $origenRiesgo       = trim($_POST['origen_riesgo'] ?? '');
 $objetivosNegocio   = trim($_POST['objetivos_negocio'] ?? '');
 $riesgoNegocio      = trim($_POST['riesgo_negocio'] ?? '');
@@ -35,19 +35,10 @@ try {
         INSERT INTO prueba_23_riesgos 
         (proyecto_id, origen_riesgo, objetivos_negocio, riesgo_negocio, riesgo_clave, respuesta_controles, area_asercion, enfoque_auditoria, emision_informe)
         VALUES (:proj, :origen, :objetivos, :r_negocio, :r_clave, :controles, :asercion, :enfoque, :emision)
-        ON DUPLICATE KEY UPDATE 
-            origen_riesgo = :origen_u, 
-            objetivos_negocio = :objetivos_u, 
-            riesgo_negocio = :r_negocio_u, 
-            riesgo_clave = :r_clave_u, 
-            respuesta_controles = :controles_u, 
-            area_asercion = :asercion_u, 
-            enfoque_auditoria = :enfoque_u, 
-            emision_informe = :emision_u
     ");
 
-    $params = [
-        ':proj'        => $proyectoId,
+    $stmt->execute([
+        ':proj'      => $proyectoId,
         ':origen'      => $origenRiesgo !== '' ? $origenRiesgo : null,
         ':objetivos'   => $objetivosNegocio !== '' ? $objetivosNegocio : null,
         ':r_negocio'   => $riesgoNegocio !== '' ? $riesgoNegocio : null,
@@ -56,24 +47,15 @@ try {
         ':asercion'    => $areaAsercion !== '' ? $areaAsercion : null,
         ':enfoque'     => $enfoqueAuditoria !== '' ? $enfoqueAuditoria : null,
         ':emision'     => $emisionInforme !== '' ? $emisionInforme : null,
-        ':origen_u'      => $origenRiesgo !== '' ? $origenRiesgo : null,
-        ':objetivos_u'   => $objetivosNegocio !== '' ? $objetivosNegocio : null,
-        ':r_negocio_u'   => $riesgoNegocio !== '' ? $riesgoNegocio : null,
-        ':r_clave_u'     => $riesgoClave !== '' ? $riesgoClave : null,
-        ':controles_u'   => $respuestaControles !== '' ? $respuestaControles : null,
-        ':asercion_u'    => $areaAsercion !== '' ? $areaAsercion : null,
-        ':enfoque_u'     => $enfoqueAuditoria !== '' ? $enfoqueAuditoria : null,
-        ':emision_u'     => $emisionInforme !== '' ? $emisionInforme : null,
-    ];
+    ]);
 
-    $stmt->execute($params);
     $pdo->commit();
 
-    echo json_encode(['status' => 'success', 'message' => 'Riesgo guardado correctamente.']);
+    echo json_encode(['status' => 'success', 'message' => 'Riesgo agregado correctamente.']);
 } catch (Exception $e) {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    error_log("Error al guardar prueba_23_riesgos: " . $e->getMessage());
+    error_log("Error al insertar en prueba_23_riesgos: " . $e->getMessage());
     echo json_encode(['status' => 'error', 'message' => 'Error en base de datos: ' . $e->getMessage()]);
 }
