@@ -75,7 +75,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $pdo->beginTransaction();
-        
+        ##
+
+        // 1. Interceptar la petición POST del modal de la Prueba 11
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_POST['action_type'] === 'add_analitica_item') {
+            try {
+                // Obtener y validar parámetros de la URL de forma estricta
+                $pruebaId = filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT);
+                $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT);
+
+                if (!$pruebaId || $pruebaId !== 11) {
+                    throw new Exception('Identificador de prueba no válido.');
+                }
+
+                // Sanitizar y validar el tipo recibido del input oculto
+                $tipo = trim($_POST['tipo'] ?? '');
+                $tiposPermitidos = ['activo', 'pasivo', 'patrimonio'];
+                if (!in_array($tipo, $tiposPermitidos, true)) {
+                    throw new Exception('El tipo de partida analítica seleccionado no es válido.');
+                }
+
+                // Sanitizar el resto de campos del formulario
+                $tipoRubro = trim($_POST['tipo_rubro'] ?? '');
+                if (empty($tipoRubro)) {
+                    throw new Exception('El rubro o tipo de cuenta es obligatorio.');
+                }
+
+                $saldoActual = filter_input(INPUT_POST, 'saldo_actual', FILTER_VALIDATE_FLOAT);
+                $saldoAnterior = filter_input(INPUT_POST, 'saldo_anterior', FILTER_VALIDATE_FLOAT);
+                $observaciones = trim($_POST['observaciones'] ?? '');
+
+                if ($saldoActual === false || $saldoAnterior === false) {
+                    throw new Exception('Los montos de saldo deben ser numéricos.');
+                }
+
+                // 2. Inserción segura utilizando PDO (Sentencias Preparadas)
+                // Se asume que la instancia de conexión PDO está disponible bajo la variable global $pdo
+                $sql = "INSERT INTO partidas_analiticas (prueba_id, tipo, tipo_rubro, saldo_actual, saldo_anterior, observaciones, fecha_creacion) 
+                        VALUES (:prueba_id, :tipo, :tipo_rubro, :saldo_actual, :saldo_anterior, :observaciones, NOW())";
+
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ':prueba_id'      => $pruebaId,
+                    ':tipo'           => $tipo,
+                    ':tipo_rubro'     => htmlspecialchars($tipoRubro, ENT_QUOTES, 'UTF-8'),
+                    ':saldo_actual'   => $saldoActual,
+                    ':saldo_anterior' => $saldoAnterior,
+                    ':observaciones'  => htmlspecialchars($observaciones, ENT_QUOTES, 'UTF-8')
+                ]);
+
+                // 3. Redirección exitosa (Patrón PRG)
+                header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&success=analitica_guardada");
+                exit;
+
+            } catch (Exception $e) {
+                // Registro interno de errores del sistema y redirección con mensaje controlado
+                error_log('Error al guardar analítica Prueba 11: ' . $e->getMessage());
+                $errorMsg = urlencode($e->getMessage());
+                
+                $pId = $proyectoId ?? 0;
+                $prId = $pruebaId ?? 11;
+                header("Location: actividades.php?proyectoId={$pId}&pruebaId={$prId}&error={$errorMsg}");
+                exit;
+            }
+        }
         // Procesamiento específico para la Prueba 16 (Materialidad)
         if ((int)$pruebaId === 16 && isset($_POST['materialidad']) && is_array($_POST['materialidad'])) {
             $mat = $_POST['materialidad'];

@@ -356,40 +356,41 @@ include 'conect-actividades.php';
     <?php endforeach; ?>
 
     <!-- Modal para Agregar Partida Analítica -->
-<!-- Modal de Partida Analítica (Activo, Pasivo, Patrimonio) -->
-<div id="analiticaModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 9999;">
-    <div style="background: #ffffff; padding: 2rem; border-radius: 10px; max-width: 500px; width: 90%; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        
-        <!-- Título dinámico -->
-        <h3 id="modalAnaliticaTitle" style="margin-top: 0; color: #1e3a5f;">Agregar Partida</h3>
-        
-        <!-- Formulario que será procesado por FormData -->
-        <form id="formAnalitica11">
-            <!-- Input oculto que recibe el tipo ('activo', 'pasivo', 'patrimonio') desde openAnaliticaModal(tipo) -->
-            <input type="hidden" id="modalTipoAnalitica" name="tipo">
-            
-            <!-- ID de la prueba actual (Asegúrate de inyectar dinámicamente el ID real de la prueba) -->
-            <input type="hidden" name="id_prueba" value="<?php echo htmlspecialchars((string)$idPrueba, ENT_QUOTES, 'UTF-8'); ?>">
-
-            <div style="margin-bottom: 1rem;">
-                <label for="descripcion" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #334155;">Descripción / Cuenta:</label>
-                <input type="text" id="descripcion" name="descripcion" required style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+    <div id="analiticaModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1150; align-items:center; justify-content:center;">
+        <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:550px; width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.15);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:0.75rem;">
+                <h3 id="modalAnaliticaTitle" style="margin:0; color:#1e293b; font-size:1.1rem;">Agregar Partida</h3>
+                <button type="button" onclick="closeAnaliticaModal()" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748b;"><i class="ri-close-line"></i></button>
             </div>
+            <form action="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pruebaId ?>" method="POST">
+                <input type="hidden" name="action_type" value="add_analitica_item">
+                <input type="hidden" id="modalTipoAnalitica" name="tipo" value="">
 
-            <div style="margin-bottom: 1.5rem;">
-                <label for="monto" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #334155;">Monto:</label>
-                <input type="number" step="0.01" id="monto" name="monto" required style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
-            </div>
-
-            <div style="text-align: right;">
-                <button type="button" onclick="closeAnaliticaModal()" style="background: #64748b; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;">Cancelar</button>
-                
-                <!-- 💡 EL BOTÓN CRUCIAL CON EL ID QUE BUSCA EL JAVASCRIPT -->
-                <button type="button" id="btnGuardarAnalitica" style="background: #2563eb; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: 600;">Guardar Partida</button>
-            </div>
-        </form>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Tipo / Rubro (Ej. Efectivo, Cuentas por Cobrar...)</label>
+                    <input type="text" name="tipo_rubro" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Saldo Actual</label>
+                        <input type="number" step="0.01" name="saldo_actual" value="0.00" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Saldo Anterior</label>
+                        <input type="number" step="0.01" name="saldo_anterior" value="0.00" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                    </div>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Observaciones (ID de referencia)</label>
+                    <input type="text" name="observaciones" placeholder="Ej. 6, 7..." style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                </div>
+                <div style="text-align:right; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeAnaliticaModal()" style="padding: 0.5rem 1rem;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.25rem;">Guardar Partida</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 <?php endif; ?>
 <!-- 2. MODAL COLOCADO FUERA DEL FLUJO DE FORMULARIOS PADRES (AISLADO ABAJO) -->
 <div id="modalRiesgo" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
