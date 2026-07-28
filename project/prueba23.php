@@ -1,6 +1,6 @@
 <?php
 /**
- * Módulo: Prueba 23 - Matriz de Riesgo (Selección Única)
+ * Módulo: Prueba 23 - Matriz de Riesgo (Diseño Proporcionado)
  * Compatible con PHP 8.x + PDO
  */
 
@@ -8,7 +8,7 @@ if (!isset($pdo) || !$pdo instanceof PDO) {
     exit('Error de inicialización de base de datos.');
 }
 
-// Obtener ID del proyecto actual
+// Obtener ID del proyecto actual de forma segura
 $proyectoId = $proyectoId ?? filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 
 $mensajeRiesgo = '';
@@ -29,7 +29,6 @@ $catalogosRiesgo = [
 // Procesamiento del formulario POST para inserción de nuevos riesgos
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion_riesgo']) && $_POST['accion_riesgo'] === 'guardar_riesgo') {
     try {
-        // Capturar y sanitizar los valores de selección única
         $origen = trim($_POST['origen_riesgo'] ?? '');
         $objetivos = trim($_POST['objetivos_negocio'] ?? '');
         $riesgoNeg = trim($_POST['riesgo_negocio'] ?? '');
@@ -140,27 +139,29 @@ try {
     </div>
 </div>
 
-<!-- Modal Ancho de Captura de Riesgo (4 columnas) -->
-<div id="modalRiesgo" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background-color: #1c1c21; border: 1px solid #2a2b2f; width: 95%; max-width: 1150px; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+<!-- Modal Mejor Proporcionado (Caja interna con padding holgado) -->
+<div id="modalRiesgo" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.75); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background-color: #1c1c21; border: 1px solid #2a2b2f; width: 95%; max-width: 1200px; border-radius: 8px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.6);">
         
-        <div style="background-color: #374151; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="color: #ffffff; font-size: 16px; margin: 0;">Agregar &gt; Riesgo</h3>
-            <button type="button" onclick="closeModalRiesgo()" style="background: transparent; border: none; color: #ffffff; font-size: 18px; cursor: pointer;"><i class="ri-close-line"></i></button>
+        <!-- Cabecera del Modal -->
+        <div style="background-color: #374151; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="color: #ffffff; font-size: 16px; margin: 0; font-weight: 600;">Agregar &gt; Riesgo</h3>
+            <button type="button" onclick="closeModalRiesgo()" style="background: transparent; border: none; color: #ffffff; font-size: 20px; cursor: pointer;"><i class="ri-close-line"></i></button>
         </div>
 
-        <form action="" method="POST" style="padding: 20px; max-height: 80vh; overflow-y: auto;">
+        <!-- Formulario con Padding Interno Holgado -->
+        <form action="" method="POST" style="padding: 30px; max-height: 80vh; overflow-y: auto;">
             <input type="hidden" name="accion_riesgo" value="guardar_riesgo">
 
-            <!-- Rejilla de 4 columnas (4 campos arriba, 4 campos abajo) -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
+            <!-- Rejilla de 4 Columnas con Espaciado (Gap) -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 25px;">
                 
                 <?php foreach ($catalogosRiesgo as $nameKey => $opciones): ?>
                     <div class="form-group" style="display: flex; flex-direction: column;">
-                        <label style="font-size: 11px; text-transform: uppercase; color: #9ca3af; margin-bottom: 6px; font-weight: 600;">
+                        <label style="font-size: 11px; text-transform: uppercase; color: #9ca3af; margin-bottom: 8px; font-weight: 600; letter-spacing: 0.5px;">
                             <?php echo ucwords(str_replace('_', ' ', $nameKey)); ?>
                         </label>
-                        <select name="<?php echo $nameKey; ?>" class="form-control" style="width: 100%; background-color: #0f0f11; border: 1px solid #2a2b2f; color: #ffffff; padding: 10px; border-radius: 6px; font-size: 13px;" required>
+                        <select name="<?php echo $nameKey; ?>" class="form-control" style="width: 100%; background-color: #0f0f11; border: 1px solid #2a2b2f; color: #ffffff; padding: 10px 12px; border-radius: 6px; font-size: 13px;" required>
                             <option value="">-- Seleccione --</option>
                             <?php foreach ($opciones as $opt): ?>
                                 <option value="<?php echo htmlspecialchars($opt, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($opt, ENT_QUOTES, 'UTF-8'); ?></option>
@@ -171,13 +172,15 @@ try {
 
             </div>
 
-            <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-top: 1px solid #2a2b2f; padding-top: 15px;">
-                <input type="checkbox" id="acuerdo_informacion" name="acuerdo_informacion" value="1" required style="width: 18px; height: 18px; accent-color: #00bcd4;">
+            <!-- Fila de Términos / Acuerdo con separador superior -->
+            <div style="margin-bottom: 25px; display: flex; align-items: center; gap: 12px; border-top: 1px solid #2a2b2f; padding-top: 20px;">
+                <input type="checkbox" id="acuerdo_informacion" name="acuerdo_informacion" value="1" required style="width: 18px; height: 18px; accent-color: #00bcd4; cursor: pointer;">
                 <label for="acuerdo_informacion" style="color: #d1d5db; font-size: 13px; cursor: pointer;">Estoy de acuerdo con la información suministrada!</label>
             </div>
 
+            <!-- Botón de Guardar -->
             <div style="display: flex; justify-content: flex-start;">
-                <button type="submit" class="btn" style="background-color: #00bcd4; color: #121212; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <button type="submit" class="btn" style="background-color: #00bcd4; color: #121212; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: opacity 0.2s;">
                     <i class="ri-save-line" style="font-size: 16px;"></i> Guardar
                 </button>
             </div>
