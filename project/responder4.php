@@ -29,13 +29,13 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
     <a href="responder.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
         <i class="ri-calendar-check-line"></i> Planificación
     </a>
-    <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn active">
+    <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
         <i class="ri-compass-3-line"></i> Estrategia
     </a>
     <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
         <i class="ri-play-circle-line"></i> Ejecución
     </a>
-    <a href="responder4.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
+    <a href="responder4.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn active">
         <i class="ri-flag-line"></i> Conclusión
     </a>
 </div>
