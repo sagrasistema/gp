@@ -324,7 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // =========================================================================
             // FIN PROCESAMIENTO MODELO 5
             // ====================================================================
-        else {
+        } else {
             // Guardado General (Actividades + Estatus de Prueba)
             if (isset($_POST['actividades_data']) && is_array($_POST['actividades_data'])) {
                 $stmtSave = $pdo->prepare("
