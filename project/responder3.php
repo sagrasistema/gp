@@ -1,7 +1,7 @@
 <?php
 // v/proyectos/responder.php
 include '../main/config.php';
-include 'conect-proyecto4.php';
+include 'conect-proyecto3.php';
 
 $pageTitle = "Panel de Control de Auditoría";
 include '../main/h.php';
@@ -32,10 +32,10 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
     <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
         <i class="ri-compass-3-line"></i> Estrategia
     </a>
-    <a href="responder3.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
+    <a href="responder3.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn active">
         <i class="ri-play-circle-line"></i> Ejecución
     </a>
-    <a href="responder4.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn active">
+    <a href="responder4.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
         <i class="ri-flag-line"></i> Conclusión
     </a>
 </div>
@@ -96,7 +96,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
-            <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 4 Conclusión 
+            <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 3 Ejecución 
         </h1>
         
     </div>
@@ -260,7 +260,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
     <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS Y ACTIVIDADES) -->
     <div class="accordion-container">
         <?php
-        $categories = $pdo->query("SELECT * FROM audit_categorias WHERE etapa_id = 4 ORDER BY orden ASC")->fetchAll(PDO::FETCH_OBJ);
+        $categories = $pdo->query("SELECT * FROM audit_categorias WHERE etapa_id = 3 ORDER BY orden ASC")->fetchAll(PDO::FETCH_OBJ);
         foreach ($categories as $cat):
             $stmtP = $pdo->prepare("SELECT * FROM audit_pruebas WHERE categoria_id = :catId ORDER BY orden ASC");
             $stmtP->execute([':catId' => $cat->id]);
