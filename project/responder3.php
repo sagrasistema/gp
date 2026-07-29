@@ -195,7 +195,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 <div class="pruebas-progress-container" style="margin-bottom: 2rem; background: #ffffff; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.0rem;">
         <h4 style="margin: 0; font-size: 0.95rem; color: #1e293b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.025em;">
-            Progreso General de Pruebas (Fase de Planificación)
+            Progreso General de Pruebas (Fase de Ejecución)
         </h4>
         <span style="font-size: 0.75rem; background-color: #f1f5f9; color: #475569; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;">
             Total: 19 Actividades / Pruebas
