@@ -244,7 +244,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // =========================================================================
             // FIN PROCESAMIENTO MODELO 6
             // =========================================================================
-        } else {
+        } elseif ($action === 'save_modelo_5') {
+            // =========================================================================
+            // INICIO PROCESAMIENTO MODELO 5
+            // =========================================================================
+            
+            // 1. Textos Generales
+            $partida = trim($_POST['partida_estado_financiero'] ?? '');
+            $fecha_1 = trim($_POST['fecha_periodo_prueba'] ?? '');
+            
+            $pob_inf = trim($_POST['poblacion_informe'] ?? '');
+            $pob_fec = trim($_POST['poblacion_fecha'] ?? '');
+            $pob_n   = (int)($_POST['poblacion_n_partidas'] ?? 0);
+            
+            // 2. Textos Enriquecidos (Se permite HTML si usas editores WYSIWYG, pero filtramos scripts si es posible o usamos htmlspecialchars al imprimir)
+            $proc_realizado = trim($_POST['procedimiento_realizado'] ?? '');
+            $doc_excepcion  = trim($_POST['documentar_excepciones'] ?? '');
+            $def_error      = trim($_POST['definicion_error'] ?? '');
+            $doc_resultado  = trim($_POST['documentar_resultado'] ?? '');
+            $eval_result    = trim($_POST['evaluacion_resultados'] ?? '');
+
+            // 3. Montos Financieros (Usando tu función parseVenezuelanNumber)
+            $impGen  = parseVenezuelanNumber($_POST['importancia_relativa_general'] ?? null);
+            $impPlan = parseVenezuelanNumber($_POST['importancia_relativa_planificacion'] ?? null);
+            $sud     = parseVenezuelanNumber($_POST['nivel_registro_sud'] ?? null);
+            $pob_val = parseVenezuelanNumber($_POST['poblacion_valor_total'] ?? null);
+
+            // 4. Aserciones (Booleanos)
+            $aser_c  = isset($_POST['aser_c']) ? 1 : 0;
+            $aser_a  = isset($_POST['aser_a']) ? 1 : 0;
+            $aser_eo = isset($_POST['aser_eo']) ? 1 : 0;
+            $aser_co = isset($_POST['aser_co']) ? 1 : 0;
+            $aser_ro = isset($_POST['aser_ro']) ? 1 : 0;
+            $aser_va = isset($_POST['aser_va']) ? 1 : 0;
+            $aser_pd = isset($_POST['aser_pd']) ? 1 : 0;
+
+            // 5. Tabla de Selección
+            $cob_n = (int)($_POST['cobertura_n'] ?? 0);       $cob_m = parseVenezuelanNumber($_POST['cobertura_monto'] ?? null);       $cob_p = parseVenezuelanNumber($_POST['cobertura_porcentaje'] ?? null);
+            $rie_n = (int)($_POST['riesgo_n'] ?? 0);          $rie_m = parseVenezuelanNumber($_POST['riesgo_monto'] ?? null);          $rie_p = parseVenezuelanNumber($_POST['riesgo_porcentaje'] ?? null);
+            $imp_n = (int)($_POST['impredecibles_n'] ?? 0);   $imp_m = parseVenezuelanNumber($_POST['impredecibles_monto'] ?? null);   $imp_p = parseVenezuelanNumber($_POST['impredecibles_porcentaje'] ?? null);
+            $pro_n = (int)($_POST['probado_n'] ?? 0);         $pro_m = parseVenezuelanNumber($_POST['probado_monto'] ?? null);         $pro_p = parseVenezuelanNumber($_POST['probado_porcentaje'] ?? null);
+            $nop_n = (int)($_POST['no_probado_n'] ?? 0);      $nop_m = parseVenezuelanNumber($_POST['no_probado_monto'] ?? null);      $nop_p = parseVenezuelanNumber($_POST['no_probado_porcentaje'] ?? null);
+
+            // 6. Ejecutar Upsert
+            $stmtM5Save = $pdo->prepare("
+                INSERT INTO audit_modelo_5_detalles (
+                    proyecto_id, prueba_id, partida_estado_financiero, fecha_periodo_prueba, importancia_relativa_general, importancia_relativa_planificacion, nivel_registro_sud,
+                    aser_c, aser_a, aser_eo, aser_co, aser_ro, aser_va, aser_pd,
+                    poblacion_informe, poblacion_fecha, poblacion_valor_total, poblacion_n_partidas, procedimiento_realizado, documentar_excepciones,
+                    definicion_error,
+                    cobertura_n, cobertura_monto, cobertura_porcentaje, riesgo_n, riesgo_monto, riesgo_porcentaje, impredecibles_n, impredecibles_monto, impredecibles_porcentaje, probado_n, probado_monto, probado_porcentaje, no_probado_n, no_probado_monto, no_probado_porcentaje,
+                    documentar_resultado, evaluacion_resultados
+                ) VALUES (
+                    :proj, :pr, :p1, :p2, :p3, :p4, :p5,
+                    :a1, :a2, :a3, :a4, :a5, :a6, :a7,
+                    :po1, :po2, :po3, :po4, :po5, :po6,
+                    :de1,
+                    :t1n, :t1m, :t1p, :t2n, :t2m, :t2p, :t3n, :t3m, :t3p, :t4n, :t4m, :t4p, :t5n, :t5m, :t5p,
+                    :dr1, :dr2
+                ) ON DUPLICATE KEY UPDATE 
+                    partida_estado_financiero = VALUES(partida_estado_financiero), fecha_periodo_prueba = VALUES(fecha_periodo_prueba), importancia_relativa_general = VALUES(importancia_relativa_general), importancia_relativa_planificacion = VALUES(importancia_relativa_planificacion), nivel_registro_sud = VALUES(nivel_registro_sud),
+                    aser_c = VALUES(aser_c), aser_a = VALUES(aser_a), aser_eo = VALUES(aser_eo), aser_co = VALUES(aser_co), aser_ro = VALUES(aser_ro), aser_va = VALUES(aser_va), aser_pd = VALUES(aser_pd),
+                    poblacion_informe = VALUES(poblacion_informe), poblacion_fecha = VALUES(poblacion_fecha), poblacion_valor_total = VALUES(poblacion_valor_total), poblacion_n_partidas = VALUES(poblacion_n_partidas), procedimiento_realizado = VALUES(procedimiento_realizado), documentar_excepciones = VALUES(documentar_excepciones),
+                    definicion_error = VALUES(definicion_error),
+                    cobertura_n = VALUES(cobertura_n), cobertura_monto = VALUES(cobertura_monto), cobertura_porcentaje = VALUES(cobertura_porcentaje), riesgo_n = VALUES(riesgo_n), riesgo_monto = VALUES(riesgo_monto), riesgo_porcentaje = VALUES(riesgo_porcentaje), impredecibles_n = VALUES(impredecibles_n), impredecibles_monto = VALUES(impredecibles_monto), impredecibles_porcentaje = VALUES(impredecibles_porcentaje), probado_n = VALUES(probado_n), probado_monto = VALUES(probado_monto), probado_porcentaje = VALUES(probado_porcentaje), no_probado_n = VALUES(no_probado_n), no_probado_monto = VALUES(no_probado_monto), no_probado_porcentaje = VALUES(no_probado_porcentaje),
+                    documentar_resultado = VALUES(documentar_resultado), evaluacion_resultados = VALUES(evaluacion_resultados)
+            ");
+
+            // Bind param masivo (usando array indexado para simplificar lectura)
+            $stmtM5Save->execute([
+                ':proj' => $proyectoId, ':pr' => $pruebaId, ':p1' => $partida, ':p2' => $fecha_1, ':p3' => $impGen, ':p4' => $impPlan, ':p5' => $sud,
+                ':a1' => $aser_c, ':a2' => $aser_a, ':a3' => $aser_eo, ':a4' => $aser_co, ':a5' => $aser_ro, ':a6' => $aser_va, ':a7' => $aser_pd,
+                ':po1' => $pob_inf, ':po2' => $pob_fec, ':po3' => $pob_val, ':po4' => $pob_n, ':po5' => $proc_realizado, ':po6' => $doc_excepcion,
+                ':de1' => $def_error,
+                ':t1n' => $cob_n, ':t1m' => $cob_m, ':t1p' => $cob_p, ':t2n' => $rie_n, ':t2m' => $rie_m, ':t2p' => $rie_p, ':t3n' => $imp_n, ':t3m' => $imp_m, ':t3p' => $imp_p, ':t4n' => $pro_n, ':t4m' => $pro_m, ':t4p' => $pro_p, ':t5n' => $nop_n, ':t5m' => $nop_m, ':t5p' => $nop_p,
+                ':dr1' => $doc_resultado, ':dr2' => $eval_result
+            ]);
+            
+            // =========================================================================
+            // FIN PROCESAMIENTO MODELO 5
+            // ====================================================================
+        else {
             // Guardado General (Actividades + Estatus de Prueba)
             if (isset($_POST['actividades_data']) && is_array($_POST['actividades_data'])) {
                 $stmtSave = $pdo->prepare("
@@ -405,6 +485,35 @@ if (isset($modeloPrueba) && (string)$modeloPrueba === '6') {
 // =========================================================================
 // FIN LECTURA DATOS MODELO 6
 // =========================================================================
+// =========================================================================
+// INICIO LECTURA DATOS MODELO 5 (Precarga de Formulario)
+// =========================================================================
+if (isset($modeloPrueba) && (string)$modeloPrueba === '5') { 
+    $formData5 = [];
+    try {
+        $stmtM5Get = $pdo->prepare("SELECT * FROM audit_modelo_5_detalles WHERE proyecto_id = :proj AND prueba_id = :pr LIMIT 1");
+        $stmtM5Get->execute([':proj' => $proyectoId, ':pr' => $pruebaId]);
+        $rowM5 = $stmtM5Get->fetch(PDO::FETCH_ASSOC);
+        
+        if ($rowM5) {
+            // Arrays con los campos numéricos a formatear a estándar venezolano
+            $monedaFields = [
+                'importancia_relativa_general', 'importancia_relativa_planificacion', 'nivel_registro_sud', 'poblacion_valor_total',
+                'cobertura_monto', 'riesgo_monto', 'impredecibles_monto', 'probado_monto', 'no_probado_monto',
+                'cobertura_porcentaje', 'riesgo_porcentaje', 'impredecibles_porcentaje', 'probado_porcentaje', 'no_probado_porcentaje'
+            ];
+            
+            foreach ($monedaFields as $field) {
+                if (isset($rowM5[$field]) && $rowM5[$field] !== null) {
+                    $rowM5[$field] = number_format((float)$rowM5[$field], 2, ',', '.');
+                }
+            }
+            $formData5 = $rowM5;
+        }
+    } catch (PDOException $e) {
+        error_log("Error al recuperar Modelo 5: " . $e->getMessage());
+    }
+}
 $pageTitle = "Formulario de Actividades y Hallazgos";
 include '../main/h.php';
 ?>
