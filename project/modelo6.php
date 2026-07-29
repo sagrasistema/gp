@@ -133,6 +133,10 @@ if ($currentPruebaId > 0) {
         error_log('[Error Fetch Modelo 6]: ' . $e->getMessage());
     }
 }
+/**
+ * Módulo del Modelo 6 - Ejecución de Auditoría Especial (Completo del 1 al 6)
+ * Compatible con PHP 8.x / Estándar PSR-12
+ */
 
 // Rescatamos los identificadores de forma segura desde el contexto padre o URL
 $currentPruebaId = $pruebaId ?? filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT) ?? 0;
@@ -144,23 +148,24 @@ $currentProyectoId = $proyectoId ?? filter_input(INPUT_GET, 'proyectoId', FILTER
     <!-- Cabecera del Módulo -->
     <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.5rem;">
         <h3 style="margin: 0 0 0.25rem 0; font-size: 1.25rem; color: #1e293b; font-weight: 700; display: flex; align-items: center; justify-content: space-between;">
-            <span>Modelo 6 - Ejecución de Auditoría Especial</span>
+            <span>Modelo 6 - Ejecución de Auditoría Especial (Completo)</span>
             <span style="font-size: 0.8rem; background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600;">
                 Prueba ID: <?php echo htmlspecialchars((string)$currentPruebaId, ENT_QUOTES, 'UTF-8'); ?>
             </span>
         </h3>
         <p style="margin: 0; color: #64748b; font-size: 0.9rem;">
-            Procedimientos que serán realizados, lineamientos y vínculos del análisis especial:
+            Procedimientos integrales, lineamientos y evaluación analítica de la prueba:
         </p>
     </div>
 
     <!-- Formulario de Captura -->
     <form method="POST" action="actividades.php?proyectoId=<?php echo $currentProyectoId; ?>&pruebaId=<?php echo $currentPruebaId; ?>">
         <input type="hidden" name="action_type" value="save_modelo_6">
+        <input type="hidden" name="prueba_id" value="<?php echo htmlspecialchars((string)$currentPruebaId, ENT_QUOTES, 'UTF-8'); ?>">
 
         <!-- 1. Información de la Cuenta y Objetivo -->
-        <div style="margin-bottom: 1.5rem;">
-            <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
+        <div style="margin-bottom: 1.75rem;">
+            <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
                 1. Información de la Cuenta y Objetivo de la Prueba
             </h4>
             
@@ -192,8 +197,8 @@ $currentProyectoId = $proyectoId ?? filter_input(INPUT_GET, 'proyectoId', FILTER
         </div>
 
         <!-- 2. Aseveraciones a los Estados Financieros -->
-        <div style="margin-bottom: 1.5rem;">
-            <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
+        <div style="margin-bottom: 1.75rem;">
+            <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
                 2. Aseveraciones a los Estados Financieros
             </h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
@@ -218,17 +223,60 @@ $currentProyectoId = $proyectoId ?? filter_input(INPUT_GET, 'proyectoId', FILTER
         </div>
 
         <!-- 3. Desarrollar una Expectativa -->
-        <div style="margin-bottom: 1.5rem;">
-            <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
+        <div style="margin-bottom: 1.75rem;">
+            <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
                 3. Desarrollar una Expectativa
             </h4>
             <textarea name="modelo6[expectativa]" rows="4" placeholder="Describa analíticamente la expectativa..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"></textarea>
         </div>
 
+        <!-- 4. Definir la Diferencia Tolerable y Umbrales -->
+        <div style="margin-bottom: 1.75rem;">
+            <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
+                4. Definir la Diferencia Tolerable
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Umbral de Variación Permitida (%)</label>
+                    <input type="text" name="modelo6[umbral_porcentaje]" placeholder="Ej. 5%" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Monto Límite Tolerable (Moneda Base)</label>
+                    <input type="text" name="modelo6[monto_tolerable]" placeholder="Ej. 1000.00" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Ejecución y Registro de Resultados -->
+        <div style="margin-bottom: 1.75rem;">
+            <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
+                5. Registro de Resultados y Desviaciones Obtenidas
+            </h4>
+            <textarea name="modelo6[resultados]" rows="4" placeholder="Indique los valores reales obtenidos en la ejecución y las variaciones detectadas frente a la expectativa..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"></textarea>
+        </div>
+
+        <!-- 6. Conclusión y Evaluación del Hallazgo -->
+        <div style="margin-bottom: 1.75rem;">
+            <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
+                6. Conclusión del Procedimiento
+            </h4>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">¿La variación supera el límite tolerable?</label>
+                <select name="modelo6[supera_limite]" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
+                    <option value="no">No (Expectativa cumplida satisfactoriamente)</option>
+                    <option value="si">Sí (Requiere evaluación de hallazgo o ajuste)</option>
+                </select>
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Conclusión detallada del auditor</label>
+                <textarea name="modelo6[conclusion]" rows="3" placeholder="Redacte la conclusión técnica..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"></textarea>
+            </div>
+        </div>
+
         <!-- Botón de Envío -->
-        <div style="text-align: right; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+        <div style="text-align: right; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
             <button type="submit" style="background: #2563eb; color: white; border: none; padding: 0.65rem 1.75rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
-                Guardar Avance del Modelo 6
+                Guardar Avance Completo (Modelo 6)
             </button>
         </div>
     </form>
