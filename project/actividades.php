@@ -157,7 +157,7 @@ include 'conect-actividades.php';
                 $proyecto_id = $id_proyecto_activo; // O tu variable de sesión de proyecto
                 $prueba_id   = $prueba['id'];
                 
-                // Incluimos el componente del Modelo 6
+                // Incluimos el componente del Modelo 6ww
                 include 'modelo6.php';
             }
             if ((int)$pruebaId === 11) {
