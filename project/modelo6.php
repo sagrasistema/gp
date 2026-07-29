@@ -148,7 +148,7 @@ $currentProyectoId = $proyectoId ?? filter_input(INPUT_GET, 'proyectoId', FILTER
     <!-- Cabecera del Módulo -->
     <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.5rem;">
         <h3 style="margin: 0 0 0.25rem 0; font-size: 1.25rem; color: #1e293b; font-weight: 700; display: flex; align-items: center; justify-content: space-between;">
-            <span>Modelo 6 - Ejecución de Auditoría Especial (Completo)</span>
+            <span>Modelo 6 - Ejecución de Auditoría Especial </span>
             <span style="font-size: 0.8rem; background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600;">
                 Prueba ID: <?php echo htmlspecialchars((string)$currentPruebaId, ENT_QUOTES, 'UTF-8'); ?>
             </span>
