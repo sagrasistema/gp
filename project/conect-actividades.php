@@ -44,9 +44,11 @@ try {
 }
 
 // 2. Cargar metadatos de la Prueba y su Estatus Actual
+
+// 2. Cargar metadatos de la Prueba y su Modelo desde la BD
 try {
     $stmtPrueba = $pdo->prepare("
-        SELECT p.nombre, p.norma, c.nombre AS catNombre 
+        SELECT p.nombre, p.norma, p.modelo, c.nombre AS catNombre 
         FROM audit_pruebas p 
         INNER JOIN audit_categorias c ON p.categoria_id = c.id 
         WHERE p.id = :pId
@@ -58,6 +60,10 @@ try {
         die("Error: La prueba especificada no existe.");
     }
 
+    // DISCRIMINADOR DE MODELO: Extraemos el modelo directamente del resultado de la BD
+    // (Nota: asegúrate de que la columna en tu tabla audit_pruebas se llame 'modelo')
+    $modeloPrueba = $metaPrueba->modelo ?? null;
+
     $stmtStatus = $pdo->prepare("
         SELECT estado FROM proyecto_pruebas_ejecucion 
         WHERE proyecto_id = :projId AND prueba_id = :prId
@@ -68,6 +74,8 @@ try {
 } catch (PDOException $e) {
     die("Error al cargar metadatos: " . $e->getMessage());
 }
+
+
 
 // 3. Procesamiento POST (Guardado de actividades, estatus, materialidad, matriz de riesgos e indicadores)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
