@@ -247,7 +247,7 @@ $currentProyectoId = $proyectoId ?? filter_input(INPUT_GET, 'proyectoId', FILTER
             </div>
         </div>
 
-        <!-- 5. Ejecución y Registro de Resultados -->
+        <!-- 5. Ejecución y Registro de Resultadossss -->
         <div style="margin-bottom: 1.75rem;">
             <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
                 5. Registro de Resultados y Desviaciones Obtenidas
