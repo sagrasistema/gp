@@ -1,7 +1,7 @@
 <?php
 // v/proyectos/responder.php
 include '../main/config.php';
-include 'conect-proyecto2.php';
+include 'conect-proyecto4.php';
 
 $pageTitle = "Panel de Control de Auditoría";
 include '../main/h.php';
@@ -260,7 +260,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
     <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS Y ACTIVIDADES) -->
     <div class="accordion-container">
         <?php
-        $categories = $pdo->query("SELECT * FROM audit_categorias WHERE etapa_id = 2 ORDER BY orden ASC")->fetchAll(PDO::FETCH_OBJ);
+        $categories = $pdo->query("SELECT * FROM audit_categorias WHERE etapa_id = 4 ORDER BY orden ASC")->fetchAll(PDO::FETCH_OBJ);
         foreach ($categories as $cat):
             $stmtP = $pdo->prepare("SELECT * FROM audit_pruebas WHERE categoria_id = :catId ORDER BY orden ASC");
             $stmtP->execute([':catId' => $cat->id]);

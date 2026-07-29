@@ -38,7 +38,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
     <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
         <i class="ri-play-circle-line"></i> Ejecución
     </a>
-    <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
+    <a href="responder4.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
         <i class="ri-flag-line"></i> Conclusión
     </a>
 </div>
