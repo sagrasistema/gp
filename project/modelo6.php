@@ -133,114 +133,103 @@ if ($currentPruebaId > 0) {
         error_log('[Error Fetch Modelo 6]: ' . $e->getMessage());
     }
 }
+
+// Rescatamos los identificadores de forma segura desde el contexto padre o URL
+$currentPruebaId = $pruebaId ?? filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT) ?? 0;
+$currentProyectoId = $proyectoId ?? filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 ?>
 
-<!-- 3. Interfaz Visual (HTML / Formulario Unificado) -->
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-secondary text-white">
-        <strong>Modelo 6 - Ejecución de Auditoría Especial (Prueba ID: <?= htmlspecialchars((string)$currentPruebaId) ?>)</strong>
+<div class="card-modelo-6" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 2rem;">
+    
+    <!-- Cabecera del Módulo -->
+    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <h3 style="margin: 0 0 0.25rem 0; font-size: 1.25rem; color: #1e293b; font-weight: 700; display: flex; align-items: center; justify-content: space-between;">
+            <span>Modelo 6 - Ejecución de Auditoría Especial</span>
+            <span style="font-size: 0.8rem; background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600;">
+                Prueba ID: <?php echo htmlspecialchars((string)$currentPruebaId, ENT_QUOTES, 'UTF-8'); ?>
+            </span>
+        </h3>
+        <p style="margin: 0; color: #64748b; font-size: 0.9rem;">
+            Procedimientos que serán realizados, lineamientos y vínculos del análisis especial:
+        </p>
     </div>
-    <div class="card-body">
-        
-        <?php if ($mensajeRespuesta): ?>
-            <div class="alert alert-<?= $tipoAlerta ?> alert-dismissible fade show" role="alert">
-                <?= htmlspecialchars($mensajeRespuesta) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        <?php endif; ?>
 
-        <form method="POST" action="" class="needs-validation" novalidate>
-            <input type="hidden" name="proyecto_id" value="<?= htmlspecialchars((string)$currentProyectoId) ?>">
-            <input type="hidden" name="prueba_id" value="<?= htmlspecialchars((string)$currentPruebaId) ?>">
-            <input type="hidden" name="guardar_modelo_6" value="1">
+    <!-- Formulario de Captura -->
+    <form method="POST" action="actividades.php?proyectoId=<?php echo $currentProyectoId; ?>&pruebaId=<?php echo $currentPruebaId; ?>">
+        <input type="hidden" name="action_type" value="save_modelo_6">
 
-            <p class="text-muted">Procedimientos que serán realizados, lineamientos y vínculos:</p>
-
-            <!-- Sección 1 y 2 -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="card p-3 border">
-                        <h6 class="bg-light p-2 text-dark">1. Información de la Cuenta y Objetivo de la Prueba</h6>
-                        <div class="mb-3">
-                            <label class="form-label">Partida del estado Financiero</label>
-                            <input type="text" class="form-control" name="partida_estado_financiero" value="<?= htmlspecialchars($formData['partida_estado_financiero']) ?>" placeholder="Ej. Efectivo">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Fecha y período de la prueba</label>
-                            <input type="text" class="form-control" name="fecha_periodo_prueba" value="<?= htmlspecialchars($formData['fecha_periodo_prueba']) ?>" placeholder="DD-MM-AA">
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label small">Importancia relativa General</label>
-                                <input type="number" step="0.01" class="form-control" name="importancia_relativa_general" value="<?= htmlspecialchars((string)$formData['importancia_relativa_general']) ?>">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label small">Importancia relativa Planificación</label>
-                                <input type="number" step="0.01" class="form-control" name="importancia_relativa_planificacion" value="<?= htmlspecialchars((string)$formData['importancia_relativa_planificacion']) ?>">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label small">Nivel de registro SUD</label>
-                                <input type="number" step="0.01" class="form-control" name="nivel_registro_sud" value="<?= htmlspecialchars((string)$formData['nivel_registro_sud']) ?>">
-                            </div>
-                        </div>
-                    </div>
+        <!-- 1. Información de la Cuenta y Objetivo -->
+        <div style="margin-bottom: 1.5rem;">
+            <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
+                1. Información de la Cuenta y Objetivo de la Prueba
+            </h4>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Partida del estado Financiero</label>
+                    <input type="text" name="modelo6[partida]" placeholder="Ej. Efectivo" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
                 </div>
-
-                <div class="col-md-6">
-                    <div class="card p-3 border">
-                        <h6 class="bg-light p-2 text-dark">2. Aserciones a los Estados Financieros</h6>
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="aser_c" value="1" <?= $formData['aser_c'] ? 'checked' : '' ?>><label class="form-check-label">C</label></div>
-                                <div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="aser_a" value="1" <?= $formData['aser_a'] ? 'checked' : '' ?>><label class="form-check-label">A</label></div>
-                                <div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="aser_eo" value="1" <?= $formData['aser_eo'] ? 'checked' : '' ?>><label class="form-check-label">E/O</label></div>
-                                <div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="aser_co" value="1" <?= $formData['aser_co'] ? 'checked' : '' ?>><label class="form-check-label">CO</label></div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="aser_ro" value="1" <?= $formData['aser_ro'] ? 'checked' : '' ?>><label class="form-check-label">RO</label></div>
-                                <div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="aser_va" value="1" <?= $formData['aser_va'] ? 'checked' : '' ?>><label class="form-check-label">VA</label></div>
-                                <div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="aser_pd" value="1" <?= $formData['aser_pd'] ? 'checked' : '' ?>><label class="form-check-label">PD</label></div>
-                            </div>
-                        </div>
-                    </div>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Fecha y período de la prueba</label>
+                    <input type="text" name="modelo6[periodo]" placeholder="DD-MM-AA" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
                 </div>
             </div>
 
-            <!-- Secciones 3, 4, 5 y 6 (Editores de Texto Enriquecido) -->
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="card p-3 border">
-                        <h6 class="bg-light p-2 text-dark">3. Desarrollar una Expectativa</h6>
-                        <textarea class="form-control editor-html" name="desarrollar_expectativa" rows="5"><?= htmlspecialchars($formData['desarrollar_expectativa']) ?></textarea>
-                    </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Importancia relativa General</label>
+                    <input type="text" name="modelo6[imp_general]" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
                 </div>
-                <div class="col-md-6 mb-4">
-                    <div class="card p-3 border">
-                        <h6 class="bg-light p-2 text-dark">4. Definición de una Diferencia Significativa o Umbral</h6>
-                        <textarea class="form-control editor-html" name="definicion_diferencia_umbral" rows="5"><?= htmlspecialchars($formData['definicion_diferencia_umbral']) ?></textarea>
-                    </div>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Importancia relativa Planificación</label>
+                    <input type="text" name="modelo6[imp_planificacion]" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Nivel de registro SUD</label>
+                    <input type="text" name="modelo6[sud]" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
                 </div>
             </div>
+        </div>
 
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="card p-3 border">
-                        <h6 class="bg-light p-2 text-dark">5. Determinación de Diferencias</h6>
-                        <textarea class="form-control editor-html" name="determinacion_diferencias" rows="5"><?= htmlspecialchars($formData['determinacion_diferencias']) ?></textarea>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-4">
-                    <div class="card p-3 border">
-                        <h6 class="bg-light p-2 text-dark">6. Evaluación de los Resultados</h6>
-                        <textarea class="form-control editor-html" name="evaluacion_resultados" rows="5"><?= htmlspecialchars($formData['evaluacion_resultados']) ?></textarea>
-                    </div>
-                </div>
+        <!-- 2. Aseveraciones a los Estados Financieros -->
+        <div style="margin-bottom: 1.5rem;">
+            <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
+                2. Aseveraciones a los Estados Financieros
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <?php 
+                $aseveraciones = [
+                    'C'   => 'Completitud',
+                    'A'   => 'Exactitud',
+                    'E/O' => 'Existencia / Ocurrencia',
+                    'CO'  => 'Corte',
+                    'ORO' => 'Derechos y Obligaciones',
+                    'VA'  => 'Valoración',
+                    'PD'  => 'Presentación y Desglose'
+                ];
+                foreach ($aseveraciones as $sigla => $descripcion): 
+                ?>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #334155; cursor: pointer;">
+                        <input type="checkbox" name="modelo6[aseveraciones][]" value="<?php echo $sigla; ?>" style="width: 16px; height: 16px; accent-color: #2563eb;">
+                        <span><strong><?php echo $sigla; ?></strong> - <?php echo $descripcion; ?></span>
+                    </label>
+                <?php endforeach; ?>
             </div>
+        </div>
 
-            <!-- Botón de guardado unificado -->
-            <div class="text-end">
-                <button type="submit" class="btn btn-primary btn-lg px-5">Guardar Modelo 6</button>
-            </div>
-        </form>
-    </div>
+        <!-- 3. Desarrollar una Expectativa -->
+        <div style="margin-bottom: 1.5rem;">
+            <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
+                3. Desarrollar una Expectativa
+            </h4>
+            <textarea name="modelo6[expectativa]" rows="4" placeholder="Describa analíticamente la expectativa..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"></textarea>
+        </div>
+
+        <!-- Botón de Envío -->
+        <div style="text-align: right; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+            <button type="submit" style="background: #2563eb; color: white; border: none; padding: 0.65rem 1.75rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
+                Guardar Avance del Modelo 6
+            </button>
+        </div>
+    </form>
 </div>
