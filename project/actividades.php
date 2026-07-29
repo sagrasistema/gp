@@ -157,7 +157,7 @@ include 'conect-actividades.php';
                 include 'modelo6.php';
                 }
             if ((int)$modeloPrueba === 5) {
-                include 'modelo6.php';
+                include 'modelo5.php';
                 }
             if ((int)$pruebaId === 11) {
                 include 'prueba11.php';
