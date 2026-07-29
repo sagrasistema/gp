@@ -183,6 +183,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmtDel = $pdo->prepare("DELETE FROM proyecto_indicador_detalles WHERE id = :id AND proyecto_id = :proj AND prueba_id = :pr");
                 $stmtDel->execute([':id' => $detalleId, ':proj' => $proyectoId, ':pr' => $pruebaId]);
             }
+        } elseif ($action === 'save_modelo_6') {
+            // =========================================================================
+            // INICIO PROCESAMIENTO MODELO 6
+            // =========================================================================
+            
+            // 1. Sanitización de Textos
+            $partida = trim($_POST['partida_estado_financiero'] ?? '');
+            $fecha   = trim($_POST['fecha_periodo_prueba'] ?? '');
+            $exp     = trim($_POST['desarrollar_expectativa'] ?? '');
+            $def     = trim($_POST['definicion_diferencia_umbral'] ?? '');
+            $det     = trim($_POST['determinacion_diferencias'] ?? '');
+            $eval    = trim($_POST['evaluacion_resultados'] ?? '');
+
+            // 2. Uso de tu función parseVenezuelanNumber para parseo numérico seguro
+            $impGen  = parseVenezuelanNumber($_POST['importancia_relativa_general'] ?? null);
+            $impPlan = parseVenezuelanNumber($_POST['importancia_relativa_planificacion'] ?? null);
+            $sud     = parseVenezuelanNumber($_POST['nivel_registro_sud'] ?? null);
+
+            // 3. Aserciones (Booleanos)
+            $aser_c  = isset($_POST['aser_c']) ? 1 : 0;
+            $aser_a  = isset($_POST['aser_a']) ? 1 : 0;
+            $aser_eo = isset($_POST['aser_eo']) ? 1 : 0;
+            $aser_co = isset($_POST['aser_co']) ? 1 : 0;
+            $aser_ro = isset($_POST['aser_ro']) ? 1 : 0;
+            $aser_va = isset($_POST['aser_va']) ? 1 : 0;
+            $aser_pd = isset($_POST['aser_pd']) ? 1 : 0;
+
+            // 4. Upsert (Insertar o Actualizar)
+            $stmtM6Save = $pdo->prepare("
+                INSERT INTO audit_modelo_6_detalles (
+                    proyecto_id, prueba_id, partida_estado_financiero, fecha_periodo_prueba,
+                    importancia_relativa_general, importancia_relativa_planificacion, nivel_registro_sud,
+                    aser_c, aser_a, aser_eo, aser_co, aser_ro, aser_va, aser_pd,
+                    desarrollar_expectativa, definicion_diferencia_umbral, determinacion_diferencias, evaluacion_resultados
+                ) VALUES (
+                    :proj, :pr, :partida, :fecha,
+                    :imp_gen, :imp_plan, :sud,
+                    :aser_c, :aser_a, :aser_eo, :aser_co, :aser_ro, :aser_va, :aser_pd,
+                    :exp, :def, :det, :eval
+                ) ON DUPLICATE KEY UPDATE 
+                    partida_estado_financiero = :partida_u, fecha_periodo_prueba = :fecha_u,
+                    importancia_relativa_general = :imp_gen_u, importancia_relativa_planificacion = :imp_plan_u, nivel_registro_sud = :sud_u,
+                    aser_c = :aser_c_u, aser_a = :aser_a_u, aser_eo = :aser_eo_u, aser_co = :aser_co_u, aser_ro = :aser_ro_u, aser_va = :aser_va_u, aser_pd = :aser_pd_u,
+                    desarrollar_expectativa = :exp_u, definicion_diferencia_umbral = :def_u, determinacion_diferencias = :det_u, evaluacion_resultados = :eval_u
+            ");
+
+            $stmtM6Save->execute([
+                ':proj' => $proyectoId, ':pr' => $pruebaId, ':partida' => $partida, ':fecha' => $fecha,
+                ':imp_gen' => $impGen, ':imp_plan' => $impPlan, ':sud' => $sud,
+                ':aser_c' => $aser_c, ':aser_a' => $aser_a, ':aser_eo' => $aser_eo, ':aser_co' => $aser_co, ':aser_ro' => $aser_ro, ':aser_va' => $aser_va, ':aser_pd' => $aser_pd,
+                ':exp' => $exp, ':def' => $def, ':det' => $det, ':eval' => $eval,
+                // Parámetros duplicados para el UPDATE seguro
+                ':partida_u' => $partida, ':fecha_u' => $fecha,
+                ':imp_gen_u' => $impGen, ':imp_plan_u' => $impPlan, ':sud_u' => $sud,
+                ':aser_c_u' => $aser_c, ':aser_a_u' => $aser_a, ':aser_eo_u' => $aser_eo, ':aser_co_u' => $aser_co, ':aser_ro_u' => $aser_ro, ':aser_va_u' => $aser_va, ':aser_pd_u' => $aser_pd,
+                ':exp_u' => $exp, ':def_u' => $def, ':det_u' => $det, ':eval_u' => $eval
+            ]);
+            
+            // =========================================================================
+            // FIN PROCESAMIENTO MODELO 6
+            // =========================================================================
         } else {
             // Guardado General (Actividades + Estatus de Prueba)
             if (isset($_POST['actividades_data']) && is_array($_POST['actividades_data'])) {
@@ -311,6 +372,39 @@ if ((int)$pruebaId === 23) {
         error_log("Error al recuperar prueba_23_riesgos: " . $e->getMessage());
     }
 }
+// =========================================================================
+// INICIO LECTURA DATOS MODELO 6 (Precarga de Formulario)
+// =========================================================================
+$formData = [
+    'partida_estado_financiero' => '', 'fecha_periodo_prueba' => '',
+    'importancia_relativa_general' => '', 'importancia_relativa_planificacion' => '', 'nivel_registro_sud' => '',
+    'aser_c' => 0, 'aser_a' => 0, 'aser_eo' => 0, 'aser_co' => 0, 'aser_ro' => 0, 'aser_va' => 0, 'aser_pd' => 0,
+    'desarrollar_expectativa' => '', 'definicion_diferencia_umbral' => '', 'determinacion_diferencias' => '', 'evaluacion_resultados' => ''
+];
+
+// Asumiendo que el discriminator es $modeloPrueba === '6', ajústalo a tu BD si es necesario
+if (isset($modeloPrueba) && (string)$modeloPrueba === '6') { 
+    try {
+        $stmtM6Get = $pdo->prepare("SELECT * FROM audit_modelo_6_detalles WHERE proyecto_id = :proj AND prueba_id = :pr LIMIT 1");
+        $stmtM6Get->execute([':proj' => $proyectoId, ':pr' => $pruebaId]);
+        $rowM6 = $stmtM6Get->fetch(PDO::FETCH_ASSOC);
+        
+        if ($rowM6) {
+            // Formatear números al estándar venezolano para la vista si fueron guardados como FLOAT
+            $rowM6['importancia_relativa_general'] = number_format((float)$rowM6['importancia_relativa_general'], 2, ',', '.');
+            $rowM6['importancia_relativa_planificacion'] = number_format((float)$rowM6['importancia_relativa_planificacion'], 2, ',', '.');
+            $rowM6['nivel_registro_sud'] = number_format((float)$rowM6['nivel_registro_sud'], 2, ',', '.');
+            
+            // Combinar con los defaults para evitar undefined offsets
+            $formData = array_merge($formData, $rowM6);
+        }
+    } catch (PDOException $e) {
+        error_log("Error al recuperar Modelo 6: " . $e->getMessage());
+    }
+}
+// =========================================================================
+// FIN LECTURA DATOS MODELO 6
+// =========================================================================
 $pageTitle = "Formulario de Actividades y Hallazgos";
 include '../main/h.php';
 ?>
