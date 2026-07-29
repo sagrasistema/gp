@@ -158,7 +158,7 @@ include 'conect-actividades.php';
                 $prueba_id   = $prueba['id'];
                 
                 // Incluimos el componente del Modelo 6
-                include __DIR__ . '/modelo6.php';
+                include 'modelo6.php';
             }
             if ((int)$pruebaId === 11) {
                 include 'prueba11.php';
