@@ -151,6 +151,15 @@ include 'conect-actividades.php';
 
         <!-- INCLUSIÓN AUTOMÁTICA DE LA REVISIÓN ANALÍTICA SÓLO PARA LA PRUEBA 11 -->
         <?php 
+        // Dentro del bucle o renderizador de actividades en actividades.php
+            if (isset($prueba['modelo']) && (int)$prueba['modelo'] === 6) {
+                // Definimos las variables locales que usará el componente
+                $proyecto_id = $id_proyecto_activo; // O tu variable de sesión de proyecto
+                $prueba_id   = $prueba['id'];
+                
+                // Incluimos el componente del Modelo 6
+                include __DIR__ . '/modelo6.php';
+            }
             if ((int)$pruebaId === 11) {
                 include 'prueba11.php';
             } elseif ((int)$pruebaId === 16) {
