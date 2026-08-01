@@ -47,18 +47,20 @@ try {
 }
 
 // 3. Cargar lista completa de pruebas para la Fase de Planificación (Etapa 1) con sus categorías
+// 3. Cargar lista de pruebas SELECCIONADAS para la Fase de Ejecución (Etapa 3)
 try {
     $stmtList = $pdo->prepare("
         SELECT p.id, p.nombre, p.orden, c.nombre as categoria_nombre 
         FROM audit_pruebas p
         INNER JOIN audit_categorias c ON p.categoria_id = c.id
-        WHERE c.etapa_id = 3
+        INNER JOIN proyecto_pruebas_ejecucion pe ON pe.prueba_id = p.id
+        WHERE c.etapa_id = 3 AND pe.proyecto_id = :proyecto_id
         ORDER BY p.id ASC
     ");
-    $stmtList->execute();
+    $stmtList->execute([':proyecto_id' => $proyectoId]);
     $pruebasList = $stmtList->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    error_log("Error al cargar listado de pruebas: " . $e->getMessage());
+    error_log("Error al cargar listado de pruebas seleccionadas: " . $e->getMessage());
     $pruebasList = [];
 }
 

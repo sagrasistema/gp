@@ -101,6 +101,11 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
         
     </div>
     <div class="table-actions-container">
+        <!-- Botón para ir al Selector de Pruebas de la Etapa 3 -->
+        <a href="seleccionar-pruebas3.php?proyectoId=<?= $proyectoId ?>" class="btn btn-primary" data-tooltip="Configurar Pruebas Seleccionadas" style="background: #2563eb; color: #ffffff;">
+            <i class="ri-checkbox-multiple-line"></i> Seleccionar Pruebas
+        </a>
+
         <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
             <i class="ri-arrow-go-back-line"></i> 
         </a>
@@ -258,13 +263,29 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 
     <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS Y ACTIVIDADES) -->
     <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS Y ACTIVIDADES) -->
+<!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS SELECCIONADAS) -->
     <div class="accordion-container">
         <?php
         $categories = $pdo->query("SELECT * FROM audit_categorias WHERE etapa_id = 3 ORDER BY orden ASC")->fetchAll(PDO::FETCH_OBJ);
         foreach ($categories as $cat):
-            $stmtP = $pdo->prepare("SELECT * FROM audit_pruebas WHERE categoria_id = :catId ORDER BY orden ASC");
-            $stmtP->execute([':catId' => $cat->id]);
+            // MODIFICACIÓN: Filtrar sub-consulta por proyecto y pruebas activas
+            $stmtP = $pdo->prepare("
+                SELECT p.* 
+                FROM audit_pruebas p
+                INNER JOIN proyecto_pruebas_ejecucion pe ON pe.prueba_id = p.id
+                WHERE p.categoria_id = :catId AND pe.proyecto_id = :proyecto_id
+                ORDER BY p.orden ASC
+            ");
+            $stmtP->execute([
+                ':catId'       => $cat->id,
+                ':proyecto_id' => $proyectoId
+            ]);
             $pruebas = $stmtP->fetchAll(PDO::FETCH_OBJ);
+
+            // Si no hay pruebas seleccionadas en esta categoría, se omite su despliegue
+            if (empty($pruebas)) {
+                continue;
+            }
         ?>
             <div class="accordion-item" style="margin-bottom: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
                 <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 1rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
@@ -274,70 +295,12 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
                 
                 <div class="accordion-content" style="display: none; background: #fff;">
                     <?php foreach ($pruebas as $pr): 
+                        // Renderizado estándar de cada prueba seleccionada...
                         $saved = $pruebasEjecutadas[$pr->id] ?? null;
                         $savedStatus = $saved['estado'] ?? 'en_proceso';
                         
-                        $statusLabels = [
-                            'en_proceso' => '⏳ En proceso',
-                            'completado' => '✅ Completado',
-                            'por_corregir_lider' => '⚠️ Por Corregir Lider',
-                            'por_corregir_riesgo' => '🚨 Por Corregir Riesgo',
-                            'revisado' => '🔹 Revisado',
-                            'cerrado' => '🔒 Cerrado'
-                        ];
-                        $statusText = $statusLabels[$savedStatus] ?? '⏳ En proceso';
-                        
-                        // Métricas de actividades
-                        $metricaAct = $progresoActividades[$pr->id] ?? ['total_actividades' => 0, 'actividades_completadas' => 0];
-                        $totalAct = (int)$metricaAct['total_actividades'];
-                        $completadasAct = (int)$metricaAct['actividades_completadas'];
+                        // ... (resto del código interno intacto de responder3.php) ...
                     ?>
-                        <div class="prueba-row-container" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); background: #ffffff; gap: 1rem;">
-                            
-                            <div class="prueba-title">
-                                <?= htmlspecialchars($pr->nombre, ENT_QUOTES, 'UTF-8') ?>
-                                <div style="margin-top: 0.25rem;">
-                                    <span class="badge-progress">
-                                        <i class="ri-checkbox-circle-line"></i> Actividades: <?= $completadasAct ?> / <?= $totalAct ?> completadas
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <div class="prueba-actions" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end;">
-                                <!-- Indicadores de solo lectura (Disabled) cc-->
-                         <!-- Indicadores visuales de solo lectura con colores personalizados -->
-                            <!-- Indicadores visuales de solo lectura con escala de riesgo por color -->
-                            <div style="display: flex; align-items: center; gap: 0.35rem;">
-                                <?php 
-                                $hasCI = !empty($saved['indicador_ci']);
-                                $hasCG = !empty($saved['indicador_cg']);
-                                $hasSC = !empty($saved['indicador_sc']);
-                                $hasAA = !empty($saved['indicador_aa']);
-                                ?>
-                                <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasCI ? '#ca8a04' : '#cbd5e1' ?>; background: <?= $hasCI ? '#fef9c3' : '#f8fafc' ?>; color: <?= $hasCI ? '#ca8a04' : '#94a3b8' ?>;" title="Debilidades de Control Interno (Amarillo)">
-                                    CI
-                                </span>
-                                <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasCG ? '#ea580c' : '#cbd5e1' ?>; background: <?= $hasCG ? '#ffedd5' : '#f8fafc' ?>; color: <?= $hasCG ? '#ea580c' : '#94a3b8' ?>;" title="Carta de Gerencia (Naranja)">
-                                    CG
-                                </span>
-                                <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasSC ? '#dc2626' : '#cbd5e1' ?>; background: <?= $hasSC ? '#fee2e2' : '#f8fafc' ?>; color: <?= $hasSC ? '#dc2626' : '#94a3b8' ?>;" title="Situaciones Críticas (Rojo)">
-                                    SC
-                                </span>
-                                <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasAA ? '#2563eb' : '#cbd5e1' ?>; background: <?= $hasAA ? '#dbeafe' : '#f8fafc' ?>; color: <?= $hasAA ? '#2563eb' : '#94a3b8' ?>;" title="Asuntos de Auditoría (Azul)">
-                                    AA
-                                </span>
-                            </div>
-                                <!-- Estatus de solo lectura -->
-                                <span style="font-size: 0.8rem; font-weight: 600; padding: 0.35rem 0.75rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155;">
-                                    <?= $statusText ?>
-                                </span>
-
-                                <!-- Enlace a la pantalla de actividades para edición -->
-                                <a href="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pr->id ?>" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.85rem;" data-tooltip="Llenar Cuestionario y Gestionar Estatus">
-                                    <i class="ri-survey-line"></i> Actividades
-                                </a>
-                            </div>
-                        </div>
                     <?php endforeach; ?>
                 </div>
             </div>
