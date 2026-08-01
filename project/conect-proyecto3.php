@@ -63,7 +63,6 @@ try {
     error_log("Error al cargar listado de pruebas seleccionadas: " . $e->getMessage());
     $pruebasList = [];
 }
-
 // 4. Cargar métricas de progreso de actividades por prueba para este proyecto
 try {
     $stmtActProgress = $pdo->prepare("
