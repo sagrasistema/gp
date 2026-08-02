@@ -5,14 +5,18 @@ declare(strict_types=1);
 // v/proyectos/seleccionar-pruebas3.php
 include '../main/config.php';
 
-$proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) 
-    ?? filter_input(INPUT_POST, 'proyecto_id', FILTER_VALIDATE_INT);
-$frecuenciaNum = filter_input(INPUT_GET, 'frecuencia', FILTER_VALIDATE_INT) 
-    ?? filter_input(INPUT_POST, 'frecuencia_num', FILTER_VALIDATE_INT) 
-    ?? 1;
+// -------------------------------------------------------------------------
+// 0. CAPTURA Y SANITIZACIÓN DE PARÁMETROS ENTRANTES (POST PRIORITARIO)
+// -------------------------------------------------------------------------
+$proyectoId = filter_input(INPUT_POST, 'proyecto_id', FILTER_VALIDATE_INT) 
+    ?: filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT);
 
-if (!$proyectoId) {
-    die("Error: Proyecto no especificado.");
+$frecuenciaNum = filter_input(INPUT_POST, 'frecuencia_num', FILTER_VALIDATE_INT) 
+    ?: filter_input(INPUT_GET, 'frecuencia', FILTER_VALIDATE_INT) 
+    ?: 1;
+
+if (!$proyectoId || $proyectoId <= 0) {
+    die("Error: ID de proyecto no especificado o inválido.");
 }
 
 // -------------------------------------------------------------------------
@@ -26,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_selection
     try {
         $pdo->beginTransaction();
 
-        // Obtener IDs de pruebas de la Etapa 3
+        // Obtener la totalidad de IDs de pruebas asociadas a la Etapa 3
         $stmtEtapa = $pdo->prepare("
             SELECT p.id 
             FROM audit_pruebas p
@@ -34,11 +38,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_selection
             WHERE c.etapa_id = 3
         ");
         $stmtEtapa->execute();
-        $etapa3PruebaIds = $stmtEtapa->fetchAll(PDO::FETCH_COLUMN);
+        $etapa3PruebaIds = array_map('intval', $stmtEtapa->fetchAll(PDO::FETCH_COLUMN));
 
         if (!empty($etapa3PruebaIds)) {
-            // Eliminar registros que ya no estén seleccionados para esta frecuencia específica
+            // Pruebas a eliminar/desmarcar para esta frecuencia específica
             $toDelete = array_diff($etapa3PruebaIds, $selectedPruebas);
+            
             if (!empty($toDelete)) {
                 $placeholders = implode(',', array_fill(0, count($toDelete), '?'));
                 $stmtDelete = $pdo->prepare("
@@ -49,13 +54,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_selection
                 $stmtDelete->execute($params);
             }
 
-            // Insertar o actualizar las seleccionadas
+            // Insertar o mantener activas las pruebas seleccionadas
             if (!empty($selectedPruebas)) {
                 $stmtInsert = $pdo->prepare("
                     INSERT INTO proyecto_pruebas_ejecucion (proyecto_id, prueba_id, frecuencia_num, estado)
                     VALUES (?, ?, ?, 'en_proceso')
-                    ON DUPLICATE KEY UPDATE proyecto_id = VALUES(proyecto_id)
+                    ON DUPLICATE KEY UPDATE 
+                        frecuencia_num = VALUES(frecuencia_num)
                 ");
+                
                 foreach ($selectedPruebas as $pId) {
                     if (in_array($pId, $etapa3PruebaIds, true)) {
                         $stmtInsert->execute([$proyectoId, $pId, $frecuenciaNum]);
@@ -64,38 +71,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_selection
             }
         }
 
-        $pdo->commit();
-
-        // Replicar a todas las frecuencias si fue solicitado
-        if (!empty($_POST['replicate_all'])) {
+        // Replicación a todas las frecuencias del proyecto (si fue seleccionado)
+        if (!empty($_POST['replicate_all']) && !empty($selectedPruebas)) {
             $stmtProjFreq = $pdo->prepare("SELECT frecuencia_cantidad FROM proyectos WHERE id = :id");
             $stmtProjFreq->execute([':id' => $proyectoId]);
-            $maxFreq = (int)$stmtProjFreq->fetchColumn();
+            $maxFreq = max(1, (int)$stmtProjFreq->fetchColumn());
+
+            $stmtRepl = $pdo->prepare("
+                INSERT INTO proyecto_pruebas_ejecucion (proyecto_id, prueba_id, frecuencia_num, estado)
+                VALUES (?, ?, ?, 'en_proceso')
+                ON DUPLICATE KEY UPDATE frecuencia_num = VALUES(frecuencia_num)
+            ");
 
             for ($f = 1; $f <= $maxFreq; $f++) {
-                if ($f === $frecuenciaNum) continue;
+                if ($f === $frecuenciaNum) {
+                    continue;
+                }
                 foreach ($selectedPruebas as $pId) {
-                    $stmtRepl = $pdo->prepare("
-                        INSERT INTO proyecto_pruebas_ejecucion (proyecto_id, prueba_id, frecuencia_num, estado)
-                        VALUES (?, ?, ?, 'en_proceso')
-                        ON DUPLICATE KEY UPDATE proyecto_id = VALUES(proyecto_id)
-                    ");
-                    $stmtRepl->execute([$proyectoId, $pId, $f]);
+                    if (in_array($pId, $etapa3PruebaIds, true)) {
+                        $stmtRepl->execute([$proyectoId, $pId, $f]);
+                    }
                 }
             }
         }
 
+        $pdo->commit();
+
+        // Redirección limpia manteniendo contexto
         header("Location: seleccionar-pruebas3.php?proyectoId={$proyectoId}&frecuencia={$frecuenciaNum}&success=1");
         exit();
+
     } catch (PDOException $e) {
-        $pdo->rollBack();
-        error_log("Error al guardar selección de pruebas por frecuencia: " . $e->getMessage());
-        $errorMessage = "Error de base de datos al guardar la configuración.";
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("Error al guardar pruebas por frecuencia: " . $e->getMessage());
+        $errorMessage = "Error de base de datos al guardar los cambios.";
     }
 }
 
 // -------------------------------------------------------------------------
-// 2. CARGAR DATOS
+// 2. CARGAR DATOS DE LA VISTA
 // -------------------------------------------------------------------------
 try {
     $stmtProj = $pdo->prepare("
@@ -107,9 +123,13 @@ try {
     $stmtProj->execute([':id' => $proyectoId]);
     $projectData = $stmtProj->fetch(PDO::FETCH_OBJ);
 
+    if (!$projectData) {
+        die("Error: El proyecto solicitado no existe.");
+    }
+
     $totalFrecuencias = max(1, (int)($projectData->frecuencia_cantidad ?? 1));
 
-    // Pruebas actualmente seleccionadas en esta frecuencia
+    // Cargar pruebas marcadas específicamente para la frecuencia activa
     $stmtSelected = $pdo->prepare("
         SELECT prueba_id 
         FROM proyecto_pruebas_ejecucion 
@@ -119,15 +139,16 @@ try {
         ':proyecto_id'   => $proyectoId,
         ':frecuencia_num' => $frecuenciaNum
     ]);
-    $currentlySelected = $stmtSelected->fetchAll(PDO::FETCH_COLUMN);
+    $currentlySelected = array_map('intval', $stmtSelected->fetchAll(PDO::FETCH_COLUMN));
 
+    // Cargar la estructura de categorías de la Etapa 3
     $stmtCategories = $pdo->prepare("SELECT * FROM audit_categorias WHERE etapa_id = 3 ORDER BY orden ASC");
     $stmtCategories->execute();
     $categories = $stmtCategories->fetchAll(PDO::FETCH_OBJ);
 
 } catch (PDOException $e) {
     error_log("Error al cargar selector de pruebas: " . $e->getMessage());
-    die("Error al cargar los datos.");
+    die("Error al cargar la información del proyecto.");
 }
 
 $pageTitle = "Seleccionar Pruebas por Frecuencia";
@@ -157,7 +178,7 @@ include '../main/h.php';
         </div>
     </div>
 
-    <!-- PESTAÑAS (TABS) DE FRECUENCIAS -->
+    <!-- PESTAÑAS (TABS) DE NAVEGACIÓN ENTRE FRECUENCIAS -->
     <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; overflow-x: auto;">
         <?php for ($f = 1; $f <= $totalFrecuencias; $f++): ?>
             <a href="seleccionar-pruebas3.php?proyectoId=<?= $proyectoId ?>&frecuencia=<?= $f ?>" 
@@ -169,11 +190,17 @@ include '../main/h.php';
 
     <?php if (isset($_GET['success'])): ?>
         <div style="padding:1rem; background:#dcfce7; color:#166534; border-radius:8px; margin-bottom:1.5rem;">
-            <i class="ri-checkbox-circle-fill"></i> Pruebas guardadas correctamente para la <strong>Frecuencia <?= $frecuenciaNum ?></strong>.
+            <i class="ri-checkbox-circle-fill"></i> Selección guardada correctamente para la <strong>Frecuencia <?= $frecuenciaNum ?></strong>.
         </div>
     <?php endif; ?>
 
-    <form method="POST" action="seleccionar-pruebas3.php">
+    <?php if (isset($errorMessage)): ?>
+        <div style="padding:1rem; background:#fee2e2; color:#991b1b; border-radius:8px; margin-bottom:1.5rem;">
+            <i class="ri-error-warning-fill"></i> <?= htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') ?>
+        </div>
+    <?php endif; ?>
+
+    <form method="POST" action="seleccionar-pruebas3.php?proyectoId=<?= $proyectoId ?>&frecuencia=<?= $frecuenciaNum ?>">
         <input type="hidden" name="action_save_selection" value="1">
         <input type="hidden" name="proyecto_id" value="<?= $proyectoId ?>">
         <input type="hidden" name="frecuencia_num" value="<?= $frecuenciaNum ?>">
@@ -200,7 +227,7 @@ include '../main/h.php';
 
                     <div class="accordion-content cat_group_<?= $cat->id ?>" style="display: block; padding: 0.5rem 1rem;">
                         <?php foreach ($pruebas as $pr): 
-                            $isChecked = in_array($pr->id, $currentlySelected, true) ? 'checked' : '';
+                            $isChecked = in_array((int)$pr->id, $currentlySelected, true) ? 'checked' : '';
                         ?>
                             <label style="display: flex; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; cursor: pointer; gap: 0.75rem;">
                                 <input type="checkbox" name="pruebas[]" value="<?= $pr->id ?>" <?= $isChecked ?> style="width: 18px; height: 18px; accent-color: #2563eb;">
@@ -216,7 +243,7 @@ include '../main/h.php';
 
         <div style="position: sticky; bottom: 1rem; background: #ffffff; padding: 1rem; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; justify-content: space-between; align-items: center;">
             <label style="font-size: 0.875rem; color: #334155; font-weight: 600; cursor: pointer;">
-                <input type="checkbox" name="replicate_all" value="1"> Copiar esta selección a todas las frecuencias restantes (1 a <?= $totalFrecuencias ?>)
+                <input type="checkbox" name="replicate_all" value="1"> Copiar esta selección a todas las frecuencias (1 a <?= $totalFrecuencias ?>)
             </label>
             <div>
                 <a href="responder3.php?proyectoId=<?= $proyectoId ?>&frecuencia=<?= $frecuenciaNum ?>" class="btn btn-secondary" style="margin-right: 0.5rem;">Cancelar</a>
