@@ -102,10 +102,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
     </div>
     <div class="table-actions-container">
         <!-- Botón para ir al Selector de Pruebas de la Etapa 3 -->
-        <a href="seleccionar-pruebas3.php?proyectoId=<?= $proyectoId ?>" class="btn btn-primary" data-tooltip="Configurar Pruebas Seleccionadas" style="background: #2563eb; color: #ffffff;">
-            <i class="ri-checkbox-multiple-line"></i> Seleccionar Pruebas
-        </a>
-
+   
         <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
             <i class="ri-arrow-go-back-line"></i> 
         </a>
@@ -228,7 +225,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
             Progreso General de Pruebas (Fase de Ejecución)
         </h4>
         <span style="font-size: 0.75rem; background-color: #f1f5f9; color: #475569; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;">
-            Total: 19 Actividades / Pruebas
+             Actividades / Pruebas
         </span>
     </div>
 
