@@ -2,15 +2,25 @@
 
 declare(strict_types=1);
 
-// v/proyectos/conect-proyecto.php
+// v/proyectos/conect-proyecto3.php
 
+// -------------------------------------------------------------------------
+// 0. CAPTURA Y SANITIZACIÓN DE PARÁMETROS ENTRANTES
+// -------------------------------------------------------------------------
 $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT);
+$frecuenciaNum = filter_input(INPUT_GET, 'frecuencia', FILTER_VALIDATE_INT) ?: 1;
 
-if (!$proyectoId) {
+if (!$proyectoId || $proyectoId <= 0) {
     die("Error: Proyecto no especificado o ID inválido.");
 }
 
-// 1. Cargar Cabecera del Proyecto y Datos del Cliente
+if ($frecuenciaNum <= 0) {
+    $frecuenciaNum = 1;
+}
+
+// -------------------------------------------------------------------------
+// 1. CARGAR CABECERA DEL PROYECTO Y DATOS DEL CLIENTE
+// -------------------------------------------------------------------------
 try {
     $stmt = $pdo->prepare("
         SELECT 
@@ -27,43 +37,67 @@ try {
     if (!$projectData) {
         die("Error: El proyecto solicitado no existe.");
     }
+
+    // Determinar la cantidad total de frecuencias configuradas en el proyecto
+    $totalFrecuencias = max(1, (int)($projectData->frecuencia_cantidad ?? 1));
+
+    // Ajustar si se consulta una frecuencia mayor a la configurada
+    if ($frecuenciaNum > $totalFrecuencias) {
+        $frecuenciaNum = $totalFrecuencias;
+    }
+
 } catch (PDOException $e) {
     error_log("Error crítico en cabecera de proyecto: " . $e->getMessage());
     die("Error crítico de base de datos al cargar el proyecto.");
 }
 
-// 2. Cargar mapeo de estados y banderas de indicadores de las pruebas desde la ejecución
+// -------------------------------------------------------------------------
+// 2. CARGAR MAPEO DE ESTADOS E INDICADORES DE LA FRECUENCIA ACTIVA
+// -------------------------------------------------------------------------
 try {
     $stmtPruebas = $pdo->prepare("
         SELECT prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado 
         FROM proyecto_pruebas_ejecucion 
-        WHERE proyecto_id = :proyecto_id
+        WHERE proyecto_id = :proyecto_id AND frecuencia_num = :frecuencia_num
     ");
-    $stmtPruebas->execute([':proyecto_id' => $proyectoId]);
+    $stmtPruebas->execute([
+        ':proyecto_id'   => $proyectoId,
+        ':frecuencia_num' => $frecuenciaNum
+    ]);
+    // Indexamos por prueba_id para acceso O(1) en la vista
     $pruebasEjecutadas = $stmtPruebas->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    error_log("Error al cargar ejecución de pruebas: " . $e->getMessage());
+    error_log("Error al cargar ejecución de pruebas por frecuencia: " . $e->getMessage());
     $pruebasEjecutadas = [];
 }
 
-// 3. Cargar lista completa de pruebas para la Fase de Planificación (Etapa 1) con sus categorías
-// 3. Cargar lista de pruebas SELECCIONADAS para la Fase de Ejecución (Etapa 3)
+// -------------------------------------------------------------------------
+// 3. CARGAR LISTA DE PRUEBAS SELECCIONADAS DE LA FRECUENCIA ACTIVA (ETAPA 3)
+// -------------------------------------------------------------------------
 try {
     $stmtList = $pdo->prepare("
         SELECT p.id, p.nombre, p.orden, c.nombre as categoria_nombre 
         FROM audit_pruebas p
         INNER JOIN audit_categorias c ON p.categoria_id = c.id
         INNER JOIN proyecto_pruebas_ejecucion pe ON pe.prueba_id = p.id
-        WHERE c.etapa_id = 3 AND pe.proyecto_id = :proyecto_id
+        WHERE c.etapa_id = 3 
+          AND pe.proyecto_id = :proyecto_id 
+          AND pe.frecuencia_num = :frecuencia_num
         ORDER BY p.id ASC
     ");
-    $stmtList->execute([':proyecto_id' => $proyectoId]);
+    $stmtList->execute([
+        ':proyecto_id'   => $proyectoId,
+        ':frecuencia_num' => $frecuenciaNum
+    ]);
     $pruebasList = $stmtList->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    error_log("Error al cargar listado de pruebas seleccionadas: " . $e->getMessage());
+    error_log("Error al cargar listado de pruebas seleccionadas por frecuencia: " . $e->getMessage());
     $pruebasList = [];
 }
-// 4. Cargar métricas de progreso de actividades por prueba para este proyecto
+
+// -------------------------------------------------------------------------
+// 4. CARGAR MÉTRICAS DE PROGRESO DE ACTIVIDADES DE LA FRECUENCIA ACTIVA
+// -------------------------------------------------------------------------
 try {
     $stmtActProgress = $pdo->prepare("
         SELECT 
@@ -73,19 +107,27 @@ try {
         FROM audit_pruebas p
         INNER JOIN audit_categorias c ON p.categoria_id = c.id
         LEFT JOIN audit_actividades a ON a.prueba_id = p.id
-        LEFT JOIN proyecto_actividades_ejecucion ae ON ae.actividad_id = a.id AND ae.proyecto_id = :proyecto_id
+        LEFT JOIN proyecto_actividades_ejecucion ae 
+            ON ae.actividad_id = a.id 
+           AND ae.proyecto_id = :proyecto_id 
+           AND (ae.frecuencia_num = :frecuencia_num OR ae.frecuencia_num IS NULL)
         WHERE c.etapa_id = 3
         GROUP BY p.id
     ");
-    $stmtActProgress->execute([':proyecto_id' => $proyectoId]);
+    $stmtActProgress->execute([
+        ':proyecto_id'   => $proyectoId,
+        ':frecuencia_num' => $frecuenciaNum
+    ]);
     // Indexamos por prueba_id para acceso O(1) en la vista
     $progresoActividades = $stmtActProgress->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    error_log("Error al calcular progreso de actividades: " . $e->getMessage());
+    error_log("Error al calcular progreso de actividades por frecuencia: " . $e->getMessage());
     $progresoActividades = [];
 }
 
-// 5. Calcular el porcentaje global de avance de la fase
+// -------------------------------------------------------------------------
+// 5. CALCULAR EL PORCENTAJE GLOBAL DE AVANCE DE LA FRECUENCIA ACTIVA
+// -------------------------------------------------------------------------
 $totalPruebasCount = count($pruebasList);
 $completadasCount = 0;
 

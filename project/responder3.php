@@ -168,6 +168,31 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
             </div>
         </div>
     </div>
+    <div class="table-actions-container" style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-bottom: 1rem;">
+        <!-- Botón 1: Definir Frecuencia / Periodicidad -->
+        <a href="configurar-frecuencia3.php?proyectoId=<?= $proyectoId ?>" class="btn btn-secondary" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
+            <i class="ri-calendar-event-line"></i> Frecuencias (<?= $totalFrecuencias ?>)
+        </a>
+
+        <!-- Botón 2: Seleccionar Pruebas de la Frecuencia Activa -->
+        <a href="seleccionar-pruebas3.php?proyectoId=<?= $proyectoId ?>&frecuencia=<?= $frecuenciaNum ?>" class="btn btn-primary" style="background: #2563eb; color: #ffffff;">
+            <i class="ri-checkbox-multiple-line"></i> Seleccionar Pruebas
+        </a>
+    </div>
+    <!-- SISTEMA DE PESTAÑAS (TABS) DE FRECUENCIAS -->
+<div style="background: #ffffff; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
+    <span style="font-size: 0.85rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 0.5rem; text-transform: uppercase;">
+        Selecciona la Frecuencia a Ejecutar:
+    </span>
+    <div style="display: flex; gap: 0.5rem; overflow-x: auto;">
+        <?php for ($f = 1; $f <= $totalFrecuencias; $f++): ?>
+            <a href="responder3.php?proyectoId=<?= $proyectoId ?>&frecuencia=<?= $f ?>" 
+               style="padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.875rem; transition: all 0.2s; <?= $f === $frecuenciaNum ? 'background: #2563eb; color: #ffffff;' : 'background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;' ?>">
+               <i class="ri-time-line"></i> Frecuencia <?= $f ?>
+            </a>
+        <?php endfor; ?>
+    </div>
+</div>
     <div class="table-actions-container">
     <!-- 1. Icono de Edición / Notas -->
     <a href="#" class="btn btn-primary" data-tooltip="Reporte de avance" onclick="return false;">
@@ -264,10 +289,10 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
     <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS Y ACTIVIDADES) -->
     <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS Y ACTIVIDADES) -->
 <!-- SISTEMA DE ACORDEONES (CATEGORÍAS -> PRUEBAS SELECCIONADAS) -->
+<!-- SISTEMA DE ACORDEONES FILTRADOS POR FRECUENCIA -->
     <div class="accordion-container">
         <?php
         try {
-            // 1. Obtener todas las categorías asociadas a la Etapa 3
             $stmtCat = $pdo->prepare("SELECT * FROM audit_categorias WHERE etapa_id = 3 ORDER BY orden ASC");
             $stmtCat->execute();
             $categories = $stmtCat->fetchAll(PDO::FETCH_OBJ);
@@ -275,25 +300,23 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
             $hayPruebasVisibles = false;
 
             foreach ($categories as $cat):
-                // 2. Filtrar únicamente las pruebas SELECCIONADAS para este proyecto y esta categoría
                 $stmtP = $pdo->prepare("
                     SELECT p.* 
                     FROM audit_pruebas p
                     INNER JOIN proyecto_pruebas_ejecucion pe ON pe.prueba_id = p.id
-                    WHERE p.categoria_id = :catId AND pe.proyecto_id = :proyecto_id
+                    WHERE p.categoria_id = :catId AND pe.proyecto_id = :proyecto_id AND pe.frecuencia_num = :frecuencia_num
                     ORDER BY p.id ASC
                 ");
                 $stmtP->execute([
-                    ':catId'       => $cat->id,
-                    ':proyecto_id' => $proyectoId
+                    ':catId'          => $cat->id,
+                    ':proyecto_id'    => $proyectoId,
+                    ':frecuencia_num' => $frecuenciaNum
                 ]);
                 $pruebas = $stmtP->fetchAll(PDO::FETCH_OBJ);
 
-                // Si la categoría no contiene pruebas seleccionadas para este proyecto, omitir su renderizado
                 if (empty($pruebas)) {
                     continue;
                 }
-
                 $hayPruebasVisibles = true;
         ?>
             <div class="accordion-item" style="margin-bottom: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
@@ -309,54 +332,18 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
                     <?php foreach ($pruebas as $pr): 
                         $saved = $pruebasEjecutadas[$pr->id] ?? null;
                         $savedStatus = $saved['estado'] ?? 'en_proceso';
-                        
-                        $statusLabels = [
-                            'en_proceso'          => '⏳ En proceso',
-                            'completado'          => '✅ Completado',
-                            'por_corregir_lider'  => '⚠️ Por Corregir Lider',
-                            'por_corregir_riesgo' => '🚨 Por Corregir Riesgo',
-                            'revisado'            => '🔹 Revisado',
-                            'cerrado'             => '🔒 Cerrado'
-                        ];
-                        $statusText = $statusLabels[$savedStatus] ?? '⏳ En proceso';
-                        
-                        // Métricas de actividades por prueba
-                        $metricaAct = $progresoActividades[$pr->id] ?? ['total_actividades' => 0, 'actividades_completadas' => 0];
-                        $totalAct = (int)$metricaAct['total_actividades'];
-                        $completadasAct = (int)$metricaAct['actividades_completadas'];
                     ?>
-                        <div class="prueba-row-container" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); background: #ffffff; gap: 1rem;">
-                            
+                        <div class="prueba-row-container" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); gap: 1rem;">
                             <div class="prueba-title">
                                 <?= htmlspecialchars($pr->nombre, ENT_QUOTES, 'UTF-8') ?>
-                                <div style="margin-top: 0.25rem;">
-                                    <span class="badge-progress">
-                                        <i class="ri-checkbox-circle-line"></i> Actividades: <?= $completadasAct ?> / <?= $totalAct ?> completadas
-                                    </span>
-                                </div>
+                                <span style="margin-left: 0.5rem; font-size: 0.75rem; background: #dbeafe; color: #1e40af; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 600;">
+                                    Frecuencia <?= $frecuenciaNum ?>
+                                </span>
                             </div>
                             
-                            <div class="prueba-actions" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end;">
-                                <!-- Indicadores de solo lectura con escala de riesgo por color -->
-                                <div style="display: flex; align-items: center; gap: 0.35rem;">
-                                    <?php 
-                                    $hasCI = !empty($saved['indicador_ci']);
-                                    $hasCG = !empty($saved['indicador_cg']);
-                                    $hasSC = !empty($saved['indicador_sc']);
-                                    $hasAA = !empty($saved['indicador_aa']);
-                                    ?>
-                                    <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasCI ? '#ca8a04' : '#cbd5e1' ?>; background: <?= $hasCI ? '#fef9c3' : '#f8fafc' ?>; color: <?= $hasCI ? '#ca8a04' : '#94a3b8' ?>;" title="Debilidades de Control Interno">CI</span>
-                                    <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasCG ? '#ea580c' : '#cbd5e1' ?>; background: <?= $hasCG ? '#ffedd5' : '#f8fafc' ?>; color: <?= $hasCG ? '#ea580c' : '#94a3b8' ?>;" title="Carta de Gerencia">CG</span>
-                                    <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasSC ? '#dc2626' : '#cbd5e1' ?>; background: <?= $hasSC ? '#fee2e2' : '#f8fafc' ?>; color: <?= $hasSC ? '#dc2626' : '#94a3b8' ?>;" title="Situaciones Críticas">SC</span>
-                                    <span style="font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid <?= $hasAA ? '#2563eb' : '#cbd5e1' ?>; background: <?= $hasAA ? '#dbeafe' : '#f8fafc' ?>; color: <?= $hasAA ? '#2563eb' : '#94a3b8' ?>;" title="Asuntos de Auditoría">AA</span>
-                                </div>
-                                
-                                <span style="font-size: 0.8rem; font-weight: 600; padding: 0.35rem 0.75rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155;">
-                                    <?= $statusText ?>
-                                </span>
-
-                                <a href="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pr->id ?>" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.85rem;" data-tooltip="Llenar Cuestionario y Gestionar Estatus">
-                                    <i class="ri-survey-line"></i> Actividades
+                            <div class="prueba-actions" style="display: flex; align-items: center; gap: 0.75rem;">
+                                <a href="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pr->id ?>&frecuencia=<?= $frecuenciaNum ?>" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.85rem;">
+                                    <i class="ri-survey-line"></i> Actividades (Frecuencia <?= $frecuenciaNum ?>)
                                 </a>
                             </div>
                         </div>
@@ -366,29 +353,23 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
         <?php 
             endforeach;
 
-            // 3. Fallback: Si el proyecto no tiene NINGUNA prueba seleccionada en la Etapa 3
             if (!$hayPruebasVisibles):
         ?>
-            <div style="padding: 2.5rem 1rem; text-align: center; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 12px; margin-top: 1rem;">
-                <i class="ri-inbox-archive-line" style="font-size: 3rem; color: #94a3b8; display: block; margin-bottom: 0.5rem;"></i>
-                <h3 style="margin: 0; font-size: 1.1rem; color: #334155; font-weight: 600;">No hay pruebas asignadas a este proyecto</h3>
-                <p style="margin: 0.5rem 0 1.25rem 0; color: #64748b; font-size: 0.875rem;">
-                    Para comenzar a trabajar en la Etapa de Ejecución, selecciona las pruebas correspondientes.
-                </p>
-                <a href="seleccionar-pruebas3.php?proyectoId=<?= $proyectoId ?>" class="btn btn-primary" style="background: #2563eb; color: #ffffff; padding: 0.6rem 1.25rem; font-weight: 600; text-decoration: none; border-radius: 6px; inline-flex; align-items: center; gap: 0.5rem;">
-                    <i class="ri-checkbox-multiple-line"></i> Seleccionar Pruebas Ahora
+            <div style="padding: 2.5rem 1rem; text-align: center; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 12px;">
+                <i class="ri-inbox-archive-line" style="font-size: 3rem; color: #94a3b8; display: block;"></i>
+                <h3 style="margin: 0.5rem 0 0 0; color: #334155;">No hay pruebas asignadas a la Frecuencia <?= $frecuenciaNum ?></h3>
+                <p style="color: #64748b; font-size: 0.875rem;">Selecciona las pruebas que aplican para esta frecuencia específica.</p>
+                <a href="seleccionar-pruebas3.php?proyectoId=<?= $proyectoId ?>&frecuencia=<?= $frecuenciaNum ?>" class="btn btn-primary" style="background: #2563eb; color: #fff; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none;">
+                    <i class="ri-checkbox-multiple-line"></i> Seleccionar Pruebas para Frecuencia <?= $frecuenciaNum ?>
                 </a>
             </div>
         <?php 
             endif;
         } catch (PDOException $e) {
-            error_log("Error crítico al renderizar acordeón de pruebas: " . $e->getMessage());
-            echo '<div style="padding:1rem; background:#fee2e2; color:#991b1b; border-radius:8px;">Error al cargar las pruebas seleccionadas.</div>';
+            error_log("Error al renderizar pruebas: " . $e->getMessage());
         }
         ?>
     </div>
-
-
 </div>
 
 <?php 
