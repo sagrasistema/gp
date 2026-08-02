@@ -101,7 +101,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
         
     </div>
     <div class="table-actions-container">
-        <!-- Botón para ir al Selector de Pruebas de la Etapa 3 -->
+        <!-- Botón para ir al Selector de Pruebas de la Etapa 3 ss-->
    
         <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
             <i class="ri-arrow-go-back-line"></i> 
