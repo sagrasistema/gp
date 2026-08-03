@@ -346,6 +346,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="login-wrapper">
                 
                 <div class="brand-logo">
+                    <img src="main/logo.png" alt="SAGRA" class="main-system-logo">
                     <i class="fas fa-shield-alt"></i> SAGRA<span>GP</span>
                 </div>
 
