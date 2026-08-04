@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 // v/ac/exportar-word.php
 
-require_once '../../vendor/autoload.php'; // Ajusta la ruta a tu vendor/autoload.php
+#require_once '../../vendor/autoload.php'; // Ajusta la ruta a tu vendor/autoload.php
 require_once '../main/config.php';
 
 use PhpOffice\PhpWord\PhpWord;
