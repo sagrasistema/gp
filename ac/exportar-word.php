@@ -10,10 +10,10 @@ use PhpOffice\PhpWord\Style\Language;
 use PhpOffice\PhpWord\IOFactory;
 
 // 1. Configuración de conexión segura PDO
-$host     = '127.0.0.1';
+$host     = 'localhost';
 $db       = 'sagracom_alberto_1';
-$user     = 'tu_usuario';
-$pass     = 'tu_contraseña';
+$user     = 'sagracom_alberto_t';
+$pass     = 'sagragp2705';
 $charset  = 'utf8mb4';
 
 $dsn = "mysql:host={$host};dbname={$db};charset={$charset}";
