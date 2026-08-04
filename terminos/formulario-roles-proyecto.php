@@ -164,8 +164,8 @@ include '../main/h.php';
 <link rel="stylesheet" href="../main/layout.css">
 <?php include '../main/layout_header.php'; ?>
 
-<div class="view-container" style="padding: 2rem; max-width: 900px; margin: 0 auto;">
-
+<!--<div class="view-container" style="padding: 2rem; max-width: 900px; margin: 0 auto;">-->
+<div class="view-container" >
     <!-- CABECERA DE NAVEGACIÓN -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div>
