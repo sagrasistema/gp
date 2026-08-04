@@ -10,7 +10,7 @@ declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 
 // Cargar la conexión unificada de la base de datos
-require_once 'db.php';
+require_once 'config.php';
 
 /** @var PDO $pdo */
 
