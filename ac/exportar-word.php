@@ -2,38 +2,35 @@
 
 declare(strict_types=1);
 
-#require_once __DIR__ . '/vendor/autoload.php';
+// 1. Validar y sanitizar entrada
+$acId = filter_input(INPUT_GET, 'acId', FILTER_VALIDATE_INT);
 
-use PhpOffice\PhpWord\PhpWord.php;
-use PhpOffice\PhpWord\SimpleType\Jc.php;
-use PhpOffice\PhpWord\Style\Language.php;
-use PhpOffice\PhpWord\IOFactory.php;
+if (!$acId) {
+    http_response_code(400);
+    die('Error: El parámetro acId es obligatorio y debe ser un número entero válido.');
+}
 
-// 1. Configuración de conexión segura PDO
-$host     = 'localhost';
-$db       = 'sagracom_alberto_1';
-$user     = 'sagracom_alberto_t';
-$pass     = 'sagragp2705';
-$charset  = 'utf8mb4';
+// 2. Conexión a Base de Datos con PDO
+$dbHost  = 'localhost';
+$dbName  = 'sagracom_alberto_1';
+$dbUser  = 'sagracom_alberto_t';
+$dbPass  = 'sagragp2705';
+$charset = 'utf8mb4';
 
-$dsn = "mysql:host={$host};dbname={$db};charset={$charset}";
+
+$dsn = "mysql:host={$dbHost};dbname={$dbName};charset={$charset}";
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     PDO::ATTR_EMULATE_PREPARES   => false,
 ];
 
-$acId = filter_input(INPUT_GET, 'acId', FILTER_VALIDATE_INT);
-
-if (!$acId) {
-    http_response_code(400);
-    die('Error: ID de evaluación no válido o no proporcionado.');
-}
-
 try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
+    $pdo = new PDO($dsn, $dbUser, $dbPass, $options);
 
-    // 2. Consulta de Cabecera (Tabla: ac, ac_services, ac_types)
+    // --- CONSULTAS A LA BASE DE DATOS ---
+
+    // Cabecera AC
     $sqlAc = "SELECT 
                 a.acId, 
                 a.riskScore, 
@@ -51,10 +48,10 @@ try {
 
     if (!$evaluacion) {
         http_response_code(404);
-        die("Error: No se encontró la evaluación con ID {$acId}.");
+        die("Error: No se encontró la evaluación AC con ID {$acId}.");
     }
 
-    // 3. Consulta de Preguntas Generales y Respuestas (Tablas: ac_questions, ac_categories, ac_general_answers)
+    // Cuestionario General
     $sqlGeneral = "SELECT 
                     cat.categoryName,
                     q.questionNumber,
@@ -71,7 +68,7 @@ try {
     $stmtGeneral->execute([':acId' => $acId]);
     $preguntasGenerales = $stmtGeneral->fetchAll();
 
-    // 4. Consulta del Desglose de la Pregunta 28 (Tablas: ac_q28_tests, ac_q28_answers)
+    // Desglose de Pruebas de la Pregunta 28
     $sqlQ28 = "SELECT 
                 t.testNumber,
                 t.testText,
@@ -86,95 +83,191 @@ try {
     $stmtQ28->execute([':acId' => $acId]);
     $pruebasQ28 = $stmtQ28->fetchAll();
 
-    // ---------------------------------------------------------
-    // 5. Construcción del Documento Word (PHPWord)
-    // ---------------------------------------------------------
-    $phpWord = new PhpWord();
-    $phpWord->getSettings()->setThemeFontLang(new Language(Language::ES_ES));
-
-    // Estilos de Tablas y Textos
-    $tableStyle = [
-        'borderSize'  => 6,
-        'borderColor' => '999999',
-        'cellMargin'  => 80,
-    ];
-    $headerCellStyle = ['bgColor' => 'F2F2F2'];
-    $boldText        = ['bold' => true];
-    $titleStyle      = ['size' => 16, 'bold' => true, 'color' => '1B365D'];
-    $subTitleStyle   = ['size' => 13, 'bold' => true, 'color' => '2C3E50'];
-
-    $section = $phpWord->addSection();
-
-    // Título Principal
-    $section->addText("Reporte de Evaluación de Riesgos #{$evaluacion['acId']}", $titleStyle, ['alignment' => Jc::CENTER]);
-    $section->addTextBreak(1);
-
-    // Resumen de Cabecera
-    $section->addText("Servicio: " . ($evaluacion['serviceName'] ?? 'N/A'), $boldText);
-    $section->addText("Tipo de Auditoría: " . ($evaluacion['typeName'] ?? 'N/A'));
-    $section->addText("Puntaje Total de Riesgo: " . $evaluacion['riskScore'], $boldText);
-    $section->addText("Nivel de Riesgo Global: " . $evaluacion['riskLevel'], $boldText);
-    $section->addTextBreak(1);
-
-    // Sección: Cuestionario General
-    $section->addText("1. Cuestionario General de Auditoría", $subTitleStyle);
-    $section->addTextBreak(1);
-
-    $tableGen = $section->addTable($tableStyle);
-    $tableGen->addRow();
-    $tableGen->addCell(800, $headerCellStyle)->addText('#', $boldText);
-    $tableGen->addCell(2500, $headerCellStyle)->addText('Categoría', $boldText);
-    $tableGen->addCell(4000, $headerCellStyle)->addText('Pregunta', $boldText);
-    $tableGen->addCell(1200, $headerCellStyle)->addText('Respuesta', $boldText);
-    $tableGen->addCell(2500, $headerCellStyle)->addText('Comentario', $boldText);
-
-    foreach ($preguntasGenerales as $p) {
-        $tableGen->addRow();
-        $tableGen->addCell(800)->addText((string)$p['questionNumber']);
-        $tableGen->addCell(2500)->addText($p['categoryName']);
-        $tableGen->addCell(4000)->addText($p['questionText']);
-        $tableGen->addCell(1200)->addText($p['response']);
-        $tableGen->addCell(2500)->addText($p['comment']);
-    }
-
-    $section->addTextBreak(2);
-
-    // Sección: Detalle de las 21 Pruebas (Pregunta 28)
-    $section->addText("2. Desglose Analítico - Pregunta 28 (Pruebas de Riesgo)", $subTitleStyle);
-    $section->addTextBreak(1);
-
-    $tableQ28 = $section->addTable($tableStyle);
-    $tableQ28->addRow();
-    $tableQ28->addCell(800, $headerCellStyle)->addText('Prueba #', $boldText);
-    $tableQ28->addCell(5500, $headerCellStyle)->addText('Descripción del Riesgo / Prueba', $boldText);
-    $tableQ28->addCell(2200, $headerCellStyle)->addText('Valor de Riesgo', $boldText);
-    $tableQ28->addCell(1000, $headerCellStyle)->addText('Puntaje', $boldText);
-
-    foreach ($pruebasQ28 as $q28) {
-        $tableQ28->addRow();
-        $tableQ28->addCell(800)->addText((string)$q28['testNumber']);
-        $tableQ28->addCell(5500)->addText($q28['testText']);
-        $tableQ28->addCell(2200)->addText($q28['riskValue']);
-        $tableQ28->addCell(1000)->addText((string)$q28['score']);
-    }
-
-    // 6. Descarga directa del archivo Word generado
-    $fileName = "Evaluacion_Riesgo_AC_{$acId}.docx";
-
-    header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    header('Content-Disposition: attachment; filename="' . $fileName . '"');
-    header('Cache-Control: max-age=0');
-
-    $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
-    $objWriter->save('php://output');
-    exit;
-
 } catch (PDOException $e) {
-    error_log("Error PDO en impresión Word: " . $e->getMessage());
+    error_log("Error BD en export_word_native: " . $e->getMessage());
     http_response_code(500);
-    echo "Error interno de base de datos al procesar el documento.";
-} catch (\Throwable $e) {
-    error_log("Error al generar Word: " . $e->getMessage());
-    http_response_code(500);
-    echo "Ocurrió un error al construir el archivo Word.";
+    die("Error de conexión o consulta en la base de datos.");
 }
+
+// 3. Cabeceras HTTP para forzar a Word a abrir e interpretar el archivo
+$fileName = "Reporte_Auditoria_AC_{$acId}.doc";
+
+header("Content-Type: application/vnd.ms-word; charset=utf-8");
+header("Content-Disposition: attachment; filename=\"{$fileName}\"");
+header("Expires: 0");
+header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+header("Pragma: public");
+
+// 4. Plantilla HTML/CSS que Microsoft Word renderizará con diseño profesional
+?>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" 
+      xmlns:w="urn:schemas-microsoft-com:office:word" 
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta charset="utf-8">
+    <title>Reporte de Evaluación AC</title>
+    <style>
+        /* Estilos compatibles con Microsoft Word */
+        @page {
+            size: 21cm 29.7cm; /* A4 */
+            margin: 2cm 2cm 2cm 2cm;
+        }
+        body {
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            font-size: 11pt;
+            color: #333333;
+            line-height: 1.4;
+        }
+        h1 {
+            font-size: 18pt;
+            color: #1B365D;
+            text-align: center;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .subtitle {
+            font-size: 10pt;
+            color: #7F8C8D;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 13pt;
+            color: #1B365D;
+            border-bottom: 2px solid #1B365D;
+            padding-bottom: 4px;
+            margin-top: 20px;
+        }
+        .summary-box {
+            background-color: #F8F9FA;
+            border: 1px solid #E2E8F0;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+        .summary-box table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-box td {
+            padding: 4px 8px;
+            font-size: 10.5pt;
+        }
+        .label {
+            font-weight: bold;
+            color: #2C3E50;
+            width: 30%;
+        }
+        /* Tablas Principales */
+        table.report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        table.report-table th {
+            background-color: #1B365D;
+            color: #FFFFFF;
+            font-weight: bold;
+            font-size: 10pt;
+            padding: 8px;
+            border: 1px solid #1B365D;
+            text-align: left;
+        }
+        table.report-table td {
+            padding: 7px;
+            font-size: 9.5pt;
+            border: 1px solid #CBD5E1;
+            vertical-align: top;
+        }
+        table.report-table tr:nth-child(even) {
+            background-color: #F8FAFC;
+        }
+        .badge {
+            font-weight: bold;
+            padding: 2px 6px;
+            color: #1B365D;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Reporte de Evaluación de Riesgos</h1>
+    <div class="subtitle">Auditoría Control Interno | Evaluación #<?= htmlspecialchars((string)$evaluacion['acId']) ?></div>
+
+    <!-- Resumen Ejecutivo -->
+    <div class="summary-box">
+        <table>
+            <tr>
+                <td class="label">Servicio Evaluado:</td>
+                <td><?= htmlspecialchars($evaluacion['serviceName'] ?? 'N/A') ?></td>
+            </tr>
+            <tr>
+                <td class="label">Tipo de Auditoría:</td>
+                <td><?= htmlspecialchars($evaluacion['typeName'] ?? 'N/A') ?></td>
+            </tr>
+            <tr>
+                <td class="label">Puntaje Total de Riesgo:</td>
+                <td><strong><?= htmlspecialchars((string)$evaluacion['riskScore']) ?></strong></td>
+            </tr>
+            <tr>
+                <td class="label">Nivel de Riesgo Global:</td>
+                <td><span class="badge"><?= htmlspecialchars(strtoupper((string)$evaluacion['riskLevel'])) ?></span></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Seccion 1: Cuestionario General -->
+    <h2>1. Cuestionario General</h2>
+    <table class="report-table">
+        <thead>
+            <tr>
+                <th style="width: 5%;">#</th>
+                <th style="width: 25%;">Categoría</th>
+                <th style="width: 40%;">Pregunta</th>
+                <th style="width: 10%;">Respuesta</th>
+                <th style="width: 20%;">Comentario</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($preguntasGenerales as $p): ?>
+                <tr>
+                    <td class="text-center"><?= htmlspecialchars((string)$p['questionNumber']) ?></td>
+                    <td><?= htmlspecialchars($p['categoryName']) ?></td>
+                    <td><?= htmlspecialchars($p['questionText']) ?></td>
+                    <td class="text-center"><strong><?= htmlspecialchars($p['response']) ?></strong></td>
+                    <td><?= htmlspecialchars($p['comment']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <br>
+
+    <!-- Seccion 2: Pregunta 28 -->
+    <h2>2. Desglose Analítico - Pregunta 28 (Pruebas de Riesgo)</h2>
+    <table class="report-table">
+        <thead>
+            <tr>
+                <th style="width: 8%;">Prueba</th>
+                <th style="width: 60%;">Descripción del Riesgo / Prueba Operativa</th>
+                <th style="width: 20%;">Valor de Riesgo</th>
+                <th style="width: 12%;">Puntaje</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($pruebasQ28 as $q28): ?>
+                <tr>
+                    <td class="text-center"><?= htmlspecialchars((string)$q28['testNumber']) ?></td>
+                    <td><?= htmlspecialchars($q28['testText']) ?></td>
+                    <td><?= htmlspecialchars($q28['riskValue']) ?></td>
+                    <td class="text-center"><strong><?= htmlspecialchars((string)$q28['score']) ?></strong></td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+</body>
+</html>
