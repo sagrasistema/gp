@@ -436,7 +436,7 @@ include '../main/h.php';
                     <tfoot>
                         <tr>
                             <td colspan="2" style="text-align: right; font-weight: 700; color: #334155; font-size: 0.9rem;">
-                                TOTAL CARTA / ESQUEMA:
+                                TOTAL ESQUEMA:
                             </td>
                             <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 0.95rem;" id="tfoot_total_esquema">
                                 <?= formatMontoVe($sumaTotalEsquema) ?>
