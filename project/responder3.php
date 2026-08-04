@@ -119,7 +119,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
             <i class="ri-add-line"></i>
         </a>
 
-        <a href="../projet/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+        <a href="../project/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
             <i class="ri-close-circle-line"></i> 
         </a>
     </div>
