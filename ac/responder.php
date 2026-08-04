@@ -16,6 +16,10 @@ include '../ac/conect-responder.php';
         <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
             <i class="ri-arrow-go-back-line"></i> 
         </a>
+        <!-- BOTÓN DE EXPORTACIÓN A WORD -->
+        <a href="exportar-word.php?acId=<?= urlencode((string)$acId) ?>" class="btn btn-primary" data-tooltip="Exportar Informe a Word" style="background-color: #2b579a; border-color: #2b579a;">
+            <i class="ri-file-word-2-line"></i> Exportar a Word
+        </a>
 
         <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
             <i class="ri-screenshot-2-line"></i>
