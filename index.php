@@ -96,12 +96,11 @@ include 'main/layout_header.php';
             <p>Evaluación de riesgos, políticas internas y aprobación regulatoria.</p>
         </a>
         
-        <div class="module-card disabled">
-            <span class="badge-coming-soon">Próximamente</span>
+        <a href="terminos/index.php" class="module-card">
             <div class="icon-box"><i class="ri-file-list-3-line"></i></div>
             <h2>Términos y Condiciones</h2>
             <p>Gestión de contratos, cláusulas legales y acuerdos de nivel de servicio.</p>
-        </div>
+        </a>
         
         <a href="project/index.php" class="module-card">
             <div class="icon-box"><i class="ri-folders-line"></i></div>
