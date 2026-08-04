@@ -93,10 +93,17 @@ try {
 }
 
 $pageTitle = "Módulo de Términos y Condiciones";
+
+
 include '../main/h.php';
 ?>
 <link rel="stylesheet" href="../main/layout.css">
-<?php include '../main/layout_header.php'; ?>
+<?php 
+$customLogoPath = '../main/logo.png';
+$customHomePath = '../index.php';
+$customAcPath   = '../ac/index.php';
+$currentTab     = 'terminos'; 
+include '../main/layout_header.php'; ?>
 
 <div class="view-container" style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
 
