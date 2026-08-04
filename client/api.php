@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -8,31 +9,15 @@ declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Configuración de la base de datos (Ajustar credenciales según entorno)
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'sagracom_alberto_1');
-define('DB_USER', 'sagracom_alberto_t');
-define('DB_PASS', 'sagragp2705');
-define('DB_CHARSET', 'utf8mb4');
+// Cargar la conexión unificada de la base de datos
+require_once 'db.php';
 
-try {
-    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
-    $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
-    ];
-    $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Error crítico de conexión a la base de datos.']);
-    exit;
-}
+/** @var PDO $pdo */
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 /**
- * Función helper para sanitizar y extraer datos de entrada de forma segura
+ * Helper para sanitizar las entradas del cliente de manera segura.
  */
 function sanitizeInput(array $input): array
 {
@@ -46,7 +31,8 @@ function sanitizeInput(array $input): array
 
     foreach ($allowedKeys as $key) {
         if (array_key_exists($key, $input) && $input[$key] !== null) {
-            $clean[$key] = trim((string)$input[$key]);
+            $value = trim((string)$input[$key]);
+            $clean[$key] = $value !== '' ? $value : null;
         } else {
             $clean[$key] = null;
         }
@@ -59,16 +45,15 @@ try {
     switch ($method) {
         
         // ------------------------------------------------------------------
-        // GET: Obtener todos los registros o un registro por ID
+        // GET: Consultar todos los clientes o uno en específico por ID
         // ------------------------------------------------------------------
         case 'GET':
             $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
             if ($id) {
-                // Consulta explícita que garantiza el retorno de persona y cargo
                 $stmt = $pdo->prepare("
                     SELECT 
-                        id, name, rif, persona, cargo, phone, email, address, 
+                        id, name, rif, persona, cargo, email, phone, address, 
                         city, state_geo, zip_code, website, instagram, linkedin, 
                         country, employees, income_level, sector, service, 
                         service_desc, sector_desc, status 
@@ -80,7 +65,7 @@ try {
 
                 if (!$cliente) {
                     http_response_code(404);
-                    echo json_encode(['error' => 'Registro no encontrado.']);
+                    echo json_encode(['error' => 'El cliente solicitado no existe.'], JSON_UNESCAPED_UNICODE);
                     exit;
                 }
 
@@ -88,20 +73,19 @@ try {
             } else {
                 $stmt = $pdo->query("
                     SELECT 
-                        id, name, rif, persona, cargo, phone, email, address, 
+                        id, name, rif, persona, cargo, email, phone, address, 
                         city, state_geo, zip_code, website, instagram, linkedin, 
                         country, employees, income_level, sector, service, 
                         service_desc, sector_desc, status 
                     FROM clientes 
                     ORDER BY id DESC
                 ");
-                $clientes = $stmt->fetchAll();
-                echo json_encode($clientes, JSON_UNESCAPED_UNICODE);
+                echo json_encode($stmt->fetchAll(), JSON_UNESCAPED_UNICODE);
             }
             break;
 
         // ------------------------------------------------------------------
-        // POST: Crear nuevo cliente
+        // POST: Crear nuevo registro
         // ------------------------------------------------------------------
         case 'POST':
             $rawInput = json_decode(file_get_contents('php://input'), true) ?? [];
@@ -109,7 +93,7 @@ try {
 
             if (empty($data['name'])) {
                 http_response_code(400);
-                echo json_encode(['error' => 'El campo Nombre/Razón Social es obligatorio.']);
+                echo json_encode(['error' => 'El campo Nombre o Razón Social es obligatorio.'], JSON_UNESCAPED_UNICODE);
                 exit;
             }
 
@@ -151,11 +135,14 @@ try {
             ]);
 
             http_response_code(201);
-            echo json_encode(['message' => 'Cliente registrado exitosamente.', 'id' => $pdo->lastInsertId()]);
+            echo json_encode([
+                'message' => 'Cliente registrado exitosamente.', 
+                'id' => (int)$pdo->lastInsertId()
+            ], JSON_UNESCAPED_UNICODE);
             break;
 
         // ------------------------------------------------------------------
-        // PUT: Actualizar registro existente
+        // PUT: Actualización completa de la ficha corporativa
         // ------------------------------------------------------------------
         case 'PUT':
             $rawInput = json_decode(file_get_contents('php://input'), true) ?? [];
@@ -163,7 +150,7 @@ try {
 
             if (!$id) {
                 http_response_code(400);
-                echo json_encode(['error' => 'ID inválido o no suministrado para actualización.']);
+                echo json_encode(['error' => 'Identificador (ID) de cliente no válido.'], JSON_UNESCAPED_UNICODE);
                 exit;
             }
 
@@ -171,7 +158,7 @@ try {
 
             if (empty($data['name'])) {
                 http_response_code(400);
-                echo json_encode(['error' => 'El campo Nombre/Razón Social es obligatorio.']);
+                echo json_encode(['error' => 'El campo Nombre o Razón Social es obligatorio.'], JSON_UNESCAPED_UNICODE);
                 exit;
             }
 
@@ -225,11 +212,11 @@ try {
                 ':status'       => $data['status'] ?? 'Activo'
             ]);
 
-            echo json_encode(['message' => 'Ficha del cliente actualizada exitosamente.']);
+            echo json_encode(['message' => 'Ficha de cliente actualizada exitosamente.'], JSON_UNESCAPED_UNICODE);
             break;
 
         // ------------------------------------------------------------------
-        // DELETE: Eliminar cliente
+        // DELETE: Eliminar cliente por ID
         // ------------------------------------------------------------------
         case 'DELETE':
             $rawInput = json_decode(file_get_contents('php://input'), true) ?? [];
@@ -237,24 +224,24 @@ try {
 
             if (!$id) {
                 http_response_code(400);
-                echo json_encode(['error' => 'ID inválido para eliminación.']);
+                echo json_encode(['error' => 'Identificador (ID) inválido para eliminación.'], JSON_UNESCAPED_UNICODE);
                 exit;
             }
 
             $stmt = $pdo->prepare("DELETE FROM clientes WHERE id = :id");
             $stmt->execute([':id' => $id]);
 
-            echo json_encode(['message' => 'Cliente eliminado correctamente.']);
+            echo json_encode(['message' => 'Registro eliminado correctamente.'], JSON_UNESCAPED_UNICODE);
             break;
 
         default:
             http_response_code(405);
-            echo json_encode(['error' => 'Método HTTP no permitido.']);
+            echo json_encode(['error' => 'Método HTTP no soportado.'], JSON_UNESCAPED_UNICODE);
             break;
     }
 
 } catch (PDOException $e) {
+    error_log("Error PDO en api.php: " . $e->getMessage());
     http_response_code(500);
-    // En producción se debe registrar $e->getMessage() en un archivo log interno
-    echo json_encode(['error' => 'Error de ejecución en base de datos: ' . $e->getMessage()]);
+    echo json_encode(['error' => 'Error interno procesando la solicitud.'], JSON_UNESCAPED_UNICODE);
 }
