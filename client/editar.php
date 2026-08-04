@@ -147,11 +147,11 @@ include '../main/layout_header.php';
                 <i class="ri-arrow-go-back-line"></i> 
             </a>
             <!-- Ejemplo de enlace en la vista del cliente -->
-            <a href="export_cliente_word.php?id=<?= $cliente['id'] ?>" 
-            class="btn btn-primary" 
-            target="_blank">
-                <i class="fa fa-file-word"></i> Exportar Ficha a Word
+            <a href="export_cliente_word.php?id=<?= urlencode((string)$id) ?>" 
+                    class="btn btn-primary" >
+                <i class="fa fa-file-word"></i>
             </a>
+
             <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
                 <i class="ri-screenshot-2-line"></i>
             </a>
