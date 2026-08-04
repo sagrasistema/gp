@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 #require_once __DIR__ . '/vendor/autoload.php';
 
-use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\SimpleType\Jc;
-use PhpOffice\PhpWord\Style\Language;
-use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\PhpWord.php;
+use PhpOffice\PhpWord\SimpleType\Jc.php;
+use PhpOffice\PhpWord\Style\Language.php;
+use PhpOffice\PhpWord\IOFactory.php;
 
 // 1. Configuración de conexión segura PDO
 $host     = 'localhost';
