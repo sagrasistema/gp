@@ -316,7 +316,7 @@ include '../main/h.php';
     }
 </style>
 
-<div class="view-container">
+<div class="view-container" style="padding: 2rem; max-width: 1050px; margin: 0 auto;">
 
     <!-- CABECERA SUPERIOR -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -339,7 +339,7 @@ include '../main/h.php';
         </div>
     <?php endif; ?>
 
-    <!-- PANEL PRINCIPAL (MAQUETA BASE) -->
+    <!-- PANEL PRINCIPAL -->
     <div class="panel-box">
         <div class="header-bar-panel">Esquema de Facturación</div>
         <div style="padding: 1.5rem;">
@@ -386,11 +386,12 @@ include '../main/h.php';
 
     <!-- TABLA DE FACTURAS Y TOTALIZACIÓN -->
     <?php if (!empty($facturasVal)): ?>
+        <?php $totalFacturasCount = count($facturasVal); ?>
         <form method="POST" action="formulario-esquema-facturacion.php?terminoId=<?= $terminoId ?>">
             <input type="hidden" name="action_save_esquema" value="1">
             <input type="hidden" name="termino_id" value="<?= $terminoId ?>">
             <input type="hidden" name="fecha_estimada_base" value="<?= htmlspecialchars($fechaEstimadaBaseVal, ENT_QUOTES, 'UTF-8') ?>">
-            <input type="hidden" name="cantidad_facturas" value="<?= count($facturasVal) ?>">
+            <input type="hidden" name="cantidad_facturas" value="<?= $totalFacturasCount ?>">
             <input type="hidden" name="monto_factura" value="<?= htmlspecialchars(formatMontoVe($montoFacturaVal), ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="moneda" value="<?= htmlspecialchars($monedaVal, ENT_QUOTES, 'UTF-8') ?>">
 
@@ -402,8 +403,8 @@ include '../main/h.php';
                 <table class="table-custom">
                     <thead>
                         <tr>
-                            <th style="width: 10%;"># Cuota</th>
-                            <th style="width: 40%;">Fecha Estimada de Emisión</th>
+                            <th style="width: 12%; text-align: center;"># Cuota</th>
+                            <th style="width: 38%; text-align: right;">Fecha Estimada de Emisión</th>
                             <th style="width: 35%; text-align: right;">Monto Cuota (<?= htmlspecialchars($monedaVal, ENT_QUOTES, 'UTF-8') ?>)</th>
                             <th style="width: 15%; text-align: center;">Estatus</th>
                         </tr>
@@ -411,11 +412,13 @@ include '../main/h.php';
                     <tbody>
                         <?php foreach ($facturasVal as $index => $f): ?>
                             <tr>
-                                <td style="font-weight: 600; color: #334155;">
-                                    Factura #<?= (int)($f['numero'] ?? ($index + 1)) ?>
+                                <!-- REQUERIMIENTO 1: NUMERACIÓN FORMATO (1/10, 2/10) -->
+                                <td style="font-weight: 600; color: #334155; text-align: center;">
+                                    <?= (int)($f['numero'] ?? ($index + 1)) ?>/<?= $totalFacturasCount ?>
                                 </td>
+                                <!-- REQUERIMIENTO 2: FECHA ALINEADA A LA DERECHA -->
                                 <td>
-                                    <input type="date" name="factura_fecha[]" class="form-control-line" value="<?= htmlspecialchars((string)($f['fecha'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
+                                    <input type="date" name="factura_fecha[]" class="form-control-line" style="text-align: right;" value="<?= htmlspecialchars((string)($f['fecha'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
                                 </td>
                                 <td>
                                     <input type="text" name="factura_monto[]" class="form-control-line js-monto-cuota" style="text-align: right; font-weight: 600;" value="<?= htmlspecialchars(formatMontoVe((float)($f['monto'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>" onblur="formatInputVe(this); recalcularTotales();" required>
@@ -428,24 +431,26 @@ include '../main/h.php';
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
-                    <!-- REQUERIMIENTO 1: PIE DE TABLA TOTALIZADOR -->
+                    
+                    <!-- REQUERIMIENTO 3: TOTALIZACIÓN SOLO NÚMERO Y MONEDA ABAJO DE ESTATUS -->
                     <tfoot>
                         <tr>
                             <td colspan="2" style="text-align: right; font-weight: 700; color: #334155; font-size: 0.9rem;">
-                                TOTAL ESQUEMA:
+                                TOTAL CARTA / ESQUEMA:
                             </td>
                             <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 0.95rem;" id="tfoot_total_esquema">
-                                <?= formatMontoVe($sumaTotalEsquema) ?> <?= htmlspecialchars($monedaVal, ENT_QUOTES, 'UTF-8') ?>
+                                <?= formatMontoVe($sumaTotalEsquema) ?>
                             </td>
-                            <td></td>
+                            <td style="text-align: center; font-weight: 700; color: #0f172a; font-size: 0.95rem;" id="tfoot_moneda">
+                                <?= htmlspecialchars($monedaVal, ENT_QUOTES, 'UTF-8') ?>
+                            </td>
                         </tr>
                     </tfoot>
                 </table>
 
-                <!-- REQUERIMIENTO 2: SECCIÓN DE TOTALES ALINEADOS VERTICALMENTE CON FUENTE IDÉNTICA -->
+                <!-- RESUMEN INFERIOR ALINEADO -->
                 <div style="margin-top: 1.5rem; padding: 1.25rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     
-                    <!-- GRID BI-COLUMNA DE TOTALES -->
                     <div style="display: grid; grid-template-columns: auto minmax(150px, auto); gap: 0.5rem 1.5rem; align-items: center; font-size: 0.9rem;">
                         <span style="color: #475569; font-weight: 500;">Total Esquema de Facturación:</span>
                         <span id="summary_total_esquema" style="font-size: 0.9rem; font-weight: 700; color: #0f172a; text-align: right;">
@@ -458,7 +463,6 @@ include '../main/h.php';
                         </span>
                     </div>
 
-                    <!-- BADGE DE COMPARACIÓN -->
                     <div id="status_badge_container">
                         <?php if ($esIgualPropuesta): ?>
                             <div style="padding: 0.5rem 1rem; background: #dcfce7; color: #15803d; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
@@ -522,7 +526,6 @@ function formatFloatToVe(num) {
     return num.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-// RECÁLCULO DINÁMICO CLIENT-SIDE (CERO RECARGAS DE PÁGINA)
 function recalcularTotales() {
     const inputs = document.querySelectorAll('.js-monto-cuota');
     let sumaTotal = 0.00;
@@ -531,17 +534,17 @@ function recalcularTotales() {
         sumaTotal += parseVeToFloat(input.value);
     });
 
-    const strTotalVe = formatFloatToVe(sumaTotal) + ' ' + MONEDA_ACTUAL;
+    const strNumVe = formatFloatToVe(sumaTotal);
 
-    // Actualizar Pie de Tabla
+    // 1. Actualizar Pie de Tabla (SOLO NÚMERO)
     const elTfoot = document.getElementById('tfoot_total_esquema');
-    if (elTfoot) elTfoot.textContent = strTotalVe;
+    if (elTfoot) elTfoot.textContent = strNumVe;
 
-    // Actualizar Resumen
+    // 2. Actualizar Resumen (NÚMERO + MONEDA)
     const elSummary = document.getElementById('summary_total_esquema');
-    if (elSummary) elSummary.textContent = strTotalVe;
+    if (elSummary) elSummary.textContent = strNumVe + ' ' + MONEDA_ACTUAL;
 
-    // Recalcular Diferencia / Coincidencia
+    // 3. Recalcular Diferencia / Coincidencia
     const diff = Math.round((sumaTotal - MONTO_PROPUESTA_CARTA) * 100) / 100;
     const badgeContainer = document.getElementById('status_badge_container');
 
