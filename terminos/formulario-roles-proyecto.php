@@ -33,7 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_roles']))
     $rawIntegrantes = $_POST['integrantes_ids'] ?? [];
     $integrantesIds = [];
     if (is_array($rawIntegrantes)) {
-        $integrantesIds = array_values(array_filter(array_map('intval', $rawIntegrantes), fn($id) => $id > 0));
+        $integrantesIds = array_values(
+            array_filter(
+                array_map('intval', $rawIntegrantes), 
+                static fn(int $id): bool => $id > 0
+            )
+        );
     }
 
     $contactoCliente = is_string($contactoClienteInput) ? trim($contactoClienteInput) : '';
@@ -48,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_roles']))
         try {
             $pdo->beginTransaction();
 
-            // Struct del JSON almacenando los IDs de usuario
+            // Guardar estructurado los IDs referenciales
             $payloadJson = json_encode([
                 'lider_usuario_id'   => $liderUsuarioIdInput,
                 'auditor_usuario_id' => $auditorUsuarioIdInput,
@@ -126,16 +131,15 @@ try {
         die("Error: El registro de Términos y Condiciones no existe.");
     }
 
-    // Cargar la lista de usuarios del sistema (Ajustar nombres de columna según tu BD si difieren)
+    // Consulta ajustada estrictamente a las columnas del SQL Dump
     $stmtUsuarios = $pdo->query("
-        SELECT id, nombre, apellido 
+        SELECT id, username, nombre_completo, rol 
         FROM usuarios 
-        WHERE activo = 1 
-        ORDER BY nombre ASC, apellido ASC
+        ORDER BY nombre_completo ASC
     ");
     $usuariosSistema = $stmtUsuarios->fetchAll(PDO::FETCH_OBJ);
 
-    // Cargar el item configurado actual
+    // Cargar el ítem configurado actual
     $stmtItem = $pdo->prepare("
         SELECT * 
         FROM terminos_condiciones_items 
@@ -210,9 +214,8 @@ include '../main/h.php';
                     <select name="lider_usuario_id" required style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #f8fafc;">
                         <option value="">-- Seleccionar Usuario --</option>
                         <?php foreach ($usuariosSistema as $usr): ?>
-                            <?php $nombreCompleto = trim($usr->nombre . ' ' . $usr->apellido); ?>
                             <option value="<?= $usr->id ?>" <?= $usr->id === $liderUsuarioIdVal ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?>
+                                <?= htmlspecialchars($usr->nombre_completo, ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars($usr->username, ENT_QUOTES, 'UTF-8') ?>)
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -226,9 +229,8 @@ include '../main/h.php';
                     <select name="auditor_usuario_id" required style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #f8fafc;">
                         <option value="">-- Seleccionar Usuario --</option>
                         <?php foreach ($usuariosSistema as $usr): ?>
-                            <?php $nombreCompleto = trim($usr->nombre . ' ' . $usr->apellido); ?>
                             <option value="<?= $usr->id ?>" <?= $usr->id === $auditorUsuarioIdVal ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?>
+                                <?= htmlspecialchars($usr->nombre_completo, ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars($usr->username, ENT_QUOTES, 'UTF-8') ?>)
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -255,11 +257,10 @@ include '../main/h.php';
                     <select name="integrantes_ids[]" multiple style="width: 100%; height: 110px; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
                         <?php foreach ($usuariosSistema as $usr): ?>
                             <?php 
-                                $nombreCompleto = trim($usr->nombre . ' ' . $usr->apellido); 
                                 $isSelected = in_array((int)$usr->id, $integrantesIdsVal, true) ? 'selected' : '';
                             ?>
                             <option value="<?= $usr->id ?>" <?= $isSelected ?>>
-                                <?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?>
+                                <?= htmlspecialchars($usr->nombre_completo, ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars($usr->username, ENT_QUOTES, 'UTF-8') ?>)
                             </option>
                         <?php endforeach; ?>
                     </select>
