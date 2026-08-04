@@ -11,10 +11,11 @@ if (!$clienteId) {
 }
 
 // 2. Conexión a Base de Datos (PDO)
-$dbHost  = '127.0.0.1';
+
+$dbHost  = 'localhost';
 $dbName  = 'sagracom_alberto_1';
-$dbUser  = 'tu_usuario';
-$dbPass  = 'tu_contraseña';
+$dbUser  = 'sagracom_alberto_t';
+$dbPass  = 'sagragp2705';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host={$dbHost};dbname={$dbName};charset={$charset}";
