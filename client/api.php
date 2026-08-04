@@ -76,14 +76,14 @@ switch ($method) {
         $data = json_decode(file_get_contents("php://input"), true);
         if (!empty($data['name'])) {
             try {
-                $stmt = $pdo->prepare("INSERT INTO clientes (name, rif, email, phone, address, city, state_geo, zip_code, website, instagram, linkedin, country, employees, income_level, sector, service, service_desc, sector_desc, status) VALUES (:name, :rif, :email, :phone, :address, :city, :state_geo, :zip_code, :website, :instagram, :linkedin, :country, :employees, :income_level, :sector, :service, :service_desc, :sector_desc, :status)");
+                $stmt = $pdo->prepare("INSERT INTO clientes (name, rif, email, persona, cargo, phone, address, city, state_geo, zip_code, website, instagram, linkedin, country, employees, income_level, sector, service, service_desc, sector_desc, status) VALUES (:name, :rif, :email, :phone, :address, :city, :state_geo, :zip_code, :website, :instagram, :linkedin, :country, :employees, :income_level, :sector, :service, :service_desc, :sector_desc, :status)");
                 
                 $stmt->execute([
                     ':name'         => $data['name'],
                     ':rif'          => $data['rif'] ?? '',
                     ':email'        => $data['email'] ?? '',
                     ':persona'        => $data['persona'] ?? '',
-                    ':cargo'        => $data['cargo'] ?? '',
+                    ':cargo'        => $data['email'] ?? '',
                     ':phone'        => $data['phone'] ?? '',
                     ':address'      => $data['address'] ?? '',
                     ':city'         => $data['city'] ?? '',
@@ -117,7 +117,7 @@ switch ($method) {
         $data = json_decode(file_get_contents("php://input"), true);
         if (!empty($data['id'])) {
             try {
-                $stmt = $pdo->prepare("UPDATE clientes SET name = :name, rif = :rif, email = :email, phone = :phone, address = :address, city = :city, state_geo = :state_geo, zip_code = :zip_code, website = :website, instagram = :instagram, linkedin = :linkedin, country = :country, employees = :employees, income_level = :income_level, sector = :sector, service = :service, service_desc = :service_desc, sector_desc = :sector_desc, status = :status WHERE id = :id");
+                $stmt = $pdo->prepare("UPDATE clientes SET name = :name, rif = :rif, email = :email, persona = :persona, cargo = :cargo, phone = :phone,  address = :address, city = :city, state_geo = :state_geo, zip_code = :zip_code, website = :website, instagram = :instagram, linkedin = :linkedin, country = :country, employees = :employees, income_level = :income_level, sector = :sector, service = :service, service_desc = :service_desc, sector_desc = :sector_desc, status = :status WHERE id = :id");
                 
                 $stmt->execute([
                     ':id'           => $data['id'],
@@ -125,7 +125,7 @@ switch ($method) {
                     ':rif'          => $data['rif'] ?? '',
                     ':email'        => $data['email'] ?? '',
                     ':persona'        => $data['persona'] ?? '',
-                    ':cargo'        => $data['cargo'] ?? '',
+                    ':cargo'        => $data['email'] ?? '',
                     ':phone'        => $data['phone'] ?? '',
                     ':address'      => $data['address'] ?? '',
                     ':city'         => $data['city'] ?? '',
