@@ -49,7 +49,7 @@ function calcularCuotas(float $montoTotal, int $cantidad): array
     for ($i = 1; $i <= $cantidad; $i++) {
         $montoCuota = $montoBase;
         if ($i === $cantidad) {
-            $montoCuota += $diferencia; // Ajusta centavos sobrantes en la última cuota
+            $montoCuota += $diferencia;
         }
         $cuotas[] = $montoCuota;
     }
@@ -71,10 +71,9 @@ if (!$terminoId || $terminoId <= 0) {
 $itemKey = 'esquema_facturacion';
 
 // -------------------------------------------------------------------------
-// 2. CARGAR DATOS DE CABECERA Y CARTA DE CONTRATACIÓN (MONTO PROPUESTA)
+// 2. CARGAR DATOS DE CABECERA Y CARTA DE CONTRATACIÓN
 // -------------------------------------------------------------------------
 try {
-    // Cabecera del proyecto
     $stmtHeader = $pdo->prepare("
         SELECT tc.*, c.name AS clientName 
         FROM terminos_condiciones tc 
@@ -137,12 +136,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_esquema']
 
     $facturasList = [];
 
-    // CASO A: Si el usuario proviene de presionar "Generar / Re-calcular"
     if (isset($_POST['btn_generar_cuotas'])) {
         $cuotasCalculadas = calcularCuotas($montoFacturaTotal, $cantidadFacturas);
         
         foreach ($cuotasCalculadas as $idx => $montoCuota) {
-            // Incrementar mes por cada cuota generada
             $fechaCuota = date('Y-m-d', strtotime("+$idx month", strtotime($fechaEstimadaBase)));
             $facturasList[] = [
                 'numero' => $idx + 1,
@@ -150,9 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_esquema']
                 'monto'  => number_format($montoCuota, 2, '.', '')
             ];
         }
-    } 
-    // CASO B: Guardar cambios manuales realizados sobre la tabla detallada
-    else {
+    } else {
         $fechasPOST  = $_POST['factura_fecha'] ?? [];
         $montosPOST  = $_POST['factura_monto'] ?? [];
 
@@ -168,7 +163,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_esquema']
         }
     }
 
-    // Guardar payload final en BD
     try {
         $pdo->beginTransaction();
 
@@ -193,7 +187,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_esquema']
             ':item_key'    => $itemKey
         ]);
 
-        // Reevaluar estado global de los términos
         $stmtCheckPending = $pdo->prepare("
             SELECT COUNT(*) 
             FROM terminos_condiciones_items 
@@ -237,13 +230,11 @@ $montoFacturaVal      = (string)($savedData['monto_factura'] ?? '0.00');
 $monedaVal            = (string)($savedData['moneda'] ?? $monedaCarta);
 $facturasVal          = (array)($savedData['facturas'] ?? []);
 
-// Calcular suma total de las cuotas generadas en la tabla
 $sumaTotalEsquema = 0.00;
 foreach ($facturasVal as $f) {
     $sumaTotalEsquema += (float)($f['monto'] ?? 0);
 }
 
-// Comparación con Carta de Contratación
 $diferenciaConPropuesta = round($sumaTotalEsquema - $montoPropuestaCarta, 2);
 $esIgualPropuesta       = (abs($diferenciaConPropuesta) < 0.01);
 
@@ -318,9 +309,14 @@ include '../main/h.php';
         border-bottom: 1px solid #e2e8f0;
         font-size: 0.9rem;
     }
+    .table-custom tfoot td {
+        background: #f1f5f9;
+        border-top: 2px solid #cbd5e1;
+        border-bottom: none;
+    }
 </style>
 
-<div class="view-container">
+<div class="view-container" style="padding: 2rem; max-width: 1050px; margin: 0 auto;">
 
     <!-- CABECERA SUPERIOR -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -343,7 +339,7 @@ include '../main/h.php';
         </div>
     <?php endif; ?>
 
-    <!-- PANEL PRINCIPAL (FRANJA GRIS - DISEÑO MAQUETA) -->
+    <!-- PANEL PRINCIPAL (MAQUETA BASE) -->
     <div class="panel-box">
         <div class="header-bar-panel">Esquema de Facturación</div>
         <div style="padding: 1.5rem;">
@@ -352,9 +348,7 @@ include '../main/h.php';
                 <input type="hidden" name="action_save_esquema" value="1">
                 <input type="hidden" name="termino_id" value="<?= $terminoId ?>">
 
-                <!-- CAMPOS SUPERIORES SEGÚN DISEÑO -->
                 <div style="display: grid; grid-template-columns: 2fr 1.5fr 2fr 1.5fr 60px; gap: 1.5rem; align-items: end;">
-                    
                     <div>
                         <label style="display: block; font-size: 0.78rem; color: #475569; margin-bottom: 0.25rem;">Fecha Factura (Estimada):</label>
                         <input type="date" name="fecha_estimada_base" class="form-control-line" style="text-align: center;" value="<?= htmlspecialchars($fechaEstimadaBaseVal, ENT_QUOTES, 'UTF-8') ?>">
@@ -384,14 +378,13 @@ include '../main/h.php';
                             <i class="ri-save-3-fill" style="font-size: 1.25rem;"></i>
                         </button>
                     </div>
-
                 </div>
             </form>
 
         </div>
     </div>
 
-    <!-- TABLA DE FACTURAS GENERADAS -->
+    <!-- TABLA DE FACTURAS Y TOTALIZACIÓN -->
     <?php if (!empty($facturasVal)): ?>
         <form method="POST" action="formulario-esquema-facturacion.php?terminoId=<?= $terminoId ?>">
             <input type="hidden" name="action_save_esquema" value="1">
@@ -425,7 +418,7 @@ include '../main/h.php';
                                     <input type="date" name="factura_fecha[]" class="form-control-line" value="<?= htmlspecialchars((string)($f['fecha'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
                                 </td>
                                 <td>
-                                    <input type="text" name="factura_monto[]" class="form-control-line" style="text-align: right; font-weight: 600;" value="<?= htmlspecialchars(formatMontoVe((float)($f['monto'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>" onblur="formatInputVe(this)" required>
+                                    <input type="text" name="factura_monto[]" class="form-control-line js-monto-cuota" style="text-align: right; font-weight: 600;" value="<?= htmlspecialchars(formatMontoVe((float)($f['monto'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>" onblur="formatInputVe(this); recalcularTotales();" required>
                                 </td>
                                 <td style="text-align: center;">
                                     <span style="font-size: 0.75rem; background: #f1f5f9; color: #475569; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600;">
@@ -435,20 +428,38 @@ include '../main/h.php';
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
+                    <!-- REQUERIMIENTO 1: PIE DE TABLA TOTALIZADOR -->
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" style="text-align: right; font-weight: 700; color: #334155; font-size: 0.9rem;">
+                                TOTAL CARTA / ESQUEMA:
+                            </td>
+                            <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 0.95rem;" id="tfoot_total_esquema">
+                                <?= formatMontoVe($sumaTotalEsquema) ?> <?= htmlspecialchars($monedaVal, ENT_QUOTES, 'UTF-8') ?>
+                            </td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
                 </table>
 
-                <!-- RESUMEN COMPARATIVO CON CARTA DE CONTRATACIÓN -->
-                <div style="margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-size: 0.85rem; color: #64748b;">
-                            Total Esquema de Facturación: <strong style="color: #0f172a; font-size: 1rem;"><?= formatMontoVe($sumaTotalEsquema) ?> <?= htmlspecialchars($monedaVal, ENT_QUOTES, 'UTF-8') ?></strong>
-                        </div>
-                        <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.2rem;">
-                            Monto Propuesta (Carta Contratación): <strong style="color: #0f172a;"><?= formatMontoVe($montoPropuestaCarta) ?> <?= htmlspecialchars($monedaCarta, ENT_QUOTES, 'UTF-8') ?></strong>
-                        </div>
+                <!-- REQUERIMIENTO 2: SECCIÓN DE TOTALES ALINEADOS VERTICALMENTE CON FUENTE IDÉNTICA -->
+                <div style="margin-top: 1.5rem; padding: 1.25rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    
+                    <!-- GRID BI-COLUMNA DE TOTALES -->
+                    <div style="display: grid; grid-template-columns: auto minmax(150px, auto); gap: 0.5rem 1.5rem; align-items: center; font-size: 0.9rem;">
+                        <span style="color: #475569; font-weight: 500;">Total Esquema de Facturación:</span>
+                        <span id="summary_total_esquema" style="font-size: 0.9rem; font-weight: 700; color: #0f172a; text-align: right;">
+                            <?= formatMontoVe($sumaTotalEsquema) ?> <?= htmlspecialchars($monedaVal, ENT_QUOTES, 'UTF-8') ?>
+                        </span>
+
+                        <span style="color: #475569; font-weight: 500;">Monto Propuesta (Carta Contratación):</span>
+                        <span style="font-size: 0.9rem; font-weight: 700; color: #0f172a; text-align: right;">
+                            <?= formatMontoVe($montoPropuestaCarta) ?> <?= htmlspecialchars($monedaCarta, ENT_QUOTES, 'UTF-8') ?>
+                        </span>
                     </div>
 
-                    <div>
+                    <!-- BADGE DE COMPARACIÓN -->
+                    <div id="status_badge_container">
                         <?php if ($esIgualPropuesta): ?>
                             <div style="padding: 0.5rem 1rem; background: #dcfce7; color: #15803d; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
                                 <i class="ri-checkbox-circle-fill"></i> Coincide con la Propuesta
@@ -459,9 +470,10 @@ include '../main/h.php';
                             </div>
                         <?php endif; ?>
                     </div>
+
                 </div>
 
-                <!-- BOTÓN GUARDAR FILAS -->
+                <!-- BOTÓN GUARDAR -->
                 <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
                     <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
                         <i class="ri-save-line"></i> Guardar Esquema Detallado
@@ -475,6 +487,10 @@ include '../main/h.php';
 </div>
 
 <script>
+const MONEDA_ACTUAL = <?= json_encode($monedaVal, JSON_HEX_TAG | JSON_HEX_AMP) ?>;
+const MONEDA_PROPUESTA = <?= json_encode($monedaCarta, JSON_HEX_TAG | JSON_HEX_AMP) ?>;
+const MONTO_PROPUESTA_CARTA = <?= (float)$montoPropuestaCarta ?>;
+
 function formatInputVe(input) {
     let val = input.value.trim();
     if (!val) return;
@@ -493,6 +509,55 @@ function formatInputVe(input) {
     integerPart = parseInt(integerPart, 10).toLocaleString('de-DE');
 
     input.value = integerPart + ',' + decimalPart;
+}
+
+function parseVeToFloat(strVal) {
+    if (!strVal) return 0.00;
+    let limpio = strVal.replace(/\./g, '').replace(',', '.');
+    let num = parseFloat(limpio);
+    return isNaN(num) ? 0.00 : num;
+}
+
+function formatFloatToVe(num) {
+    return num.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// RECÁLCULO DINÁMICO CLIENT-SIDE (CERO RECARGAS DE PÁGINA)
+function recalcularTotales() {
+    const inputs = document.querySelectorAll('.js-monto-cuota');
+    let sumaTotal = 0.00;
+
+    inputs.forEach(input => {
+        sumaTotal += parseVeToFloat(input.value);
+    });
+
+    const strTotalVe = formatFloatToVe(sumaTotal) + ' ' + MONEDA_ACTUAL;
+
+    // Actualizar Pie de Tabla
+    const elTfoot = document.getElementById('tfoot_total_esquema');
+    if (elTfoot) elTfoot.textContent = strTotalVe;
+
+    // Actualizar Resumen
+    const elSummary = document.getElementById('summary_total_esquema');
+    if (elSummary) elSummary.textContent = strTotalVe;
+
+    // Recalcular Diferencia / Coincidencia
+    const diff = Math.round((sumaTotal - MONTO_PROPUESTA_CARTA) * 100) / 100;
+    const badgeContainer = document.getElementById('status_badge_container');
+
+    if (badgeContainer) {
+        if (Math.abs(diff) < 0.01) {
+            badgeContainer.innerHTML = `
+                <div style="padding: 0.5rem 1rem; background: #dcfce7; color: #15803d; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
+                    <i class="ri-checkbox-circle-fill"></i> Coincide con la Propuesta
+                </div>`;
+        } else {
+            badgeContainer.innerHTML = `
+                <div style="padding: 0.5rem 1rem; background: #fef3c7; color: #b45309; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
+                    <i class="ri-alert-fill"></i> Diferencia: ${formatFloatToVe(diff)} ${MONEDA_ACTUAL}
+                </div>`;
+        }
+    }
 }
 </script>
 
