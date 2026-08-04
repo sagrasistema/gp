@@ -1,240 +1,260 @@
 <?php
-
 declare(strict_types=1);
 
 /**
- * API de Control de Clientes Corporativos
- * Estándar: PSR-12
- * Compatibilidad: PHP 8.0+
+ * RESTful API Controller - Gestión de Clientes Corporativos
+ * Estándar: PSR-12 / PHP 8.x Strict Types
  */
 
-header('Content-Type: application/json; charset=UTF-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
-header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
+header('Content-Type: application/json; charset=utf-8');
 
-require_once 'config.php';
+// Configuración de la base de datos (Ajustar credenciales según entorno)
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'sagracom_alberto_1');
+define('DB_USER', 'sagracom_alberto_t');
+define('DB_PASS', 'sagragp2705');
+define('DB_CHARSET', 'utf8mb4');
 
-// Asegurar que PDO está correctamente configurado
-/** @var PDO $pdo */
-$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+try {
+    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+    $options = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+    ];
+    $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Error crítico de conexión a la base de datos.']);
+    exit;
+}
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 /**
- * Limpia y normaliza los valores del registro
+ * Función helper para sanitizar y extraer datos de entrada de forma segura
  */
-function sanitizeRow(?array $row): array
+function sanitizeInput(array $input): array
 {
-    if (!$row) {
-        return [];
+    $clean = [];
+    $allowedKeys = [
+        'name', 'rif', 'persona', 'cargo', 'phone', 'email', 'address',
+        'city', 'state_geo', 'zip_code', 'website', 'instagram', 'linkedin',
+        'country', 'employees', 'income_level', 'sector', 'service',
+        'service_desc', 'sector_desc', 'status'
+    ];
+
+    foreach ($allowedKeys as $key) {
+        if (array_key_exists($key, $input) && $input[$key] !== null) {
+            $clean[$key] = trim((string)$input[$key]);
+        } else {
+            $clean[$key] = null;
+        }
     }
 
-    return array_map(function ($value) {
-        if ($value === null) {
-            return '';
-        }
-        return htmlspecialchars(trim((string) $value), ENT_QUOTES, 'UTF-8');
-    }, $row);
+    return $clean;
 }
 
-switch ($method) {
-    case 'GET':
-        try {
-            if (isset($_GET['id'])) {
-                $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+try {
+    switch ($method) {
+        
+        // ------------------------------------------------------------------
+        // GET: Obtener todos los registros o un registro por ID
+        // ------------------------------------------------------------------
+        case 'GET':
+            $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
-                if ($id === false || $id === null || $id <= 0) {
-                    http_response_code(400);
-                    echo json_encode(['error' => 'El parámetro ID debe ser un número entero válido.']);
+            if ($id) {
+                // Consulta explícita que garantiza el retorno de persona y cargo
+                $stmt = $pdo->prepare("
+                    SELECT 
+                        id, name, rif, persona, cargo, phone, email, address, 
+                        city, state_geo, zip_code, website, instagram, linkedin, 
+                        country, employees, income_level, sector, service, 
+                        service_desc, sector_desc, status 
+                    FROM clientes 
+                    WHERE id = :id
+                ");
+                $stmt->execute([':id' => $id]);
+                $cliente = $stmt->fetch();
+
+                if (!$cliente) {
+                    http_response_code(404);
+                    echo json_encode(['error' => 'Registro no encontrado.']);
                     exit;
                 }
 
-                $stmt = $pdo->prepare('SELECT * FROM clientes WHERE id = :id LIMIT 1');
-                $stmt->execute([':id' => $id]);
-                $client = $stmt->fetch();
+                echo json_encode($cliente, JSON_UNESCAPED_UNICODE);
+            } else {
+                $stmt = $pdo->query("
+                    SELECT 
+                        id, name, rif, persona, cargo, phone, email, address, 
+                        city, state_geo, zip_code, website, instagram, linkedin, 
+                        country, employees, income_level, sector, service, 
+                        service_desc, sector_desc, status 
+                    FROM clientes 
+                    ORDER BY id DESC
+                ");
+                $clientes = $stmt->fetchAll();
+                echo json_encode($clientes, JSON_UNESCAPED_UNICODE);
+            }
+            break;
 
-                if ($client) {
-                    http_response_code(200);
-                    echo json_encode(sanitizeRow($client));
-                } else {
-                    http_response_code(404);
-                    echo json_encode(['error' => 'El cliente solicitado no existe.']);
-                }
+        // ------------------------------------------------------------------
+        // POST: Crear nuevo cliente
+        // ------------------------------------------------------------------
+        case 'POST':
+            $rawInput = json_decode(file_get_contents('php://input'), true) ?? [];
+            $data = sanitizeInput($rawInput);
+
+            if (empty($data['name'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'El campo Nombre/Razón Social es obligatorio.']);
                 exit;
             }
 
-            $stmt = $pdo->query('SELECT * FROM clientes ORDER BY id DESC');
-            $results = $stmt->fetchAll();
-
-            $cleanedResults = array_map('sanitizeRow', $results);
-            http_response_code(200);
-            echo json_encode($cleanedResults);
-        } catch (PDOException $e) {
-            error_log('Error crítico en GET API Clientes: ' . $e->getMessage());
-            http_response_code(500);
-            echo json_encode(['error' => 'Error interno al consultar la base de datos.']);
-        }
-        break;
-
-    case 'POST':
-        $data = json_decode(file_get_contents('php://input'), true);
-
-        if (!is_array($data) || empty(trim((string) ($data['name'] ?? '')))) {
-            http_response_code(400);
-            echo json_encode(['error' => 'El nombre de la empresa es obligatorio.']);
-            exit;
-        }
-
-        try {
-            // CORREGIDO: Inclusión de los 21 campos con sus 21 placeholders alineados
-            $sql = 'INSERT INTO clientes (
-                name, rif, email, persona, cargo, phone, address, city, state_geo, 
-                zip_code, website, instagram, linkedin, country, employees, 
-                income_level, sector, service, service_desc, sector_desc, status
-            ) VALUES (
-                :name, :rif, :email, :persona, :cargo, :phone, :address, :city, :state_geo, 
-                :zip_code, :website, :instagram, :linkedin, :country, :employees, 
-                :income_level, :sector, :service, :service_desc, :sector_desc, :status
-            )';
+            $sql = "INSERT INTO clientes (
+                        name, rif, persona, cargo, phone, email, address, city, 
+                        state_geo, zip_code, website, instagram, linkedin, country, 
+                        employees, income_level, sector, service, service_desc, 
+                        sector_desc, status
+                    ) VALUES (
+                        :name, :rif, :persona, :cargo, :phone, :email, :address, :city, 
+                        :state_geo, :zip_code, :website, :instagram, :linkedin, :country, 
+                        :employees, :income_level, :sector, :service, :service_desc, 
+                        :sector_desc, :status
+                    )";
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
-                ':name'         => trim((string) ($data['name'] ?? '')),
-                ':rif'          => trim((string) ($data['rif'] ?? '')),
-                ':email'        => trim((string) ($data['email'] ?? '')),
-                ':persona'      => trim((string) ($data['persona'] ?? '')),
-                ':cargo'        => trim((string) ($data['cargo'] ?? '')), // CORREGIDO: Mapeo correcto
-                ':phone'        => trim((string) ($data['phone'] ?? '')),
-                ':address'      => trim((string) ($data['address'] ?? '')),
-                ':city'         => trim((string) ($data['city'] ?? '')),
-                ':state_geo'    => trim((string) ($data['state_geo'] ?? '')),
-                ':zip_code'     => trim((string) ($data['zip_code'] ?? '')),
-                ':website'      => trim((string) ($data['website'] ?? '')),
-                ':instagram'    => trim((string) ($data['instagram'] ?? '')),
-                ':linkedin'     => trim((string) ($data['linkedin'] ?? '')),
-                ':country'      => trim((string) ($data['country'] ?? 'Venezuela')),
-                ':employees'    => trim((string) ($data['employees'] ?? '')),
-                ':income_level' => trim((string) ($data['income_level'] ?? '')),
-                ':sector'       => trim((string) ($data['sector'] ?? '')),
-                ':service'      => trim((string) ($data['service'] ?? '')),
-                ':service_desc' => trim((string) ($data['service_desc'] ?? '')),
-                ':sector_desc'  => trim((string) ($data['sector_desc'] ?? '')),
-                ':status'       => trim((string) ($data['status'] ?? 'Activo')),
+                ':name'         => $data['name'],
+                ':rif'          => $data['rif'],
+                ':persona'      => $data['persona'],
+                ':cargo'        => $data['cargo'],
+                ':phone'        => $data['phone'],
+                ':email'        => $data['email'],
+                ':address'      => $data['address'],
+                ':city'         => $data['city'],
+                ':state_geo'    => $data['state_geo'],
+                ':zip_code'     => $data['zip_code'],
+                ':website'      => $data['website'],
+                ':instagram'    => $data['instagram'],
+                ':linkedin'     => $data['linkedin'],
+                ':country'      => $data['country'],
+                ':employees'    => $data['employees'],
+                ':income_level' => $data['income_level'],
+                ':sector'       => $data['sector'],
+                ':service'      => $data['service'],
+                ':service_desc' => $data['service_desc'],
+                ':sector_desc'  => $data['sector_desc'],
+                ':status'       => $data['status'] ?? 'Activo'
             ]);
 
             http_response_code(201);
-            echo json_encode(['status' => 'success', 'id' => $pdo->lastInsertId()]);
-        } catch (PDOException $e) {
-            error_log('Error crítico en POST API Clientes: ' . $e->getMessage());
-            http_response_code(500);
-            echo json_encode(['error' => 'No se pudo crear el registro en la base de datos.']);
-        }
-        break;
+            echo json_encode(['message' => 'Cliente registrado exitosamente.', 'id' => $pdo->lastInsertId()]);
+            break;
 
-    case 'PUT':
-        $data = json_decode(file_get_contents('php://input'), true);
+        // ------------------------------------------------------------------
+        // PUT: Actualizar registro existente
+        // ------------------------------------------------------------------
+        case 'PUT':
+            $rawInput = json_decode(file_get_contents('php://input'), true) ?? [];
+            $id = filter_var($rawInput['id'] ?? null, FILTER_VALIDATE_INT);
 
-        $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
+            if (!$id) {
+                http_response_code(400);
+                echo json_encode(['error' => 'ID inválido o no suministrado para actualización.']);
+                exit;
+            }
 
-        if (!$id || $id <= 0) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Se requiere un ID de cliente válido para actualizar.']);
-            exit;
-        }
+            $data = sanitizeInput($rawInput);
 
-        if (empty(trim((string) ($data['name'] ?? '')))) {
-            http_response_code(400);
-            echo json_encode(['error' => 'El nombre de la empresa no puede estar vacío.']);
-            exit;
-        }
+            if (empty($data['name'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'El campo Nombre/Razón Social es obligatorio.']);
+                exit;
+            }
 
-        try {
-            $sql = 'UPDATE clientes SET 
-                name = :name, 
-                rif = :rif, 
-                email = :email, 
-                persona = :persona, 
-                cargo = :cargo, 
-                phone = :phone, 
-                address = :address, 
-                city = :city, 
-                state_geo = :state_geo, 
-                zip_code = :zip_code, 
-                website = :website, 
-                instagram = :instagram, 
-                linkedin = :linkedin, 
-                country = :country, 
-                employees = :employees, 
-                income_level = :income_level, 
-                sector = :sector, 
-                service = :service, 
-                service_desc = :service_desc, 
-                sector_desc = :sector_desc, 
-                status = :status 
-            WHERE id = :id';
+            $sql = "UPDATE clientes SET 
+                        name = :name,
+                        rif = :rif,
+                        persona = :persona,
+                        cargo = :cargo,
+                        phone = :phone,
+                        email = :email,
+                        address = :address,
+                        city = :city,
+                        state_geo = :state_geo,
+                        zip_code = :zip_code,
+                        website = :website,
+                        instagram = :instagram,
+                        linkedin = :linkedin,
+                        country = :country,
+                        employees = :employees,
+                        income_level = :income_level,
+                        sector = :sector,
+                        service = :service,
+                        service_desc = :service_desc,
+                        sector_desc = :sector_desc,
+                        status = :status
+                    WHERE id = :id";
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 ':id'           => $id,
-                ':name'         => trim((string) ($data['name'] ?? '')),
-                ':rif'          => trim((string) ($data['rif'] ?? '')),
-                ':email'        => trim((string) ($data['email'] ?? '')),
-                ':persona'      => trim((string) ($data['persona'] ?? '')),
-                ':cargo'        => trim((string) ($data['cargo'] ?? '')), // CORREGIDO: Mapeo correcto
-                ':phone'        => trim((string) ($data['phone'] ?? '')),
-                ':address'      => trim((string) ($data['address'] ?? '')),
-                ':city'         => trim((string) ($data['city'] ?? '')),
-                ':state_geo'    => trim((string) ($data['state_geo'] ?? '')),
-                ':zip_code'     => trim((string) ($data['zip_code'] ?? '')),
-                ':website'      => trim((string) ($data['website'] ?? '')),
-                ':instagram'    => trim((string) ($data['instagram'] ?? '')),
-                ':linkedin'     => trim((string) ($data['linkedin'] ?? '')),
-                ':country'      => trim((string) ($data['country'] ?? '')),
-                ':employees'    => trim((string) ($data['employees'] ?? '')),
-                ':income_level' => trim((string) ($data['income_level'] ?? '')),
-                ':sector'       => trim((string) ($data['sector'] ?? '')),
-                ':service'      => trim((string) ($data['service'] ?? '')),
-                ':service_desc' => trim((string) ($data['service_desc'] ?? '')),
-                ':sector_desc'  => trim((string) ($data['sector_desc'] ?? '')),
-                ':status'       => trim((string) ($data['status'] ?? 'Activo')),
+                ':name'         => $data['name'],
+                ':rif'          => $data['rif'],
+                ':persona'      => $data['persona'],
+                ':cargo'        => $data['cargo'],
+                ':phone'        => $data['phone'],
+                ':email'        => $data['email'],
+                ':address'      => $data['address'],
+                ':city'         => $data['city'],
+                ':state_geo'    => $data['state_geo'],
+                ':zip_code'     => $data['zip_code'],
+                ':website'      => $data['website'],
+                ':instagram'    => $data['instagram'],
+                ':linkedin'     => $data['linkedin'],
+                ':country'      => $data['country'],
+                ':employees'    => $data['employees'],
+                ':income_level' => $data['income_level'],
+                ':sector'       => $data['sector'],
+                ':service'      => $data['service'],
+                ':service_desc' => $data['service_desc'],
+                ':sector_desc'  => $data['sector_desc'],
+                ':status'       => $data['status'] ?? 'Activo'
             ]);
 
-            http_response_code(200);
-            echo json_encode(['status' => 'success', 'message' => 'Ficha actualizada correctamente.']);
-        } catch (PDOException $e) {
-            error_log('Error crítico en PUT API Clientes: ' . $e->getMessage());
-            http_response_code(500);
-            echo json_encode(['error' => 'Error interno al actualizar la ficha.']);
-        }
-        break;
+            echo json_encode(['message' => 'Ficha del cliente actualizada exitosamente.']);
+            break;
 
-    case 'DELETE':
-        $data = json_decode(file_get_contents('php://input'), true);
-        $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
+        // ------------------------------------------------------------------
+        // DELETE: Eliminar cliente
+        // ------------------------------------------------------------------
+        case 'DELETE':
+            $rawInput = json_decode(file_get_contents('php://input'), true) ?? [];
+            $id = filter_var($rawInput['id'] ?? null, FILTER_VALIDATE_INT);
 
-        if (!$id || $id <= 0) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Se requiere un ID válido para eliminar el registro.']);
-            exit;
-        }
+            if (!$id) {
+                http_response_code(400);
+                echo json_encode(['error' => 'ID inválido para eliminación.']);
+                exit;
+            }
 
-        try {
-            $stmt = $pdo->prepare('DELETE FROM clientes WHERE id = :id');
+            $stmt = $pdo->prepare("DELETE FROM clientes WHERE id = :id");
             $stmt->execute([':id' => $id]);
 
-            http_response_code(200);
-            echo json_encode(['status' => 'success', 'message' => 'Registro eliminado correctamente.']);
-        } catch (PDOException $e) {
-            error_log('Error crítico en DELETE API Clientes: ' . $e->getMessage());
-            http_response_code(500);
-            echo json_encode(['error' => 'No se pudo eliminar el registro.']);
-        }
-        break;
+            echo json_encode(['message' => 'Cliente eliminado correctamente.']);
+            break;
 
-    default:
-        http_response_code(405);
-        echo json_encode(['error' => 'Método HTTP no permitido.']);
-        break;
+        default:
+            http_response_code(405);
+            echo json_encode(['error' => 'Método HTTP no permitido.']);
+            break;
+    }
+
+} catch (PDOException $e) {
+    http_response_code(500);
+    // En producción se debe registrar $e->getMessage() en un archivo log interno
+    echo json_encode(['error' => 'Error de ejecución en base de datos: ' . $e->getMessage()]);
 }
