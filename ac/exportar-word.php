@@ -2,25 +2,20 @@
 declare(strict_types=1);
 
 // v/ac/exportar-word.php
+// SOLUCIÓN NATIVA: Generación directa a Word mediante cabeceras MSOffice (Sin Composer)
 
-#require_once '../../vendor/autoload.php'; // Ajusta la ruta a tu vendor/autoload.php
-require_once '../main/config.php';
+include '../main/config.php';
 
-use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\IOFactory;
-use PhpOffice\PhpWord\SimpleType\Jc;
-use PhpOffice\PhpWord\Style\Language;
-
-// 1. Sanitización y Validación de Entrada
+// 1. Validar y sanitizar la entrada
 $acId = filter_input(INPUT_GET, 'acId', FILTER_VALIDATE_INT);
 
 if (!$acId) {
     http_response_code(400);
-    die('Identificador de evaluación no válido o faltante.');
+    die('Identificador de evaluación no válido.');
 }
 
 try {
-    // 2. Consulta de Datos Principales de la Evaluación (PDO Prepared Statement)
+    // 2. Consultar datos principales de la evaluación
     $stmtAc = $pdo->prepare("
         SELECT 
             ac.*,
@@ -46,210 +41,195 @@ try {
         die('La evaluación solicitada no existe.');
     }
 
-    // 3. Consulta de Respuestas Guardadas
+    // 3. Cargar Respuestas Guardadas
     $stmtAns = $pdo->prepare("SELECT questionId, response, comment FROM ac_answers WHERE acId = :acId");
     $stmtAns->execute([':acId' => $acId]);
-    $rawAnswers = $stmtAns->fetchAll(PDO::FETCH_OBJ);
-
     $answersSaved = [];
-    foreach ($rawAnswers as $ans) {
+    foreach ($stmtAns->fetchAll(PDO::FETCH_OBJ) as $ans) {
         $answersSaved[$ans->questionId] = [
             'response' => $ans->response,
             'comment'  => $ans->comment
         ];
     }
 
-    // 4. Consulta de Respuestas de la Pregunta 28 (Matriz de Riesgo)
+    // 4. Cargar Subpruebas Pregunta 28
     $stmtQ28 = $pdo->prepare("SELECT testId, riskValue FROM ac_q28_answers WHERE acId = :acId");
     $stmtQ28->execute([':acId' => $acId]);
-    $rawQ28 = $stmtQ28->fetchAll(PDO::FETCH_OBJ);
-
     $q28Saved = [];
-    foreach ($rawQ28 as $q28) {
+    foreach ($stmtQ28->fetchAll(PDO::FETCH_OBJ) as $q28) {
         $q28Saved[$q28->testId] = $q28->riskValue;
     }
 
-    // 5. Inicializar Documento Word y Estilos Modernos
-    $phpWord = new PhpWord();
-    $phpWord->getSettings()->setThemeFontLang(new Language(Language::SPANISH_MODERN));
-
-    // Estilos Globales de Fuente y Párrafo
-    $fontFamily = 'Arial';
-    
-    $phpWord->addTitleStyle(1, [
-        'name' => $fontFamily, 'size' => 18, 'color' => '0F172A', 'bold' => true
-    ], ['spaceAfter' => 120]);
-
-    $phpWord->addTitleStyle(2, [
-        'name' => $fontFamily, 'size' => 13, 'color' => '0284C7', 'bold' => true
-    ], ['spaceBefore' => 200, 'spaceAfter' => 100]);
-
-    // Crear Sección con Márgenes Limpios (2 cm)
-    $section = $phpWord->addSection([
-        'marginTop'    => 1134,
-        'marginBottom' => 1134,
-        'marginLeft'   => 1134,
-        'marginRight'  => 1134
-    ]);
-
-    // Encabezado del Documento
-    $section->addTitle('INFORME DE EVALUACIÓN DE ACEPTACIÓN Y CONTINUIDAD (A&C)', 1);
-    $section->addText('Generado el: ' . date('d/m/Y H:i'), ['name' => $fontFamily, 'size' => 9, 'color' => '64748B'], ['spaceAfter' => 200]);
-
-    // Color según nivel de riesgo
+    // 5. Determinar color del badge de riesgo
     $riskColor = match ($acData->riskLevel ?? 'Bajo') {
-        'Moderado'      => 'EAB308',
-        'Moderado-Alto' => 'F97316',
-        'Alto'          => 'EF4444',
-        default         => '22C55E',
+        'Moderado'      => '#eab308',
+        'Moderado-Alto' => '#f97316',
+        'Alto'          => '#ef4444',
+        default         => '#22c55e',
     };
 
-    // 6. Tarjeta Resumen Metadatos (Tabla Estilizada)
-    $metaTableStyle = [
-        'borderSize'  => 6,
-        'borderColor' => 'E2E8F0',
-        'cellMargin'  => 100
-    ];
-    $phpWord->addTableStyle('MetaTable', $metaTableStyle);
-    $tableMeta = $section->addTable('MetaTable');
+    // 6. Configurar Cabeceras de Descarga para Microsoft Word
+    $filename = 'Informe_AC_' . preg_replace('/[^A-Za-z0-9_\-]/', '_', $acData->clientName ?? 'Cliente') . '_' . date('Ymd') . '.doc';
 
-    // Fila 1: Datos Principales
-    $tableMeta->addRow();
-    $tableMeta->addCell(4500, ['bgColor' => 'F8FAFC'])->addText('Cliente / Empresa:', ['bold' => true, 'size' => 9, 'name' => $fontFamily]);
-    $tableMeta->addCell(4500, ['bgColor' => 'FFFFFF'])->addText($acData->clientName ?? 'N/A', ['size' => 9, 'name' => $fontFamily]);
+    header("Content-Type: application/vnd.ms-word; charset=utf-8");
+    header("Content-Disposition: attachment; filename=\"{$filename}\"");
+    header("Cache-Control: no-cache, must-revalidate");
+    header("Pragma: no-cache");
 
-    $tableMeta->addRow();
-    $tableMeta->addCell(4500, ['bgColor' => 'F8FAFC'])->addText('Tipo de Evaluación:', ['bold' => true, 'size' => 9, 'name' => $fontFamily]);
-    $tableMeta->addCell(4500, ['bgColor' => 'FFFFFF'])->addText($acData->typeName ?? 'N/A', ['size' => 9, 'name' => $fontFamily]);
+    // 7. Salida HTML Maquetada para Microsoft Word
+?>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" 
+      xmlns:w="urn:schemas-microsoft-com:office:word" 
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta charset="utf-8">
+    <title>Informe de Aceptación y Continuidad</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 10pt; color: #334155; line-height: 1.4; }
+        h1 { font-size: 16pt; color: #0f172a; margin-bottom: 5px; }
+        h2 { font-size: 12pt; color: #0284c7; margin-top: 20px; border-bottom: 2px solid #0284c7; padding-bottom: 4px; }
+        .meta-table, .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 15px; }
+        .meta-table td { padding: 6px 10px; border: 1px solid #cbd5e1; font-size: 9pt; }
+        .meta-label { background-color: #f8fafc; font-weight: bold; width: 30%; color: #475569; }
+        
+        .risk-box { padding: 12px; background-color: #f8fafc; border-left: 5px solid <?= $riskColor ?>; margin: 15px 0; }
+        .risk-title { font-size: 9pt; font-weight: bold; color: #64748b; text-transform: uppercase; }
+        .risk-value { font-size: 13pt; font-weight: bold; color: <?= $riskColor ?>; }
 
-    $tableMeta->addRow();
-    $tableMeta->addCell(4500, ['bgColor' => 'F8FAFC'])->addText('Naturaleza del Servicio:', ['bold' => true, 'size' => 9, 'name' => $fontFamily]);
-    $tableMeta->addCell(4500, ['bgColor' => 'FFFFFF'])->addText($acData->serviceName ?? 'N/A', ['size' => 9, 'name' => $fontFamily]);
+        .data-table th { background-color: #1e293b; color: #ffffff; padding: 6px; font-size: 8.5pt; text-align: left; border: 1px solid #1e293b; }
+        .data-table td { padding: 6px; font-size: 8.5pt; border: 1px solid #cbd5e1; vertical-align: top; }
+        .text-center { text-align: center; }
+        .badge-si { color: #16a34a; font-weight: bold; }
+        .badge-no { color: #dc2626; font-weight: bold; }
+    </style>
+</head>
+<body>
 
-    $tableMeta->addRow();
-    $tableMeta->addCell(4500, ['bgColor' => 'F8FAFC'])->addText('Período de la A&C:', ['bold' => true, 'size' => 9, 'name' => $fontFamily]);
-    $periodText = (!empty($acData->startDate) && !empty($acData->endDate))
-        ? "Desde {$acData->startDate} Hasta {$acData->endDate}"
-        : "SIN ASIGNAR";
-    $tableMeta->addCell(4500, ['bgColor' => 'FFFFFF'])->addText($periodText, ['size' => 9, 'name' => $fontFamily]);
+    <h1>INFORME DE ACEPTACIÓN Y CONTINUIDAD (A&C)</h1>
+    <p style="font-size: 8.5pt; color: #64748b;">Generado el: <?= date('d/m/Y H:i') ?></p>
 
-    $tableMeta->addRow();
-    $tableMeta->addCell(4500, ['bgColor' => 'F8FAFC'])->addText('Socio Líder / Gerente:', ['bold' => true, 'size' => 9, 'name' => $fontFamily]);
-    $tableMeta->addCell(4500, ['bgColor' => 'FFFFFF'])->addText(($acData->partnerName ?? 'N/A') . ' / ' . ($acData->managerName ?? 'N/A'), ['size' => 9, 'name' => $fontFamily]);
+    <!-- Resumen de Metadatos -->
+    <table class="meta-table">
+        <tr>
+            <td class="meta-label">Cliente / Empresa:</td>
+            <td><strong><?= htmlspecialchars($acData->clientName ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong></td>
+        </tr>
+        <tr>
+            <td class="meta-label">Tipo de Evaluación:</td>
+            <td><?= htmlspecialchars($acData->typeName ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></td>
+        </tr>
+        <tr>
+            <td class="meta-label">Naturaleza del Servicio:</td>
+            <td><?= htmlspecialchars($acData->serviceName ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></td>
+        </tr>
+        <tr>
+            <td class="meta-label">Período de la A&C:</td>
+            <td>
+                <?php 
+                if (!empty($acData->startDate) && !empty($acData->endDate)) {
+                    echo "Desde " . htmlspecialchars($acData->startDate, ENT_QUOTES, 'UTF-8') . " Hasta " . htmlspecialchars($acData->endDate, ENT_QUOTES, 'UTF-8');
+                } else {
+                    echo "SIN ASIGNAR";
+                }
+                ?>
+            </td>
+        </tr>
+        <tr>
+            <td class="meta-label">Socio Líder / Gerente:</td>
+            <td><?= htmlspecialchars($acData->partnerName ?? 'N/D', ENT_QUOTES, 'UTF-8') ?> / <?= htmlspecialchars($acData->managerName ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></td>
+        </tr>
+    </table>
 
-    $section->addTextBreak(1);
+    <!-- Callout de Riesgo -->
+    <div class="risk-box">
+        <div class="risk-title">Nivel de Riesgo Calculado Matriz</div>
+        <div class="risk-value"><?= (float)($acData->riskScore ?? 0) ?> Pts — Categoría: <?= strtoupper(htmlspecialchars($acData->riskLevel ?? 'Bajo', ENT_QUOTES, 'UTF-8')) ?></div>
+    </div>
 
-    // 7. Bloque Destacado de Riesgo Calculado (Callout)
-    $riskTable = $section->addTable([
-        'borderLeftSize'  => 36,
-        'borderLeftColor' => $riskColor,
-        'borderTopSize'   => 0,
-        'borderRightSize' => 0,
-        'borderBottomSize'=> 0,
-        'cellMargin'      => 120
-    ]);
-    $riskTable->addRow();
-    $riskCell = $riskTable->addCell(9000, ['bgColor' => 'F8FAFC']);
-    $riskCell->addText('NIVEL DE RIESGO CALCULADO MATRIZ', ['bold' => true, 'size' => 10, 'color' => '475569', 'name' => $fontFamily]);
-    $riskCell->addText(
-        ($acData->riskScore ?? 0) . ' Puntos — Categoría: ' . strtoupper($acData->riskLevel ?? 'Bajo'),
-        ['bold' => true, 'size' => 12, 'color' => $riskColor, 'name' => $fontFamily]
-    );
+    <!-- Secciones del Cuestionario -->
+    <h2>Resultados del Cuestionario de Auditoría</h2>
 
-    $section->addTextBreak(1);
-
-    // 8. Renderizado de Categorías y Cuestionario
-    $section->addTitle('Resultados del Cuestionario de Auditoría', 2);
-
+    <?php
     $categories = $pdo->query("SELECT * FROM ac_categories ORDER BY orderNum ASC")->fetchAll(PDO::FETCH_OBJ);
 
-    $qTableStyle = [
-        'borderSize'  => 4,
-        'borderColor' => 'CBD5E1',
-        'cellMargin'  => 80
-    ];
-    $phpWord->addTableStyle('QuestionTable', $qTableStyle);
-
-    foreach ($categories as $cat) {
-        $section->addText($cat->categoryName, ['bold' => true, 'size' => 11, 'color' => '0F172A', 'name' => $fontFamily], ['spaceBefore' => 150, 'spaceAfter' => 60]);
-
+    foreach ($categories as $cat):
         $stmtQ = $pdo->prepare("SELECT * FROM ac_questions WHERE categoryId = :catId ORDER BY questionNumber ASC");
         $stmtQ->execute([':catId' => $cat->categoryId]);
         $questions = $stmtQ->fetchAll(PDO::FETCH_OBJ);
 
-        if (empty($questions)) {
-            continue;
-        }
+        if (empty($questions)) continue;
+    ?>
+        <h3 style="font-size: 10pt; color: #0f172a; margin-top: 15px; margin-bottom: 5px;">
+            <?= htmlspecialchars($cat->categoryName, ENT_QUOTES, 'UTF-8') ?>
+        </h3>
 
-        $table = $section->addTable('QuestionTable');
-        
-        // Cabecera de la tabla de preguntas
-        $table->addRow(280, ['tblHeader' => true]);
-        $table->addCell(800, ['bgColor' => '1E293B'])->addText('N°', ['bold' => true, 'color' => 'FFFFFF', 'size' => 8, 'name' => $fontFamily], ['alignment' => Jc::CENTER]);
-        $table->addCell(5200, ['bgColor' => '1E293B'])->addText('Pregunta / Criterio de Control', ['bold' => true, 'color' => 'FFFFFF', 'size' => 8, 'name' => $fontFamily]);
-        $table->addCell(1000, ['bgColor' => '1E293B'])->addText('Respuesta', ['bold' => true, 'color' => 'FFFFFF', 'size' => 8, 'name' => $fontFamily], ['alignment' => Jc::CENTER]);
-        $table->addCell(2000, ['bgColor' => '1E293B'])->addText('Comentarios / Justificación', ['bold' => true, 'color' => 'FFFFFF', 'size' => 8, 'name' => $fontFamily]);
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 8%;" class="text-center">N°</th>
+                    <th style="width: 52%;">Pregunta / Criterio de Control</th>
+                    <th style="width: 12%;" class="text-center">Respuesta</th>
+                    <th style="width: 28%;">Comentarios / Justificación</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($questions as $q): 
+                    $res = $answersSaved[$q->questionId]['response'] ?? 'Sin Responder';
+                    $com = $answersSaved[$q->questionId]['comment'] ?? '-';
+                    $classRes = ($res === 'Si') ? 'badge-si' : (($res === 'No') ? 'badge-no' : '');
+                ?>
+                    <tr>
+                        <td class="text-center"><strong><?= (int)$q->questionNumber ?></strong></td>
+                        <td><?= htmlspecialchars($q->questionText, ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="text-center <?= $classRes ?>"><?= htmlspecialchars($res, ENT_QUOTES, 'UTF-8') ?></td>
+                        <td><em><?= htmlspecialchars($com, ENT_QUOTES, 'UTF-8') ?></em></td>
+                    </tr>
 
-        foreach ($questions as $q) {
-            $res = $answersSaved[$q->questionId]['response'] ?? 'Sin Responder';
-            $com = $answersSaved[$q->questionId]['comment'] ?? '-';
+                    <?php if ((int)$q->questionNumber === 28): 
+                        $subtests = $pdo->query("SELECT * FROM ac_q28_tests ORDER BY testNumber ASC")->fetchAll(PDO::FETCH_OBJ);
+                        if (!empty($subtests)):
+                    ?>
+                        <tr>
+                            <td colspan="4" style="background-color: #f1f5f9; padding: 10px;">
+                                <strong style="color: #0284c7;">Desglose Analítico Matriz de Riesgo Interno (Prueba 28):</strong>
+                                <table class="data-table" style="margin-top: 8px;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%; background-color: #0284c7; border-color: #0284c7;" class="text-center">Item</th>
+                                            <th style="width: 65%; background-color: #0284c7; border-color: #0284c7;">Factor de Riesgo / Prueba de Control</th>
+                                            <th style="width: 25%; background-color: #0284c7; border-color: #0284c7;" class="text-center">Riesgo Asignado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($subtests as $sub): 
+                                            $riskVal = $q28Saved[$sub->testId] ?? 'No Aplica';
+                                        ?>
+                                            <tr>
+                                                <td class="text-center"><strong><?= (int)$sub->testNumber ?></strong></td>
+                                                <td><?= htmlspecialchars($sub->testText, ENT_QUOTES, 'UTF-8') ?></td>
+                                                <td class="text-center"><strong><?= htmlspecialchars($riskVal, ENT_QUOTES, 'UTF-8') ?></strong></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    <?php 
+                        endif;
+                    endif; 
+                    ?>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endforeach; ?>
 
-            $resColor = match ($res) {
-                'Si'    => '16A34A',
-                'No'    => 'DC2626',
-                default => '64748B'
-            };
-
-            $table->addRow();
-            $table->addCell(800)->addText((string)$q->questionNumber, ['bold' => true, 'size' => 8, 'name' => $fontFamily], ['alignment' => Jc::CENTER]);
-            $table->addCell(5200)->addText($q->questionText, ['size' => 8, 'name' => $fontFamily]);
-            $table->addCell(1000)->addText($res, ['bold' => true, 'color' => $resColor, 'size' => 8, 'name' => $fontFamily], ['alignment' => Jc::CENTER]);
-            $table->addCell(2000)->addText($com, ['size' => 8, 'italic' => true, 'color' => '334155', 'name' => $fontFamily]);
-
-            // 9. Desglose Especial para la Pregunta 28 (Matriz Analítica)
-            if ((int)$q->questionNumber === 28) {
-                $subtests = $pdo->query("SELECT * FROM ac_q28_tests ORDER BY testNumber ASC")->fetchAll(PDO::FETCH_OBJ);
-
-                if (!empty($subtests)) {
-                    $section->addText('Desglose Analítico - Matriz de Riesgo Interno (Detalle Prueba 28):', ['bold' => true, 'size' => 9, 'color' => '0284C7', 'name' => $fontFamily], ['spaceBefore' => 100, 'spaceAfter' => 50]);
-
-                    $subTable = $section->addTable('QuestionTable');
-                    $subTable->addRow(250, ['tblHeader' => true]);
-                    $subTable->addCell(800, ['bgColor' => '0284C7'])->addText('Item', ['bold' => true, 'color' => 'FFFFFF', 'size' => 8, 'name' => $fontFamily], ['alignment' => Jc::CENTER]);
-                    $subTable->addCell(6200, ['bgColor' => '0284C7'])->addText('Factor de Riesgo / Prueba de Control', ['bold' => true, 'color' => 'FFFFFF', 'size' => 8, 'name' => $fontFamily]);
-                    $subTable->addCell(2000, ['bgColor' => '0284C7'])->addText('Riesgo Asignado', ['bold' => true, 'color' => 'FFFFFF', 'size' => 8, 'name' => $fontFamily], ['alignment' => Jc::CENTER]);
-
-                    foreach ($subtests as $sub) {
-                        $riskVal = $q28Saved[$sub->testId] ?? 'No Aplica';
-
-                        $subTable->addRow();
-                        $subTable->addCell(800)->addText((string)$sub->testNumber, ['bold' => true, 'size' => 8, 'name' => $fontFamily], ['alignment' => Jc::CENTER]);
-                        $subTable->addCell(6200)->addText($sub->testText, ['size' => 8, 'name' => $fontFamily]);
-                        $subTable->addCell(2000)->addText($riskVal, ['bold' => true, 'size' => 8, 'name' => $fontFamily], ['alignment' => Jc::CENTER]);
-                    }
-                }
-            }
-        }
-    }
-
-    // 10. Forzar Descarga Directa del Documento Word
-    $filename = 'Informe_AC_Cliente_' . preg_replace('/[^A-Za-z0-9_\-]/', '_', $acData->clientName ?? 'Auditoria') . '_' . date('Ymd') . '.docx';
-
-    header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
-    header('Cache-Control: max-age=0');
-    header('Pragma: public');
-
-    $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
-    $objWriter->save('php://output');
+</body>
+</html>
+<?php
     exit;
 
 } catch (PDOException $e) {
-    error_log('Error SQL en exportar-word.php: ' . $e->getMessage());
+    error_log("Error SQL en exportar-word.php: " . $e->getMessage());
     http_response_code(500);
-    die('Error al recuperar los datos del informe.');
-} catch (Exception $e) {
-    error_log('Error en generación de Word: ' . $e->getMessage());
-    http_response_code(500);
-    die('Ocurrió un error al generar el archivo Word.');
+    die("Error al consultar la base de datos.");
 }
