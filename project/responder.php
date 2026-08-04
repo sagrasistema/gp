@@ -196,20 +196,20 @@ include '../main/h.php';
         </div>
     </div>
 
-    <!-- SISTEMA DE ACORDEONES (CATEGORÍAS CON LETRAS -> PRUEBAS CON NÚMEROS) -->
+    <!-- SISTEMA DE ACORDEONES (CATEGORÍAS CON LETRAS MAYÚSCULAS -> PRUEBAS CON NÚMEROS) -->
     <div class="accordion-container">
         <?php
         $stmtCat = $pdo->prepare("SELECT * FROM audit_categorias WHERE etapa_id = 1 ORDER BY orden ASC");
         $stmtCat->execute();
         $categories = $stmtCat->fetchAll(PDO::FETCH_OBJ);
 
-        // Inicializar contadores dinámicos para letras y números
+        // Inicializar contadores dinámicos para letras MAYÚSCULAS y números
         $catIndex = 0;
         $pruebaIndex = 1;
 
         foreach ($categories as $cat):
-            // Generar letra minúscula (a, b, c, d...) según el índice de la categoría
-            $letraCat = chr(97 + ($catIndex % 26));
+            // Generar letra MAYÚSCULA (A, B, C, D...) usando ASCII 65 ('A')
+            $letraCat = chr(65 + ($catIndex % 26));
             $catIndex++;
 
             $stmtP = $pdo->prepare("SELECT * FROM audit_pruebas WHERE categoria_id = :catId ORDER BY orden ASC");
@@ -217,7 +217,7 @@ include '../main/h.php';
             $pruebas = $stmtP->fetchAll(PDO::FETCH_OBJ);
         ?>
             <div class="accordion-item" style="margin-bottom: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
-                <!-- Título de Categoría prefijado con Letra (ej. "a. Procedimientos...") -->
+                <!-- Título de Categoría prefijado con Letra MAYÚSCULA (ej. "A. Procedimientos...") -->
                 <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 1rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
                     <span><?= $letraCat ?>. <?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
                     <i class="ri-arrow-down-s-line"></i>
@@ -277,7 +277,7 @@ include '../main/h.php';
                             </div>
                         </div>
                     <?php 
-                        $pruebaIndex++; // Incrementar el número global de la prueba
+                        $pruebaIndex++; 
                     endforeach; 
                     ?>
                 </div>
