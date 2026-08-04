@@ -105,7 +105,7 @@ $customAcPath   = '../ac/index.php';
 $currentTab     = 'terminos'; 
 include '../main/layout_header.php'; ?>
 
-<div class="view-container" style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
+<div class="view-container" >
         
         <div class="view-header">
             <h1 class="page-main-title">
