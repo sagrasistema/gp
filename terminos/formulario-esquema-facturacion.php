@@ -316,7 +316,7 @@ include '../main/h.php';
     }
 </style>
 
-<div class="view-container" style="padding: 2rem; max-width: 1050px; margin: 0 auto;">
+<div class="view-container">
 
     <!-- CABECERA SUPERIOR -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -414,7 +414,7 @@ include '../main/h.php';
                             <tr>
                                 <!-- REQUERIMIENTO 1: NUMERACIÓN FORMATO (1/10, 2/10) -->
                                 <td style="font-weight: 600; color: #334155; text-align: center;">
-                                    <?= (int)($f['numero'] ?? ($index + 1)) ?>/<?= $totalFacturasCount ?>
+                                  Factura  <?= (int)($f['numero'] ?? ($index + 1)) ?>/<?= $totalFacturasCount ?>
                                 </td>
                                 <!-- REQUERIMIENTO 2: FECHA ALINEADA A LA DERECHA -->
                                 <td>
