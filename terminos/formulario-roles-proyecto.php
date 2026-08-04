@@ -200,7 +200,7 @@ include '../main/h.php';
                 <!-- LÍDER DEL PROYECTO -->
                 <div>
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">
-                        Socio Líder / Gerente *
+                        Socio Líder  *
                     </label>
                     <select name="lider_usuario_id" required style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
                         <option value="">-- Seleccionar --</option>
@@ -230,7 +230,7 @@ include '../main/h.php';
                 <!-- AUDITOR PRINCIPAL -->
                 <div>
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">
-                        Senior*
+                        Senior *
                     </label>
                     <select name="auditor_usuario_id" required style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
                         <option value="">-- Seleccionar --</option>
