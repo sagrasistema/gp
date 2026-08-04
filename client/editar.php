@@ -1,25 +1,33 @@
-<?php 
+<?php
+declare(strict_types=1);
+
+/**
+ * Módulo de Gestión de Clientes - Vista para Modificar Ficha Corporativa
+ * PHP Version 8.x
+ */
+
+// 1. Validar y sanitizar el parámetro 'id' antes de renderizar cualquier salida
+$clienteId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+if (!$clienteId || $clienteId <= 0) {
+    // Redirección limpia al index si el ID no es válido
+    header('Location: index.php?error=invalid_id');
+    exit;
+}
+
 $pageTitle = "Modificar Ficha Corporativa";
-include 'header.php'; ?>
+include 'header.php'; 
+?>
 <link rel="stylesheet" href="../main/layout.css">
 <?php
-// Configuración dinámica del Layout para la carpeta client/ (Estándar unificado)
-$customLogoPath = '../main/logo.png'; // Ruta para llegar al logo original del sistema
-$customHomePath = '../index.php';     // Ruta para volver al HUB principal
-$customAcPath   = '../ac/index.php';  // Ruta para ir al módulo AC
+// Configuración dinámica del Layout para la carpeta client/
+$customLogoPath = '../main/logo.png';
+$customHomePath = '../index.php';
+$customAcPath   = '../ac/index.php';
 $currentTab     = 'inicio'; 
 
 include '../main/layout_header.php'; 
-
-// Capturar y sanitizar el ID directamente desde la URL ($_GET)
-$clienteId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-
-// Si utilizas un array de datos traído de la base de datos (ej. $cliente), usas su ID como respaldo
-if (!$clienteId && isset($cliente['id'])) {
-    $clienteId = (int)$cliente['id'];
-}
 ?>
-
 
 <style>
     .form-grid-complex { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
@@ -29,13 +37,12 @@ if (!$clienteId && isset($cliente['id'])) {
     .col-1 { grid-column: span 1; }
     .section-title { grid-column: span 4; margin-top: 1rem; padding-bottom: 0.25rem; border-bottom: 2px solid #e2e8f0; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; }
     @media (max-width: 768px) { .form-grid-complex > div { grid-column: span 4 !important; } }
-        /* Modo oscuro adaptado para títulos de sección del formulario */
+    
     body.dark-mode .section-title {
         border-bottom-color: #334155;
         color: #f8fafc;
     }
 
-    /* --- CONTENEDOR PRINCIPAL DE BOTONES DE CONTROL (FORZADO A LA DERECHA) --- */
     .table-actions-container {
         display: flex !important;
         justify-content: flex-end !important;
@@ -44,7 +51,6 @@ if (!$clienteId && isset($cliente['id'])) {
         width: auto;
     }
 
-    /* Posicionamiento relativo individual para los tooltips */
     .table-actions-container a, 
     .table-actions-container button {
         position: relative;
@@ -55,15 +61,14 @@ if (!$clienteId && isset($cliente['id'])) {
         cursor: pointer;
     }
 
-    /* El globo del Tooltip */
     .table-actions-container a::after,
     .table-actions-container button::after {
         content: attr(data-tooltip);
         position: absolute;
-        bottom: 125%; /* Lo ubica justo arriba del botón */
+        bottom: 125%;
         left: 50%;
         transform: translateX(-50%) translateY(5px);
-        background-color: #1e293b; /* Fondo oscuro elegante */
+        background-color: #1e293b;
         color: #ffffff;
         padding: 0.4rem 0.7rem;
         border-radius: 5px;
@@ -75,10 +80,9 @@ if (!$clienteId && isset($cliente['id'])) {
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         z-index: 99;
-        pointer-events: none; /* Evita interferir con los clics */
+        pointer-events: none;
     }
 
-    /* La pequeña flecha del Tooltip */
     .table-actions-container a::before,
     .table-actions-container button::before {
         content: "";
@@ -88,7 +92,7 @@ if (!$clienteId && isset($cliente['id'])) {
         transform: translateX(-50%) translateY(5px);
         border-width: 6px;
         border-style: solid;
-        border-color: #1e293b transparent transparent transparent; /* Flecha apuntando abajo */
+        border-color: #1e293b transparent transparent transparent;
         opacity: 0;
         visibility: hidden;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -96,7 +100,6 @@ if (!$clienteId && isset($cliente['id'])) {
         pointer-events: none;
     }
 
-    /* Acción Hover: Muestra el tooltip con un efecto de deslizamiento hacia arriba */
     .table-actions-container a:hover::after,
     .table-actions-container a:hover::before,
     .table-actions-container button:hover::after,
@@ -106,7 +109,6 @@ if (!$clienteId && isset($cliente['id'])) {
         transform: translateX(-50%) translateY(0);
     }
 
-    /* Ajuste para que los botones deshabilitados tengan el cursor correcto y sí muestren el tooltip */
     .btn-control-disabled {
         display: inline-flex;
         align-items: center;
@@ -117,13 +119,12 @@ if (!$clienteId && isset($cliente['id'])) {
         border: 1px solid #e2e8f0;
         background-color: #f1f5f9;
         color: #94a3b8;
-        cursor: not-allowed; /* Muestra el icono de prohibido */
+        cursor: not-allowed;
         text-decoration: none;
         height: 38px;
-        width: 42px; /* Caja cuadrada idéntica */
+        width: 42px;
     }
 
-    /* Botón primary normalizado para coincidir en tamaño */
     .table-actions-container .btn-primary {
         height: 38px;
         width: 42px;
@@ -134,7 +135,6 @@ if (!$clienteId && isset($cliente['id'])) {
         border-radius: 6px;
     }
 
-    /* Modo oscuro para el botón deshabilitado */
     body.dark-mode .btn-control-disabled {
         background-color: #1e293b;
         border-color: #334155;
@@ -153,16 +153,13 @@ if (!$clienteId && isset($cliente['id'])) {
             <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
                 <i class="ri-arrow-go-back-line"></i> 
             </a>
-            <!-- Ejemplo de enlace en la vista del cliente -->
-           <!-- Botón de Exportación a Word -->
-            <?php if (!empty($clienteId)): ?>
-                <a href="export_cliente_word.php?id=<?= $clienteId ?>" 
-                class="btn btn-primary" 
-                title="Exportar Ficha a Word" 
-                target="_blank">
-                    <i class="ri-file-word-2-line"></i>
-                </a>
-            <?php endif; ?>
+
+            <a href="export_cliente_word.php?id=<?= htmlspecialchars((string)$clienteId, ENT_QUOTES, 'UTF-8') ?>" 
+               class="btn btn-primary" 
+               data-tooltip="Exportar Ficha a Word" 
+               target="_blank">
+                <i class="ri-file-word-2-line"></i>
+            </a>
 
             <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
                 <i class="ri-screenshot-2-line"></i>
@@ -172,7 +169,7 @@ if (!$clienteId && isset($cliente['id'])) {
                 <i class="ri-book-open-line"></i> 
             </a>
 
-            <button href="#" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
+            <button type="button" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
                 <i class="ri-add-line"></i>
             </button>
 
@@ -183,102 +180,106 @@ if (!$clienteId && isset($cliente['id'])) {
     </div>
 
     <div class="card">
-        <form id="edit-form" class="form-grid-complex">
+        <!-- El formulario se maneja asíncronamente mediante clients.js -->
+        <form id="edit-form" class="form-grid-complex" onsubmit="return false;">
             
+            <!-- Campo oculto para asegurar la disponibilidad del ID en JS/DOM -->
+            <input type="hidden" id="client-id" value="<?= htmlspecialchars((string)$clienteId, ENT_QUOTES, 'UTF-8') ?>">
+
             <div class="section-title"><i class="ri-building-line"></i> Datos de la Empresa</div>
             
             <div class="form-group col-2">
-                <label>Nombre o Razón Social *</label>
-                <input type="text" id="client-name" required>
+                <label for="client-name">Nombre o Razón Social *</label>
+                <input type="text" id="client-name" name="name" required>
             </div>
             <div class="form-group col-1">
-                <label>Número ID Fiscal (R.I.F)</label>
-                <input type="text" id="client-rif">
+                <label for="client-rif">Número ID Fiscal (R.I.F)</label>
+                <input type="text" id="client-rif" name="rif">
             </div>
             <div class="form-group col-2">
-                <label>Persona contacto</label>
-                <input type="text" id="client-persona">
+                <label for="client-persona">Persona contacto</label>
+                <input type="text" id="client-persona" name="persona">
             </div>
             <div class="form-group col-1">
-                <label>Cargo</label>
-                <input type="text" id="client-cargo">
+                <label for="client-cargo">Cargo</label>
+                <input type="text" id="client-cargo" name="cargo">
             </div>
             <div class="form-group col-1">
-                <label>Teléfono</label>
-                <input type="text" id="client-phone">
+                <label for="client-phone">Teléfono</label>
+                <input type="text" id="client-phone" name="phone">
             </div>
             <div class="form-group col-2">
-                <label>Correo Electrónico</label>
-                <input type="email" id="client-email">
+                <label for="client-email">Correo Electrónico</label>
+                <input type="email" id="client-email" name="email">
             </div>
             <div class="form-group col-2">
-                <label>Página Web</label>
-                <input type="url" id="client-website">
+                <label for="client-website">Página Web</label>
+                <input type="url" id="client-website" name="website">
             </div>
 
             <div class="section-title"><i class="ri-map-pin-line"></i> Ubicación Fiscal</div>
 
             <div class="form-group col-4">
-                <label>Dirección Fiscal</label>
-                <input type="text" id="client-address">
+                <label for="client-address">Dirección Fiscal</label>
+                <input type="text" id="client-address" name="address">
             </div>
             <div class="form-group col-1">
-                <label>Ciudad</label>
-                <input type="text" id="client-city">
+                <label for="client-city">Ciudad</label>
+                <input type="text" id="client-city" name="city">
             </div>
             <div class="form-group col-1">
-                <label>Estado</label>
-                <input type="text" id="client-state-geo">
+                <label for="client-state-geo">Estado</label>
+                <input type="text" id="client-state-geo" name="state_geo">
             </div>
             <div class="form-group col-1">
-                <label>Código Postal</label>
-                <input type="text" id="client-zip">
+                <label for="client-zip">Código Postal</label>
+                <input type="text" id="client-zip" name="zip_code">
             </div>
             <div class="form-group col-1">
-                <label>País</label>
-                <input type="text" id="client-country">
+                <label for="client-country">País</label>
+                <input type="text" id="client-country" name="country">
             </div>
 
             <div class="section-title"><i class="ri-briefcase-line"></i> Segmentación Comercial</div>
 
             <div class="form-group col-1">
-                <label>Nro de Trabajadores</label>
-                <input type="text" id="client-employees">
+                <label for="client-employees">Nro de Trabajadores</label>
+                <input type="text" id="client-employees" name="employees">
             </div>
             <div class="form-group col-1">
-                <label>Nivel de Ingreso en $</label>
-                <input type="text" id="client-income">
+                <label for="client-income">Nivel de Ingreso en $</label>
+                <input type="text" id="client-income" name="income_level">
             </div>
             <div class="form-group col-1">
-                <label>Sector al que Pertenece</label>
-                <input type="text" id="client-sector">
+                <label for="client-sector">Sector al que Pertenece</label>
+                <input type="text" id="client-sector" name="sector">
             </div>
             <div class="form-group col-1">
-                <label>Servicio Prestado</label>
-                <input type="text" id="client-service">
+                <label for="client-service">Servicio Prestado</label>
+                <input type="text" id="client-service" name="service">
             </div>
             <div class="form-group col-2">
-                <label>Descripción del Sector</label>
-                <input type="text" id="client-sector-desc">
+                <label for="client-sector-desc">Descripción del Sector</label>
+                <input type="text" id="client-sector-desc" name="sector_desc">
             </div>
             <div class="form-group col-2">
-                <label>Descripción del Servicio</label>
-                <input type="text" id="client-service-desc">
+                <label for="client-service-desc">Descripción del Servicio</label>
+                <input type="text" id="client-service-desc" name="service_desc">
             </div>
 
             <div class="section-title"><i class="ri-global-line"></i> Redes Sociales y Sistema</div>
 
             <div class="form-group col-1">
-                <label>Instagram</label>
-                <input type="text" id="client-instagram">
+                <label for="client-instagram">Instagram</label>
+                <input type="text" id="client-instagram" name="instagram">
             </div>
             <div class="form-group col-2">
-                <label>Linkedin</label>
-                <input type="text" id="client-linkedin">
+                <label for="client-linkedin">Linkedin</label>
+                <input type="text" id="client-linkedin" name="linkedin">
             </div>
             <div class="form-group col-1">
-                <label>Estado del Cliente (Sistema)</label>
-                <select id="client-status">
+                <label for="client-status">Estado del Cliente (Sistema)</label>
+                <select id="client-status" name="status">
                     <option value="Activo">Activo</option>
                     <option value="Inactivo">Inactivo</option>
                 </select>
@@ -286,13 +287,19 @@ if (!$clienteId && isset($cliente['id'])) {
 
             <div class="actions col-4">
                 <a href="index.php" class="btn btn-secondary">Cancelar</a>
-                <button type="submit" class="btn btn-primary"><i class="ri-refresh-line"></i> Actualizar Ficha Completa</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-refresh-line"></i> Actualizar Ficha Completa
+                </button>
             </div>
         </form>
     </div>
 </div>
 
+<!-- Inclusión explícita del script del controlador frontend -->
+<script src="clients.js" defer></script>-->
+
 <?php 
-// Renderiza el cierre del layout, barra lateral y los scripts de interacción móvil
+// Cierre del layout y footers
 include '../main/layout_footer.php'; 
-include 'footer.php'; ?>
+include 'footer.php'; 
+?>
