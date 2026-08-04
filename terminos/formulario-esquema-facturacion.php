@@ -8,6 +8,56 @@ require_once '../main/config.php';
 /** @var PDO $pdo */
 
 // -------------------------------------------------------------------------
+// HELPERS DE FORMATO Y SANITIZACIÓN NUMÉRICA
+// -------------------------------------------------------------------------
+
+/**
+ * Convierte cadena en formato venezolano ("4.000,00") a float (4000.00)
+ */
+function parseMontoVe(?string $valor): float
+{
+    if ($valor === null || trim($valor) === '') {
+        return 0.00;
+    }
+    $limpio = str_replace('.', '', trim($valor));
+    $limpio = str_replace(',', '.', $limpio);
+
+    return (float)$limpio;
+}
+
+/**
+ * Formatea un float/string a formato venezolano (4000.00 -> "4.000,00")
+ */
+function formatMontoVe(float|string $valor): string
+{
+    return number_format((float)$valor, 2, ',', '.');
+}
+
+/**
+ * Divide el monto total equitativamente entre N cuotas ajustando centavos
+ */
+function calcularCuotas(float $montoTotal, int $cantidad): array
+{
+    if ($cantidad <= 0) {
+        return [];
+    }
+
+    $montoBase = floor(($montoTotal / $cantidad) * 100) / 100;
+    $diferencia = round($montoTotal - ($montoBase * $cantidad), 2);
+
+    $cuotas = [];
+    for ($i = 1; $i <= $cantidad; $i++) {
+        $montoCuota = $montoBase;
+        if ($i === $cantidad) {
+            $montoCuota += $diferencia; // Ajusta centavos sobrantes en la última cuota
+        }
+        $cuotas[] = $montoCuota;
+    }
+
+    return $cuotas;
+}
+
+// -------------------------------------------------------------------------
 // 1. SANITIZACIÓN Y VALIDACIÓN DE PARÁMETROS ENTRANTES
 // -------------------------------------------------------------------------
 $terminoId = filter_input(INPUT_GET, 'terminoId', FILTER_VALIDATE_INT)
@@ -20,96 +70,11 @@ if (!$terminoId || $terminoId <= 0) {
 
 $itemKey = 'esquema_facturacion';
 
-// Lista blanca de monedas soportadas
-$monedasPermitidas = ['USD', 'BS', 'EUR'];
-
 // -------------------------------------------------------------------------
-// 2. PROCESAR GUARDADO DEL FORMULARIO (POST)
-// -------------------------------------------------------------------------
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_facturacion'])) {
-    $montoTotalInput       = filter_input(INPUT_POST, 'monto_total', FILTER_VALIDATE_FLOAT);
-    $monedaInput           = filter_input(INPUT_POST, 'moneda', FILTER_DEFAULT);
-    $formaPagoInput        = filter_input(INPUT_POST, 'forma_pago', FILTER_DEFAULT);
-    $hitosFacturacionInput = filter_input(INPUT_POST, 'hitos_facturacion', FILTER_DEFAULT);
-    $observacionesInput    = filter_input(INPUT_POST, 'observaciones', FILTER_DEFAULT);
-
-    $moneda           = is_string($monedaInput) ? trim($monedaInput) : 'USD';
-    $formaPago        = is_string($formaPagoInput) ? trim($formaPagoInput) : '';
-    $hitosFacturacion = is_string($hitosFacturacionInput) ? trim($hitosFacturacionInput) : '';
-    $observaciones    = is_string($observacionesInput) ? trim($observacionesInput) : '';
-
-    // Validaciones de Lógica de Negocio
-    if ($montoTotalInput === false || $montoTotalInput < 0) {
-        $errorMessage = "Ingrese un monto total válido para el servicio.";
-    } elseif (!in_array($moneda, $monedasPermitidas, true)) {
-        $errorMessage = "La moneda seleccionada no es válida.";
-    } elseif (empty($formaPago)) {
-        $errorMessage = "Debe especificar la forma o condición de pago (ej: Contado, Crédito 30 días).";
-    } else {
-        try {
-            $pdo->beginTransaction();
-
-            $payloadJson = json_encode([
-                'monto_total'       => number_format((float)$montoTotalInput, 2, '.', ''),
-                'moneda'            => $moneda,
-                'forma_pago'        => $formaPago,
-                'hitos_facturacion' => $hitosFacturacion,
-                'observaciones'     => $observaciones,
-                'updated_at'        => date('Y-m-d H:i:s')
-            ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
-
-            $stmtUpdateItem = $pdo->prepare("
-                UPDATE terminos_condiciones_items 
-                SET datos_json = :datos_json,
-                    estado = 'completado'
-                WHERE termino_id = :termino_id AND item_key = :item_key
-            ");
-            $stmtUpdateItem->execute([
-                ':datos_json' => $payloadJson,
-                ':termino_id'  => $terminoId,
-                ':item_key'    => $itemKey
-            ]);
-
-            // Reevaluar estado global de la cabecera
-            $stmtCheckPending = $pdo->prepare("
-                SELECT COUNT(*) 
-                FROM terminos_condiciones_items 
-                WHERE termino_id = :termino_id AND estado != 'completado'
-            ");
-            $stmtCheckPending->execute([':termino_id' => $terminoId]);
-            $pendingCount = (int)$stmtCheckPending->fetchColumn();
-
-            $nuevoEstadoGlobal = ($pendingCount === 0) ? 'completado' : 'en_proceso';
-
-            $stmtUpdateMaster = $pdo->prepare("
-                UPDATE terminos_condiciones 
-                SET estado = :estado 
-                WHERE id = :id
-            ");
-            $stmtUpdateMaster->execute([
-                ':estado' => $nuevoEstadoGlobal,
-                ':id'     => $terminoId
-            ]);
-
-            $pdo->commit();
-
-            header("Location: responder-terminos.php?id={$terminoId}&success=facturacion_saved");
-            exit();
-
-        } catch (Throwable $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-            error_log("Error al guardar esquema de facturación: " . $e->getMessage());
-            $errorMessage = "Error interno al guardar los datos de facturación.";
-        }
-    }
-}
-
-// -------------------------------------------------------------------------
-// 3. CARGAR DATOS EXISTENTES
+// 2. CARGAR DATOS DE CABECERA Y CARTA DE CONTRATACIÓN (MONTO PROPUESTA)
 // -------------------------------------------------------------------------
 try {
+    // Cabecera del proyecto
     $stmtHeader = $pdo->prepare("
         SELECT tc.*, c.name AS clientName 
         FROM terminos_condiciones tc 
@@ -124,6 +89,20 @@ try {
         die("Error: El registro de Términos y Condiciones no existe.");
     }
 
+    // Obtener Monto Propuesta desde Carta de Contratación
+    $stmtCarta = $pdo->prepare("
+        SELECT datos_json 
+        FROM terminos_condiciones_items 
+        WHERE termino_id = :termino_id AND item_key = 'carta_contratacion'
+    ");
+    $stmtCarta->execute([':termino_id' => $terminoId]);
+    $cartaRaw = $stmtCarta->fetchColumn();
+    $cartaJson = $cartaRaw ? (json_decode($cartaRaw, true) ?: []) : [];
+
+    $montoPropuestaCarta = (float)($cartaJson['monto_propuesta'] ?? 0.00);
+    $monedaCarta          = (string)($cartaJson['moneda'] ?? 'USD');
+
+    // Cargar item actual de Esquema de Facturación
     $stmtItem = $pdo->prepare("
         SELECT * 
         FROM terminos_condiciones_items 
@@ -142,14 +121,133 @@ try {
 
 } catch (PDOException $e) {
     error_log("Error al cargar esquema de facturación: " . $e->getMessage());
-    die("Error crítico al cargar los datos.");
+    die("Error crítico al consultar la base de datos.");
 }
 
-$montoTotalVal       = (string)($savedData['monto_total'] ?? '0.00');
-$monedaVal           = (string)($savedData['moneda'] ?? 'USD');
-$formaPagoVal        = (string)($savedData['forma_pago'] ?? '');
-$hitosFacturacionVal = (string)($savedData['hitos_facturacion'] ?? '');
-$observacionesVal    = (string)($savedData['observaciones'] ?? '');
+// -------------------------------------------------------------------------
+// 3. PROCESAR ACCIONES (POST)
+// -------------------------------------------------------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_esquema'])) {
+
+    $fechaEstimadaBase = filter_input(INPUT_POST, 'fecha_estimada_base', FILTER_DEFAULT) ?: date('Y-m-d');
+    $cantidadFacturas  = filter_input(INPUT_POST, 'cantidad_facturas', FILTER_VALIDATE_INT) ?: 1;
+    $rawMontoFactura   = filter_input(INPUT_POST, 'monto_factura', FILTER_DEFAULT);
+    $montoFacturaTotal = parseMontoVe(is_string($rawMontoFactura) ? $rawMontoFactura : '');
+    $moneda            = filter_input(INPUT_POST, 'moneda', FILTER_DEFAULT) ?? $monedaCarta;
+
+    $facturasList = [];
+
+    // CASO A: Si el usuario proviene de presionar "Generar / Re-calcular"
+    if (isset($_POST['btn_generar_cuotas'])) {
+        $cuotasCalculadas = calcularCuotas($montoFacturaTotal, $cantidadFacturas);
+        
+        foreach ($cuotasCalculadas as $idx => $montoCuota) {
+            // Incrementar mes por cada cuota generada
+            $fechaCuota = date('Y-m-d', strtotime("+$idx month", strtotime($fechaEstimadaBase)));
+            $facturasList[] = [
+                'numero' => $idx + 1,
+                'fecha'  => $fechaCuota,
+                'monto'  => number_format($montoCuota, 2, '.', '')
+            ];
+        }
+    } 
+    // CASO B: Guardar cambios manuales realizados sobre la tabla detallada
+    else {
+        $fechasPOST  = $_POST['factura_fecha'] ?? [];
+        $montosPOST  = $_POST['factura_monto'] ?? [];
+
+        if (is_array($fechasPOST) && count($fechasPOST) > 0) {
+            foreach ($fechasPOST as $index => $fFecha) {
+                $fMontoRaw = $montosPOST[$index] ?? '0,00';
+                $facturasList[] = [
+                    'numero' => $index + 1,
+                    'fecha'  => trim((string)$fFecha),
+                    'monto'  => number_format(parseMontoVe((string)$fMontoRaw), 2, '.', '')
+                ];
+            }
+        }
+    }
+
+    // Guardar payload final en BD
+    try {
+        $pdo->beginTransaction();
+
+        $payloadJson = json_encode([
+            'fecha_estimada_base' => $fechaEstimadaBase,
+            'cantidad_facturas'   => $cantidadFacturas,
+            'monto_factura'       => number_format($montoFacturaTotal, 2, '.', ''),
+            'moneda'              => $moneda,
+            'facturas'            => $facturasList,
+            'updated_at'          => date('Y-m-d H:i:s')
+        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+
+        $stmtUpdateItem = $pdo->prepare("
+            UPDATE terminos_condiciones_items 
+            SET datos_json = :datos_json,
+                estado = 'completado'
+            WHERE termino_id = :termino_id AND item_key = :item_key
+        ");
+        $stmtUpdateItem->execute([
+            ':datos_json' => $payloadJson,
+            ':termino_id'  => $terminoId,
+            ':item_key'    => $itemKey
+        ]);
+
+        // Reevaluar estado global de los términos
+        $stmtCheckPending = $pdo->prepare("
+            SELECT COUNT(*) 
+            FROM terminos_condiciones_items 
+            WHERE termino_id = :termino_id AND estado != 'completado'
+        ");
+        $stmtCheckPending->execute([':termino_id' => $terminoId]);
+        $pendingCount = (int)$stmtCheckPending->fetchColumn();
+
+        $nuevoEstadoGlobal = ($pendingCount === 0) ? 'completado' : 'en_proceso';
+
+        $stmtUpdateMaster = $pdo->prepare("
+            UPDATE terminos_condiciones 
+            SET estado = :estado 
+            WHERE id = :id
+        ");
+        $stmtUpdateMaster->execute([
+            ':estado' => $nuevoEstadoGlobal,
+            ':id'     => $terminoId
+        ]);
+
+        $pdo->commit();
+
+        header("Location: formulario-esquema-facturacion.php?terminoId={$terminoId}&success=1");
+        exit();
+
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("Error al guardar esquema de facturación: " . $e->getMessage());
+        $errorMessage = "Error interno al guardar los cambios.";
+    }
+}
+
+// -------------------------------------------------------------------------
+// 4. PREPARAR DATOS PARA LA VISTA
+// -------------------------------------------------------------------------
+$fechaEstimadaBaseVal = (string)($savedData['fecha_estimada_base'] ?? date('Y-m-d'));
+$cantidadFacturasVal  = (int)($savedData['cantidad_facturas'] ?? 1);
+$montoFacturaVal      = (string)($savedData['monto_factura'] ?? '0.00');
+$monedaVal            = (string)($savedData['moneda'] ?? $monedaCarta);
+$facturasVal          = (array)($savedData['facturas'] ?? []);
+
+// Calcular suma total de las cuotas generadas en la tabla
+$sumaTotalEsquema = 0.00;
+foreach ($facturasVal as $f) {
+    $sumaTotalEsquema += (float)($f['monto'] ?? 0);
+}
+
+// Comparación con Carta de Contratación
+$diferenciaConPropuesta = round($sumaTotalEsquema - $montoPropuestaCarta, 2);
+$esIgualPropuesta       = (abs($diferenciaConPropuesta) < 0.01);
+
+$monedasSoportadas = ['USD', 'BS', 'EUR'];
 
 $pageTitle = "Esquema de Facturación - Términos y Condiciones";
 include '../main/h.php';
@@ -157,17 +255,81 @@ include '../main/h.php';
 <link rel="stylesheet" href="../main/layout.css">
 <?php include '../main/layout_header.php'; ?>
 
-<div class="view-container" style="padding: 2rem; max-width: 900px; margin: 0 auto;">
+<style>
+    .header-bar-panel {
+        background: #475569;
+        color: #ffffff;
+        padding: 0.65rem 1.25rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border-radius: 4px 4px 0 0;
+    }
+    .panel-box {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        margin-bottom: 1.5rem;
+    }
+    .form-control-line {
+        width: 100%;
+        border: none;
+        border-bottom: 1px solid #cbd5e1;
+        padding: 0.4rem 0;
+        font-size: 0.9rem;
+        outline: none;
+        background: transparent;
+    }
+    .form-control-line:focus {
+        border-bottom-color: #2563eb;
+    }
+    .btn-blue-icon {
+        background: #2563eb;
+        color: #ffffff;
+        border: none;
+        width: 38px;
+        height: 38px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-blue-icon:hover {
+        background: #1d4ed8;
+    }
+    .table-custom {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+    .table-custom th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        padding: 0.65rem 1rem;
+        border-bottom: 2px solid #e2e8f0;
+        text-align: left;
+    }
+    .table-custom td {
+        padding: 0.65rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.9rem;
+    }
+</style>
 
-    <!-- CABECERA -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+<div class="view-container" style="padding: 2rem; max-width: 1050px; margin: 0 auto;">
+
+    <!-- CABECERA SUPERIOR -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <div>
             <h1 style="font-size: 1.4rem; font-weight: 700; color: #0f172a; margin: 0;">
-                <i class="ri-money-dollar-circle-line" style="color: #2563eb;"></i> Actividad 4: Esquema de Facturación
+                Esquema de Facturación
             </h1>
             <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.875rem;">
-                Cliente: <strong><?= htmlspecialchars($headerData->clientName, ENT_QUOTES, 'UTF-8') ?></strong> | 
-                Servicio: <strong><?= htmlspecialchars($headerData->servicio, ENT_QUOTES, 'UTF-8') ?></strong>
+                Cliente: <strong><?= htmlspecialchars($headerData->clientName, ENT_QUOTES, 'UTF-8') ?></strong>
             </p>
         </div>
         <a href="responder-terminos.php?id=<?= $terminoId ?>" class="btn btn-secondary" style="padding: 0.5rem 1rem; text-decoration: none; background: #e2e8f0; color: #334155; border-radius: 6px; font-weight: 600;">
@@ -175,82 +337,164 @@ include '../main/h.php';
         </a>
     </div>
 
-    <?php if (isset($errorMessage)): ?>
-        <div style="padding: 1rem; background: #fee2e2; color: #991b1b; border-radius: 8px; margin-bottom: 1.5rem;">
-            <i class="ri-error-warning-fill"></i> <?= htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') ?>
+    <?php if (isset($_GET['success'])): ?>
+        <div style="padding: 0.85rem 1rem; background: #dcfce7; color: #166534; border-radius: 6px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="ri-checkbox-circle-fill"></i> Esquema de facturación actualizado correctamente.
         </div>
     <?php endif; ?>
 
-    <!-- FORMULARIO -->
-    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <form method="POST" action="formulario-esquema-facturacion.php?terminoId=<?= $terminoId ?>">
-            <input type="hidden" name="action_save_facturacion" value="1">
-            <input type="hidden" name="termino_id" value="<?= $terminoId ?>">
+    <!-- PANEL PRINCIPAL (FRANJA GRIS - DISEÑO MAQUETA) -->
+    <div class="panel-box">
+        <div class="header-bar-panel">Esquema de Facturación</div>
+        <div style="padding: 1.5rem;">
+            
+            <form method="POST" action="formulario-esquema-facturacion.php?terminoId=<?= $terminoId ?>">
+                <input type="hidden" name="action_save_esquema" value="1">
+                <input type="hidden" name="termino_id" value="<?= $terminoId ?>">
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-                
-                <!-- MONTO TOTAL -->
-                <div>
-                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">
-                        Monto Total Estimado *
-                    </label>
-                    <input type="number" step="0.01" min="0" name="monto_total" required value="<?= htmlspecialchars($montoTotalVal, ENT_QUOTES, 'UTF-8') ?>" placeholder="0.00" style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #f8fafc;">
+                <!-- CAMPOS SUPERIORES SEGÚN DISEÑO -->
+                <div style="display: grid; grid-template-columns: 2fr 1.5fr 2fr 1.5fr 60px; gap: 1.5rem; align-items: end;">
+                    
+                    <div>
+                        <label style="display: block; font-size: 0.78rem; color: #475569; margin-bottom: 0.25rem;">Fecha Factura (Estimada):</label>
+                        <input type="date" name="fecha_estimada_base" class="form-control-line" style="text-align: center;" value="<?= htmlspecialchars($fechaEstimadaBaseVal, ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.78rem; color: #475569; margin-bottom: 0.25rem;">Cantidad de Facturas:</label>
+                        <input type="number" min="1" max="60" name="cantidad_facturas" class="form-control-line" style="text-align: center;" value="<?= $cantidadFacturasVal ?>">
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.78rem; color: #475569; margin-bottom: 0.25rem;">Monto Factura (Total):</label>
+                        <input type="text" name="monto_factura" class="form-control-line" style="text-align: right;" value="<?= htmlspecialchars(formatMontoVe($montoFacturaVal), ENT_QUOTES, 'UTF-8') ?>" placeholder="0,00" onblur="formatInputVe(this)">
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.78rem; color: #475569; margin-bottom: 0.25rem;">Moneda:</label>
+                        <select name="moneda" class="form-control-line">
+                            <?php foreach ($monedasSoportadas as $m): ?>
+                                <option value="<?= $m ?>" <?= $m === $monedaVal ? 'selected' : '' ?>><?= $m ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div>
+                        <button type="submit" name="btn_generar_cuotas" value="1" class="btn-blue-icon" title="Generar / Re-calcular Cuotas">
+                            <i class="ri-save-3-fill" style="font-size: 1.25rem;"></i>
+                        </button>
+                    </div>
+
                 </div>
+            </form>
 
-                <!-- MONEDA -->
-                <div>
-                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">
-                        Moneda de Facturación *
-                    </label>
-                    <select name="moneda" required style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #f8fafc;">
-                        <?php foreach ($monedasPermitidas as $m): ?>
-                            <option value="<?= $m ?>" <?= $m === $monedaVal ? 'selected' : '' ?>>
-                                <?= $m ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-            </div>
-
-            <!-- FORMA / CONDICIÓN DE PAGO -->
-            <div style="margin-bottom: 1.5rem;">
-                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">
-                    Forma / Condición de Pago *
-                </label>
-                <input type="text" name="forma_pago" required value="<?= htmlspecialchars($formaPagoVal, ENT_QUOTES, 'UTF-8') ?>" placeholder="Ej: 50% anticipado, 50% contra entrega de informe final" style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #f8fafc;">
-            </div>
-
-            <!-- HITOS DE FACTURACIÓN -->
-            <div style="margin-bottom: 1.5rem;">
-                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">
-                    Hitos / Fechas Estimadas de Entrega
-                </label>
-                <textarea name="hitos_facturacion" rows="3" placeholder="Desglose de entregables vinculados a pagos..." style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; resize: vertical;"><?= htmlspecialchars($hitosFacturacionVal, ENT_QUOTES, 'UTF-8') ?></textarea>
-            </div>
-
-            <!-- OBSERVACIONES -->
-            <div style="margin-bottom: 2rem;">
-                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">
-                    Observaciones o Consideraciones Fiscales
-                </label>
-                <textarea name="observaciones" rows="3" placeholder="Retenciones, impuestos aplicables, cuentas bancarias, etc." style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; resize: vertical;"><?= htmlspecialchars($observacionesVal, ENT_QUOTES, 'UTF-8') ?></textarea>
-            </div>
-
-            <!-- ACCIONES -->
-            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
-                <a href="responder-terminos.php?id=<?= $terminoId ?>" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; background: #e2e8f0; color: #334155; border-radius: 6px; text-decoration: none; font-weight: 600;">
-                    Cancelar
-                </a>
-                <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="ri-save-line"></i> Guardar Esquema
-                </button>
-            </div>
-
-        </form>
+        </div>
     </div>
 
+    <!-- TABLA DE FACTURAS GENERADAS -->
+    <?php if (!empty($facturasVal)): ?>
+        <form method="POST" action="formulario-esquema-facturacion.php?terminoId=<?= $terminoId ?>">
+            <input type="hidden" name="action_save_esquema" value="1">
+            <input type="hidden" name="termino_id" value="<?= $terminoId ?>">
+            <input type="hidden" name="fecha_estimada_base" value="<?= htmlspecialchars($fechaEstimadaBaseVal, ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="cantidad_facturas" value="<?= count($facturasVal) ?>">
+            <input type="hidden" name="monto_factura" value="<?= htmlspecialchars(formatMontoVe($montoFacturaVal), ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="moneda" value="<?= htmlspecialchars($monedaVal, ENT_QUOTES, 'UTF-8') ?>">
+
+            <div class="panel-box" style="padding: 1.25rem;">
+                <h3 style="font-size: 1rem; color: #1e293b; margin: 0 0 1rem 0; font-weight: 600;">
+                    <i class="ri-table-line" style="color: #2563eb;"></i> Desglose Detallado de Facturas
+                </h3>
+
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;"># Cuota</th>
+                            <th style="width: 40%;">Fecha Estimada de Emisión</th>
+                            <th style="width: 35%; text-align: right;">Monto Cuota (<?= htmlspecialchars($monedaVal, ENT_QUOTES, 'UTF-8') ?>)</th>
+                            <th style="width: 15%; text-align: center;">Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($facturasVal as $index => $f): ?>
+                            <tr>
+                                <td style="font-weight: 600; color: #334155;">
+                                    Factura #<?= (int)($f['numero'] ?? ($index + 1)) ?>
+                                </td>
+                                <td>
+                                    <input type="date" name="factura_fecha[]" class="form-control-line" value="<?= htmlspecialchars((string)($f['fecha'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
+                                </td>
+                                <td>
+                                    <input type="text" name="factura_monto[]" class="form-control-line" style="text-align: right; font-weight: 600;" value="<?= htmlspecialchars(formatMontoVe((float)($f['monto'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>" onblur="formatInputVe(this)" required>
+                                </td>
+                                <td style="text-align: center;">
+                                    <span style="font-size: 0.75rem; background: #f1f5f9; color: #475569; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600;">
+                                        Programada
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+
+                <!-- RESUMEN COMPARATIVO CON CARTA DE CONTRATACIÓN -->
+                <div style="margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 0.85rem; color: #64748b;">
+                            Total Esquema de Facturación: <strong style="color: #0f172a; font-size: 1rem;"><?= formatMontoVe($sumaTotalEsquema) ?> <?= htmlspecialchars($monedaVal, ENT_QUOTES, 'UTF-8') ?></strong>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.2rem;">
+                            Monto Propuesta (Carta Contratación): <strong style="color: #0f172a;"><?= formatMontoVe($montoPropuestaCarta) ?> <?= htmlspecialchars($monedaCarta, ENT_QUOTES, 'UTF-8') ?></strong>
+                        </div>
+                    </div>
+
+                    <div>
+                        <?php if ($esIgualPropuesta): ?>
+                            <div style="padding: 0.5rem 1rem; background: #dcfce7; color: #15803d; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
+                                <i class="ri-checkbox-circle-fill"></i> Coincide con la Propuesta
+                            </div>
+                        <?php else: ?>
+                            <div style="padding: 0.5rem 1rem; background: #fef3c7; color: #b45309; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
+                                <i class="ri-alert-fill"></i> Diferencia: <?= formatMontoVe($diferenciaConPropuesta) ?> <?= htmlspecialchars($monedaVal, ENT_QUOTES, 'UTF-8') ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- BOTÓN GUARDAR FILAS -->
+                <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
+                    <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="ri-save-line"></i> Guardar Esquema Detallado
+                    </button>
+                </div>
+
+            </div>
+        </form>
+    <?php endif; ?>
+
 </div>
+
+<script>
+function formatInputVe(input) {
+    let val = input.value.trim();
+    if (!val) return;
+
+    if (val.includes('.') && !val.includes(',')) {
+        val = val.replace('.', ',');
+    }
+
+    let parts = val.split(',');
+    let integerPart = parts[0].replace(/\D/g, '');
+    let decimalPart = parts[1] ? parts[1].replace(/\D/g, '').slice(0, 2) : '00';
+
+    if (decimalPart.length === 1) decimalPart += '0';
+    if (integerPart === '') integerPart = '0';
+
+    integerPart = parseInt(integerPart, 10).toLocaleString('de-DE');
+
+    input.value = integerPart + ',' + decimalPart;
+}
+</script>
 
 <?php 
 include '../main/layout_footer.php'; 
