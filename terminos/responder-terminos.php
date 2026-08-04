@@ -51,7 +51,7 @@ include '../main/h.php';
     <!-- ENCABEZADO -->
      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
-            <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 1 Planificación
+            <i class="ri-dashboard-line" style="color: var(--accent);"></i> Términos y Condiciones
         </h1>
         
     </div>
