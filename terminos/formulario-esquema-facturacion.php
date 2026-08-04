@@ -316,7 +316,7 @@ include '../main/h.php';
     }
 </style>
 
-<div class="view-container" style="padding: 2rem; max-width: 1050px; margin: 0 auto;">
+<div class="view-container">
 
     <!-- CABECERA SUPERIOR -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -432,7 +432,7 @@ include '../main/h.php';
                     <tfoot>
                         <tr>
                             <td colspan="2" style="text-align: right; font-weight: 700; color: #334155; font-size: 0.9rem;">
-                                TOTAL CARTA / ESQUEMA:
+                                TOTAL ESQUEMA:
                             </td>
                             <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 0.95rem;" id="tfoot_total_esquema">
                                 <?= formatMontoVe($sumaTotalEsquema) ?> <?= htmlspecialchars($monedaVal, ENT_QUOTES, 'UTF-8') ?>
