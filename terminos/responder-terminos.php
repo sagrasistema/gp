@@ -42,6 +42,14 @@ try {
 
 $pageTitle = "Responder Términos y Condiciones";
 include '../main/h.php';
+
+// Mapa de enrutamiento para los formularios por item_key
+$mapaFormularios = [
+    'carta_contratacion'  => 'formulario-carta-contratacion.php',
+    'frecuencia'          => 'formulario-frecuencia.php',
+    'roles_proyecto'       => 'formulario-roles-proyecto.php',
+    'esquema_facturacion' => 'formulario-esquema-facturacion.php',
+];
 ?>
 <link rel="stylesheet" href="../main/layout.css">
 <?php include '../main/layout_header.php'; ?>
@@ -137,9 +145,11 @@ include '../main/h.php';
                         <span style="background: rgba(255,255,255,0.2); color: #f8fafc; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 12px; font-weight: 500;">Pendiente</span>
                     <?php endif; ?>
                 </div>
-
-                <!-- Reemplazar la etiqueta <a> en responder-terminos.php -->
-                <a href="<?= $item->item_key === 'frecuencia' ? 'formulario-frecuencia.php' : 'formulario-termino.php' ?>?terminoId=<?= $terminoId ?>&item=<?= $item->item_key ?>" 
+                <?php 
+                    // Determinar el archivo de destino o usar el genérico por defecto
+                    $scriptDestino = $mapaFormularios[$item->item_key] ?? 'formulario-termino.php'; 
+                ?>
+                <a href="<?= htmlspecialchars($scriptDestino, ENT_QUOTES, 'UTF-8') ?>?terminoId=<?= $terminoId ?>&item=<?= htmlspecialchars($item->item_key, ENT_QUOTES, 'UTF-8') ?>" 
                 title="Editar <?= htmlspecialchars($item->item_nombre, ENT_QUOTES, 'UTF-8') ?>"
                 style="display: flex; align-items: center; justify-content: center; padding: 0.85rem 1.25rem; background: rgba(0, 0, 0, 0.08); color: #ffffff; text-decoration: none; transition: background 0.2s;">
                     <i class="ri-pencil-fill" style="font-size: 1.1rem;"></i>
