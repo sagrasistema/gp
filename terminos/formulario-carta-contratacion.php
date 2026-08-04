@@ -282,8 +282,8 @@ include '../main/h.php';
     }
 </style>
 
-<div class="view-container" style="padding: 2rem; max-width: 1050px; margin: 0 auto;">
-
+<!--<div class="view-container" style="padding: 2rem; max-width: 1050px; margin: 0 auto;">-->
+<div class="view-container">
     <!-- CABECERA -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <div>
