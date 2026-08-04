@@ -12,7 +12,7 @@ header('Content-Type: application/json; charset=utf-8');
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'sagracom_alberto_1');
 define('DB_USER', 'sagracom_alberto_t');
-define('DB_PASS', 'sagracom_alberto_t');
+define('DB_PASS', 'sagragp2705');
 define('DB_CHARSET', 'utf8mb4');
 
 try {
