@@ -185,7 +185,7 @@ include '../main/h.php';
                         <?php endfor; ?>
                     </select>
                     <small style="color: #64748b; font-size: 0.78rem; margin-top: 0.25rem; display: block;">
-                        Define cuántas entregas o iteraciones contempla este servicio.
+                        Define cuántas entregas o interaciones contempla este servicio.
                     </small>
                 </div>
 
