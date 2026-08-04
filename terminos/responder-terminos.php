@@ -46,9 +46,36 @@ include '../main/h.php';
 <link rel="stylesheet" href="../main/layout.css">
 <?php include '../main/layout_header.php'; ?>
 
-<div class="view-container" style="padding: 2rem; max-width: 1100px; margin: 0 auto;">
+<div class="view-container">
     
     <!-- ENCABEZADO -->
+     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
+            <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 1 Planificación
+        </h1>
+        
+    </div>
+    <div class="table-actions-container">
+        <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+            <i class="ri-arrow-go-back-line"></i> 
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+            <i class="ri-screenshot-2-line"></i>
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
+            <i class="ri-book-open-line"></i> 
+        </a>
+
+        <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
+            <i class="ri-add-line"></i>
+        </a>
+
+        <a href="../project/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+            <i class="ri-close-circle-line"></i> 
+        </a>
+    </div>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div>
             <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
@@ -63,6 +90,45 @@ include '../main/h.php';
             <i class="ri-arrow-left-line"></i> Volver al Listado
         </a>
     </div>
+
+    <!-- Cabecera de Metadatos del Proyecto -->
+    <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.25rem; border-radius: 12px; background: #ffffff; border: 1px solid var(--border-color);">
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid #e2e8f0; padding-right: 1rem; font-size: 0.9rem;">
+            <div>
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Cliente / Empresa</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars($headerData->clientName ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.5rem;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Socio Líder</span><br>
+                <strong style="color: #1e293b;"></strong>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid #e2e8f0; padding-right: 1rem; padding-left: 0.5rem; font-size: 0.9rem;">
+            <div>
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Proyecto / Alcance</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars($headerData->servicio, ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.5rem;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Socio de Calidad</span><br>
+                <strong style="color: #1e293b;"></strong>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; padding-left: 0.5rem; font-size: 0.9rem;">
+            <div>
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Fecha de Remisión</span><br>
+                <strong style="color: #1e293b;"></strong>
+            </div>
+            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.5rem;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Gerente Encargado</span><br>
+                <strong style="color: #1e293b;"></strong>
+            </div>
+        </div>
+    </div>
+
+
+
 
     <!-- LISTADO DE LAS 4 ACTIVIDADES -->
     <div class="terminos-container" style="display: flex; flex-direction: column; gap: 0.6rem;">
