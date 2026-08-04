@@ -51,7 +51,7 @@ include '../main/h.php';
     <!-- ENCABEZADO -->
      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
-            <i class="ri-dashboard-line" style="color: var(--accent);"></i> Términos y Condiciones
+            <i class="ri-file-list-3-line" style="color: #2563eb;"></i> Responder Términos y Condiciones
         </h1>
         
     </div>
@@ -68,28 +68,15 @@ include '../main/h.php';
             <i class="ri-book-open-line"></i> 
         </a>
 
-        <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
+        <a href="#" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
             <i class="ri-add-line"></i>
         </a>
 
-        <a href="../project/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+        <a href="../terminos/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
             <i class="ri-close-circle-line"></i> 
         </a>
     </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <div>
-            <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
-                <i class="ri-file-list-3-line" style="color: #2563eb;"></i> Responder Términos y Condiciones
-            </h1>
-            <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.875rem;">
-                Cliente: <strong><?= htmlspecialchars($headerData->clientName, ENT_QUOTES, 'UTF-8') ?></strong> | 
-                Servicio: <strong><?= htmlspecialchars($headerData->servicio, ENT_QUOTES, 'UTF-8') ?></strong>
-            </p>
-        </div>
-        <a href="index.php" class="btn btn-secondary" style="padding: 0.5rem 1rem; text-decoration: none; background: #e2e8f0; color: #334155; border-radius: 6px; font-weight: 600;">
-            <i class="ri-arrow-left-line"></i> Volver al Listado
-        </a>
-    </div>
+
 
     <!-- Cabecera de Metadatos del Proyecto -->
     <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.25rem; border-radius: 12px; background: #ffffff; border: 1px solid var(--border-color);">
