@@ -106,21 +106,40 @@ $currentTab     = 'terminos';
 include '../main/layout_header.php'; ?>
 
 <div class="view-container" style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
-
-    <!-- CABECERA DE LA VISTA -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <div>
-            <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
-                <i class="ri-file-text-line" style="color: #2563eb;"></i> Términos y Condiciones
+        
+        <div class="view-header">
+            <h1 class="page-main-title">
+                <i class="ri-folders-line"></i>Términos y Condiciones
             </h1>
             <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.875rem;">
                 Gestión y respuesta de cartas de contratación, frecuencia, roles y esquemas de facturación.
             </p>
         </div>
-        <button onclick="openModal()" class="btn btn-primary" style="padding: 0.6rem 1.2rem; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-            <i class="ri-add-line"></i> Crear Términos y Condiciones
-        </button>
-    </div>
+        
+        <div class="table-actions-container">
+            <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+                <i class="ri-arrow-go-back-line"></i> 
+            </a>
+
+            <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+                <i class="ri-screenshot-2-line"></i>
+            </a>
+
+            <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
+                <i class="ri-book-open-line"></i> 
+            </a>
+            <button onclick="openModal()" class="btn btn-primary" data-tooltip="Crear Registro">
+                <i class="ri-add-line"></i> 
+            </button>
+            <a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Registro">
+                <i class="ri-add-line"></i>
+            </a>
+
+            <a href="../index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+                <i class="ri-close-circle-line"></i> 
+            </a>
+        </div>
+        
 
     <?php if (isset($_GET['success'])): ?>
         <div style="padding: 1rem; background: #dcfce7; color: #166534; border-radius: 8px; margin-bottom: 1.5rem;">
