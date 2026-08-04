@@ -295,7 +295,7 @@ include '../main/layout_header.php';
     </div>
 </div>
 
-<!-- Inclusión explícita del script del controlador frontend -->
+<!-- Inclusión explícita del script del controlador frontend 
 <script src="clients.js" defer></script>-->
 
 <?php 
