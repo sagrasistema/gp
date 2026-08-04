@@ -21,6 +21,8 @@ function getFormData() {
     return {
         name: document.getElementById('client-name').value,
         rif: document.getElementById('client-rif').value,
+        persona: document.getElementById('client-persona').value,
+        cargo: document.getElementById('client-cargo').value,
         phone: document.getElementById('client-phone').value,
         email: document.getElementById('client-email').value,
         address: document.getElementById('client-address').value,
@@ -45,6 +47,8 @@ function getFormData() {
 function fillFormData(c) {
     document.getElementById('client-name').value = c.name || '';
     document.getElementById('client-rif').value = c.rif || '';
+    document.getElementById('client-persona').value = c.persona || '';
+    document.getElementById('client-cargo').value = c.cargo || '';
     document.getElementById('client-phone').value = c.phone || '';
     document.getElementById('client-email').value = c.email || '';
     document.getElementById('client-address').value = c.address || '';
