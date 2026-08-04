@@ -8,6 +8,35 @@ require_once '../main/config.php';
 /** @var PDO $pdo */
 
 // -------------------------------------------------------------------------
+// HELPERS DE FORMATO Y SANITIZACIÓN NUMÉRICA
+// -------------------------------------------------------------------------
+
+/**
+ * Convierte una cadena con formato numérico venezolano (ej. "1.234,56") 
+ * a un float estándar de PHP/SQL (1234.56).
+ */
+function parseMontoVe(?string $valor): float
+{
+    if ($valor === null || trim($valor) === '') {
+        return 0.00;
+    }
+    // Elimina puntos de millar y reemplaza coma decimal por punto
+    $limpio = str_replace('.', '', trim($valor));
+    $limpio = str_replace(',', '.', $limpio);
+
+    return (float)$limpio;
+}
+
+/**
+ * Formatea un float/cadena a formato numérico venezolano (ej. 1234.56 -> "1.234,56").
+ */
+function formatMontoVe(float|string $valor): string
+{
+    $num = (float)$valor;
+    return number_format($num, 2, ',', '.');
+}
+
+// -------------------------------------------------------------------------
 // 1. SANITIZACIÓN Y VALIDACIÓN DE PARÁMETROS ENTRANTES
 // -------------------------------------------------------------------------
 $terminoId = filter_input(INPUT_GET, 'terminoId', FILTER_VALIDATE_INT)
@@ -22,7 +51,7 @@ $itemKey = 'carta_contratacion';
 $uploadBaseDir = __DIR__ . '/../uploads/terminos/';
 
 // -------------------------------------------------------------------------
-// 2. CARGAR DATOS EXISTENTES (NECESARIO PARA GUARDADO Y VISTA)
+// 2. CARGAR DATOS EXISTENTES
 // -------------------------------------------------------------------------
 try {
     $stmtHeader = $pdo->prepare("
@@ -65,23 +94,27 @@ try {
 // -------------------------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_carta'])) {
     
-    // Captura y sanitización de inputs
     $fechaSolicitud      = filter_input(INPUT_POST, 'fecha_solicitud', FILTER_DEFAULT) ?? '';
     $fechaRecibida       = filter_input(INPUT_POST, 'fecha_recibida', FILTER_DEFAULT) ?? '';
     $terminosAprobados   = filter_input(INPUT_POST, 'terminos_aprobados', FILTER_DEFAULT) ?? 'no';
-    $horasContempladas   = filter_input(INPUT_POST, 'horas_contempladas', FILTER_VALIDATE_FLOAT) ?: 0.00;
-    $montoPropuesta      = filter_input(INPUT_POST, 'monto_propuesta', FILTER_VALIDATE_FLOAT) ?: 0.00;
+    
+    // Parsear montos formateados en estilo venezolano (ej. "1.500,00" -> 1500.00)
+    $rawHoras            = filter_input(INPUT_POST, 'horas_contempladas', FILTER_DEFAULT);
+    $rawMonto            = filter_input(INPUT_POST, 'monto_propuesta', FILTER_DEFAULT);
+    $horasContempladas   = parseMontoVe(is_string($rawHoras) ? $rawHoras : '');
+    $montoPropuesta      = parseMontoVe(is_string($rawMonto) ? $rawMonto : '');
+
     $moneda              = filter_input(INPUT_POST, 'moneda', FILTER_DEFAULT) ?? 'USD';
     $observaciones       = filter_input(INPUT_POST, 'observaciones', FILTER_DEFAULT) ?? '';
     $situacionImportante = isset($_POST['situacion_importante']) ? 1 : 0;
 
-    // Rutas previas guardadas (por si no se reemplazan en este envío)
+    // Preservar rutas de archivos anteriores si no se vuelven a subir
     $archivoCartaPath       = $savedData['archivo_carta'] ?? '';
     $archivoPresupuestoPath = $savedData['archivo_presupuesto'] ?? '';
 
-    // Validar y crear carpeta de subidas si no existe
+    // Crear directorio de archivos si no existe
     if (!is_dir($uploadBaseDir) && !mkdir($uploadBaseDir, 0755, true) && !is_dir($uploadBaseDir)) {
-        $errorMessage = "No se pudo crear la carpeta de almacenamiento de archivos.";
+        $errorMessage = "No se pudo crear el directorio de almacenamiento.";
     }
 
     // A) PROCESAR CARTA DE CONTRATACIÓN (PDF)
@@ -94,14 +127,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_carta']))
         finfo_close($finfo);
 
         if ($fileExt !== 'pdf' || $mimeType !== 'application/pdf') {
-            $errorMessage = "El archivo de la Carta de Contratación debe ser estrictamente un PDF válido.";
+            $errorMessage = "La Carta de Contratación debe ser un archivo PDF válido.";
         } else {
             $newFileName = 'carta_' . $terminoId . '_' . bin2hex(random_bytes(8)) . '.pdf';
             $targetPath  = $uploadBaseDir . $newFileName;
             if (move_uploaded_file($fileTmp, $targetPath)) {
                 $archivoCartaPath = 'uploads/terminos/' . $newFileName;
             } else {
-                $errorMessage = "Error al mover el archivo PDF al servidor.";
+                $errorMessage = "Error al guardar el archivo PDF en el servidor.";
             }
         }
     }
@@ -122,19 +155,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_carta']))
         ];
 
         if (!in_array($fileExt, ['xls', 'xlsx'], true) || !in_array($mimeType, $allowedExcelMimes, true)) {
-            $errorMessage = "El presupuesto debe ser un archivo de Excel válido (.xls o .xlsx).";
+            $errorMessage = "El presupuesto debe ser un archivo de Excel (.xls o .xlsx) válido.";
         } else {
             $newFileName = 'presupuesto_' . $terminoId . '_' . bin2hex(random_bytes(8)) . '.' . $fileExt;
             $targetPath  = $uploadBaseDir . $newFileName;
             if (move_uploaded_file($fileTmp, $targetPath)) {
                 $archivoPresupuestoPath = 'uploads/terminos/' . $newFileName;
             } else {
-                $errorMessage = "Error al mover el archivo de Excel al servidor.";
+                $errorMessage = "Error al guardar el archivo de Excel en el servidor.";
             }
         }
     }
 
-    // GUARDAR EN BASE DE DATOS SI NO HAY ERRORES
+    // ACTUALIZACIÓN DE BD
     if (!isset($errorMessage)) {
         try {
             $pdo->beginTransaction();
@@ -145,8 +178,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_carta']))
                 'fecha_recibida'       => trim((string)$fechaRecibida),
                 'terminos_aprobados'   => trim((string)$terminosAprobados),
                 'archivo_presupuesto'  => $archivoPresupuestoPath,
-                'horas_contempladas'   => number_format((float)$horasContempladas, 2, '.', ''),
-                'monto_propuesta'      => number_format((float)$montoPropuesta, 2, '.', ''),
+                'horas_contempladas'   => number_format($horasContempladas, 2, '.', ''),
+                'monto_propuesta'      => number_format($montoPropuesta, 2, '.', ''),
                 'moneda'               => trim((string)$moneda),
                 'observaciones'        => trim((string)$observaciones),
                 'situacion_importante' => $situacionImportante,
@@ -201,7 +234,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_carta']))
     }
 }
 
-// Valores por defecto extraídos del JSON
+// Cargar variables formateadas para la vista
 $archivoCartaVal       = (string)($savedData['archivo_carta'] ?? '');
 $fechaSolicitudVal      = (string)($savedData['fecha_solicitud'] ?? '');
 $fechaRecibidaVal       = (string)($savedData['fecha_recibida'] ?? '');
@@ -262,11 +295,31 @@ include '../main/h.php';
         color: #2563eb;
         cursor: pointer;
     }
+    .btn-action-view {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #2563eb;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 4px;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .btn-action-view:hover {
+        background: #dbeafe;
+    }
     .file-custom-label {
         font-size: 0.875rem;
-        color: #94a3b8;
+        color: #64748b;
         cursor: pointer;
         flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .form-control-line {
         width: 100%;
@@ -282,8 +335,8 @@ include '../main/h.php';
     }
 </style>
 
-<!--<div class="view-container" style="padding: 2rem; max-width: 1050px; margin: 0 auto;">-->
-<div class="view-container">
+<div class="view-container" style="padding: 2rem; max-width: 1050px; margin: 0 auto;">
+
     <!-- CABECERA -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <div>
@@ -309,7 +362,6 @@ include '../main/h.php';
         <input type="hidden" name="action_save_carta" value="1">
         <input type="hidden" name="termino_id" value="<?= $terminoId ?>">
 
-        <!-- DOS COLUMNAS PRINCIPALES -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
 
             <!-- COLUMNA IZQUIERDA: CARTA DE CONTRATACIÓN -->
@@ -317,7 +369,7 @@ include '../main/h.php';
                 <div class="card-panel-header">Carta de Contratación</div>
                 <div class="card-panel-body">
                     
-                    <!-- ADJUNTAR CARTA (PDF) -->
+                    <!-- ADJUNTAR CARTA Y BOTÓN DESCARGAR/VER -->
                     <div class="file-input-wrapper">
                         <label for="input_carta" class="btn-attach" title="Adjuntar Archivo PDF">
                             <i class="ri-attachment-line" style="font-size: 1.2rem;"></i>
@@ -326,6 +378,13 @@ include '../main/h.php';
                         <span id="label_carta" class="file-custom-label" onclick="document.getElementById('input_carta').click();">
                             <?= !empty($archivoCartaVal) ? '📄 ' . basename($archivoCartaVal) : 'Adjuntar o cambiar Carta de Contratación (Sólo PDF)' ?>
                         </span>
+
+                        <!-- BOTÓN DESCARGAR/VER PDF -->
+                        <?php if (!empty($archivoCartaVal)): ?>
+                            <a href="../<?= htmlspecialchars($archivoCartaVal, ENT_QUOTES, 'UTF-8') ?>" target="_blank" class="btn-action-view" title="Ver / Descargar Carta de Contratación">
+                                <i class="ri-external-link-line"></i> Ver PDF
+                            </a>
+                        <?php endif; ?>
                     </div>
 
                     <!-- FECHAS -->
@@ -361,7 +420,7 @@ include '../main/h.php';
                 <div class="card-panel-header">Presupuesto del Proyecto</div>
                 <div class="card-panel-body">
 
-                    <!-- ADJUNTAR PRESUPUESTO (EXCEL) -->
+                    <!-- ADJUNTAR PRESUPUESTO Y BOTÓN DESCARGAR EXCEL -->
                     <div class="file-input-wrapper">
                         <label for="input_presupuesto" class="btn-attach" title="Adjuntar Excel de Presupuesto">
                             <i class="ri-attachment-line" style="font-size: 1.2rem;"></i>
@@ -370,17 +429,24 @@ include '../main/h.php';
                         <span id="label_presupuesto" class="file-custom-label" onclick="document.getElementById('input_presupuesto').click();">
                             <?= !empty($archivoPresupuestoVal) ? '📊 ' . basename($archivoPresupuestoVal) : 'Adjuntar o Cambiar Presupuesto del Proyecto (Sólo Excel)' ?>
                         </span>
+
+                        <!-- BOTÓN DESCARGAR EXCEL -->
+                        <?php if (!empty($archivoPresupuestoVal)): ?>
+                            <a href="../<?= htmlspecialchars($archivoPresupuestoVal, ENT_QUOTES, 'UTF-8') ?>" download class="btn-action-view" title="Descargar Presupuesto Excel">
+                                <i class="ri-download-line"></i> Descargar Excel
+                            </a>
+                        <?php endif; ?>
                     </div>
 
-                    <!-- METRICAS DE PRESUPUESTO -->
+                    <!-- METRICAS DE PRESUPUESTO CON FORMATO VENEZOLANO -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
                         <div>
                             <label style="display: block; font-size: 0.75rem; color: #475569; margin-bottom: 0.25rem;">Horas contempladas</label>
-                            <input type="number" step="0.01" min="0" name="horas_contempladas" class="form-control-line" style="text-align: right;" value="<?= htmlspecialchars($horasContempladasVal, ENT_QUOTES, 'UTF-8') ?>">
+                            <input type="text" name="horas_contempladas" class="form-control-line" style="text-align: right;" value="<?= htmlspecialchars(formatMontoVe($horasContempladasVal), ENT_QUOTES, 'UTF-8') ?>" placeholder="0,00" onblur="formatInputVe(this)">
                         </div>
                         <div>
                             <label style="display: block; font-size: 0.75rem; color: #475569; margin-bottom: 0.25rem;">Monto Total de la Propuesta</label>
-                            <input type="number" step="0.01" min="0" name="monto_propuesta" class="form-control-line" style="text-align: right;" value="<?= htmlspecialchars($montoPropuestaVal, ENT_QUOTES, 'UTF-8') ?>">
+                            <input type="text" name="monto_propuesta" class="form-control-line" style="text-align: right;" value="<?= htmlspecialchars(formatMontoVe($montoPropuestaVal), ENT_QUOTES, 'UTF-8') ?>" placeholder="0,00" onblur="formatInputVe(this)">
                         </div>
                         <div>
                             <label style="display: block; font-size: 0.75rem; color: #475569; margin-bottom: 0.25rem;">Moneda asociada</label>
@@ -407,7 +473,7 @@ include '../main/h.php';
             </div>
         </div>
 
-        <!-- SITUACIÓN IMPORTANTE (CHECKBOX) -->
+        <!-- SITUACIÓN IMPORTANTE -->
         <div style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
             <input type="checkbox" id="situacion_importante" name="situacion_importante" value="1" <?= $situacionImportanteVal === 1 ? 'checked' : '' ?> style="width: 18px; height: 18px; cursor: pointer;">
             <label for="situacion_importante" style="font-size: 0.875rem; color: #334155; cursor: pointer;">
@@ -436,6 +502,30 @@ function updateFileName(input, labelId) {
         label.style.color = "#0f172a";
         label.style.fontWeight = "600";
     }
+}
+
+// Formateador dinámico para mejorar la UX del usuario al escribir montos
+function formatInputVe(input) {
+    let val = input.value.trim();
+    if (!val) return;
+
+    // Normalizar si introducen punto como decimal
+    if (val.includes('.') && !val.includes(',')) {
+        val = val.replace('.', ',');
+    }
+
+    let parts = val.split(',');
+    let integerPart = parts[0].replace(/\D/g, ''); // Solo dígitos
+    let decimalPart = parts[1] ? parts[1].replace(/\D/g, '').slice(0, 2) : '00';
+
+    if (decimalPart.length === 1) decimalPart += '0';
+
+    if (integerPart === '') integerPart = '0';
+
+    // Separador de miles con punto
+    integerPart = parseInt(integerPart, 10).toLocaleString('de-DE');
+
+    input.value = integerPart + ',' + decimalPart;
 }
 </script>
 
