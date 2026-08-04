@@ -195,6 +195,14 @@ if (!$clienteId && isset($cliente['id'])) {
                 <label>Número ID Fiscal (R.I.F)</label>
                 <input type="text" id="client-rif">
             </div>
+            <div class="form-group col-2">
+                <label>Persona contacto</label>
+                <input type="text" id="client-persona">
+            </div>
+            <div class="form-group col-1">
+                <label>Cargo</label>
+                <input type="text" id="client-cargo">
+            </div>
             <div class="form-group col-1">
                 <label>Teléfono</label>
                 <input type="text" id="client-phone">
