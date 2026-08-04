@@ -138,11 +138,10 @@ include '../main/h.php';
                     <?php endif; ?>
                 </div>
 
-                <a href="formulario-termino.php?terminoId=<?= $terminoId ?>&item=<?= $item->item_key ?>" 
-                   title="Editar <?= htmlspecialchars($item->item_nombre, ENT_QUOTES, 'UTF-8') ?>"
-                   style="display: flex; align-items: center; justify-content: center; padding: 0.85rem 1.25rem; background: rgba(0, 0, 0, 0.08); color: #ffffff; text-decoration: none; transition: background 0.2s;"
-                   onmouseover="this.style.background='rgba(0, 0, 0, 0.25)'"
-                   onmouseout="this.style.background='rgba(0, 0, 0, 0.08)'">
+                <!-- Reemplazar la etiqueta <a> en responder-terminos.php -->
+                <a href="<?= $item->item_key === 'frecuencia' ? 'formulario-frecuencia.php' : 'formulario-termino.php' ?>?terminoId=<?= $terminoId ?>&item=<?= $item->item_key ?>" 
+                title="Editar <?= htmlspecialchars($item->item_nombre, ENT_QUOTES, 'UTF-8') ?>"
+                style="display: flex; align-items: center; justify-content: center; padding: 0.85rem 1.25rem; background: rgba(0, 0, 0, 0.08); color: #ffffff; text-decoration: none; transition: background 0.2s;">
                     <i class="ri-pencil-fill" style="font-size: 1.1rem;"></i>
                 </a>
 
