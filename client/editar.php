@@ -149,7 +149,7 @@ include '../main/layout_header.php';
             <!-- Ejemplo de enlace en la vista del cliente -->
             <a href="export_cliente_word.php?id=<?= urlencode((string)$id) ?>" 
                     class="btn btn-primary" >
-                <i class="fa fa-file-word"></i>
+                <i class="ri-file-word-2-line"></i>
             </a>
 
             <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
