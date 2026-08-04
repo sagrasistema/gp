@@ -11,6 +11,13 @@ $currentTab     = 'inicio';
 
 include '../main/layout_header.php'; 
 
+// Capturar y sanitizar el ID directamente desde la URL ($_GET)
+$clienteId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+// Si utilizas un array de datos traído de la base de datos (ej. $cliente), usas su ID como respaldo
+if (!$clienteId && isset($cliente['id'])) {
+    $clienteId = (int)$cliente['id'];
+}
 ?>
 
 
@@ -147,10 +154,15 @@ include '../main/layout_header.php';
                 <i class="ri-arrow-go-back-line"></i> 
             </a>
             <!-- Ejemplo de enlace en la vista del cliente -->
-            <a href="export_cliente_word.php?id=<?= urlencode((string)$id) ?>" 
-                    class="btn btn-primary" >
-                <i class="ri-file-word-2-line"></i>
-            </a>
+           <!-- Botón de Exportación a Word -->
+            <?php if (!empty($clienteId)): ?>
+                <a href="export_cliente_word.php?id=<?= $clienteId ?>" 
+                class="btn btn-primary" 
+                title="Exportar Ficha a Word" 
+                target="_blank">
+                    <i class="ri-file-word-2-line"></i>
+                </a>
+            <?php endif; ?>
 
             <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
                 <i class="ri-screenshot-2-line"></i>
