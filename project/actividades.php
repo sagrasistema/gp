@@ -276,41 +276,78 @@ include 'conect-actividades.php';
                 </div>
             </div>
         </div>
-<!-- SECCIÓN ADJUNTO ÚNICO DE LA PRUEBA (Abajo de Indicadores/Socios y antes de Guardar) -->
-        <div style="margin-top: 2rem; background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <label for="documento_prueba" style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.95rem; color: #1e293b; margin-bottom: 0.5rem;">
-                <i class="ri-attachment-2" style="color: #0284c7; font-size: 1.2rem;"></i> Documento Adjunto de la Prueba
+<!-- SECCIÓN ADJUNTO ÚNICO DE LA PRUEBA (UI REDISEÑADA) -->
+        <div style="margin-top: 2rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+            
+            <!-- Título de la Sección -->
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.95rem; color: #1e293b; margin-bottom: 0.85rem;">
+                <i class="ri-attachment-2" style="color: #0284c7; font-size: 1.25rem;"></i> Documento Adjunto de la Prueba
             </label>
             
-            <input type="file" 
-                   name="documento_prueba" 
-                   id="documento_prueba" 
-                   class="form-control"
-                   accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.zip,.rar"
-                   style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.875rem; background: #f8fafc;">
-                   
-            <small style="display: block; color: #64748b; font-size: 0.8rem; margin-top: 0.35rem;">
-                Formatos permitidos: PDF, Word, Excel, Imágenes, ZIP, RAR (Tamaño máximo: 10MB).
+            <!-- Área Personalizada para Cargar Archivo -->
+            <div style="display: flex; align-items: center; gap: 0.85rem; background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 0.85rem 1.1rem; border-radius: 8px; flex-wrap: wrap;">
+                
+                <!-- Botón Visual Personalizado (Trigger del File Input) -->
+                <label for="documento_prueba" 
+                       style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; background-color: #0284c7; color: #ffffff; font-weight: 600; font-size: 0.85rem; padding: 0.5rem 1.1rem; border-radius: 6px; margin: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.2s ease;">
+                    <i class="ri-upload-cloud-2-line" style="font-size: 1.1rem;"></i> Seleccionar archivo
+                </label>
+                
+                <!-- Input Oculto Real -->
+                <input type="file" 
+                       name="documento_prueba" 
+                       id="documento_prueba" 
+                       accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.zip,.rar"
+                       style="display: none;" 
+                       onchange="actualizarNombreArchivo(this)">
+                
+                <!-- Feedback visual del archivo nuevo seleccionado -->
+                <span id="texto_archivo_nuevo" style="font-size: 0.85rem; color: #64748b; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px;">
+                    Ningún archivo nuevo seleccionado
+                </span>
+            </div>
+
+            <small style="display: block; color: #94a3b8; font-size: 0.775rem; margin-top: 0.5rem; margin-left: 0.2rem;">
+                <i class="ri-information-line"></i> Formatos permitidos: PDF, Word, Excel, Imágenes, ZIP, RAR (Tamaño máximo: 10MB).
             </small>
 
-            <!-- Si existe un archivo guardado anteriormente, se muestra el link de descarga -->
+            <!-- Previsualización / Descarga del Documento Guardado en Servidor -->
             <?php if (!empty($archivoRutaPrueba)): ?>
-                <div style="margin-top: 0.85rem; padding: 0.65rem 0.85rem; background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
-                    <span style="font-size: 0.85rem; color: #334155;">
-                        <i class="ri-file-text-line" style="color: #0284c7; margin-right: 0.3rem;"></i>
-                        <strong>Documento actual:</strong> <?= htmlspecialchars((string)$archivoNombrePrueba, ENT_QUOTES, 'UTF-8') ?>
-                        <small style="color: #64748b;">(<?= round(((int)($archivoPesoPrueba ?? 0)) / 1024, 1) ?> KB)</small>
+                <div style="margin-top: 1rem; padding: 0.75rem 1rem; background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                    <span style="font-size: 0.85rem; color: #0369a1; display: flex; align-items: center; gap: 0.4rem;">
+                        <i class="ri-file-text-line" style="font-size: 1.1rem; color: #0284c7;"></i>
+                        <strong>Documento actual:</strong> 
+                        <span style="color: #0c4a6e; font-weight: 600;"><?= htmlspecialchars((string)$archivoNombrePrueba, ENT_QUOTES, 'UTF-8') ?></span>
+                        <small style="color: #0369a1;">(<?= round(((int)($archivoPesoPrueba ?? 0)) / 1024, 1) ?> KB)</small>
                     </span>
                     
                     <a href="../<?= htmlspecialchars((string)$archivoRutaPrueba, ENT_QUOTES, 'UTF-8') ?>" 
                        target="_blank" 
                        class="btn btn-sm" 
-                       style="background-color: #e0f2fe; color: #0369a1; font-weight: 600; font-size: 0.8rem; padding: 0.35rem 0.85rem; text-decoration: none; border-radius: 4px; display: inline-flex; align-items: center; gap: 0.3rem;">
+                       style="background-color: #e0f2fe; color: #0369a1; font-weight: 600; font-size: 0.8rem; padding: 0.35rem 0.85rem; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; transition: background-color 0.2s ease;">
                         <i class="ri-download-2-line"></i> Descargar Documento
                     </a>
                 </div>
             <?php endif; ?>
         </div>
+
+        <!-- Script Vanilla JS para cambiar el texto en tiempo real al seleccionar un archivo -->
+        <script>
+        function actualizarNombreArchivo(input) {
+            const labelTexto = document.getElementById('texto_archivo_nuevo');
+            if (input.files && input.files.length > 0) {
+                labelTexto.textContent = input.files[0].name;
+                labelTexto.style.color = '#0f172a';
+                labelTexto.style.fontWeight = '600';
+                labelTexto.style.fontStyle = 'normal';
+            } else {
+                labelTexto.textContent = 'Ningún archivo nuevo seleccionado';
+                labelTexto.style.color = '#64748b';
+                labelTexto.style.fontWeight = '400';
+                labelTexto.style.fontStyle = 'italic';
+            }
+        }
+        </script>
 
         <script>
         function toggleAcordeonSocios(header) {
