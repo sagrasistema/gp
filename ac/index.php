@@ -79,8 +79,6 @@ include '../main/layout_header.php';
                                 INNER JOIN clientes c ON a.clientId = c.id
                                 INNER JOIN ac_types t ON a.typeId = t.typeId
                                 ORDER BY a.acId DESC";
-
-    
                     $stmt = $pdo->query($query);
                     $evaluaciones = $stmt->fetchAll(PDO::FETCH_OBJ);
                     / Valores con fallback en caso de ser NULL en la BD
