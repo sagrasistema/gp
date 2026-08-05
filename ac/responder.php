@@ -241,8 +241,15 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                                     <?php endif; ?>
                                 </div>
                                 
-                                <div>
-                                    <input type="text" name="answers[<?= $q->questionId ?>][comment]" class="comment-input" placeholder="Comentarios o justificación..." value="<?= htmlspecialchars($savedComment, ENT_QUOTES, 'UTF-8') ?>">
+                                <!--<div>
+                                    <input type="text" name="answers[<?= # $q->questionId ?>][comment]" class="comment-input" placeholder="Comentarios o justificación..." value="<?= # htmlspecialchars($savedComment, ENT_QUOTES, 'UTF-8') ?>">
+                                </div>-->
+                                <div style="width: 100%;">
+                                    <!-- REEMPLAZO: Textarea auto-expansible -->
+                                    <textarea name="answers[<?= (int)$q->questionId ?>][comment]" 
+                                            class="comment-input auto-expand" 
+                                            rows="1" 
+                                            placeholder="Comentarios o justificación..."><?= htmlspecialchars((string)$savedComment, ENT_QUOTES, 'UTF-8') ?></textarea>
                                 </div>
                             </div>
 
@@ -492,6 +499,28 @@ function eliminarRiesgoAC(btn) {
             </tr>`;
     }
 }
+document.addEventListener('DOMContentLoaded', () => {
+    const textareas = document.querySelectorAll('.comment-input.auto-expand');
+
+    /**
+     * Ajusta la altura del textarea según el contenido
+     * @param {HTMLTextAreaElement} el 
+     */
+    const autoResizeTextarea = (el) => {
+        el.style.height = 'auto';
+        el.style.height = `${el.scrollHeight}px`;
+    };
+
+    textareas.forEach((textarea) => {
+        // 1. Ajustar altura inicial si ya existe texto cargado desde BD
+        autoResizeTextarea(textarea);
+
+        // 2. Escuchar evento de tipeo en tiempo real
+        textarea.addEventListener('input', () => {
+            autoResizeTextarea(textarea);
+        });
+    });
+});
 </script>
 
 <?php 

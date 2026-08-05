@@ -248,5 +248,26 @@ $rotationAngle = -90 + ($score * 1.8);
     fill: #64748b; /* Slate 500 para un look moderno */
     text-anchor: middle;
 }
+.comment-input.auto-expand {
+    width: 100%;
+    min-height: 38px;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: #334155;
+    background-color: #ffffff;
+    resize: none; /* Deshabilita el reescalado manual por el usuario */
+    overflow-y: hidden; /* Evita que aparezca el scrollbar interno */
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
 
+.comment-input.auto-expand:focus {
+    outline: none;
+    border-color: #0284c7;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
 </style>
