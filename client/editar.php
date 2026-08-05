@@ -1,4 +1,14 @@
 <?php 
+// 1. Iniciar sesión obligatoriamente antes de procesar lógica o incluir layouts
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. Validar autenticación de usuario
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../login.php');
+    exit;
+}
 $pageTitle = "Modificar Ficha Corporativa";
 include 'header.php'; ?>
 <link rel="stylesheet" href="../main/layout.css">
