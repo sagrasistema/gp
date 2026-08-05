@@ -81,7 +81,6 @@ include '../main/layout_header.php';
                                 ORDER BY a.acId DESC";
                     $stmt = $pdo->query($query);
                     $evaluaciones = $stmt->fetchAll(PDO::FETCH_OBJ);
-                    / Valores con fallback en caso de ser NULL en la BD
                     $riskScore  = htmlspecialchars((string)($ac->riskScore ?? '0'), ENT_QUOTES, 'UTF-8');
                     $riskLevel  = htmlspecialchars((string)($ac->riskLevel ?? 'Sin Evaluar'), ENT_QUOTES, 'UTF-8');
                     
