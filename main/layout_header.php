@@ -48,7 +48,7 @@ $activeTab = isset($currentTab) ? $currentTab : '';
     </div>
     
    <div class="navbar-right">
-    <span class="user-name-text"><?= $userId ?> <?= $userRol ?> </span>
+    <span class="user-name-text"><?= $nombreUsuario ?>  </span>
     <i class="ri-user-line user-avatar"></i>
     <button id="toggle-sidebar-btn" class="btn-toggle">
         <i class="ri-menu-line"></i>
