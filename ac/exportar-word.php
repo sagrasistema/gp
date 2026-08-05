@@ -17,7 +17,6 @@ $dbUser  = 'sagracom_alberto_t';
 $dbPass  = 'sagragp2705';
 $charset = 'utf8mb4';
 
-
 $dsn = "mysql:host={$dbHost};dbname={$dbName};charset={$charset}";
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -30,7 +29,7 @@ try {
 
     // --- CONSULTAS A LA BASE DE DATOS ---
 
-    // Cabecera AC
+    // A. Cabecera AC
     $sqlAc = "SELECT 
                 a.acId, 
                 a.riskScore, 
@@ -51,7 +50,7 @@ try {
         die("Error: No se encontró la evaluación AC con ID {$acId}.");
     }
 
-    // Cuestionario General
+    // B. Cuestionario General
     $sqlGeneral = "SELECT 
                     cat.categoryName,
                     q.questionNumber,
@@ -68,7 +67,7 @@ try {
     $stmtGeneral->execute([':acId' => $acId]);
     $preguntasGenerales = $stmtGeneral->fetchAll();
 
-    // Desglose de Pruebas de la Pregunta 28
+    // C. Desglose de Pruebas de la Pregunta 28
     $sqlQ28 = "SELECT 
                 t.testNumber,
                 t.testText,
@@ -83,13 +82,28 @@ try {
     $stmtQ28->execute([':acId' => $acId]);
     $pruebasQ28 = $stmtQ28->fetchAll();
 
+    // D. Matriz de Riesgos Identificados
+    $sqlMatriz = "SELECT 
+                    idRiesgo, 
+                    categoria, 
+                    descripcion, 
+                    causaRaiz, 
+                    nivelRiesgo 
+                  FROM ac_matriz_riesgos 
+                  WHERE acId = :acId 
+                  ORDER BY id ASC";
+
+    $stmtMatriz = $pdo->prepare($sqlMatriz);
+    $stmtMatriz->execute([':acId' => $acId]);
+    $matrizRiesgos = $stmtMatriz->fetchAll();
+
 } catch (PDOException $e) {
     error_log("Error BD en export_word_native: " . $e->getMessage());
     http_response_code(500);
     die("Error de conexión o consulta en la base de datos.");
 }
 
-// 3. Cabeceras HTTP para forzar a Word a abrir e interpretar el archivo
+// 3. Cabeceras HTTP para exportación a MS Word
 $fileName = "Reporte_Auditoria_AC_{$acId}.doc";
 
 header("Content-Type: application/vnd.ms-word; charset=utf-8");
@@ -98,7 +112,7 @@ header("Expires: 0");
 header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 header("Pragma: public");
 
-// 4. Plantilla HTML/CSS que Microsoft Word renderizará con diseño profesional
+// 4. Plantilla HTML/CSS para Microsoft Word
 ?>
 <html xmlns:o="urn:schemas-microsoft-com:office:office" 
       xmlns:w="urn:schemas-microsoft-com:office:word" 
@@ -190,6 +204,11 @@ header("Pragma: public");
         .text-center {
             text-align: center;
         }
+        .no-data {
+            font-style: italic;
+            color: #64748B;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -219,7 +238,7 @@ header("Pragma: public");
         </table>
     </div>
 
-    <!-- Seccion 1: Cuestionario General -->
+    <!-- Sección 1: Cuestionario General -->
     <h2>1. Cuestionario General</h2>
     <table class="report-table">
         <thead>
@@ -246,7 +265,7 @@ header("Pragma: public");
 
     <br>
 
-    <!-- Seccion 2: Pregunta 28 -->
+    <!-- Sección 2: Pregunta 28 -->
     <h2>2. Desglose Analítico - Pregunta 28 (Pruebas de Riesgo)</h2>
     <table class="report-table">
         <thead>
@@ -268,6 +287,39 @@ header("Pragma: public");
             <?php endforeach; ?>
         </tbody>
     </table>
+
+    <br>
+
+    <!-- Sección 3: Matriz de Riesgos Identificados -->
+    <h2>3. Matriz de Riesgos Identificados</h2>
+    <?php if (!empty($matrizRiesgos)): ?>
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th style="width: 12%;">ID Riesgo</th>
+                    <th style="width: 20%;">Categoría</th>
+                    <th style="width: 33%;">Descripción del Riesgo</th>
+                    <th style="width: 23%;">Causa Raíz</th>
+                    <th style="width: 12%;">Nivel</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($matrizRiesgos as $m): ?>
+                    <tr>
+                        <td class="text-center"><strong><?= htmlspecialchars((string)$m['idRiesgo']) ?></strong></td>
+                        <td><?= htmlspecialchars((string)$m['categoria']) ?></td>
+                        <td><?= htmlspecialchars((string)$m['descripcion']) ?></td>
+                        <td><?= htmlspecialchars((string)$m['causaRaiz']) ?></td>
+                        <td class="text-center">
+                            <span class="badge"><?= htmlspecialchars(strtoupper((string)$m['nivelRiesgo'])) ?></span>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php else: ?>
+        <p class="no-data">No se registraron riesgos en la matriz para esta evaluación.</p>
+    <?php endif; ?>
 
 </body>
 </html>
