@@ -144,6 +144,61 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
             </div>
         </div>
     </div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <!-- 1. Título (Alineado a la izquierda) -->
+    <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 3 Ejecución 
+    </h1>
+
+    <!-- 2. Grupo de Botones (Agrupados y Alineados a la derecha) -->
+    <div style="display: flex; align-items: center; gap: 0.35rem; margin-left: auto;">
+        <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+            <i class="ri-arrow-go-back-line"></i> 
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+            <i class="ri-screenshot-2-line"></i>
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
+            <i class="ri-book-open-line"></i> 
+        </a>
+
+        <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
+            <i class="ri-add-line"></i>
+        </a>
+
+        <a href="../project/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+            <i class="ri-close-circle-line"></i> 
+        </a>
+
+        <!-- 1. Icono de Edición / Notas -->
+        <a href="#" class="btn btn-primary" data-tooltip="Reporte de avance" onclick="return false;">
+            <i class="ri-file-edit-line"></i> 
+        </a>
+
+        <!-- 2. Icono de Bandera / Hitos -->
+        <a href="#" class="btn btn-primary" data-tooltip="Reporte de debilidades" onclick="return false;">
+            <i class="ri-flag-line"></i>
+        </a>
+
+        <!-- 3. Icono de Tiempo / Historial -->
+        <a href="#" class="btn btn-primary" data-tooltip="Reporte de Horas" onclick="return false;">
+            <i class="ri-time-line"></i> 
+        </a>
+
+        <!-- 4. Icono Financiero / Moneda -->
+        <a href="#" class="btn btn-primary" data-tooltip="Reporte de asientos" onclick="return false;">
+            <i class="ri-money-dollar-circle-line"></i>
+        </a>
+
+        <!-- 5. Icono de Cuadrícula / Panel de Control -->
+        <a href="#" class="btn btn-primary" data-tooltip="Reporte general">
+            <i class="ri-layout-grid-line"></i> 
+        </a>
+    </div>
+</div>
+
     <div class="table-actions-container" style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-bottom: 1rem;">
         <!-- Botón 1: Definir Frecuencia / Periodicidad -->
         <a href="configurar-frecuencia3.php?proyectoId=<?= $proyectoId ?>" class="btn btn-secondary" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
@@ -170,59 +225,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
     </div>
 </div>
 
-        <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
-            <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 3 Ejecución 
-        </h1>
-        
 
-    <div class="table-actions-container">
-        <!-- Botón para ir al Selector de Pruebas de la Etapa 3 ss-->
-   
-        <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
-            <i class="ri-arrow-go-back-line"></i> 
-        </a>
-
-        <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
-            <i class="ri-screenshot-2-line"></i>
-        </a>
-
-        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
-            <i class="ri-book-open-line"></i> 
-        </a>
-
-        <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
-            <i class="ri-add-line"></i>
-        </a>
-
-        <a href="../project/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
-            <i class="ri-close-circle-line"></i> 
-        </a>
-
-    <!-- 1. Icono de Edición / Notas -->
-    <a href="#" class="btn btn-primary" data-tooltip="Reporte de avance" onclick="return false;">
-        <i class="ri-file-edit-line"></i> 
-    </a>
-
-    <!-- 2. Icono de Bandera / Hitos -->
-    <a href="#" class="btn btn-primary" data-tooltip="Reporte de debilidades" onclick="return false;">
-        <i class="ri-flag-line"></i>
-    </a>
-
-    <!-- 3. Icono de Tiempo / Historial -->
-    <a href="#" class="btn btn-primary" data-tooltip="Reporte de Horas" onclick="return false;">
-        <i class="ri-time-line"></i> 
-    </a>
-
-    <!-- 4. Icono Financiero / Moneda -->
-    <a href="#" class="btn btn-primary" data-tooltip="Reporte de asientos" onclick="return false;">
-        <i class="ri-money-dollar-circle-line"></i>
-    </a>
-
-    <!-- 5. Icono de Cuadrícula / Panel de Control (Activo) -->
-    <a href="#" class="btn btn-primary" data-tooltip="Reporte general">
-        <i class="ri-layout-grid-line"></i> 
-    </a>
-</div>
 
     <!-- Bloque de Progreso General de Pruebas (Numerado Dinámico) -->
 <!-- Bloque de Progreso General de Pruebas (Numerado Consecutivo Global 1-19) -->

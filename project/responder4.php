@@ -36,16 +36,16 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 <!-- Barra de Navegación Rápida por Etapas del Proyecto -->
 <div class="project-stages-bar">
     <a href="responder.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
-        <i class="ri-calendar-check-line"></i> Planificación
+        <i class="ri-calendar-check-line"></i>1. Planificación
     </a>
     <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
-        <i class="ri-compass-3-line"></i> Estrategia
+        <i class="ri-compass-3-line"></i>2. Estrategia
     </a>
     <a href="responder3.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
-        <i class="ri-play-circle-line"></i> Ejecución
+        <i class="ri-play-circle-line"></i>3. Ejecución
     </a>
     <a href="responder4.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn active">
-        <i class="ri-flag-line"></i> Conclusión
+        <i class="ri-flag-line"></i>4. Conclusión
     </a>
 </div>
 
@@ -102,35 +102,6 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 }
 </style>
 
-
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
-            <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 4 Conclusión 
-        </h1>
-        
-    </div>
-    <div class="table-actions-container">
-        <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
-            <i class="ri-arrow-go-back-line"></i> 
-        </a>
-
-        <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
-            <i class="ri-screenshot-2-line"></i>
-        </a>
-
-        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
-            <i class="ri-book-open-line"></i> 
-        </a>
-
-        <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
-            <i class="ri-add-line"></i>
-        </a>
-
-        <a href="../project/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
-            <i class="ri-close-circle-line"></i> 
-        </a>
-    </div>
-
     <?php if (isset($_GET['success'])): ?>
         <div class="alert-success" style="padding:1rem; background:#d1fae5; color:#065f46; border-radius:8px; margin-bottom:1.5rem;">
             <i class="ri-checkbox-circle-fill"></i> Parámetros e indicadores de prueba sincronizados correctamente.
@@ -172,33 +143,60 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
             </div>
         </div>
     </div>
-    <div class="table-actions-container">
-    <!-- 1. Icono de Edición / Notas -->
-    <a href="#" class="btn btn-primary" data-tooltip="Reporte de avance" onclick="return false;">
-        <i class="ri-file-edit-line"></i> 
-    </a>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <!-- 1. Título (Alineado a la izquierda) -->
+    <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 4 Conclusión 
+    </h1>
 
-    <!-- 2. Icono de Bandera / Hitos -->
-    <a href="#" class="btn btn-primary" data-tooltip="Reporte de debilidades" onclick="return false;">
-        <i class="ri-flag-line"></i>
-    </a>
+    <!-- 2. Grupo de Botones (Agrupados y Alineados a la derecha) -->
+    <div style="display: flex; align-items: center; gap: 0.35rem; margin-left: auto;">
+        <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+            <i class="ri-arrow-go-back-line"></i> 
+        </a>
 
-    <!-- 3. Icono de Tiempo / Historial -->
-    <a href="#" class="btn btn-primary" data-tooltip="Reporte de Horas" onclick="return false;">
-        <i class="ri-time-line"></i> 
-    </a>
+        <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+            <i class="ri-screenshot-2-line"></i>
+        </a>
 
-    <!-- 4. Icono Financiero / Moneda -->
-    <a href="#" class="btn btn-primary" data-tooltip="Reporte de asientos" onclick="return false;">
-        <i class="ri-money-dollar-circle-line"></i>
-    </a>
+        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
+            <i class="ri-book-open-line"></i> 
+        </a>
 
-    <!-- 5. Icono de Cuadrícula / Panel de Control (Activo) -->
-    <a href="#" class="btn btn-primary" data-tooltip="Reporte general">
-        <i class="ri-layout-grid-line"></i> 
-    </a>
+        <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
+            <i class="ri-add-line"></i>
+        </a>
+
+        <a href="../project/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+            <i class="ri-close-circle-line"></i> 
+        </a>
+
+        <!-- 1. Icono de Edición / Notas -->
+        <a href="#" class="btn btn-primary" data-tooltip="Reporte de avance" onclick="return false;">
+            <i class="ri-file-edit-line"></i> 
+        </a>
+
+        <!-- 2. Icono de Bandera / Hitos -->
+        <a href="#" class="btn btn-primary" data-tooltip="Reporte de debilidades" onclick="return false;">
+            <i class="ri-flag-line"></i>
+        </a>
+
+        <!-- 3. Icono de Tiempo / Historial -->
+        <a href="#" class="btn btn-primary" data-tooltip="Reporte de Horas" onclick="return false;">
+            <i class="ri-time-line"></i> 
+        </a>
+
+        <!-- 4. Icono Financiero / Moneda -->
+        <a href="#" class="btn btn-primary" data-tooltip="Reporte de asientos" onclick="return false;">
+            <i class="ri-money-dollar-circle-line"></i>
+        </a>
+
+        <!-- 5. Icono de Cuadrícula / Panel de Control -->
+        <a href="#" class="btn btn-primary" data-tooltip="Reporte general">
+            <i class="ri-layout-grid-line"></i> 
+        </a>
+    </div>
 </div>
-
     <!-- Bloque de Progreso General de Pruebas (Numerado Dinámico) -->
 <!-- Bloque de Progreso General de Pruebas (Numerado Consecutivo Global 1-19) -->
 <div class="pruebas-progress-container" style="margin-bottom: 2rem; background: #ffffff; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
