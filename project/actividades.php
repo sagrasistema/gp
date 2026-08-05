@@ -276,7 +276,7 @@ include 'conect-actividades.php';
                 </div>
             </div>
         </div>
-        PHP
+        
         <!-- SECCIÓN DE DOCUMENTOS ADJUNTOS POR ACTIVIDAD (Abajo de Indicadores y Observaciones, Antes del área de Guardar) -->
         <div style="margin: 2.5rem 0 1.5rem 0; background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
             <h3 style="font-size: 1.1rem; color: #1e293b; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
