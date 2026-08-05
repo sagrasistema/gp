@@ -302,71 +302,75 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                 </div>
             </div>
         <?php endforeach; ?>
-
-        <!-- PRUEBA ESPECIAL: MATRIZ DE RIESGO AL FINAL DE LAS 30 PRUEBAS -->
-        <div class="accordion-item" style="margin-top: 1.5rem; border: 1px solid #cbd5e1;">
-            <div class="accordion-header" style="background: #1e293b; color: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.25rem;">
-                <span style="font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="ri-shield-flash-line" style="color: #38bdf8;"></i> Matriz de Riesgo
-                </span>
-                <button type="button" onclick="abrirModalRiesgoAC()" style="background: #0284c7; color: #ffffff; border: none; padding: 0.45rem 0.9rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
-                    <i class="ri-add-line"></i> Agregar Riesgo
-                </button>
-            </div>
-            <div style="padding: 1.25rem; background: #ffffff; overflow-x: auto;">
-                <table class="subtest-table" style="width: 100%; border-collapse: collapse; background: #1e293b; color: #ffffff" id="tablaMatrizAC">
-                    <thead>
-                        <tr style="background: background: #1e293b">
-                            <th style="width: 12%; border: 1px solid #e2e8f0; padding: 0.6rem;  color: #ffffff;background: #1e293b">ID Riesgo</th>
-                            <th style="width: 20%; border: 1px solid #e2e8f0; padding: 0.6rem; color: #ffffff; background: #1e293b">Categoría de Riesgo</th>
-                            <th style="width: 32%; border: 1px solid #e2e8f0; padding: 0.6rem; color: #ffffff; background: #1e293b">Descripción del Riesgo Identificado</th>
-                            <th style="width: 22%; border: 1px solid #e2e8f0; padding: 0.6rem; color: #ffffff; background: #1e293b">Factor / Causa Raíz (Según AC)</th>
-                            <th style="width: 14%; border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center; color: #ffffff; background: #1e293b">Nivel de Riesgo Inherente</th>
-                            <th style="width: 5%; border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center; color: #ffffff; background: #1e293b">Acción</th>
+<!-- PRUEBA ESPECIAL: MATRIZ DE RIESGO AL FINAL DE LAS 30 PRUEBAS -->
+<div class="accordion-item" style="margin-top: 1.5rem; border: 1px solid #cbd5e1;">
+    <div class="accordion-header" style="background: #1e293b; color: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.25rem;">
+        <span style="font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="ri-shield-flash-line" style="color: #38bdf8;"></i> Matriz de Riesgo 
+        </span>
+        <button type="button" onclick="abrirModalRiesgoAC()" style="background: #0284c7; color: #ffffff; border: none; padding: 0.45rem 0.9rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+            <i class="ri-add-line"></i> Agregar Riesgo
+        </button>
+    </div>
+    <div style="padding: 1.25rem; background: #ffffff; overflow-x: auto;">
+        <table class="subtest-table" style="width: 100%; border-collapse: collapse;" id="tablaMatrizAC">
+            <thead>
+                <tr style="background: #f8fafc;">
+                    <th style="width: 12%; border: 1px solid #e2e8f0; padding: 0.6rem;background: #1e293b; color: #ffffff">ID Riesgo</th>
+                    <th style="width: 20%; border: 1px solid #e2e8f0; padding: 0.6rem;background: #1e293b; color: #ffffff">Categoría de Riesgo</th>
+                    <th style="width: 30%; border: 1px solid #e2e8f0; padding: 0.6rem;background: #1e293b; color: #ffffff">Descripción del Riesgo Identificado</th>
+                    <th style="width: 20%; border: 1px solid #e2e8f0; padding: 0.6rem;background: #1e293b; color: #ffffff">Factor / Causa Raíz (Según AC)</th>
+                    <th style="width: 12%; border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center;background: #1e293b; color: #ffffff">Nivel de Riesgo Inherente</th>
+                    <th style="width: 6%; border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center;background: #1e293b; color: #ffffff">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyMatrizAC">
+                <?php if (empty($matrizRiesgosSaved)): ?>
+                    <tr id="rowEmptyMatrizAC">
+                        <td colspan="6" style="text-align: center; color: #94a3b8; padding: 1.5rem; border: 1px solid #e2e8f0;">
+                            No se han agregado registros a la matriz de riesgo. Haz clic en <strong>Agregar Riesgo</strong>.
+                        </td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($matrizRiesgosSaved as $mr): ?>
+                        <tr>
+                            <td style="border: 1px solid #e2e8f0; padding: 0.6rem; font-weight: 700;">
+                                <?= htmlspecialchars($mr->idRiesgo, ENT_QUOTES, 'UTF-8') ?>
+                                <input type="hidden" name="matriz_id[]" value="<?= htmlspecialchars($mr->idRiesgo, ENT_QUOTES, 'UTF-8') ?>">
+                            </td>
+                            <td style="border: 1px solid #e2e8f0; padding: 0.6rem;">
+                                <?= htmlspecialchars($mr->categoria, ENT_QUOTES, 'UTF-8') ?>
+                                <input type="hidden" name="matriz_categoria[]" value="<?= htmlspecialchars($mr->categoria, ENT_QUOTES, 'UTF-8') ?>">
+                            </td>
+                            <td style="border: 1px solid #e2e8f0; padding: 0.6rem;">
+                                <?= htmlspecialchars($mr->descripcion, ENT_QUOTES, 'UTF-8') ?>
+                                <input type="hidden" name="matriz_descripcion[]" value="<?= htmlspecialchars($mr->descripcion, ENT_QUOTES, 'UTF-8') ?>">
+                            </td>
+                            <td style="border: 1px solid #e2e8f0; padding: 0.6rem;">
+                                <?= htmlspecialchars($mr->causaRaiz, ENT_QUOTES, 'UTF-8') ?>
+                                <input type="hidden" name="matriz_causa[]" value="<?= htmlspecialchars($mr->causaRaiz, ENT_QUOTES, 'UTF-8') ?>">
+                            </td>
+                            <td style="border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center;">
+                                <strong><?= htmlspecialchars($mr->nivelRiesgo, ENT_QUOTES, 'UTF-8') ?></strong>
+                                <input type="hidden" name="matriz_nivel[]" value="<?= htmlspecialchars($mr->nivelRiesgo, ENT_QUOTES, 'UTF-8') ?>">
+                            </td>
+                            <td style="border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center; white-space: nowrap;">
+                                <!-- Botón Editar -->
+                                <button type="button" onclick="editarRiesgoAC(this)" style="background: transparent; border: none; color: #0284c7; cursor: pointer; margin-right: 0.3rem;" title="Editar">
+                                    <i class="ri-edit-line" style="font-size: 1.1rem;"></i>
+                                </button>
+                                <!-- Botón Eliminar -->
+                                <button type="button" onclick="eliminarRiesgoAC(this)" style="background: transparent; border: none; color: #ef4444; cursor: pointer;" title="Eliminar">
+                                    <i class="ri-delete-bin-line" style="font-size: 1.1rem;"></i>
+                                </button>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody id="tbodyMatrizAC">
-                        <?php if (empty($matrizRiesgosSaved)): ?>
-                            <tr id="rowEmptyMatrizAC" style="background: #ffffff;color: #1e293b">
-                                <td colspan="6" style="text-align: center; color: #94a3b8; padding: 1.5rem; border: 1px solid #e2e8f0;">
-                                    No se han agregado registros a la matriz de riesgo. Haz clic en <strong>Agregar Riesgo</strong>.
-                                </td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($matrizRiesgosSaved as $mr): ?>
-                                <tr style="background: #ffffff;color: #1e293b">
-                                    <td style="border: 1px solid #e2e8f0; padding: 0.6rem; font-weight: 700;">
-                                        <?= htmlspecialchars($mr->idRiesgo, ENT_QUOTES, 'UTF-8') ?>
-                                        <input type="hidden" name="matriz_id[]" value="<?= htmlspecialchars($mr->idRiesgo, ENT_QUOTES, 'UTF-8') ?>">
-                                    </td>
-                                    <td style="border: 1px solid #e2e8f0; padding: 0.6rem;">
-                                        <?= htmlspecialchars($mr->categoria, ENT_QUOTES, 'UTF-8') ?>
-                                        <input type="hidden" name="matriz_categoria[]" value="<?= htmlspecialchars($mr->categoria, ENT_QUOTES, 'UTF-8') ?>">
-                                    </td>
-                                    <td style="border: 1px solid #e2e8f0; padding: 0.6rem;">
-                                        <?= htmlspecialchars($mr->descripcion, ENT_QUOTES, 'UTF-8') ?>
-                                        <input type="hidden" name="matriz_descripcion[]" value="<?= htmlspecialchars($mr->descripcion, ENT_QUOTES, 'UTF-8') ?>">
-                                    </td>
-                                    <td style="border: 1px solid #e2e8f0; padding: 0.6rem;">
-                                        <?= htmlspecialchars($mr->causaRaiz, ENT_QUOTES, 'UTF-8') ?>
-                                        <input type="hidden" name="matriz_causa[]" value="<?= htmlspecialchars($mr->causaRaiz, ENT_QUOTES, 'UTF-8') ?>">
-                                    </td>
-                                    <td style="border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center;">
-                                        <strong><?= htmlspecialchars($mr->nivelRiesgo, ENT_QUOTES, 'UTF-8') ?></strong>
-                                        <input type="hidden" name="matriz_nivel[]" value="<?= htmlspecialchars($mr->nivelRiesgo, ENT_QUOTES, 'UTF-8') ?>">
-                                    </td>
-                                    <td style="border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center;">
-                                        <button type="button" onclick="eliminarRiesgoAC(this)" style="background: transparent; border: none; color: #ef4444; cursor: pointer;">
-                                            <i class="ri-delete-bin-line" style="font-size: 1.1rem;"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
 
         <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end; margin-bottom: 4rem;">
             <a href="index.php" class="btn btn-secondary">Regresar al panel</a>
@@ -376,12 +380,11 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
         </div>
     </form>
 </div>
-
-<!-- MODAL PARA REGISTRAR MATRIZ DE RIESGO -->
+<!-- MODAL PARA REGISTRAR / EDITAR MATRIZ DE RIESGO -->
 <div id="modalRiesgoAC" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 10000; align-items: center; justify-content: center;">
     <div style="background: #ffffff; width: 100%; max-width: 580px; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
         <div style="background: #0f172a; color: #ffffff; padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="margin: 0; font-size: 1rem; font-weight: 700;">Agregar Riesgo a la Matriz (AC)</h3>
+            <h3 id="modalRiesgoTituloAC" style="margin: 0; font-size: 1rem; font-weight: 700;">Agregar Riesgo a la Matriz (AC)</h3>
             <button type="button" onclick="cerrarModalRiesgoAC()" style="background: transparent; border: none; color: #ffffff; font-size: 1.25rem; cursor: pointer;">&times;</button>
         </div>
         <div style="padding: 1.25rem; display: flex; flex-direction: column; gap: 0.85rem;">
@@ -414,18 +417,50 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
         </div>
         <div style="padding: 1rem 1.25rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 0.5rem;">
             <button type="button" onclick="cerrarModalRiesgoAC()" class="btn btn-secondary" style="padding: 0.4rem 1rem;">Cancelar</button>
-            <button type="button" onclick="agregarRiesgoAC()" class="btn btn-primary" style="padding: 0.4rem 1rem;">Agregar a la Tabla</button>
+            <button type="button" id="btnGuardarModalRiesgoAC" onclick="guardarRiesgoAC()" class="btn btn-primary" style="padding: 0.4rem 1rem;">Agregar a la Tabla</button>
         </div>
     </div>
 </div>
-
 <script>
-function abrirModalRiesgoAC() {
-    document.getElementById('modalRiesgoAC').style.display = 'flex';
+// Variable global para rastrear la fila que se está editando
+let rowEditingAC = null;
+
+function abrirModalRiesgoAC(btnEdit = null) {
+    const modal = document.getElementById('modalRiesgoAC');
+    const titulo = document.getElementById('modalRiesgoTituloAC');
+    const btnGuardar = document.getElementById('btnGuardarModalRiesgoAC');
+
+    if (btnEdit) {
+        // MODO EDICIÓN: Obtener la fila relativa al botón
+        rowEditingAC = btnEdit.closest('tr');
+        titulo.textContent = 'Editar Riesgo de la Matriz (AC)';
+        btnGuardar.textContent = 'Guardar Cambios';
+
+        // Extraer los valores guardados en los inputs ocultos de la fila
+        const inputs = rowEditingAC.querySelectorAll('input[type="hidden"]');
+        document.getElementById('ac_m_id').value = inputs[0] ? inputs[0].value : '';
+        document.getElementById('ac_m_categoria').value = inputs[1] ? inputs[1].value : '';
+        document.getElementById('ac_m_descripcion').value = inputs[2] ? inputs[2].value : '';
+        document.getElementById('ac_m_causa').value = inputs[3] ? inputs[3].value : '';
+        document.getElementById('ac_m_nivel').value = inputs[4] ? inputs[4].value : 'Bajo';
+    } else {
+        // MODO CREACIÓN
+        rowEditingAC = null;
+        titulo.textContent = 'Agregar Riesgo a la Matriz (AC)';
+        btnGuardar.textContent = 'Agregar a la Tabla';
+        limpiarFormularioModalRiesgo();
+    }
+
+    modal.style.display = 'flex';
 }
 
 function cerrarModalRiesgoAC() {
     document.getElementById('modalRiesgoAC').style.display = 'none';
+    limpiarFormularioModalRiesgo();
+    rowEditingAC = null;
+}
+
+function limpiarFormularioModalRiesgo() {
     document.getElementById('ac_m_id').value = '';
     document.getElementById('ac_m_categoria').value = '';
     document.getElementById('ac_m_descripcion').value = '';
@@ -433,11 +468,20 @@ function cerrarModalRiesgoAC() {
     document.getElementById('ac_m_nivel').value = 'Bajo';
 }
 
-function escapeAC(str) {
-    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+function editarRiesgoAC(btn) {
+    abrirModalRiesgoAC(btn);
 }
 
-function agregarRiesgoAC() {
+function escapeAC(str) {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function guardarRiesgoAC() {
     const id = document.getElementById('ac_m_id').value.trim();
     const cat = document.getElementById('ac_m_categoria').value.trim();
     const desc = document.getElementById('ac_m_descripcion').value.trim();
@@ -449,14 +493,8 @@ function agregarRiesgoAC() {
         return;
     }
 
-    const emptyRow = document.getElementById('rowEmptyMatrizAC');
-    if (emptyRow) {
-        emptyRow.remove();
-    }
-
-    const tbody = document.getElementById('tbodyMatrizAC');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
+    // Estructura interna HTML de la fila con los dos botones de acción
+    const rowContent = `
         <td style="border: 1px solid #e2e8f0; padding: 0.6rem; font-weight: 700;">
             ${escapeAC(id)}
             <input type="hidden" name="matriz_id[]" value="${escapeAC(id)}">
@@ -477,14 +515,32 @@ function agregarRiesgoAC() {
             <strong>${escapeAC(nivel)}</strong>
             <input type="hidden" name="matriz_nivel[]" value="${escapeAC(nivel)}">
         </td>
-        <td style="border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center;">
-            <button type="button" onclick="eliminarRiesgoAC(this)" style="background: transparent; border: none; color: #ef4444; cursor: pointer;">
+        <td style="border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center; white-space: nowrap;">
+            <button type="button" onclick="editarRiesgoAC(this)" style="background: transparent; border: none; color: #0284c7; cursor: pointer; margin-right: 0.3rem;" title="Editar">
+                <i class="ri-edit-line" style="font-size: 1.1rem;"></i>
+            </button>
+            <button type="button" onclick="eliminarRiesgoAC(this)" style="background: transparent; border: none; color: #ef4444; cursor: pointer;" title="Eliminar">
                 <i class="ri-delete-bin-line" style="font-size: 1.1rem;"></i>
             </button>
         </td>
     `;
 
-    tbody.appendChild(tr);
+    if (rowEditingAC) {
+        // Actualizar fila existente
+        rowEditingAC.innerHTML = rowContent;
+    } else {
+        // Crear nueva fila
+        const emptyRow = document.getElementById('rowEmptyMatrizAC');
+        if (emptyRow) {
+            emptyRow.remove();
+        }
+
+        const tbody = document.getElementById('tbodyMatrizAC');
+        const tr = document.createElement('tr');
+        tr.innerHTML = rowContent;
+        tbody.appendChild(tr);
+    }
+
     cerrarModalRiesgoAC();
 }
 
