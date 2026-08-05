@@ -36,16 +36,16 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 <!-- Barra de Navegación Rápida por Etapas del Proyecto -->
 <div class="project-stages-bar">
     <a href="responder.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
-        <i class="ri-calendar-check-line"></i> Planificación
+        <i class="ri-calendar-check-line"></i> 1. Planificación
     </a>
     <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
-        <i class="ri-compass-3-line"></i> Estrategia
+        <i class="ri-compass-3-line"></i> 2. Estrategia
     </a>
     <a href="responder3.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn active">
-        <i class="ri-play-circle-line"></i> Ejecución
+        <i class="ri-play-circle-line"></i> 3. Ejecución
     </a>
     <a href="responder4.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
-        <i class="ri-flag-line"></i> Conclusión
+        <i class="ri-flag-line"></i>4. Conclusión
     </a>
 </div>
 
@@ -103,12 +103,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 </style>
 
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
-            <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 3 Ejecución 
-        </h1>
-        
-    </div>
+    
     <div class="table-actions-container">
         <!-- Botón para ir al Selector de Pruebas de la Etapa 3 ss-->
    
@@ -199,6 +194,12 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
         <?php endfor; ?>
     </div>
 </div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
+            <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 3 Ejecución 
+        </h1>
+        
+    </div>
     <div class="table-actions-container">
     <!-- 1. Icono de Edición / Notas -->
     <a href="#" class="btn btn-primary" data-tooltip="Reporte de avance" onclick="return false;">
