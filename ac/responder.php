@@ -228,6 +228,17 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                                                data-qnum="<?= $q->questionNumber ?>" 
                                                <?= $savedRes === 'No' ? 'checked' : '' ?>> No
                                     </label>
+                                    <!-- Renderizado exclusivo del campo N/A para la Pregunta 13 -->
+                                    <?php if ((int)$q->questionNumber === 13): ?>
+                                        <label class="radio-label">
+                                            <input type="radio" 
+                                                name="answers[<?= (int)$q->questionId ?>][response]" 
+                                                value="N/A" 
+                                                class="q-radio" 
+                                                data-qnum="<?= (int)$q->questionNumber ?>" 
+                                                <?= $savedRes === 'N/A' ? 'checked' : '' ?>> N/A
+                                        </label>
+                                    <?php endif; ?>
                                 </div>
                                 
                                 <div>
