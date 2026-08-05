@@ -208,17 +208,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
     </div>
 </div>
 
-    <div class="table-actions-container" style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-bottom: 1rem;">
-        <!-- Botón 1: Definir Frecuencia / Periodicidad -->
-        <a href="configurar-frecuencia3.php?proyectoId=<?= $proyectoId ?>" class="btn btn-secondary" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
-            <i class="ri-calendar-event-line"></i> Frecuencias (<?= $totalFrecuencias ?>)
-        </a>
 
-        <!-- Botón 2: Seleccionar Pruebas de la Frecuencia Activa -->
-        <a href="seleccionar-pruebas3.php?proyectoId=<?= $proyectoId ?>&frecuencia=<?= $frecuenciaNum ?>" class="btn btn-primary" style="background: #2563eb; color: #ffffff;">
-            <i class="ri-checkbox-multiple-line"></i> Seleccionar Pruebas
-        </a>
-    </div>
     <!-- SISTEMA DE PESTAÑAS (TABS) DE FRECUENCIAS -->
 <div style="background: #ffffff; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
     <span style="font-size: 0.85rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 0.5rem; text-transform: uppercase;">
