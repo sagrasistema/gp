@@ -1,9 +1,20 @@
 <?php 
 // v/ac/index.php
+// ac/index.php
+
+// 1. Iniciar sesión obligatoriamente antes de procesar lógica o incluir layouts
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. Validar autenticación de usuario
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../login.php');
+    exit;
+}
 $pageTitle = "Aceptación y Continuidad";
 include '../main/h.php'; // Tu cabecera PHP normal de base de datos / sesiones
 include '../main/config.php'; 
-include '../main/user.php'; 
 //include '../main/user.php'; // Tu cabecera PHP normal de base de datos / sesiones
 ?>
 
