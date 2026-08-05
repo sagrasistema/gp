@@ -52,11 +52,17 @@ include '../main/layout_header.php';
         <table class="custom-table">
             <thead>
                 <tr>
-                    <th style="width: 10%;">ID AC</th>
+                    <!--<th style="width: 10%;">ID AC</th>-->
+                    
                     <th style="width: 40%;">Cliente / Empresa</th>
-                    <th style="width: 25%;">Tipo de Evaluación</th>
-                    <th style="width: 15%;">Fecha Creación</th>
+                    <th style="width: 15%;">Tipo de Evaluación</th>
+                    <th style="width: 10%;">Fecha Creación</th>
+                    
+                    <th style="width: 15%;"> Nivel de Riesgo</th>
+                    
                     <th style="width: 10%; text-align: center;">Acciones</th>
+                    
+                    <th style="width: 10%;">Cerrar Ac</th>
                 </tr>
             </thead>
             <tbody>
@@ -77,15 +83,17 @@ include '../main/layout_header.php';
                             $fecha      = date('d/m/Y', strtotime($ac->created_at));
 
                             echo "<tr>";
-                            echo "<td style='font-weight: 600; color: #64748b;'>#{$ac->acId}</td>";
+                            
                             echo "<td><strong>{$clientName}</strong></td>";
                             echo "<td>{$typeName}</td>";
                             echo "<td>{$fecha}</td>";
+                            echo "<td style='font-weight: 600; color: #64748b;'>{$ac->riskScore} {$ac->riskLevel} </td>";
                             echo "<td style='text-align: center;'>
                                     <a href='responder.php?acId={$ac->acId}' class='btn btn-secondary' style='padding: 0.4rem 0.8rem; font-size: 0.85rem;'>
                                         <i class='ri-file-list-3-line'></i> Responder
                                     </a>
                                   </td>";
+                            echo "<td style='font-weight: 600; color: #64748b;'> </td>";
                             echo "</tr>";
                         }
                     } else {
