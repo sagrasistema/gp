@@ -189,8 +189,15 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
         <?php
         $categories = $pdo->query("SELECT * FROM ac_categories ORDER BY orderNum ASC")->fetchAll(PDO::FETCH_OBJ);
         $qNumberToIdMap = [];
-
+        // Inicializamos la letra de inicio para la secuencia alfabética
+        $categoryLetter = 'A';
         foreach ($categories as $cat):
+            $catId   = (int)$cat->categoryId;
+            $catName = htmlspecialchars((string)$cat->categoryName, ENT_QUOTES, 'UTF-8');
+            
+            // Generamos el prefijo alfabético (Ej: "A.", "B.", etc.)
+            $currentPrefix = $categoryLetter . '.';
+
             $stmtQ = $pdo->prepare("SELECT * FROM ac_questions WHERE categoryId = :catId ORDER BY questionNumber ASC");
             $stmtQ->execute([':catId' => $cat->categoryId]);
             $questions = $stmtQ->fetchAll(PDO::FETCH_OBJ);
@@ -311,7 +318,10 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                     <?php endforeach; ?>
                 </div>
             </div>
-        <?php endforeach; ?>
+        <?php    
+        // Incremento automático de PHP: 'A' -> 'B' -> 'C' ... 'Z' -> 'AA'
+        $categoryLetter++; 
+        endforeach; ?>
 <!-- PRUEBA ESPECIAL: MATRIZ DE RIESGO AL FINAL DE LAS 30 PRUEBAS -->
 <div class="accordion-item" style="margin-top: 1.5rem; border: 1px solid #cbd5e1;">
     <div class="accordion-header" style="background: #1e293b; color: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.25rem;">
