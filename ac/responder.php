@@ -189,8 +189,8 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
             $stmtQ->execute([':catId' => $cat->categoryId]);
             $questions = $stmtQ->fetchAll(PDO::FETCH_OBJ);
         ?>
-            <div class="accordion-item" style="color: #ffffff;background: #1e293b">
-                <div class="accordion-header" onclick="toggleAccordion(this)">
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)"  style="color: #ffffff;background: #1e293b">
                     <span><?= htmlspecialchars($cat->categoryName, ENT_QUOTES, 'UTF-8') ?></span>
                     <i class="ri-arrow-down-s-line"></i>
                 </div>
