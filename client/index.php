@@ -20,7 +20,7 @@ include 'header.php'; // Tu archivo de conexión / inicialización local de la c
 $customLogoPath = '../main/logo.png'; // Ruta para llegar al logo original del sistema
 $customHomePath = '../index.php';     // Ruta para volver al HUB principal
 $customAcPath   = '../ac/index.php';  // Ruta para ir al módulo AC
-$currentTab     = 'inicio';           // Podemos dejar 'inicio' o definir una pestaña para clientes si la creas luego
+$currentTab     = 'clientes';           // Podemos dejar 'inicio' o definir una pestaña para clientes si la creas luego
 
 include '../main/layout_header.php'; 
 ?>
