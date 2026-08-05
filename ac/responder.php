@@ -316,13 +316,13 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
             <div style="padding: 1.25rem; background: #ffffff; overflow-x: auto;">
                 <table class="subtest-table" style="width: 100%; border-collapse: collapse; background: #1e293b; color: #ffffff" id="tablaMatrizAC">
                     <thead>
-                        <tr style="background: #f8fafc;">
-                            <th style="width: 12%; border: 1px solid #e2e8f0; padding: 0.6rem;">ID Riesgo</th>
-                            <th style="width: 20%; border: 1px solid #e2e8f0; padding: 0.6rem;">Categoría de Riesgo</th>
-                            <th style="width: 32%; border: 1px solid #e2e8f0; padding: 0.6rem;">Descripción del Riesgo Identificado</th>
-                            <th style="width: 22%; border: 1px solid #e2e8f0; padding: 0.6rem;">Factor / Causa Raíz (Según AC)</th>
-                            <th style="width: 14%; border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center;">Nivel de Riesgo Inherente</th>
-                            <th style="width: 5%; border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center;">Acción</th>
+                        <tr style="background: background: #1e293b">
+                            <th style="width: 12%; border: 1px solid #e2e8f0; padding: 0.6rem;  color: #ffffff">ID Riesgo</th>
+                            <th style="width: 20%; border: 1px solid #e2e8f0; padding: 0.6rem; color: #ffffff">Categoría de Riesgo</th>
+                            <th style="width: 32%; border: 1px solid #e2e8f0; padding: 0.6rem; color: #ffffff">Descripción del Riesgo Identificado</th>
+                            <th style="width: 22%; border: 1px solid #e2e8f0; padding: 0.6rem; color: #ffffff">Factor / Causa Raíz (Según AC)</th>
+                            <th style="width: 14%; border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center; color: #ffffff">Nivel de Riesgo Inherente</th>
+                            <th style="width: 5%; border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center; color: #ffffff">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="tbodyMatrizAC">
