@@ -3,6 +3,12 @@
 include '../main/config.php';
 include '../ac/conect-responder.php';
 // Validar que exista el ID de la evaluación a responder
+
+// Evaluamos el estado actual del AC (1: En Proceso, 2: Cerrado)
+$currentStatusId = (int)($acData->statusId ?? 1);
+$isClosed = ($currentStatusId === 2);
+$disabledAttr = $isClosed ? 'disabled' : '';
+
 ?>
 <div class="view-container">
     
@@ -211,24 +217,27 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                             </div>
                             
                             <div class="question-inputs">
-                                <div class="radio-group">
+                               <div class="radio-group">
                                     <label class="radio-label">
                                         <input type="radio" 
-                                               name="answers[<?= $q->questionId ?>][response]" 
-                                               value="Si" 
-                                               class="q-radio" 
-                                               data-qnum="<?= $q->questionNumber ?>" 
-                                               <?= $savedRes === 'Si' ? 'checked' : '' ?>> Sí
+                                            name="answers[<?= (int)$q->questionId ?>][response]" 
+                                            value="Si" 
+                                            class="q-radio" 
+                                            data-qnum="<?= (int)$q->questionNumber ?>" 
+                                            <?= $savedRes === 'Si' ? 'checked' : '' ?> 
+                                            <?= $disabledAttr ?>> Sí
                                     </label>
+                                    
                                     <label class="radio-label">
                                         <input type="radio" 
-                                               name="answers[<?= $q->questionId ?>][response]" 
-                                               value="No" 
-                                               class="q-radio" 
-                                               data-qnum="<?= $q->questionNumber ?>" 
-                                               <?= $savedRes === 'No' ? 'checked' : '' ?>> No
+                                            name="answers[<?= (int)$q->questionId ?>][response]" 
+                                            value="No" 
+                                            class="q-radio" 
+                                            data-qnum="<?= (int)$q->questionNumber ?>" 
+                                            <?= $savedRes === 'No' ? 'checked' : '' ?> 
+                                            <?= $disabledAttr ?>> No
                                     </label>
-                                    <!-- Renderizado exclusivo del campo N/A para la Pregunta 13 -->
+
                                     <?php if ((int)$q->questionNumber === 13): ?>
                                         <label class="radio-label">
                                             <input type="radio" 
@@ -236,9 +245,18 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                                                 value="N/A" 
                                                 class="q-radio" 
                                                 data-qnum="<?= (int)$q->questionNumber ?>" 
-                                                <?= $savedRes === 'N/A' ? 'checked' : '' ?>> N/A
+                                                <?= $savedRes === 'N/A' ? 'checked' : '' ?> 
+                                                <?= $disabledAttr ?>> N/A
                                         </label>
                                     <?php endif; ?>
+                                </div>
+
+                                <div style="width: 100%;">
+                                    <textarea name="answers[<?= (int)$q->questionId ?>][comment]" 
+                                            class="comment-input auto-expand" 
+                                            rows="<?= $estimatedRows ?>" 
+                                            placeholder="Comentarios o justificación..." 
+                                            <?= $disabledAttr ?>><?= htmlspecialchars($savedComment, ENT_QUOTES, 'UTF-8') ?></textarea>
                                 </div>
                     
                                <div style="width: 100%;">
@@ -308,9 +326,12 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
         <span style="font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
             <i class="ri-shield-flash-line" style="color: #38bdf8;"></i> Matriz de Riesgo 
         </span>
-        <button type="button" onclick="abrirModalRiesgoAC()" style="background: #0284c7; color: #ffffff; border: none; padding: 0.45rem 0.9rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
-            <i class="ri-add-line"></i> Agregar Riesgo
-        </button>
+        <?php if (!$isClosed): ?>
+            <button type="button" onclick="abrirModalRiesgoAC()" style="background: #0284c7; color: #ffffff; border: none; padding: 0.45rem 0.9rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                <i class="ri-add-line"></i> Agregar Riesgo
+            </button>
+        <?php endif; ?>
+        
     </div>
     <div style="padding: 1.25rem; background: #ffffff; overflow-x: auto;">
         <table class="subtest-table" style="width: 100%; border-collapse: collapse;" id="tablaMatrizAC">
@@ -354,21 +375,61 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                                 <strong><?= htmlspecialchars($mr->nivelRiesgo, ENT_QUOTES, 'UTF-8') ?></strong>
                                 <input type="hidden" name="matriz_nivel[]" value="<?= htmlspecialchars($mr->nivelRiesgo, ENT_QUOTES, 'UTF-8') ?>">
                             </td>
+                            <!-- Dentro del foreach de filas en la Matriz de Riesgo -->
                             <td style="border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center; white-space: nowrap;">
-                                <!-- Botón Editar -->
-                                <button type="button" onclick="editarRiesgoAC(this)" style="background: transparent; border: none; color: #0284c7; cursor: pointer; margin-right: 0.3rem;" title="Editar">
-                                    <i class="ri-edit-line" style="font-size: 1.1rem;"></i>
-                                </button>
-                                <!-- Botón Eliminar -->
-                                <button type="button" onclick="eliminarRiesgoAC(this)" style="background: transparent; border: none; color: #ef4444; cursor: pointer;" title="Eliminar">
-                                    <i class="ri-delete-bin-line" style="font-size: 1.1rem;"></i>
-                                </button>
+                                <?php if (!$isClosed): ?>
+                                    <button type="button" onclick="editarRiesgoAC(this)" style="background: transparent; border: none; color: #0284c7; cursor: pointer; margin-right: 0.3rem;" title="Editar">
+                                        <i class="ri-edit-line" style="font-size: 1.1rem;"></i>
+                                    </button>
+                                    <button type="button" onclick="eliminarRiesgoAC(this)" style="background: transparent; border: none; color: #ef4444; cursor: pointer;" title="Eliminar">
+                                        <i class="ri-delete-bin-line" style="font-size: 1.1rem;"></i>
+                                    </button>
+                                <?php else: ?>
+                                    <span style="color: #94a3b8; font-size: 0.8rem; font-style: italic;">Bloqueado</span>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </tbody>
         </table>
+    </div>
+</div>
+<!-- CUADRO DE CIERRE DE PROYECTO / EVALUACIÓN -->
+<div style="margin-top: 2rem; border: 1px solid <?= $isClosed ? '#fecaca' : '#cbd5e1' ?>; border-radius: 8px; background: <?= $isClosed ? '#fef2f2' : '#ffffff' ?>; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid <?= $isClosed ? '#fee2e2' : '#f1f5f9' ?>; padding-bottom: 0.75rem;">
+        <h3 style="margin: 0; font-size: 1.05rem; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; font-weight: 700;">
+            <i class="ri-shield-keyhole-line" style="color: <?= $isClosed ? '#dc2626' : '#0284c7' ?>; font-size: 1.25rem;"></i> Cierre y Estado de la Evaluación
+        </h3>
+        <?php if ($isClosed): ?>
+            <span style="background: #dc2626; color: #ffffff; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem;">
+                <i class="ri-lock-fill"></i> EVALUACIÓN CERRADA
+            </span>
+        <?php else: ?>
+            <span style="background: #e0f2fe; color: #0369a1; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem;">
+                <i class="ri-time-line"></i> EN PROCESO
+            </span>
+        <?php endif; ?>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <p style="margin: 0; font-size: 0.875rem; color: #475569; max-width: 600px;">
+            <?php if ($isClosed): ?>
+                Esta evaluación ha sido finalizada y cerrada. Los campos se encuentran bloqueados para evitar alteraciones en la auditoría.
+            <?php else: ?>
+                Selecciona <strong>"Cerrado"</strong> cuando hayas finalizado la auditoría para bloquear la modificación de las respuestas y la matriz de riesgo.
+            <?php endif; ?>
+        </p>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <label for="statusId" style="font-weight: 700; color: #334155; font-size: 0.875rem; whitespace: nowrap;">
+                Estado:
+            </label>
+            <select name="statusId" id="statusId" style="padding: 0.5rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.875rem; font-weight: 600; background-color: #ffffff; color: #0f172a; cursor: pointer;">
+                <option value="1" <?= $currentStatusId === 1 ? 'selected' : '' ?>>En Proceso</option>
+                <option value="2" <?= $currentStatusId === 2 ? 'selected' : '' ?>>Cerrado</option>
+            </select>
+        </div>
     </div>
 </div>
 
