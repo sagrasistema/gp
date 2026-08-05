@@ -1,8 +1,18 @@
 <?php
 declare(strict_types=1);
+// 1. Iniciar sesión obligatoriamente antes de procesar lógica o incluir layouts
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
+// 2. Validar autenticación de usuario
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../login.php');
+    exit;
+}
+$pageTitle = "Gestión de Usuarios - Panel de Control";
 include '../main/config.php'; 
-session_start();
+
 
 try {
     // Consulta optimizada con LEFT JOIN para obtener los clientes asignados a cada usuario
@@ -41,7 +51,12 @@ $currentTab     = 'usuarios';
 <head>
     <meta charset="UTF-8">
     <title>Gestión de Usuarios - Panel de Control</title>
+        
+    <link rel="shortcut icon" href="../client/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="../client/favicon.ico" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="main/layout.css">
     <style>
         :root { --primary: #0284c7; --bg-main: #f8fafc; --border: #e2e8f0; --text: #0f172a; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-main); color: var(--text); padding: 2rem; margin: 0; }
@@ -61,7 +76,10 @@ $currentTab     = 'usuarios';
     </style>
 </head>
 <body>
-
+<?php 
+// Incluimos la cabecera del layout visual después de validar la sesión
+include '../main/layout_header.php'; 
+?>
 <div class="container">
     <div class="header">
         <h1 style="font-size: 1.35rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
@@ -130,6 +148,6 @@ $currentTab     = 'usuarios';
         </tbody>
     </table>
 </div>
-
+<?php include '../main/layout_footer.php'; ?>
 </body>
 </html>
