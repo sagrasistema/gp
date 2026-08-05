@@ -112,7 +112,8 @@ include 'conect-actividades.php';
     <?php endif; ?>
 
     <!-- FORMULARIO PRINCIPAL DE ACTIVIDADES -->
-    <form action="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pruebaId ?>" method="POST">
+    <!-- FORMULARIO PRINCIPAL DE ACTIVIDADES -->
+    <form action="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pruebaId ?>" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="action_type" value="save_all">
         
         <?php foreach ($listaActividades as $act): ?>
@@ -273,6 +274,50 @@ include 'conect-actividades.php';
                         <textarea name="observacion_socio_calidad" id="observacion_socio_calidad" rows="5" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; resize: vertical;"><?= htmlspecialchars($obsSocioCalidad ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                     </div>
                 </div>
+            </div>
+        </div>
+        PHP
+        <!-- SECCIÓN DE DOCUMENTOS ADJUNTOS POR ACTIVIDAD (Abajo de Indicadores y Observaciones, Antes del área de Guardar) -->
+        <div style="margin: 2.5rem 0 1.5rem 0; background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <h3 style="font-size: 1.1rem; color: #1e293b; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="ri-attachment-2" style="color: #0284c7;"></i> Documentos Adjuntos de las Actividades
+            </h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1.25rem;">
+                Adjunte las evidencias o papeles de trabajo correspondientes a cada actividad antes de guardar.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <?php foreach ($listaActividades as $act): ?>
+                    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 8px;">
+                        <label for="actividad_archivo_<?= (int)$act->id ?>" style="font-weight: 700; font-size: 0.875rem; color: #1e293b; display: block; margin-bottom: 0.5rem;">
+                            Actividad <?= htmlspecialchars((string)$act->orden, ENT_QUOTES, 'UTF-8') ?>: <?= htmlspecialchars($act->descripcion, ENT_QUOTES, 'UTF-8') ?>
+                        </label>
+                        
+                        <input type="file" 
+                               name="actividad_archivo_<?= (int)$act->id ?>" 
+                               id="actividad_archivo_<?= (int)$act->id ?>" 
+                               class="form-control"
+                               accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.zip,.rar"
+                               style="font-size: 0.85rem; width: 100%; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff;">
+                        
+                        <?php if (!empty($act->archivo_ruta)): ?>
+                            <div style="margin-top: 0.5rem; padding: 0.5rem 0.75rem; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                                <span style="font-size: 0.825rem; color: #334155;">
+                                    <i class="ri-file-text-line" style="color: #0284c7; margin-right: 0.3rem;"></i>
+                                    <strong>Adjunto actual:</strong> <?= htmlspecialchars((string)$act->archivo_nombre, ENT_QUOTES, 'UTF-8') ?>
+                                    <small style="color: #64748b;">(<?= round(((int)($act->archivo_peso ?? 0)) / 1024, 1) ?> KB)</small>
+                                </span>
+                                
+                                <a href="../<?= htmlspecialchars((string)$act->archivo_ruta, ENT_QUOTES, 'UTF-8') ?>" 
+                                   target="_blank" 
+                                   class="btn btn-sm" 
+                                   style="background-color: #e0f2fe; color: #0369a1; font-weight: 600; font-size: 0.775rem; padding: 0.25rem 0.65rem; text-decoration: none; border-radius: 4px; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                    <i class="ri-download-2-line"></i> Ver / Descargar
+                                </a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
             </div>
         </div>
 

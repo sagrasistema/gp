@@ -326,24 +326,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ====================================================================
         } else {
             // Guardado General (Actividades + Estatus de Prueba)
+           // Guardado General (Actividades + Archivos Adjuntos + Estatus de Prueba)
             if (isset($_POST['actividades_data']) && is_array($_POST['actividades_data'])) {
                 $stmtSave = $pdo->prepare("
-                    INSERT INTO proyecto_actividades_ejecucion (proyecto_id, actividad_id, contenido_llenado, completado)
-                    VALUES (:proyecto_id, :actividad_id, :contenido, :completado)
-                    ON DUPLICATE KEY UPDATE contenido_llenado = :contenido_u, completado = :completado_u
+                    INSERT INTO proyecto_actividades_ejecucion 
+                        (proyecto_id, actividad_id, contenido_llenado, completado, archivo_nombre, archivo_ruta, archivo_peso)
+                    VALUES 
+                        (:proyecto_id, :actividad_id, :contenido, :completado, :archivo_nombre, :archivo_ruta, :archivo_peso)
+                    ON DUPLICATE KEY UPDATE 
+                        contenido_llenado = :contenido_u, 
+                        completado = :completado_u,
+                        archivo_nombre = COALESCE(:archivo_nombre_u, archivo_nombre),
+                        archivo_ruta = COALESCE(:archivo_ruta_u, archivo_ruta),
+                        archivo_peso = COALESCE(:archivo_peso_u, archivo_peso)
                 ");
 
+                $uploadDir = '../uploads/proyectos/actividades/';
+                $allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'zip', 'rar'];
+                $maxFileSize = 10 * 1024 * 1024; // Límite de 10 MB
+
                 foreach ($_POST['actividades_data'] as $actId => $v) {
+                    $actIdInt = (int)$actId;
                     $contenido = trim($v['contenido'] ?? '');
                     $completado = isset($v['completado']) ? 1 : 0;
 
+                    $archivoNombreOriginal = null;
+                    $archivoRutaGuardar   = null;
+                    $archivoPeso           = null;
+
+                    // Procesar archivo adjunto especifico para esta actividad
+                    $fileKey = "actividad_archivo_{$actIdInt}";
+                    if (isset($_FILES[$fileKey]) && $_FILES[$fileKey]['error'] === UPLOAD_ERR_OK) {
+                        $file = $_FILES[$fileKey];
+
+                        if ($file['size'] > $maxFileSize) {
+                            throw new Exception("El archivo adjunto para la actividad ID {$actIdInt} excede el límite permitido de 10MB.");
+                        }
+
+                        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                        if (!in_array($ext, $allowedExtensions, true)) {
+                            throw new Exception("Tipo de archivo no permitido en la actividad ID {$actIdInt}. Extensiones válidas: " . implode(', ', $allowedExtensions));
+                        }
+
+                        if (!is_dir($uploadDir)) {
+                            mkdir($uploadDir, 0755, true);
+                        }
+
+                        $safeFileName = bin2hex(random_bytes(16)) . '.' . $ext;
+                        $destinationPath = $uploadDir . $safeFileName;
+                        $archivoRutaRelativa = 'uploads/proyectos/actividades/' . $safeFileName;
+
+                        if (!move_uploaded_file($file['tmp_name'], $destinationPath)) {
+                            throw new Exception("Error al guardar el archivo adjunto en el servidor para la actividad ID {$actIdInt}.");
+                        }
+
+                        $archivoNombreOriginal = $file['name'];
+                        $archivoRutaGuardar   = $archivoRutaRelativa;
+                        $archivoPeso           = (int)$file['size'];
+                    }
+
                     $stmtSave->execute([
-                        ':proyecto_id'  => $proyectoId,
-                        ':actividad_id' => $actId,
-                        ':contenido'    => $contenido !== '' ? $contenido : null,
-                        ':completado'   => $completado,
-                        ':contenido_u'  => $contenido !== '' ? $contenido : null,
-                        ':completado_u' => $completado
+                        ':proyecto_id'      => $proyectoId,
+                        ':actividad_id'     => $actIdInt,
+                        ':contenido'        => $contenido !== '' ? $contenido : null,
+                        ':completado'       => $completado,
+                        ':archivo_nombre'   => $archivoNombreOriginal,
+                        ':archivo_ruta'     => $archivoRutaGuardar,
+                        ':archivo_peso'     => $archivoPeso,
+                        ':contenido_u'      => $contenido !== '' ? $contenido : null,
+                        ':completado_u'     => $completado,
+                        ':archivo_nombre_u' => $archivoNombreOriginal,
+                        ':archivo_ruta_u'   => $archivoRutaGuardar,
+                        ':archivo_peso_u'   => $archivoPeso
                     ]);
                 }
             }
@@ -410,11 +464,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // 4. Recuperar Catálogo de Actividades y Detalles de los Indicadores
+// 4. Recuperar Catálogo de Actividades y Detalles de los Indicadores
 $sqlActividades = "
-    SELECT a.id, a.descripcion, a.orden, COALESCE(ae.contenido_llenado, '') AS respuesta, COALESCE(ae.completado, 0) AS is_ok
+    SELECT 
+        a.id, 
+        a.descripcion, 
+        a.orden, 
+        COALESCE(ae.contenido_llenado, '') AS respuesta, 
+        COALESCE(ae.completado, 0) AS is_ok,
+        ae.archivo_nombre,
+        ae.archivo_ruta,
+        ae.archivo_peso
     FROM audit_actividades a
-    LEFT JOIN proyecto_actividades_ejecucion ae ON ae.actividad_id = a.id AND ae.proyecto_id = :projId
-    WHERE a.prueba_id = :prId ORDER BY a.orden ASC";
+    LEFT JOIN proyecto_actividades_ejecucion ae 
+        ON ae.actividad_id = a.id AND ae.proyecto_id = :projId
+    WHERE a.prueba_id = :prId 
+    ORDER BY a.orden ASC";
+
 $stmtA = $pdo->prepare($sqlActividades);
 $stmtA->execute([':projId' => $proyectoId, ':prId' => $pruebaId]);
 $listaActividades = $stmtA->fetchAll(PDO::FETCH_OBJ);
