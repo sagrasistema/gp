@@ -71,7 +71,7 @@ include 'conect-actividades.php';
     <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
         <i class="ri-compass-3-line"></i> 2. Estrategia
     </a>
-    <a href="responder3.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn active">
+    <a href="responder3.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
         <i class="ri-play-circle-line"></i> 3. Ejecución
     </a>
     <a href="responder4.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
