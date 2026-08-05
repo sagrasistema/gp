@@ -17,9 +17,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // 1. Obtener y sanitizar el nombre de usuario autenticado
 // Adapta la clave 'user_name' a la clave exacta que usas al procesar el login (ej. 'nombre', 'usuario', etc.)
-$rawUserName = $_SESSION['user_name'] 
-    ?? $_SESSION['nombre'] 
-    ?? $_SESSION['user']['name'] 
+$rawUserName = $_SESSION['nombre_completo'] 
+    ?? $_SESSION['username'] 
     ?? 'Usuario';
 
 $userNameClean = htmlspecialchars((string)$rawUserName, ENT_QUOTES, 'UTF-8');
