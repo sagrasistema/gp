@@ -302,10 +302,15 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
             $stmtCat = $pdo->prepare("SELECT * FROM audit_categorias WHERE etapa_id = 3 ORDER BY orden ASC");
             $stmtCat->execute();
             $categories = $stmtCat->fetchAll(PDO::FETCH_OBJ);
+            $catIndex = 0;
+            $pruebaIndex = 1;
 
             $hayPruebasVisibles = false;
 
             foreach ($categories as $cat):
+                $letraCat = chr(65 + ($catIndex % 26));
+                $catIndex++;
+
                 $stmtP = $pdo->prepare("
                     SELECT p.* 
                     FROM audit_pruebas p
@@ -329,7 +334,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
                 <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 1rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
                     <span>
                         <i class="ri-folder-3-line" style="margin-right: 0.5rem; color: #2563eb;"></i>
-                        <?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?>
+                       <?= $letraCat ?>.  <?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?>
                     </span>
                     <i class="ri-arrow-down-s-line"></i>
                 </div>
@@ -341,7 +346,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
                     ?>
                         <div class="prueba-row-container" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); gap: 1rem;">
                             <div class="prueba-title">
-                                <?= htmlspecialchars($pr->nombre, ENT_QUOTES, 'UTF-8') ?>
+                                <?= $pruebaIndex ?>. <?= htmlspecialchars($pr->nombre, ENT_QUOTES, 'UTF-8') ?>
                                 <span style="margin-left: 0.5rem; font-size: 0.75rem; background: #dbeafe; color: #1e40af; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 600;">
                                     Frecuencia <?= $frecuenciaNum ?>
                                 </span>
@@ -353,7 +358,10 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
                                 </a>
                             </div>
                         </div>
-                    <?php endforeach; ?>
+                       <?php 
+                        $pruebaIndex++; 
+                    endforeach; 
+                    ?>
                 </div>
             </div>
         <?php 

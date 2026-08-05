@@ -270,14 +270,19 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
     <div class="accordion-container">
         <?php
         $categories = $pdo->query("SELECT * FROM audit_categorias WHERE etapa_id = 4 ORDER BY orden ASC")->fetchAll(PDO::FETCH_OBJ);
+        $catIndex = 0;
+        $pruebaIndex = 1;
         foreach ($categories as $cat):
+             // Generar letra MAYÚSCULA (A, B, C, D...) usando ASCII 65 ('A')
+            $letraCat = chr(65 + ($catIndex % 26));
+            $catIndex++;
             $stmtP = $pdo->prepare("SELECT * FROM audit_pruebas WHERE categoria_id = :catId ORDER BY orden ASC");
             $stmtP->execute([':catId' => $cat->id]);
             $pruebas = $stmtP->fetchAll(PDO::FETCH_OBJ);
         ?>
             <div class="accordion-item" style="margin-bottom: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
                 <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 1rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                    <span><?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
+                    <span><?= $letraCat ?>. <?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
                     <i class="ri-arrow-down-s-line"></i>
                 </div>
                 
@@ -304,7 +309,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
                         <div class="prueba-row-container" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); background: #ffffff; gap: 1rem;">
                             
                             <div class="prueba-title">
-                                <?= htmlspecialchars($pr->nombre, ENT_QUOTES, 'UTF-8') ?>
+                            <?= $pruebaIndex ?>. <?= htmlspecialchars($pr->nombre, ENT_QUOTES, 'UTF-8') ?>
                                 <div style="margin-top: 0.25rem;">
                                     <span class="badge-progress">
                                         <i class="ri-checkbox-circle-line"></i> Actividades: <?= $completadasAct ?> / <?= $totalAct ?> completadas
@@ -347,7 +352,10 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
                                 </a>
                             </div>
                         </div>
-                    <?php endforeach; ?>
+                     <?php 
+                        $pruebaIndex++; 
+                    endforeach; 
+                    ?>
                 </div>
             </div>
         <?php endforeach; ?>
