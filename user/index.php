@@ -16,7 +16,7 @@ include '../main/config.php';
 
 
 try {
-    // Consulta optimizada con LEFT JOIN para obtener los clientes asignados a cada usuario
+    // Consulta optimizada con LEFT JOIN para obtener los clientes asignados a cada usuarioss
     $sql = "
         SELECT 
             u.id,
