@@ -56,8 +56,8 @@ $activeTab = isset($currentTab) ? $currentTab : '';
                 <span>Inicio</span>
             </a>
             <a href="../client/index.php" class="menu-item <?php echo ($activeTab === 'clientes') ? 'active' : ''; ?>">
-                <i class="ri-home-4-line"></i>
-                <span>Inicio</span>
+                <i class="ri-user-line user-avatar"></i>
+                <span>Clientes</span>
             </a>
             <a href="../ac/index.php" class="menu-item <?php echo ($activeTab === 'aceptacion') ? 'active' : ''; ?>">
                 <i class="ri-shield-check-line"></i>
