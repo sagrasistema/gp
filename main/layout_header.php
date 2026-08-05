@@ -9,6 +9,21 @@ $acPath   = isset($customAcPath) ? $customAcPath : 'index.php';
 
 // Detectar qué botón del Sidebar debe estar activo
 $activeTab = isset($currentTab) ? $currentTab : '';
+
+// Asegurar que la sesión esté iniciada si no lo está previamente en el bootstrap global
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 1. Obtener y sanitizar el nombre de usuario autenticado
+// Adapta la clave 'user_name' a la clave exacta que usas al procesar el login (ej. 'nombre', 'usuario', etc.)
+$rawUserName = $_SESSION['user_name'] 
+    ?? $_SESSION['nombre'] 
+    ?? $_SESSION['user']['name'] 
+    ?? 'Usuario';
+
+$userNameClean = htmlspecialchars((string)$rawUserName, ENT_QUOTES, 'UTF-8');
+
 ?>
 
 <header class="main-navbar">
@@ -19,11 +34,13 @@ $activeTab = isset($currentTab) ? $currentTab : '';
         <span class="navbar-title">SAGRAGP VERSION 2.0</span>
     </div>
     
-    <div class="navbar-right">
-        <span class="user-name-text"></span>
-        <i class="ri-user-line user-avatar"></i>
-        <button id="toggle-sidebar-btn" class="btn-toggle"><i class="ri-menu-line"></i></button>
-    </div>
+   <div class="navbar-right">
+    <span class="user-name-text"><?= $userNameClean ?></span>
+    <i class="ri-user-line user-avatar"></i>
+    <button id="toggle-sidebar-btn" class="btn-toggle">
+        <i class="ri-menu-line"></i>
+    </button>
+</div>
 </header>
 
 <div class="app-body">
