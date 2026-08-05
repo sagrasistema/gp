@@ -327,14 +327,14 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                     </thead>
                     <tbody id="tbodyMatrizAC">
                         <?php if (empty($matrizRiesgosSaved)): ?>
-                            <tr id="rowEmptyMatrizAC">
+                            <tr id="rowEmptyMatrizAC" style="background: #ffffff;color: #1e293b">
                                 <td colspan="6" style="text-align: center; color: #94a3b8; padding: 1.5rem; border: 1px solid #e2e8f0;">
                                     No se han agregado registros a la matriz de riesgo. Haz clic en <strong>Agregar Riesgo</strong>.
                                 </td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($matrizRiesgosSaved as $mr): ?>
-                                <tr>
+                                <tr style="background: #ffffff;color: #1e293b">
                                     <td style="border: 1px solid #e2e8f0; padding: 0.6rem; font-weight: 700;">
                                         <?= htmlspecialchars($mr->idRiesgo, ENT_QUOTES, 'UTF-8') ?>
                                         <input type="hidden" name="matriz_id[]" value="<?= htmlspecialchars($mr->idRiesgo, ENT_QUOTES, 'UTF-8') ?>">
