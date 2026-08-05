@@ -397,8 +397,11 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
         </table>
     </div>
 </div>
+
+
 <!-- CUADRO DE CIERRE DE PROYECTO / EVALUACIÓN -->
-<div style="margin-top: 2rem; border: 1px solid <?= $isClosed ? '#fecaca' : '#cbd5e1' ?>; border-radius: 8px; background: <?= $isClosed ? '#fef2f2' : '#ffffff' ?>; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+ <?php if ($UserId == 1) {?>
+    <div style="margin-top: 2rem; border: 1px solid <?= $isClosed ? '#fecaca' : '#cbd5e1' ?>; border-radius: 8px; background: <?= $isClosed ? '#fef2f2' : '#ffffff' ?>; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid <?= $isClosed ? '#fee2e2' : '#f1f5f9' ?>; padding-bottom: 0.75rem;">
         <h3 style="margin: 0; font-size: 1.05rem; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; font-weight: 700;">
             <i class="ri-shield-keyhole-line" style="color: <?= $isClosed ? '#dc2626' : '#0284c7' ?>; font-size: 1.25rem;"></i> Cierre y Estado de la Evaluación
@@ -434,6 +437,8 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
         </div>
     </div>
 </div>
+ <?php }?>
+
 
         <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end; margin-bottom: 4rem;">
             <a href="index.php" class="btn btn-secondary">Regresar al panel</a>

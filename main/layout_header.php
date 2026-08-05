@@ -16,6 +16,8 @@ if (session_status() === PHP_SESSION_NONE) {
 // 2. Obtención y sanitización estricta del nombre de usuario
 $rawUserName   = $_SESSION['nombre_completo'] ?? $_SESSION['username'] ?? 'Usuario';
 $nombreUsuario = htmlspecialchars((string)$rawUserName, ENT_QUOTES, 'UTF-8');
+$UserId   = $_SESSION['id'] ??;
+
 // Definimos la ruta base del logo dependiendo de dónde se llame el archivo
 // (Si es el index principal usa 'client/logo.png', si es un submódulo usa '../main/logo.png' o similar)
 $logoPath = isset($customLogoPath) ? $customLogoPath : '../main/logo.png';
