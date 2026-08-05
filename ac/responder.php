@@ -252,14 +252,6 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                                 </div>
 
                                 <div style="width: 100%;">
-                                    <textarea name="answers[<?= (int)$q->questionId ?>][comment]" 
-                                            class="comment-input auto-expand" 
-                                            rows="<?= $estimatedRows ?>" 
-                                            placeholder="Comentarios o justificación..." 
-                                            <?= $disabledAttr ?>><?= htmlspecialchars($savedComment, ENT_QUOTES, 'UTF-8') ?></textarea>
-                                </div>
-                    
-                               <div style="width: 100%;">
                                     <?php 
                                         // Calcular filas iniciales estimadas en PHP según la longitud del comentario guardado
                                         $commentText = (string)$savedComment;
