@@ -55,15 +55,19 @@ $activeTab = isset($currentTab) ? $currentTab : '';
                 <i class="ri-home-4-line"></i>
                 <span>Inicio</span>
             </a>
-            <a href="<?php echo $acPath; ?>" class="menu-item <?php echo ($activeTab === 'aceptacion') ? 'active' : ''; ?>">
+            <a href="../client/index.php" class="menu-item <?php echo ($activeTab === 'clientes') ? 'active' : ''; ?>">
+                <i class="ri-home-4-line"></i>
+                <span>Inicio</span>
+            </a>
+            <a href="../ac/index.php" class="menu-item <?php echo ($activeTab === 'aceptacion') ? 'active' : ''; ?>">
                 <i class="ri-shield-check-line"></i>
                 <span>Aceptación</span>
             </a>
-            <a href="<?php echo $acPath; ?>" class="menu-item <?php echo ($activeTab === 'terminos') ? 'active' : ''; ?>">
+            <a href="../terminos/index.php" class="menu-item <?php echo ($activeTab === 'terminos') ? 'active' : ''; ?>">
                 <i class="ri-file-text-line"></i>
                 <span>Terminos y Condiciones</span>
             </a>
-            <a href="<?php echo $acPath; ?>" class="menu-item <?php echo ($activeTab === 'proyecto') ? 'active' : ''; ?>">
+            <a href="../project/index.php" class="menu-item <?php echo ($activeTab === 'proyecto') ? 'active' : ''; ?>">
                 <i class="ri-briefcase-line"></i>
                 <span>Proyectos</span>
             </a>
