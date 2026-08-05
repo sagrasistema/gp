@@ -241,12 +241,18 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                                     <?php endif; ?>
                                 </div>
                     
-                                <div style="width: 100%;">
-                                    <!-- REEMPLAZO: Textarea auto-expansible -->
+                               <div style="width: 100%;">
+                                    <?php 
+                                        // Calcular filas iniciales estimadas en PHP según la longitud del comentario guardado
+                                        $commentText = (string)$savedComment;
+                                        $textLength  = mb_strlen($commentText, 'UTF-8');
+                                        // Asigna 1 fila por defecto, o incrementa dinámicamente según la cantidad de caracteres
+                                        $estimatedRows = ($textLength > 100) ? (int)ceil($textLength / 80) : 1;
+                                    ?>
                                     <textarea name="answers[<?= (int)$q->questionId ?>][comment]" 
                                             class="comment-input auto-expand" 
-                                            rows="1" 
-                                            placeholder="Comentarios o justificación..."><?= htmlspecialchars((string)$savedComment, ENT_QUOTES, 'UTF-8') ?></textarea>
+                                            rows="<?= $estimatedRows ?>" 
+                                            placeholder="Comentarios o justificación..."><?= htmlspecialchars($commentText, ENT_QUOTES, 'UTF-8') ?></textarea>
                                 </div>
                             </div>
 
@@ -515,6 +521,50 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Escuchar evento de tipeo en tiempo real
         textarea.addEventListener('input', () => {
             autoResizeTextarea(textarea);
+        });
+    });
+});
+document.addEventListener('DOMContentLoaded', () => {
+    const textareas = document.querySelectorAll('.comment-input.auto-expand');
+
+    /**
+     * Recalcula y ajusta la altura del textarea solo si el elemento es visible
+     * @param {HTMLTextAreaElement} el 
+     */
+    const autoResizeTextarea = (el) => {
+        // Verificar si el elemento es visible en el DOM (no está oculto por display: none)
+        if (el.offsetParent !== null) {
+            el.style.height = 'auto';
+            el.style.height = `${el.scrollHeight}px`;
+        }
+    };
+
+    /**
+     * Redimensiona todos los textareas visibles en la vista
+     */
+    const resizeAllVisibleTextareas = () => {
+        textareas.forEach((textarea) => autoResizeTextarea(textarea));
+    };
+
+    // 1. Escuchar evento de tipeo en tiempo real
+    textareas.forEach((textarea) => {
+        textarea.addEventListener('input', () => autoResizeTextarea(textarea));
+    });
+
+    // 2. Ajuste inicial en carga de la página
+    resizeAllVisibleTextareas();
+
+    // 3. Re-evaluar cuando la ventana cargue completamente (estilos CSS y fuentes aplicados)
+    window.addEventListener('load', resizeAllVisibleTextareas);
+
+    // 4. SOLUCIÓN ACORDEÓN: Escuchar clics en los encabezados/botones de acordeón
+    // Ajusta la clase selector de tu acordeón si usas Bootstrap u otro framework (ej: .accordion-button, .accordion-header)
+    const accordionTriggers = document.querySelectorAll('.accordion-header, .accordion-button, .accordion-toggle');
+
+    accordionTriggers.forEach((trigger) => {
+        trigger.addEventListener('click', () => {
+            // Se usa un pequeño retardador (150ms) para permitir que la animación de apertura CSS finalize
+            setTimeout(resizeAllVisibleTextareas, 150);
         });
     });
 });
