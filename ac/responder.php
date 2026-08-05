@@ -313,8 +313,8 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                     <i class="ri-add-line"></i> Agregar Riesgo
                 </button>
             </div>
-            <div style="padding: 1.25rem;overflow-x: auto; background: #1e293b; color: #ffffff">
-                <table class="subtest-table" style="width: 100%; border-collapse: collapse;" id="tablaMatrizAC">
+            <div style="padding: 1.25rem; background: #ffffff; overflow-x: auto;">
+                <table class="subtest-table" style="width: 100%; border-collapse: collapse; background: #1e293b; color: #ffffff" id="tablaMatrizAC">
                     <thead>
                         <tr style="background: #f8fafc;">
                             <th style="width: 12%; border: 1px solid #e2e8f0; padding: 0.6rem;">ID Riesgo</th>
