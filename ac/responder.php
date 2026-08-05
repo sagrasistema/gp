@@ -16,18 +16,23 @@ include '../ac/conect-responder.php';
         <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
             <i class="ri-arrow-go-back-line"></i> 
         </a>
+        <!-- BOTÓN DE EXPORTACIÓN A WORD -->
         <a href="exportar-word.php?acId=<?= urlencode((string)$acId) ?>" class="btn btn-primary" data-tooltip="Exportar Informe a Word" style="background-color: #2b579a; border-color: #2b579a;">
             <i class="ri-file-word-2-line"></i> Exportar a Word
         </a>
+
         <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
             <i class="ri-screenshot-2-line"></i>
         </a>
+
         <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
             <i class="ri-book-open-line"></i> 
         </a>
+
         <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
             <i class="ri-add-line"></i>
         </a>
+
         <a href="../ac/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
             <i class="ri-close-circle-line"></i> 
         </a>
@@ -38,7 +43,6 @@ include '../ac/conect-responder.php';
             <i class="ri-checkbox-circle-fill"></i> Respuestas guardadas y nivel de riesgo recalculado de forma correcta.
         </div>
     <?php endif; ?>
-
 <div class="meta-summary" style="display: grid; grid-template-columns: 17.5% 17.5% 17.5% 17.5% 30%; gap: 1rem; width: 100%; align-items: stretch;">
     
     <div class="meta-item">Client / Empresa <br><strong><?= htmlspecialchars($acData->clientName, ENT_QUOTES, 'UTF-8') ?></strong></div>
@@ -53,6 +57,7 @@ include '../ac/conect-responder.php';
             ?></strong></div>
 
 <?php
+// Lógica de cálculo adaptada al máximo de 105 puntos (21 preguntas)
 $score = isset($acData->riskScore) ? (float)$acData->riskScore : 0;
 $clampedScore = max(0, min(105, $score));
 $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
@@ -61,7 +66,9 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
 <div class="meta-item-gauge">
     <div class="gauge-wrapper">
         <svg class="gauge-svg" viewBox="0 -12 200 122" width="100%" height="100%">
+            
             <defs>
+                <!-- Arcos guía para los textos de cada categoría -->
                 <path id="path-bajo" d="M 20 100 A 80 80 0 0 1 35.3 53.0" fill="none" />
                 <path id="path-bajo-mod" d="M 35.3 53.0 A 80 80 0 0 1 75.3 23.9" fill="none" />
                 <path id="path-mod" d="M 75.3 23.9 A 80 80 0 0 1 124.7 23.9" fill="none" />
@@ -69,12 +76,23 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                 <path id="path-alto" d="M 164.7 53.0 A 80 80 0 0 1 180 100" fill="none" />
             </defs>
 
+            <!-- Segmentos de colores del Tacómetro -->
+            <!-- 1. Bajo (0 - 21) -->
             <path d="M 8 100 A 92 92 0 0 1 25.6 45.9 L 45.0 60.0 A 68 68 0 0 0 32 100 Z" fill="#22c55e" />
+            
+            <!-- 2. Bajo Moderado (21 - 42) -->
             <path d="M 25.6 45.9 A 92 92 0 0 1 71.6 12.5 L 79.0 35.3 A 68 68 0 0 0 45.0 60.0 Z" fill="#84cc16" />
+            
+            <!-- 3. Moderado (42 - 63) -->
             <path d="M 71.6 12.5 A 92 92 0 0 1 128.4 12.5 L 121.0 35.3 A 68 68 0 0 0 79.0 35.3 Z" fill="#eab308" />
+            
+            <!-- 4. Moderado Alto (63 - 84) -->
             <path d="M 128.4 12.5 A 92 92 0 0 1 174.4 45.9 L 155.0 60.0 A 68 68 0 0 0 121.0 35.3 Z" fill="#f97316" />
+            
+            <!-- 5. Alto (84 - 105) -->
             <path d="M 174.4 45.9 A 92 92 0 0 1 192 100 L 168 100 A 68 68 0 0 0 155.0 60.0 Z" fill="#ef4444" />
 
+            <!-- Textos sobre los arcos -->
             <text font-size="6.2" fill="#ffffff" class="gauge-label-text">
                 <textPath href="#path-bajo" startOffset="50%">BAJO</textPath>
             </text>
@@ -91,6 +109,7 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                 <textPath href="#path-alto" startOffset="50%">ALTO</textPath>
             </text>
 
+            <!-- Etiquetas Numéricas (Ajustadas a escala 105) -->
             <text x="2" y="112" class="gauge-text">0</text>
             <text x="21" y="34" class="gauge-text">21</text>
             <text x="64" y="2" class="gauge-text">42</text>
@@ -98,10 +117,12 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
             <text x="179" y="34" class="gauge-text">84</text>
             <text x="185" y="112" class="gauge-text">105</text>
 
+            <!-- Aguja Dinámica -->
             <g transform="rotate(<?= $angle ?>, 100, 100)">
                 <path d="M 97 100 L 99.3 10 L 100.7 10 L 103 100 Z" fill="#1e293b" />
             </g>
 
+            <!-- Pines de centro -->
             <circle cx="100" cy="100" r="11" fill="#1e293b" stroke="#ffffff" stroke-width="2.5" />
             <circle cx="100" cy="100" r="4" fill="#94a3b8" />
         </svg>
@@ -110,9 +131,9 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
 
     <hr style="grid-column: span 4; margin: 0; border: 0; border-top: 1px solid var(--border-color, #e2e8f0); opacity: 0.6;">
 
-    <div class="meta-item">Socio Líder de A&C <br><strong><?= htmlspecialchars($acData->partnerName ?? '', ENT_QUOTES, 'UTF-8') ?></strong></div>
-    <div class="meta-item">Gerente de A&C <br><strong><?= htmlspecialchars($acData->managerName ?? '', ENT_QUOTES, 'UTF-8') ?></strong></div>
-    <div class="meta-item">Socio de Riesgo <br><strong><?= htmlspecialchars($acData->riskUserId ?? '', ENT_QUOTES, 'UTF-8') ?></strong></div>
+    <div class="meta-item">Socio Líder de A&C <br><strong><?= htmlspecialchars($acData->partnerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+    <div class="meta-item">Gerente de A&C <br><strong><?= htmlspecialchars($acData->managerName, ENT_QUOTES, 'UTF-8') ?></strong></div>
+    <div class="meta-item">Socio de Riesgo <br><strong><?= htmlspecialchars($acData->riskUserId, ENT_QUOTES, 'UTF-8') ?></strong></div>
     
     <div class="meta-item" style="display: flex; flex-direction: column; justify-content: center; gap: 0.25rem;">
         <span style="font-size: 0.8rem; color: var(--text-muted, #64748b); font-weight: 500;">Riesgo Calculado Matriz</span>
@@ -130,35 +151,43 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
     </div>
 
 </div>
-
     <div class="activities-grid-card">
         <h3><i class="ri-grid-fill" style="color: var(--accent);"></i> Progreso General de Actividades (1-30)</h3>
 <div class="activities-grid">
     <?php 
+    // Generar los 30 botones del progreso interactivo
     for ($i = 1; $i <= 30; $i++): 
         $isCompleted = false;
 
         if ($i === 28) {
-            $totalSubtests = 21;
+            // Lógica ESPECIAL para la pregunta 28
+            // Se marca como completada solo si se han respondido las 21 subpruebas con score > 0
+            $totalSubtests = 21; // Puedes cambiarlo por count($subtests) si prefieres que sea 100% dinámico
             $answeredSubtests = 0;
 
+            // Recorremos las respuestas guardadas de la pregunta 28
             if (isset($q28Saved) && is_array($q28Saved)) {
                 foreach ($q28Saved as $ans) {
+                    // Validamos una a una que la subprueba tenga un puntaje válido mayor a 0
                     if (isset($ans['score']) && (float)$ans['score'] > 0) {
                         $answeredSubtests++;
                     }
                 }
             }
+            
+            // Solo si la cantidad de respuestas válidas cumple con el total, se marca completada
             if ($answeredSubtests >= $totalSubtests) {
                 $isCompleted = true;
             }
         } else {
+            // Lógica ESTÁNDAR para el resto de las preguntas (1 a 30, excepto 28)
             $qId = $qNumberToIdMap[$i] ?? null;
             if ($qId && isset($answersSaved[$qId]) && $answersSaved[$qId] !== '') {
                 $isCompleted = true;
             }
         }
 
+        // Definimos la clase CSS correspondiente según el estado (sin alterar tus clases originales)
         $statusClass = $isCompleted ? 'completed' : 'pending';
     ?>
         <a href="#question-<?= $i ?>" id="grid-box-<?= $i ?>" class="activity-box <?= $statusClass ?>" onclick="scrollToQuestion(<?= $i ?>, event)">
@@ -182,6 +211,8 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
         
         <?php
         $categories = $pdo->query("SELECT * FROM ac_categories ORDER BY orderNum ASC")->fetchAll(PDO::FETCH_OBJ);
+        
+        // Mantendremos un mapeo JS de questionNumber => questionId para el progreso en vivo
         $qNumberToIdMap = [];
 
         foreach ($categories as $cat):
@@ -200,6 +231,7 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                         $savedRes = $answersSaved[$q->questionId]['response'] ?? '';
                         $savedComment = $answersSaved[$q->questionId]['comment'] ?? '';
                         
+                        // Guardar la correspondencia de número a ID
                         $qNumberToIdMap[$q->questionNumber] = [
                             'id' => $q->questionId,
                             'completed' => (!empty($savedRes))
@@ -282,6 +314,15 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
             </div>
         <?php endforeach; ?>
 
+        <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end; margin-bottom: 4rem;">
+            <a href="index.php" class="btn btn-secondary">Regresar al panel</a>
+            <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem;">
+                <i class="ri-save-3-line"></i> Guardar Cuestionario Completo
+            </button>
+        </div>
+    </form>
+</div>
+
         <!-- PRUEBA ESPECIAL: MATRIZ DE RIESGO AL FINAL DE LAS 30 PRUEBAS -->
         <div class="accordion-item" style="margin-top: 1.5rem; border: 1px solid #cbd5e1;">
             <div class="accordion-header" style="background: #1e293b; color: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.25rem;">
@@ -355,49 +396,6 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
         </div>
     </form>
 </div>
-
-<!-- MODAL PARA REGISTRAR MATRIZ DE RIESGO -->
-<div id="modalRiesgoAC" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 10000; align-items: center; justify-content: center;">
-    <div style="background: #ffffff; width: 100%; max-width: 580px; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
-        <div style="background: #0f172a; color: #ffffff; padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="margin: 0; font-size: 1rem; font-weight: 700;">Agregar Riesgo a la Matriz (AC)</h3>
-            <button type="button" onclick="cerrarModalRiesgoAC()" style="background: transparent; border: none; color: #ffffff; font-size: 1.25rem; cursor: pointer;">&times;</button>
-        </div>
-        <div style="padding: 1.25rem; display: flex; flex-direction: column; gap: 0.85rem;">
-            <div>
-                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem;">ID Riesgo:</label>
-                <input type="text" id="ac_m_id" placeholder="Ej: R-01" style="width: 100%; padding: 0.45rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
-            </div>
-            <div>
-                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem;">Categoría de Riesgo:</label>
-                <input type="text" id="ac_m_categoria" placeholder="Ej: Financiero / Control Interno" style="width: 100%; padding: 0.45rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
-            </div>
-            <div>
-                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem;">Descripción del Riesgo Identificado:</label>
-                <textarea id="ac_m_descripcion" rows="3" placeholder="Descripción detallada del riesgo..." style="width: 100%; padding: 0.45rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;"></textarea>
-            </div>
-            <div>
-                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem;">Factor / Causa Raíz (Según AC):</label>
-                <textarea id="ac_m_causa" rows="2" placeholder="Causa raíz o factor desencadenante..." style="width: 100%; padding: 0.45rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;"></textarea>
-            </div>
-            <div>
-                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem;">Nivel de Riesgo Inherente:</label>
-                <select id="ac_m_nivel" style="width: 100%; padding: 0.45rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
-                    <option value="Alto">Alto</option>
-                    <option value="Moderado-Alto">Moderado-Alto</option>
-                    <option value="Moderado">Moderado</option>
-                    <option value="Bajo-Moderado">Bajo-Moderado</option>
-                    <option value="Bajo" selected>Bajo</option>
-                </select>
-            </div>
-        </div>
-        <div style="padding: 1rem 1.25rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 0.5rem;">
-            <button type="button" onclick="cerrarModalRiesgoAC()" class="btn btn-secondary" style="padding: 0.4rem 1rem;">Cancelar</button>
-            <button type="button" onclick="agregarRiesgoAC()" class="btn btn-primary" style="padding: 0.4rem 1rem;">Agregar a la Tabla</button>
-        </div>
-    </div>
-</div>
-
 <script>
 function abrirModalRiesgoAC() {
     document.getElementById('modalRiesgoAC').style.display = 'flex';
@@ -484,7 +482,10 @@ function eliminarRiesgoAC(btn) {
 </script>
 
 <?php 
+// Cierre del layout modular y scripts de navegación móvil
 include 'js-responder.php'; 
 include '../main/layout_footer.php'; 
+
+// Footer nativo del sistema
 include '../main/footer.php'; 
 ?>
