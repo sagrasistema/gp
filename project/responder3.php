@@ -197,8 +197,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
         <a href="../project/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
             <i class="ri-close-circle-line"></i> 
         </a>
-    </div>
-    <div class="table-actions-container">
+
     <!-- 1. Icono de Edición / Notas -->
     <a href="#" class="btn btn-primary" data-tooltip="Reporte de avance" onclick="return false;">
         <i class="ri-file-edit-line"></i> 
