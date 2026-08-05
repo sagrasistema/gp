@@ -62,7 +62,7 @@ include '../main/layout_header.php';
                     
                     <th style="width: 10%; text-align: center;">Acciones</th>
                     
-                    <th style="width: 10%;">Cerrar Ac</th>
+                    <th style="width: 10%;">Estado </th>
                 </tr>
             </thead>
             <tbody>
