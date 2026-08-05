@@ -91,6 +91,13 @@ include '../main/layout_header.php';
                             $clientName = htmlspecialchars($ac->clientName, ENT_QUOTES, 'UTF-8');
                             $typeName   = htmlspecialchars($ac->typeName, ENT_QUOTES, 'UTF-8');
                             $fecha      = date('d/m/Y', strtotime($ac->created_at));
+                            // Mapeo dinámico según statusId
+                            $statusId   = (int)($ac->statusId ?? 1);
+                            $isClosed   = ($statusId === 2);
+
+                            $iconClass  = $isClosed ? 'ri-lock-fill' : 'ri-lock-unlock-line';
+                            $iconColor  = $isClosed ? '#0f172a' : '#16a34a'; // Negro para cerrado, Verde para en proceso
+                            $tooltip    = $isClosed ? 'Cerrado' : 'En proceso';
 
                             echo "<tr>";
                             
@@ -103,7 +110,11 @@ include '../main/layout_header.php';
                                         <i class='ri-file-list-3-line'></i> Responder
                                     </a>
                                   </td>";
-                            echo "<td style='font-weight: 600; color: #64748b; text-align: center;'>{$ac->statusId}</td>";
+                            echo "<td style='text-align: center; vertical-align: middle;'>
+                                    <span title='{$tooltip}' style='cursor: help; display: inline-flex; align-items: center;'>
+                                        <i class='{$iconClass}' style='font-size: 1.25rem; color: {$iconColor};'></i>
+                                    </span>
+                                </td>";
                             echo "</tr>";
                         }
                     } else {
