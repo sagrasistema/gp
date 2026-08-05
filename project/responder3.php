@@ -103,31 +103,6 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 </style>
 
 
-    
-    <div class="table-actions-container">
-        <!-- Botón para ir al Selector de Pruebas de la Etapa 3 ss-->
-   
-        <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
-            <i class="ri-arrow-go-back-line"></i> 
-        </a>
-
-        <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
-            <i class="ri-screenshot-2-line"></i>
-        </a>
-
-        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
-            <i class="ri-book-open-line"></i> 
-        </a>
-
-        <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
-            <i class="ri-add-line"></i>
-        </a>
-
-        <a href="../project/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
-            <i class="ri-close-circle-line"></i> 
-        </a>
-    </div>
-
     <?php if (isset($_GET['success'])): ?>
         <div class="alert-success" style="padding:1rem; background:#d1fae5; color:#065f46; border-radius:8px; margin-bottom:1.5rem;">
             <i class="ri-checkbox-circle-fill"></i> Parámetros e indicadores de prueba sincronizados correctamente.
@@ -199,6 +174,29 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
             <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 3 Ejecución 
         </h1>
         
+</div>
+    <div class="table-actions-container">
+        <!-- Botón para ir al Selector de Pruebas de la Etapa 3 ss-->
+   
+        <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+            <i class="ri-arrow-go-back-line"></i> 
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+            <i class="ri-screenshot-2-line"></i>
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
+            <i class="ri-book-open-line"></i> 
+        </a>
+
+        <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
+            <i class="ri-add-line"></i>
+        </a>
+
+        <a href="../project/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+            <i class="ri-close-circle-line"></i> 
+        </a>
     </div>
     <div class="table-actions-container">
     <!-- 1. Icono de Edición / Notas -->
