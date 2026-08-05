@@ -159,7 +159,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 
         <!-- Botón 2: Seleccionar Pruebas de la Frecuencia Activa -->
         <a href="seleccionar-pruebas3.php?proyectoId=<?= $proyectoId ?>&frecuencia=<?= $frecuenciaNum ?>" class="btn btn-primary" style="background: #2563eb; color: #ffffff;">
-            <i class="ri-checkbox-multiple-line"></i> Seleccionar Pruebas
+            <i class="ri-checkbox-multiple-line"></i>Pruebas
         </a>
         <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
             <i class="ri-arrow-go-back-line"></i> 
