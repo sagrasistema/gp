@@ -16,8 +16,13 @@ if (session_status() === PHP_SESSION_NONE) {
 // 2. Obtención y sanitización estricta del nombre de usuario
 $rawUserName   = $_SESSION['nombre_completo'] ?? $_SESSION['username'] ?? 'Usuario';
 $nombreUsuario = htmlspecialchars((string)$rawUserName, ENT_QUOTES, 'UTF-8');
-$UserId   = $_SESSION['id'];
-$rol   = $_SESSION['rol'];
+
+// 3. Obtención y casteo estricto del ID de Usuario
+$userId = (int)($_SESSION['user_id'] ?? $_SESSION['id'] ?? 0);
+
+// 4. Obtención y sanitización del Rol de Usuario
+$rawRole = $_SESSION['rol'] ?? $_SESSION['role'] ?? 'invitado';
+$userRol = htmlspecialchars((string)$rawRole, ENT_QUOTES, 'UTF-8');
 
 // Definimos la ruta base del logo dependiendo de dónde se llame el archivo
 // (Si es el index principal usa 'client/logo.png', si es un submódulo usa '../main/logo.png' o similar)
@@ -43,7 +48,7 @@ $activeTab = isset($currentTab) ? $currentTab : '';
     </div>
     
    <div class="navbar-right">
-    <span class="user-name-text"><?= $rol ?> <?= $UserId ?> </span>
+    <span class="user-name-text"><?= $userId ?> <?= $userRol ?> </span>
     <i class="ri-user-line user-avatar"></i>
     <button id="toggle-sidebar-btn" class="btn-toggle">
         <i class="ri-menu-line"></i>
