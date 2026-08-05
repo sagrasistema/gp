@@ -307,7 +307,7 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
         <div class="accordion-item" style="margin-top: 1.5rem; border: 1px solid #cbd5e1;">
             <div class="accordion-header" style="background: #1e293b; color: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.25rem;">
                 <span style="font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="ri-shield-flash-line" style="color: #38bdf8;"></i> Matriz de 
+                    <i class="ri-shield-flash-line" style="color: #38bdf8;"></i> Matriz de Riesgo
                 </span>
                 <button type="button" onclick="abrirModalRiesgoAC()" style="background: #0284c7; color: #ffffff; border: none; padding: 0.45rem 0.9rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
                     <i class="ri-add-line"></i> Agregar Riesgo
