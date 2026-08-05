@@ -434,20 +434,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $obsLider = trim($_POST['observacion_socio_lider'] ?? '');
         $obsCalidad = trim($_POST['observacion_socio_calidad'] ?? '');
 
+          // =========================================================================
+        // PROCESAMIENTO DE ARCHIVO ADJUNTO DE LA PRUEBA
+        // =========================================================================
+        $archivoNombreOriginal = null;
+        $archivoRutaGuardar   = null;
+        $archivoPeso           = null;
+
+        if (isset($_FILES['documento_prueba']) && $_FILES['documento_prueba']['error'] === UPLOAD_ERR_OK) {
+            $file = $_FILES['documento_prueba'];
+            $maxFileSize = 10 * 1024 * 1024; // Límite 10 MB
+
+            if ($file['size'] > $maxFileSize) {
+                throw new Exception("El archivo adjunto excede el límite permitido de 10MB.");
+            }
+
+            $allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'zip', 'rar'];
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+            if (!in_array($ext, $allowedExtensions, true)) {
+                throw new Exception("Tipo de archivo no permitido. Tipos aceptados: " . implode(', ', $allowedExtensions));
+            }
+
+            $uploadDir = '../uploads/proyectos/pruebas/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            // Nombre aleatorio único para seguridad
+            $safeFileName = bin2hex(random_bytes(16)) . '.' . $ext;
+            $destinationPath = $uploadDir . $safeFileName;
+            $archivoRutaRelativa = 'uploads/proyectos/pruebas/' . $safeFileName;
+
+            if (!move_uploaded_file($file['tmp_name'], $destinationPath)) {
+                throw new Exception("Error al guardar el archivo adjunto en el servidor.");
+            }
+
+            $archivoNombreOriginal = $file['name'];
+            $archivoRutaGuardar   = $archivoRutaRelativa;
+            $archivoPeso           = (int)$file['size'];
+        }
+
+        // Persistencia del Estatus y Archivo Adjunto de la Prueba
         $stmtTestSave = $pdo->prepare("
             INSERT INTO proyecto_pruebas_ejecucion 
-            (proyecto_id, prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado, observacion_socio_lider, observacion_socio_calidad)
-            VALUES (:proyecto_id, :prueba_id, :ci, :cg, :sc, :aa, :estado, :obs_lider, :obs_calidad)
+            (proyecto_id, prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado, observacion_socio_lider, observacion_socio_calidad, archivo_nombre, archivo_ruta, archivo_peso)
+            VALUES (:proyecto_id, :prueba_id, :ci, :cg, :sc, :aa, :estado, :obs_lider, :obs_calidad, :archivo_nombre, :archivo_ruta, :archivo_peso)
             ON DUPLICATE KEY UPDATE 
                 indicador_ci = :ci_u, indicador_cg = :cg_u, indicador_sc = :sc_u, indicador_aa = :aa_u, 
-                estado = :estado_u, observacion_socio_lider = :obs_lider_u, observacion_socio_calidad = :obs_calidad_u
+                estado = :estado_u, observacion_socio_lider = :obs_lider_u, observacion_socio_calidad = :obs_calidad_u,
+                archivo_nombre = COALESCE(:archivo_nombre_u, archivo_nombre),
+                archivo_ruta = COALESCE(:archivo_ruta_u, archivo_ruta),
+                archivo_peso = COALESCE(:archivo_peso_u, archivo_peso)
         ");
+
         $stmtTestSave->execute([
-            ':proyecto_id' => $proyectoId, ':prueba_id' => $pruebaId,
-            ':ci' => $hasCI, ':cg' => $hasCG, ':sc' => $hasSC, ':aa' => $hasAA, ':estado' => $nuevoEstadoPrueba,
-            ':obs_lider' => $obsLider, ':obs_calidad' => $obsCalidad,
-            ':ci_u' => $hasCI, ':cg_u' => $hasCG, ':sc_u' => $hasSC, ':aa_u' => $hasAA, 
-            ':estado_u' => $nuevoEstadoPrueba, ':obs_lider_u' => $obsLider, ':obs_calidad_u' => $obsCalidad
+            ':proyecto_id'      => $proyectoId, 
+            ':prueba_id'        => $pruebaId,
+            ':ci'               => $hasCI, 
+            ':cg'               => $hasCG, 
+            ':sc'               => $hasSC, 
+            ':aa'               => $hasAA, 
+            ':estado'           => $nuevoEstadoPrueba,
+            ':obs_lider'        => $obsLider, 
+            ':obs_calidad'      => $obsCalidad,
+            ':archivo_nombre'   => $archivoNombreOriginal,
+            ':archivo_ruta'     => $archivoRutaGuardar,
+            ':archivo_peso'     => $archivoPeso,
+            ':ci_u'             => $hasCI, 
+            ':cg_u'             => $hasCG, 
+            ':sc_u'             => $hasSC, 
+            ':aa_u'             => $hasAA, 
+            ':estado_u'         => $nuevoEstadoPrueba, 
+            ':obs_lider_u'      => $obsLider, 
+            ':obs_calidad_u'    => $obsCalidad,
+            ':archivo_nombre_u' => $archivoNombreOriginal,
+            ':archivo_ruta_u'   => $archivoRutaGuardar,
+            ':archivo_peso_u'   => $archivoPeso
         ]);
 
         $pdo->commit();
@@ -496,16 +559,19 @@ foreach ($allDetalles as $det) {
 }
 
 $stmtStatus = $pdo->prepare("
-    SELECT estado, observacion_socio_lider, observacion_socio_calidad 
+    SELECT estado, observacion_socio_lider, observacion_socio_calidad, archivo_nombre, archivo_ruta, archivo_peso 
     FROM proyecto_pruebas_ejecucion 
     WHERE proyecto_id = :projId AND prueba_id = :prId
 ");
 $stmtStatus->execute([':projId' => $proyectoId, ':prId' => $pruebaId]);
 $datosEjecucion = $stmtStatus->fetch(PDO::FETCH_OBJ);
 
-$estadoActualPrueba = $datosEjecucion->estado ?? 'en_proceso';
-$obsSocioLider = $datosEjecucion->observacion_socio_lider ?? '';
-$obsSocioCalidad = $datosEjecucion->observacion_socio_calidad ?? '';
+$estadoActualPrueba  = $datosEjecucion->estado ?? 'en_proceso';
+$obsSocioLider       = $datosEjecucion->observacion_socio_lider ?? '';
+$obsSocioCalidad     = $datosEjecucion->observacion_socio_calidad ?? '';
+$archivoNombrePrueba = $datosEjecucion->archivo_nombre ?? null;
+$archivoRutaPrueba   = $datosEjecucion->archivo_ruta ?? null;
+$archivoPesoPrueba   = $datosEjecucion->archivo_peso ?? null;
 
 // Cargar todos los riesgos registrados para la Prueba 23 en este proyecto
 $listaRiesgosProyecto = [];
