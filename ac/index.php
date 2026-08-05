@@ -68,7 +68,7 @@ include '../main/layout_header.php';
             <tbody>
                 <?php
                 try {
-                    $query = "SELECT a.acId, c.name, a.riskScore, a.riskLevel, AS clientName, t.typeName, a.created_at 
+                    $query = "SELECT a.acId, c.name, a.riskScore, a.riskLevel AS clientName, t.typeName, a.created_at 
                               FROM ac a
                               INNER JOIN clientes c ON a.clientId = c.id
                               INNER JOIN ac_types t ON a.typeId = t.typeId
