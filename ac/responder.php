@@ -307,16 +307,16 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
         <div class="accordion-item" style="margin-top: 1.5rem; border: 1px solid #cbd5e1;">
             <div class="accordion-header" style="background: #1e293b; color: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.25rem;">
                 <span style="font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="ri-shield-flash-line" style="color: #38bdf8;"></i> Matriz de Riesgo Identificado
+                    <i class="ri-shield-flash-line" style="color: #38bdf8;"></i> Matriz de 
                 </span>
                 <button type="button" onclick="abrirModalRiesgoAC()" style="background: #0284c7; color: #ffffff; border: none; padding: 0.45rem 0.9rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
                     <i class="ri-add-line"></i> Agregar Riesgo
                 </button>
             </div>
-            <div style="padding: 1.25rem; background: #ffffff; overflow-x: auto;">
+            <div style="padding: 1.25rem;overflow-x: auto; background: #1e293b; color: #ffffff">
                 <table class="subtest-table" style="width: 100%; border-collapse: collapse;" id="tablaMatrizAC">
                     <thead>
-                        <tr style="style="background: #1e293b; color: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.25rem;"">
+                        <tr style="background: #f8fafc;">
                             <th style="width: 12%; border: 1px solid #e2e8f0; padding: 0.6rem;">ID Riesgo</th>
                             <th style="width: 20%; border: 1px solid #e2e8f0; padding: 0.6rem;">Categoría de Riesgo</th>
                             <th style="width: 32%; border: 1px solid #e2e8f0; padding: 0.6rem;">Descripción del Riesgo Identificado</th>
