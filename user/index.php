@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '../main/config.php';
+include '../main/config.php'; 
 session_start();
 
 try {
