@@ -308,8 +308,8 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
             $hayPruebasVisibles = false;
 
             foreach ($categories as $cat):
-                $letraCat = chr(65 + ($catIndex % 26));
-                $catIndex++;
+                
+                
 
                 $stmtP = $pdo->prepare("
                     SELECT p.* 
@@ -334,7 +334,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
                 <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 1rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
                     <span>
                         <i class="ri-folder-3-line" style="margin-right: 0.5rem; color: #2563eb;"></i>
-                       <?= $letraCat ?>.  <?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?>
+                       <?= $letraCat = chr(65 + ($catIndex % 26)); $catIndex++; $letraCat ?>.  <?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?>
                     </span>
                     <i class="ri-arrow-down-s-line"></i>
                 </div>
