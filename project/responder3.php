@@ -152,6 +152,15 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 
     <!-- 2. Grupo de Botones (Agrupados y Alineados a la derecha) -->
     <div style="display: flex; align-items: center; gap: 0.35rem; margin-left: auto;">
+    <!-- Botón 1: Definir Frecuencia / Periodicidad -->
+        <a href="configurar-frecuencia3.php?proyectoId=<?= $proyectoId ?>" class="btn btn-secondary" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
+            <i class="ri-calendar-event-line"></i> Frecuencias (<?= $totalFrecuencias ?>)
+        </a>
+
+        <!-- Botón 2: Seleccionar Pruebas de la Frecuencia Activa -->
+        <a href="seleccionar-pruebas3.php?proyectoId=<?= $proyectoId ?>&frecuencia=<?= $frecuenciaNum ?>" class="btn btn-primary" style="background: #2563eb; color: #ffffff;">
+            <i class="ri-checkbox-multiple-line"></i> Seleccionar Pruebas
+        </a>
         <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
             <i class="ri-arrow-go-back-line"></i> 
         </a>
