@@ -149,7 +149,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <!-- 1. Título (Alineado a la izquierda) -->
     <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-        <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 2 Estrategia 
+        <i class="ri-dashboard-line" style="color: var(--accent);"></i>Etapa 2 Estrategia 
     </h1>
 
     <!-- 2. Grupo de Botones (Agrupados y Alineados a la derecha) -->
