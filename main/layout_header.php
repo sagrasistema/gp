@@ -17,6 +17,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $rawUserName   = $_SESSION['nombre_completo'] ?? $_SESSION['username'] ?? 'Usuario';
 $nombreUsuario = htmlspecialchars((string)$rawUserName, ENT_QUOTES, 'UTF-8');
 $UserId   = $_SESSION['id'];
+$rol   = $_SESSION['rol'];
 
 // Definimos la ruta base del logo dependiendo de dónde se llame el archivo
 // (Si es el index principal usa 'client/logo.png', si es un submódulo usa '../main/logo.png' o similar)
@@ -42,7 +43,7 @@ $activeTab = isset($currentTab) ? $currentTab : '';
     </div>
     
    <div class="navbar-right">
-    <span class="user-name-text"> <?= $UserId ?> </span>
+    <span class="user-name-text"><?= $rol ?> <?= $UserId ?> </span>
     <i class="ri-user-line user-avatar"></i>
     <button id="toggle-sidebar-btn" class="btn-toggle">
         <i class="ri-menu-line"></i>
