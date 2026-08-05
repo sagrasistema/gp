@@ -36,16 +36,16 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 <!-- Barra de Navegación Rápida por Etapas del Proyecto -->
 <div class="project-stages-bar">
     <a href="responder.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
-        <i class="ri-calendar-check-line"></i> Planificación
+        <i class="ri-calendar-check-line"></i>1. Planificación
     </a>
     <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn active">
-        <i class="ri-compass-3-line"></i> Estrategia
+        <i class="ri-compass-3-line"></i>2. Estrategia
     </a>
     <a href="responder3.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
-        <i class="ri-play-circle-line"></i> Ejecución
+        <i class="ri-play-circle-line"></i>3. Ejecución
     </a>
     <a href="responder4.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
-        <i class="ri-flag-line"></i> Conclusión
+        <i class="ri-flag-line"></i>4. Conclusión
     </a>
 </div>
 
