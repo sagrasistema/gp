@@ -103,7 +103,7 @@ include '../main/layout_header.php';
                                         <i class='ri-file-list-3-line'></i> Responder
                                     </a>
                                   </td>";
-                            echo "<td style='font-weight: 600; color: #64748b;'>{$ac->statusId}</td>";
+                            echo "<td style='font-weight: 600; color: #64748b; text-align: center;'>{$ac->statusId}</td>";
                             echo "</tr>";
                         }
                     } else {
