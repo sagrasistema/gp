@@ -54,9 +54,9 @@ include '../main/layout_header.php';
                 <tr>
                     <!--<th style="width: 10%;">ID AC</th>-->
                     
-                    <th style="width: 40%;">Cliente / Empresa</th>
+                    <th style="width: 35%;">Cliente / Empresa</th>
                     <th style="width: 15%;">Tipo de Evaluación</th>
-                    <th style="width: 10%;">Fecha Creación</th>
+                    <th style="width: 15%;">Fecha Creación</th>
                     
                     <th style="width: 15%;"> Nivel de Riesgo</th>
                     
