@@ -11,6 +11,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 $pageTitle = "Gestión de Usuarios - Panel de Control";
+include '../main/h.php'; 
 include '../main/config.php'; 
 
 
