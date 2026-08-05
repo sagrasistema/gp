@@ -4,16 +4,16 @@
  * PHP 8.x + PDO
  */
 
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Validar sesión activa
-if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
-    header('Location: login.php');
+// 2. Validar autenticación de usuario
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../login.php');
     exit;
 }
-
 require_once '../main/config.php';
 include '../main/h.php'; 
 

@@ -1,4 +1,13 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. Validar autenticación de usuario
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../login.php');
+    exit;
+}
 // v/proyectos/responder.php
 include '../main/config.php';
 include 'conect-proyecto4.php';

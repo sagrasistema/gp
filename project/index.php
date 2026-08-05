@@ -1,6 +1,14 @@
 <?php
 // v/proyectos/index.phpss
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
+// 2. Validar autenticación de usuario
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../login.php');
+    exit;
+}
 $pageTitle = "Gestión de Proyectos de Auditoría";
 include '../main/h.php'; 
 include '../main/config.php'; 

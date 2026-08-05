@@ -1,6 +1,15 @@
 <?php
 // v/proyectos/nuevo.php
 include '../main/config.php'; 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. Validar autenticación de usuario
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../login.php');
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $clientId = filter_input(INPUT_POST, 'clientId', FILTER_VALIDATE_INT);

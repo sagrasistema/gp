@@ -1,6 +1,15 @@
 <?php
 
 declare(strict_types=1);
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. Validar autenticación de usuario
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../login.php');
+    exit;
+}
 
 // v/proyectos/configurar-frecuencia3.php
 include '../main/config.php';
