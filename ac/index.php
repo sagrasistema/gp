@@ -99,7 +99,7 @@ include '../main/layout_header.php';
                             echo "<td>{$fecha}</td>";
                             echo "<td style='font-weight: 600; color: #64748b;'> {$ac->riskLevel} </td>";
                             echo "<td style='text-align: center;'>
-                                    <a href='responder.php?acId={$ac->acId}' class='btn btn-secondary' style=' #0bcf8e; color: #ffffff;;padding: 0.4rem 0.8rem; font-size: 0.85rem;'>
+                                    <a href='responder.php?acId={$ac->acId}' class='btn btn-secondary' style=' background: #0bcf8e; color: #ffffff;;padding: 0.4rem 0.8rem; font-size: 0.85rem;'>
                                         <i class='ri-file-list-3-line'></i> Responder
                                     </a>
                                   </td>";
