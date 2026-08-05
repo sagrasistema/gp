@@ -240,10 +240,7 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                                         </label>
                                     <?php endif; ?>
                                 </div>
-                                
-                                <!--<div>
-                                    <input type="text" name="answers[<?= # $q->questionId ?>][comment]" class="comment-input" placeholder="Comentarios o justificación..." value="<?= # htmlspecialchars($savedComment, ENT_QUOTES, 'UTF-8') ?>">
-                                </div>-->
+                    
                                 <div style="width: 100%;">
                                     <!-- REEMPLAZO: Textarea auto-expansible -->
                                     <textarea name="answers[<?= (int)$q->questionId ?>][comment]" 
