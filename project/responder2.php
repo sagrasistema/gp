@@ -151,8 +151,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
             <i class="ri-dashboard-line" style="color: var(--accent);"></i> Panel de Ejecución - Etapa 2 Estrategia 
         </h1>
         
-    </div>
-    <div class="table-actions-container">
+
         <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
             <i class="ri-arrow-go-back-line"></i> 
         </a>
