@@ -62,6 +62,10 @@ $uploadBaseDir = __DIR__ . '/../uploads/terminos/';
 // -------------------------------------------------------------------------
 // 2. CARGAR DATOS EXISTENTES
 // -------------------------------------------------------------------------
+// 1. Verificar estado del registro maestro
+$stmtStatus = $pdo->prepare("SELECT statusId FROM terminos_condiciones WHERE id = :id");
+$stmtStatus->execute([':id' => $terminoId]);
+$isClosed = ((int)$stmtStatus->fetchColumn() === 2);
 try {
     $stmtHeader = $pdo->prepare("
         SELECT tc.*, c.name AS clientName 
@@ -490,14 +494,18 @@ include '../main/h.php';
             </label>
         </div>
 
+
+
         <!-- BOTONES -->
         <div style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
             <a href="responder-terminos.php?id=<?= $terminoId ?>" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; background: #e2e8f0; color: #334155; border-radius: 6px; text-decoration: none; font-weight: 600;">
                 Cancelar
             </a>
-            <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="ri-save-line"></i> Guardar Cambios
-            </button>
+            <?php if (!$isClosed): ?>
+                <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="ri-save-line"></i> Guardar Cambios
+                </button>
+            <?php endif; ?>            
         </div>
 
     </form>
