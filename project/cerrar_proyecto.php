@@ -11,7 +11,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-require_once 'conect-actividades.php';
+include '../main/config.php';
+include 'conect-proyecto.php';
 
 // 2. Procesar únicamente peticiones POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
