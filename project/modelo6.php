@@ -208,7 +208,7 @@ $valNivelSud = $resolveValue(
         <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
             3. Desarrollar una Expectativa
         </h4>
-        <textarea name="desarrollar_expectativa" rows="4" placeholder="Describa analíticamente la expectativa..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?= htmlspecialchars((string) ($formData['desarrollar_expectativa'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
+        <textarea class="comment-input auto-expand" name="desarrollar_expectativa" rows="4" placeholder="Describa analíticamente la expectativa..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?= htmlspecialchars((string) ($formData['desarrollar_expectativa'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
     </div>
 
     <!-- 4. Definir la Diferencia Tolerable y Umbrales -->
@@ -225,7 +225,7 @@ $valNivelSud = $resolveValue(
         <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
             5. Registro de Resultados y Desviaciones Obtenidas
         </h4>
-        <textarea name="determinacion_diferencias" rows="4" placeholder="Indique los valores reales obtenidos..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?= htmlspecialchars((string) ($formData['determinacion_diferencias'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
+        <textarea class="comment-input auto-expand" name="determinacion_diferencias" rows="4" placeholder="Indique los valores reales obtenidos..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?= htmlspecialchars((string) ($formData['determinacion_diferencias'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
     </div>
 
     <!-- 6. Conclusión y Evaluación del Hallazgo -->
@@ -233,7 +233,7 @@ $valNivelSud = $resolveValue(
         <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
             6. Conclusión y Evaluación de Resultados
         </h4>
-        <textarea name="evaluacion_resultados" rows="3" placeholder="Redacte la conclusión técnica..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?= htmlspecialchars((string) ($formData['evaluacion_resultados'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
+        <textarea class="comment-input auto-expand" name="evaluacion_resultados" rows="3" placeholder="Redacte la conclusión técnica..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?= htmlspecialchars((string) ($formData['evaluacion_resultados'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
     </div>
 
     <!-- Botón de Envío -->
