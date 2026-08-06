@@ -122,7 +122,7 @@ if ((int)$pruebaId === 16):
             </div>
 
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: center;">
-                <div>
+                <div style="margin-top:1em">
                    
                     <select name="punto_referencia" id="punto_referencia" class="select-materialidad-custom">
                         <?php foreach ($opcionesPuntoReferencia as $opcion): ?>
