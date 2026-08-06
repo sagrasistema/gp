@@ -1,4 +1,6 @@
-<?php 
+<?php
+declare(strict_types=1);
+
 // 1. Iniciar sesión obligatoriamente antes de procesar lógica o incluir layouts
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -9,18 +11,19 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: ../login.php');
     exit;
 }
+
 $pageTitle = "Control de Clientes";
-include 'header.php'; // Tu archivo de conexión / inicialización local de la carpeta client
+include 'header.php'; // Archivo de conexión / inicialización local de la carpeta client
 ?>
 
 <link rel="stylesheet" href="../main/layout.css">
 
 <?php
 // Configuración dinámica del Layout para la carpeta client/
-$customLogoPath = '../main/logo.png'; // Ruta para llegar al logo original del sistema
-$customHomePath = '../index.php';     // Ruta para volver al HUB principal
-$customAcPath   = '../ac/index.php';  // Ruta para ir al módulo AC
-$currentTab     = 'clientes';           // Podemos dejar 'inicio' o definir una pestaña para clientes si la creas luego
+$customLogoPath = '../main/logo.png'; 
+$customHomePath = '../index.php';     
+$customAcPath   = '../ac/index.php';  
+$currentTab     = 'clientes';         
 
 include '../main/layout_header.php'; 
 ?>
@@ -53,23 +56,62 @@ include '../main/layout_header.php';
                 <i class="ri-close-circle-line"></i> 
             </a>
         </div>
-
     </div>
 
     <div class="table-container">
         <table class="custom-table">
             <thead>
                 <tr>
-                    <th style="width: 25%;">Cliente / Empresa</th>
-                    <th style="width: 20%;">Correo Electrónico</th>
+                    <th style="width: 10%;">ID</th>
+                    <th style="width: 30%;">Cliente / Empresa</th>
+                    <th style="width: 25%;">Correo Electrónico</th>
                     <th style="width: 15%;">Teléfono</th>
-                    <th style="width: 15%;">Sector</th>
-                    <th style="width: 13%;">Estado</th>
-                    <th style="width: 12%; text-align: center;">Acciones</th>
+                    <th style="width: 20%; text-align: center;">Acciones</th>
                 </tr>
             </thead>
-            <tbody id="table-body">
-                </tbody>
+            <tbody>
+                <?php
+                try {
+                    // Consulta con filtro estricto de visibilidad por ver_id
+                    $query = "SELECT id, name, email, phone, created_at, ver_id 
+                              FROM clientes 
+                              WHERE ver_id != 0 
+                              ORDER BY id DESC";
+                              
+                    $stmt = $pdo->query($query);
+                    $clientes = $stmt->fetchAll(PDO::FETCH_OBJ);
+                    
+                    if (!empty($clientes)) {
+                        foreach ($clientes as $cli) {
+                            $id    = (int)$cli->id;
+                            $name  = htmlspecialchars($cli->name, ENT_QUOTES, 'UTF-8');
+                            $email = htmlspecialchars($cli->email ?? 'N/A', ENT_QUOTES, 'UTF-8');
+                            $phone = htmlspecialchars($cli->phone ?? 'N/A', ENT_QUOTES, 'UTF-8');
+
+                            echo "<tr>";
+                            echo "<td style='font-weight: 600; color: #64748b;'>#{$id}</td>";
+                            echo "<td><strong>{$name}</strong></td>";
+                            echo "<td>{$email}</td>";
+                            echo "<td>{$phone}</td>";
+                            echo "<td style='text-align: center; white-space: nowrap;'>";
+                            
+                            // Botón Editar / Gestionar Cliente
+                            echo "<a href='editar.php?id={$id}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; margin-right: 4px;' data-tooltip='Editar Cliente'>";
+                            echo "<i class='ri-edit-line'></i>";
+                            echo "</a>";
+
+                            echo "</td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='5' style='text-align: center; color: #64748b; padding: 3rem;'>No se han encontrado clientes registrados.</td></tr>";
+                    }
+                } catch (PDOException $e) {
+                    error_log("Error al listar clientes en client/index.php: " . $e->getMessage());
+                    echo "<tr><td colspan='5' style='text-align: center; color: red; padding: 2rem;'>Error al cargar los clientes desde el servidor.</td></tr>";
+                }
+                ?>
+            </tbody>
         </table>
     </div>
 </div>
@@ -78,6 +120,6 @@ include '../main/layout_header.php';
 // Renderiza el cierre del layout, barra lateral y los scripts de interacción móvil
 include '../main/layout_footer.php'; 
 
-// Renderiza los scripts del pie de página de clientes (donde seguramente cargas tu JS para rellenar la tabla)
+// Renderiza los scripts del pie de página de clientes
 include 'footer.php'; 
 ?>
