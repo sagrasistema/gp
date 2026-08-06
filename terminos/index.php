@@ -164,12 +164,13 @@ include '../main/layout_header.php';
         <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
             <thead>
                 <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 700;">
-                    <th style="padding: 0.85rem 1rem;">#</th>
+                    <!--<th style="padding: 0.85rem 1rem;">#</th>-->
                     <th style="padding: 0.85rem 1rem;">Cliente</th>
                     <th style="padding: 0.85rem 1rem;">Servicio</th>
                     <th style="padding: 0.85rem 1rem;">Estado</th>
                     <th style="padding: 0.85rem 1rem;">Fecha Creación</th>
                     <th style="padding: 0.85rem 1rem; text-align: center;">Acciones</th>
+                    <th style="width: 10%;">Estado</th>
                 </tr>
             </thead>
             <tbody>
@@ -182,7 +183,7 @@ include '../main/layout_header.php';
                 <?php else: ?>
                     <?php foreach ($records as $index => $row): ?>
                         <tr style="border-bottom: 1px solid #f1f5f9;">
-                            <td style="padding: 0.85rem 1rem; font-weight: 600; color: #64748b;"><?= $index + 1 ?></td>
+                            
                             <td style="padding: 0.85rem 1rem; font-weight: 600; color: #1e293b;"><?= htmlspecialchars($row->clientName, ENT_QUOTES, 'UTF-8') ?></td>
                             <td style="padding: 0.85rem 1rem; color: #334155;"><?= htmlspecialchars($row->servicio, ENT_QUOTES, 'UTF-8') ?></td>
                             <td style="padding: 0.85rem 1rem;">
@@ -202,6 +203,22 @@ include '../main/layout_header.php';
                                     <i class="ri-reply-fill"></i> Responder
                                 </a>
                             </td>
+                            <?php 
+                            $statusId   = (int)($row->statusId ?? 1);
+                            $isClosed   = ($statusId === 2);
+
+                            $iconClass  = $isClosed ? 'ri-lock-fill' : 'ri-lock-unlock-line';
+                            $iconColor  = $isClosed ? '#0f172a' : '#16a34a'; // Negro para cerrado, Verde para en proceso
+                            $tooltip    = $isClosed ? 'Cerrado' : 'En proceso';
+                            ?>
+                            <td style='text-align: center; vertical-align: middle;'>
+                                    <span title='<?={$tooltip}?>' style='cursor: help; display: inline-flex; align-items: center;'>
+                                        <i class='<?={$iconClass}?>' style='font-size: 1.25rem; color: <?{$iconColor}?>;'></i>
+                                    </span>
+                            </td>
+
+
+
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
