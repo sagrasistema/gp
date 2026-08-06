@@ -358,14 +358,14 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
             </div>
         <?php endforeach; ?>
     <?php 
-// Asegurar la obtención del estatus actual del proyecto para la vista
-$currentProjectStatusId = (int)($projectData['statusId'] ?? 1); 
+// Lectura directa del estatus actual del proyecto desde el objeto cargado
+$currentProjectStatusId = (int)($projectData->statusId ?? 1); 
 $isProjectClosed = ($currentProjectStatusId === 2);
 ?>
 
 <?php if ($currentUserId === 1 || $currentUserId === 2): ?>
-    <form method="POST" action="actividades.php?proyectoId=<?= $proyectoId ?>">
-        <input type="hidden" name="proyecto_id" value="<?= $proyectoId ?>">
+    <form method="POST" action="">
+        <input type="hidden" name="proyecto_id" value="<?= $projectData->id ?>">
         
         <div style="margin-top: 2rem; margin-bottom: 2rem; border: 1px solid <?= $isProjectClosed ? '#fecaca' : '#cbd5e1' ?>; border-radius: 8px; background: <?= $isProjectClosed ? '#fef2f2' : '#ffffff' ?>; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
             
@@ -388,7 +388,7 @@ $isProjectClosed = ($currentProjectStatusId === 2);
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                 <p style="margin: 0; font-size: 0.875rem; color: #475569; max-width: 600px;">
                     <?php if ($isProjectClosed): ?>
-                        Este proyecto se encuentra cerrado (<code>statusId = 2</code>). Las modificaciones generales están restringidas.
+                        Este proyecto se encuentra cerrado (`statusId = 2`). Las modificaciones generales están restringidas.
                     <?php else: ?>
                         Selecciona <strong>"Cerrado"</strong> para finalizar el proyecto y actualizar su <code>statusId</code> a 2 automáticamente.
                     <?php endif; ?>
