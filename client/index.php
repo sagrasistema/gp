@@ -48,6 +48,11 @@ include '../main/layout_header.php';
                 <i class="ri-book-open-line"></i> 
             </a>
 
+            <!-- Botón de exportación requerido por el script JS -->
+            <button id="btn-export" class="btn btn-secondary" data-tooltip="Exportar CSV">
+                <i class="ri-file-excel-line"></i>
+            </button>
+
             <a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Registro">
                 <i class="ri-add-line"></i>
             </a>
@@ -56,61 +61,23 @@ include '../main/layout_header.php';
                 <i class="ri-close-circle-line"></i> 
             </a>
         </div>
+
     </div>
 
     <div class="table-container">
         <table class="custom-table">
             <thead>
                 <tr>
-                    <th style="width: 10%;">ID</th>
-                    <th style="width: 30%;">Cliente / Empresa</th>
-                    <th style="width: 25%;">Correo Electrónico</th>
+                    <th style="width: 25%;">Cliente / Empresa</th>
+                    <th style="width: 20%;">Correo Electrónico</th>
                     <th style="width: 15%;">Teléfono</th>
-                    <th style="width: 20%; text-align: center;">Acciones</th>
+                    <th style="width: 15%;">Sector</th>
+                    <th style="width: 13%;">Estado</th>
+                    <th style="width: 12%; text-align: center;">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
-                <?php
-                try {
-                    // Consulta con filtro estricto de visibilidad por ver_id
-                    $query = "SELECT id, name, email, phone, created_at, ver_id 
-                              FROM clientes 
-                              WHERE ver_id != 0 
-                              ORDER BY id DESC";
-                              
-                    $stmt = $pdo->query($query);
-                    $clientes = $stmt->fetchAll(PDO::FETCH_OBJ);
-                    
-                    if (!empty($clientes)) {
-                        foreach ($clientes as $cli) {
-                            $id    = (int)$cli->id;
-                            $name  = htmlspecialchars($cli->name, ENT_QUOTES, 'UTF-8');
-                            $email = htmlspecialchars($cli->email ?? 'N/A', ENT_QUOTES, 'UTF-8');
-                            $phone = htmlspecialchars($cli->phone ?? 'N/A', ENT_QUOTES, 'UTF-8');
-
-                            echo "<tr>";
-                            echo "<td style='font-weight: 600; color: #64748b;'>#{$id}</td>";
-                            echo "<td><strong>{$name}</strong></td>";
-                            echo "<td>{$email}</td>";
-                            echo "<td>{$phone}</td>";
-                            echo "<td style='text-align: center; white-space: nowrap;'>";
-                            
-                            // Botón Editar / Gestionar Cliente
-                            echo "<a href='editar.php?id={$id}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; margin-right: 4px;' data-tooltip='Editar Cliente'>";
-                            echo "<i class='ri-edit-line'></i>";
-                            echo "</a>";
-
-                            echo "</td>";
-                            echo "</tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='5' style='text-align: center; color: #64748b; padding: 3rem;'>No se han encontrado clientes registrados.</td></tr>";
-                    }
-                } catch (PDOException $e) {
-                    error_log("Error al listar clientes en client/index.php: " . $e->getMessage());
-                    echo "<tr><td colspan='5' style='text-align: center; color: red; padding: 2rem;'>Error al cargar los clientes desde el servidor.</td></tr>";
-                }
-                ?>
+            <tbody id="table-body">
+                <!-- Los datos se cargan de forma asíncrona mediante JavaScript desde api.php -->
             </tbody>
         </table>
     </div>
@@ -120,6 +87,6 @@ include '../main/layout_header.php';
 // Renderiza el cierre del layout, barra lateral y los scripts de interacción móvil
 include '../main/layout_footer.php'; 
 
-// Renderiza los scripts del pie de página de clientes
+// Renderiza los scripts del pie de página de clientes (incluye el JS analizado previamente)
 include 'footer.php'; 
 ?>
