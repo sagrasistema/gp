@@ -138,7 +138,7 @@ $valNivelSud = $resolveValue(
             </div>
             <div>
                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Fecha y período de la prueba</label>
-                <input type="text" name="fecha_periodo_prueba" value="<?= htmlspecialchars((string) ($formData['fecha_periodo_prueba'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" placeholder="DD-MM-AA" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
+                <input type="text" name="fecha_periodo_prueba" value="<?= htmlspecialchars((string) ($formData['fecha_periodo_prueba'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" placeholder="DD-MM-AA" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;text-align: right">
             </div>
         </div>
 
