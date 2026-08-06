@@ -678,53 +678,7 @@ if (isset($modeloPrueba) && (string)$modeloPrueba === '5') {
         error_log("Error al recuperar Modelo 5: " . $e->getMessage());
     }
 }
-function obtenerEncabezadoActividad(PDO $pdo, int $pruebaId): array
-{
-    $sql = "SELECT 
-                p.id AS prueba_id,
-                p.nombre AS prueba_nombre,
-                c.id AS categoria_id,
-                c.nombre AS categoria_nombre,
-                c.etapa_id AS etapa_id,
-                COALESCE(e.nombre, CONCAT('Etapa ', c.etapa_id)) AS etapa_nombre
-            FROM audit_pruebas p
-            INNER JOIN audit_categorias c ON p.categoria_id = c.id
-            LEFT JOIN audit_etapas e ON c.etapa_id = e.id
-            WHERE p.id = :prueba_id
-            LIMIT 1";
 
-    try {
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':prueba_id', $pruebaId, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $headerData = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$headerData) {
-            throw new Exception("No se encontró información para la prueba especificada.");
-        }
-
-        return $headerData;
-
-    } catch (PDOException $e) {
-        // Registro del error en los logs internos del servidor (sin exponer detalles al usuario)
-        error_log("Error SQL al consultar encabezado [Prueba ID: {$pruebaId}]: " . $e->getMessage());
-        throw new Exception("Ocurrió un problema al cargar los datos de la prueba.");
-    }
-}
-
-// --- USO DENTRO DEL FLUJO PRINCIPAL ---
-// $pruebaId debe provenir filtrado y validado de $_GET o $_POST
-$pruebaId = filter_input(INPUT_GET, 'prueba_id', FILTER_VALIDATE_INT) ?? 0;
-
-if ($pruebaId > 0) {
-    try {
-        $datosEncabezado = obtenerEncabezadoActividad($pdo, $pruebaId);
-    } catch (Exception $e) {
-        // Manejo controlado de excepciones
-        $errorMensaje = $e->getMessage();
-    }
-}
 $pageTitle = "Formulario de Actividades y Hallazgos";
 include '../main/h.php';
 ?>
