@@ -11,9 +11,9 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-include '../main/config.php';
-include 'conect-proyecto.php';
-
+include '../main/config.php';;
+// Capturar y validar el ID del proyecto desde la URL de forma segura
+$proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 // 2. Procesar únicamente peticiones POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Capturar de forma directa y segura
