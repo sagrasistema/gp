@@ -121,7 +121,7 @@ $valNivelSud = $formData['nivel_registro_sud']
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
             <div>
                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">
-                    Importancia relativa General
+                    Importancia relativa Generaldd
                 </label>
                 <input 
                     type="text" 
