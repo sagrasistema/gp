@@ -127,7 +127,7 @@ include 'main/layout_header.php';
 
         <!-- ACCESO EXCLUSIVO PARA USUARIOS ID 1 Y 2 -->
         <?php if (isset($_SESSION['user_id']) && in_array((int)$_SESSION['user_id'], [1, 2], true)): ?>
-            <a href="tu_modulo_especial/index.php" class="module-card admin-card">
+            <a href="clientes_status/index.php" class="module-card admin-card">
                 <div class="icon-box"><i class="ri-admin-line"></i></div>
                 <h2>Panel Especial</h2>
                 <p>Módulo de gestión avanzada y control exclusivo de superusuarios.</p>
