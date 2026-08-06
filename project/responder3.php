@@ -343,6 +343,21 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
                     <?php foreach ($pruebas as $pr): 
                         $saved = $pruebasEjecutadas[$pr->id] ?? null;
                         $savedStatus = $saved['estado'] ?? 'en_proceso';
+                        
+                        $statusLabels = [
+                            'en_proceso' => '⏳ En proceso',
+                            'completado' => '✅ Completado',
+                            'por_corregir_lider' => '⚠️ Por Corregir Lider',
+                            'por_corregir_riesgo' => '🚨 Por Corregir Riesgo',
+                            'revisado' => '🔹 Revisado',
+                            'cerrado' => '🔒 Cerrado'
+                        ];
+                        $statusText = $statusLabels[$savedStatus] ?? '⏳ En proceso';
+                        
+                        // Métricas de actividades
+                        $metricaAct = $progresoActividades[$pr->id] ?? ['total_actividades' => 0, 'actividades_completadas' => 0];
+                        $totalAct = (int)$metricaAct['total_actividades'];
+                        $completadasAct = (int)$metricaAct['actividades_completadas'];
                     ?>
                         <div class="prueba-row-container" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); gap: 1rem;">
                             <div class="prueba-title">
@@ -354,9 +369,11 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 
                             
                             <div class="prueba-actions" style="display: flex; align-items: center; gap: 0.75rem;">
-                                
+                                 <span style="font-size: 0.8rem; font-weight: 600; padding: 0.35rem 0.75rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155;">
+                                    <?= $statusText ?>
+                                </span>
                                 <a href="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pr->id ?>&frecuencia=<?= $frecuenciaNum ?>" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.85rem;">
-                                    <i class="ri-survey-line"></i> Actividadess (Frecuencia <?= $frecuenciaNum ?>)
+                                    <i class="ri-survey-line"></i> Actividades (Frecuencia <?= $frecuenciaNum ?>)
                                 </a>
                             </div>
                         </div>
