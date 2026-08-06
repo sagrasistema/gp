@@ -32,7 +32,7 @@ $catalogosRiesgo = [
 $listaRiesgos = [];
 if ($proyectoId > 0) {
     try {
-        $stmtRiesgos = $pdo->prepare('SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :pid ORDER BY id DESC');
+        $stmtRiesgos = $pdo->prepare('SELECT * FROM prueba_23_riesgos WHERE proyecto_id = :pid ORDER BY id ASC');
         $stmtRiesgos->execute(['pid' => $proyectoId]);
         $listaRiesgos = $stmtRiesgos->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
