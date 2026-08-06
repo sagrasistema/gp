@@ -88,6 +88,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Procesamiento específico para la Prueba 16 (Materialidad)
         if ((int)$pruebaId === 16 && isset($_POST['materialidad']) && is_array($_POST['materialidad'])) {
             $mat = $_POST['materialidad'];
+            // 1. Sanitización y validación por Lista Blanca del Punto de Referencia
+            $opcionesValidasPuntoRef = [
+                'Ingresos de Actividades Ordinarias',
+                'Utilidad antes de Impuestos',
+                'Activo Total',
+                'Patrimonio Neto',
+            ];
+
+            $puntoRefRaw = trim((string) ($mat['punto_referencia'] ?? $_POST['punto_referencia'] ?? ''));
+            $punto_ref   = in_array($puntoRefRaw, $opcionesValidasPuntoRef, true)
+            ? $puntoRefRaw
+            : 'Utilidad antes de Impuestos';
             
             $ben_m   = parseVenezuelanNumber($mat['beneficios_monto'] ?? null);
             $tram_p  = parseVenezuelanNumber($mat['tramo_porc'] ?? null);
@@ -101,45 +113,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $min_s   = parseVenezuelanNumber($mat['minimis_secundario_monto'] ?? null);
 
             $stmtMatSave = $pdo->prepare("
-                INSERT INTO proyecto_materialidad 
-                (proyecto_id, prueba_id, beneficios_monto, tramo_porc, tramo_monto, importancia_inicial_monto, recorte_porc, recorte_monto, importancia_ajustada_monto, minimis_porc, minimis_monto, minimis_secundario_monto)
-                VALUES (:proj, :pr, :ben_m, :tram_p, :tram_m, :imp_ini, :rec_p, :rec_m, :imp_aju, :min_p, :min_m, :min_s)
+            INSERT INTO proyecto_materialidad (
+                    proyecto_id, 
+                    prueba_id, 
+                    punto_referencia,
+                    beneficios_monto, 
+                    tramo_porc, 
+                    tramo_monto, 
+                    importancia_inicial_monto, 
+                    recorte_porc, 
+                    recorte_monto, 
+                    importancia_ajustada_monto, 
+                    minimis_porc, 
+                    minimis_monto, 
+                    minimis_secundario_monto
+                )
+                VALUES (
+                    :proj, 
+                    :pr, 
+                    :punto_ref,
+                    :ben_m, 
+                    :tram_p, 
+                    :tram_m, 
+                    :imp_ini, 
+                    :rec_p, 
+                    :rec_m, 
+                    :imp_aju, 
+                    :min_p, 
+                    :min_m, 
+                    :min_s
+                )
                 ON DUPLICATE KEY UPDATE 
-                    beneficios_monto = :ben_m_u, 
-                    tramo_porc = :tram_p_u, 
-                    tramo_monto = :tram_m_u, 
+                    punto_referencia           = :punto_ref_u,
+                    beneficios_monto           = :ben_m_u, 
+                    tramo_porc                 = :tram_p_u, 
+                    tramo_monto                = :tram_m_u, 
                     importancia_inicial_monto = :imp_ini_u, 
-                    recorte_porc = :rec_p_u, 
-                    recorte_monto = :rec_m_u, 
+                    recorte_porc               = :rec_p_u, 
+                    recorte_monto              = :rec_m_u, 
                     importancia_ajustada_monto = :imp_aju_u, 
-                    minimis_porc = :min_p_u, 
-                    minimis_monto = :min_m_u, 
-                    minimis_secundario_monto = :min_s_u
-            ");
+                    minimis_porc               = :min_p_u, 
+                    minimis_monto              = :min_m_u, 
+                    minimis_secundario_monto   = :min_s_u
+            ");       
 
             $dataMat = [
-                ':proj'     => $proyectoId,
-                ':pr'       => $pruebaId,
-                ':ben_m'    => $ben_m,
-                ':tram_p'   => $tram_p,
-                ':tram_m'   => $tram_m,
-                ':imp_ini'  => $imp_ini,
-                ':rec_p'    => $rec_p,
-                ':rec_m'    => $rec_m,
-                ':imp_aju'  => $imp_aju,
-                ':min_p'    => $min_p,
-                ':min_m'    => $min_m,
-                ':min_s'    => $min_s,
-                ':ben_m_u'  => $ben_m,
-                ':tram_p_u' => $tram_p,
-                ':tram_m_u' => $tram_m,
-                ':imp_ini_u'=> $imp_ini,
-                ':rec_p_u'  => $rec_p,
-                ':rec_m_u'  => $rec_m,
-                ':imp_aju_u'=> $imp_aju,
-                ':min_p_u'  => $min_p,
-                ':min_m_u'  => $min_m,
-                ':min_s_u'  => $min_s,
+                ':proj'        => $proyectoId,
+                ':pr'          => $pruebaId,
+                ':punto_ref'   => $punto_ref,
+                ':ben_m'       => $ben_m,
+                ':tram_p'      => $tram_p,
+                ':tram_m'      => $tram_m,
+                ':imp_ini'     => $imp_ini,
+                ':rec_p'       => $rec_p,
+                ':rec_m'       => $rec_m,
+                ':imp_aju'     => $imp_aju,
+                ':min_p'       => $min_p,
+                ':min_m'       => $min_m,
+                ':min_s'       => $min_s,
+                ':punto_ref_u' => $punto_ref,
+                ':ben_m_u'     => $ben_m,
+                ':tram_p_u'    => $tram_p,
+                ':tram_m_u'    => $tram_m,
+                ':imp_ini_u'   => $imp_ini,
+                ':rec_p_u'     => $rec_p,
+                ':rec_m_u'     => $rec_m,
+                ':imp_aju_u'   => $imp_aju,
+                ':min_p_u'     => $min_p,
+                ':min_m_u'     => $min_m,
+                ':min_s_u'     => $min_s,
             ];
 
             $stmtMatSave->execute($dataMat);
