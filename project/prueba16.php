@@ -55,53 +55,42 @@ $puntoReferenciaSeleccionado = $datosMaterialidad['punto_referencia'];
 if ((int)$pruebaId === 16):
 ?>
 <style>
-.select-materialidad-custom {
+/* Estilo unificado para Inputs y Selects del módulo de Materialidad */
+.form-control-materialidad {
     display: block;
     width: 100%;
-    padding: 0.5rem 2.25rem 0.5rem 0.85rem;
+    height: 42px; /* Altura fija unificada */
+    padding: 0.375rem 0.85rem;
     font-size: 0.925rem;
     font-weight: 500;
     line-height: 1.5;
-    color: #2b3035;
+    color: #1a252f;
     background-color: #ffffff;
-    /* Flecha Chevron SVG estilizada */
+    border: 1px solid #ced4da;
+    border-radius: 8px; /* Bordes redondeados idénticos */
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    box-sizing: border-box;
+}
+
+/* Personalización del Chevron SVG para el Select sin alterar sus dimensiones */
+select.form-control-materialidad {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%3c343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 0.85rem center;
     background-size: 14px 10px;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
+    padding-right: 2.25rem;
     cursor: pointer;
 }
 
-.select-materialidad-custom:focus {
+/* Estado Focus interactivo */
+.form-control-materialidad:focus {
     border-color: #0d6efd;
     outline: 0;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.18);
-}
-
-.select-materialidad-custom:hover {
-    border-color: #b3b7bb;
-}
-
-.input-monto-custom {
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    padding: 0.5rem 0.85rem;
-    font-size: 0.925rem;
-    font-weight: 600;
-    color: #1a252f;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.input-monto-custom:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.18);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
 }
 </style>
 <div style="margin-top: 2.5rem; margin-bottom: 1.5rem; background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
