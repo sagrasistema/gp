@@ -58,7 +58,7 @@ if ((int)$pruebaId === 16):
 .select-materialidad-custom {
     display: block;
     width: 100%;
-    padding: 2.5rem 2.25rem 0.5rem 0.85rem;
+    padding: 0.5rem 2.25rem 0.5rem 0.85rem;
     font-size: 0.925rem;
     font-weight: 500;
     line-height: 1.5;
