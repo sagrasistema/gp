@@ -28,10 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_create_termino
         try {
             $pdo->beginTransaction();
 
-            // Insertar cabecera de Términos y Condiciones (incluyendo statusId inicial por defecto en 1)
+            // Insertar cabecera incluyendo statusId y ver_id inicial por defecto en 1
             $stmtMaster = $pdo->prepare("
-                INSERT INTO terminos_condiciones (cliente_id, servicio, estado, statusId) 
-                VALUES (:cliente_id, :servicio, 'pendiente', 1)
+                INSERT INTO terminos_condiciones (cliente_id, servicio, estado, statusId, ver_id) 
+                VALUES (:cliente_id, :servicio, 'pendiente', 1, 1)
             ");
             $stmtMaster->execute([
                 ':cliente_id' => $clienteId,
@@ -81,12 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_create_termino
 // 2. CONSULTAR DATOS PARA LA VISTA
 // -------------------------------------------------------------------------
 try {
-    // Listado de registros filtrando aquellos cuyo statusId sea diferente de 0
+    // Listado de registros filtrando aquellos cuyo ver_id sea diferente de 0
     $stmtList = $pdo->prepare("
         SELECT tc.*, c.name AS clientName, c.rif AS clientRif
         FROM terminos_condiciones tc
         INNER JOIN clientes c ON tc.cliente_id = c.id
-        WHERE tc.statusId != 0
+        WHERE tc.ver_id != 0
         ORDER BY tc.id DESC
     ");
     $stmtList->execute();

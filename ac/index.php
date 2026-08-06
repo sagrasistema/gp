@@ -79,13 +79,14 @@ include '../main/layout_header.php';
                                 a.riskScore, 
                                 a.riskLevel, 
                                 a.statusId,
+                                a.verId,
                                 a.created_at, 
                                 c.name AS clientName, 
                                 t.typeName 
                             FROM ac a
                             INNER JOIN clientes c ON a.clientId = c.id
                             INNER JOIN ac_types t ON a.typeId = t.typeId
-                            WHERE a.statusId != 0
+                            WHERE a.verId != 0
                             ORDER BY a.acId DESC";
 
                     $stmt = $pdo->query($query);

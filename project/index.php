@@ -70,11 +70,11 @@ include '../main/layout_header.php';
             <tbody>
                 <?php
                 try {
-                    // Consulta con filtro para excluir proyectos con statusId igual a 0
-                    $query = "SELECT p.id AS proyectoId, c.name AS clientName, p.nombre AS proyectoNombre, p.fecha_inicio, p.statusId 
+                    // Consulta filtrando por ver_id para preservar el statusId comercial/operativo (ej. proyectos cerrados en 2)
+                    $query = "SELECT p.id AS proyectoId, c.name AS clientName, p.nombre AS proyectoNombre, p.fecha_inicio, p.statusId, p.ver_id 
                               FROM proyectos p
                               INNER JOIN clientes c ON p.cliente_id = c.id
-                              WHERE p.statusId != 0
+                              WHERE p.ver_id != 0
                               ORDER BY p.id DESC";
                               
                     $stmt = $pdo->query($query);
