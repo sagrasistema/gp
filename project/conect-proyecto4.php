@@ -10,7 +10,7 @@ if (!$proyectoId) {
     die("Error: Proyecto no especificado o ID inválido.");
 }
 
-// 1. Cargar Cabecera del Proyecto y Datos del Cliente
+// 1. Cargar Cabecera del Proyecto y Datos del Cliente como ARRAY asociativo para evitar errores de tipo stdClass
 try {
     $stmt = $pdo->prepare("
         SELECT 
@@ -22,7 +22,7 @@ try {
         WHERE p.id = :id
     ");
     $stmt->execute([':id' => $proyectoId]);
-    $projectData = $stmt->fetch(PDO::FETCH_OBJ);
+    $projectData = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$projectData) {
         die("Error: El proyecto solicitado no existe.");
@@ -77,14 +77,16 @@ try {
         GROUP BY p.id
     ");
     $stmtActProgress->execute([':proyecto_id' => $proyectoId]);
-    // Indexamos por prueba_id para acceso O(1) en la vista
     $progresoActividades = $stmtActProgress->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log("Error al calcular progreso de actividades: " . $e->getMessage());
     $progresoActividades = [];
 }
 
-// 5. Calcular el porcentaje global de avance de la fase
+// 5. Inicializar variables auxiliares para evitar warnings en vistas (como $catalogosRiesgo)
+$catalogosRiesgo = $catalogosRiesgo ?? [];
+
+// 6. Calcular el porcentaje global de avance de la fase
 $totalPruebasCount = count($pruebasList);
 $completadasCount = 0;
 
@@ -99,7 +101,7 @@ foreach ($pruebasList as $pruebaItem) {
 $porcentajeProgreso = $totalPruebasCount > 0 ? round(($completadasCount / $totalPruebasCount) * 100) : 0;
 $currentUserId = (int)($_SESSION['user_id'] ?? 0);
 
-// PROCESAR CAMBIO DE ESTADO DEL PROYECTO (Solo usuarios 1 y 2)
+// 7. PROCESAR CAMBIO DE ESTADO DEL PROYECTO (Solo usuarios 1 y 2)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['statusId'])) {
     if ($currentUserId === 1 || $currentUserId === 2) {
         $newStatusId = (int)$_POST['statusId'];
@@ -107,7 +109,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['statusId'])) {
         
         if (in_array($newStatusId, [1, 2], true) && $targetProyectoId > 0) {
             try {
-                // Actualización segura en la tabla 'proyectos' modificando statusId
                 $stmtUpdateStatus = $pdo->prepare("
                     UPDATE proyectos 
                     SET statusId = :statusId, updated_at = NOW() 
