@@ -171,6 +171,39 @@ include 'conect-actividades.php';
             <i class="ri-book-line"></i> Instruciones
         </button>
     </div>
+    <div class="card-header bg-dark text-white p-4 rounded-top shadow-sm">
+        
+        <!-- Fila Superior: Etapa e ID + Nombre de la Categoría -->
+        <div class="text-uppercase text-info font-weight-bold mb-2 small tracking-wide d-flex align-items-center flex-wrap gap-2">
+            
+            <!-- Etapa -->
+            <span class="badge bg-info text-dark font-weight-bold me-2 px-2 py-1">
+                ETAPA <?= (int) $datosEncabezado['etapa_id'] ?>: <?= htmlspecialchars((string) $datosEncabezado['etapa_nombre'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
+            </span>
+
+            <span class="text-white-50 d-none d-sm-inline">|</span>
+
+            <!-- Categoría (ID antes del Nombre) -->
+            <span class="text-light ms-2">
+                CAT. #<?= (int) $datosEncabezado['categoria_id'] ?> - <?= htmlspecialchars((string) $datosEncabezado['categoria_nombre'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
+            </span>
+        </div>
+
+        <!-- Fila Principal: ID + Nombre de la Prueba -->
+        <h2 class="h3 text-white font-weight-bold mb-3">
+            PRUEBA #<?= (int) $datosEncabezado['prueba_id'] ?> - <?= htmlspecialchars((string) $datosEncabezado['prueba_nombre'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
+        </h2>
+
+        <!-- Botones de Acción -->
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-primary btn-sm d-inline-flex align-items-center me-2">
+                <i class="fas fa-book me-1"></i> Norma
+            </button>
+            <button type="button" class="btn btn-primary btn-sm d-inline-flex align-items-center">
+                <i class="fas fa-list-alt me-1"></i> Instrucciones
+            </button>
+        </div>
+    </div>
 
     <?php if (isset($_GET['success'])): ?>
         <div class="alert-success" style="padding:1rem; background:#d1fae5; color:#065f46; border-radius:8px; margin-bottom:1.5rem;">
