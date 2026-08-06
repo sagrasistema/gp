@@ -39,7 +39,7 @@ $m = $materialidadData ?? (object)[
     'minimis_monto'              => '0.00',
     'minimis_secundario_monto'   => '0.00'
 ];
-<?php
+
 // Opciones estandarizadas para el punto de referencia
 $opcionesPuntoReferencia = [
     'Ingresos de Actividades Ordinarias',
