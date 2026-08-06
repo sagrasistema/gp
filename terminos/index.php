@@ -212,8 +212,8 @@ include '../main/layout_header.php';
                             $tooltip    = $isClosed ? 'Cerrado' : 'En proceso';
                             ?>
                             <td style='text-align: center; vertical-align: middle;'>
-                                    <span title='<?={$tooltip}?>' style='cursor: help; display: inline-flex; align-items: center;'>
-                                        <i class='<?={$iconClass}?>' style='font-size: 1.25rem; color: <?{$iconColor}?>;'></i>
+                                    <span title='<?= echo $tooltip;?>' style='cursor: help; display: inline-flex; align-items: center;'>
+                                        <i class='<?=echo $iconClass;?>' style='font-size: 1.25rem; color: <? echo $iconColor;?>;'></i>
                                     </span>
                             </td>
 
