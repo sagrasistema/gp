@@ -9,7 +9,8 @@ error_reporting(E_ALL);
 
 // 1. INCLUSIÓN DE LA CONEXIÓN A LA BASE DE DATOS
 // Asegúrate de que este archivo instancie correctamente tu objeto PDO ($db)
-require_once __DIR__ . '/config.php';
+include '../main/config.php';
+$db = $pdo;
 
 try {
     // 2. VALIDACIÓN Y SANITIZACIÓN DE LA ENTRADA
