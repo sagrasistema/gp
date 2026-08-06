@@ -66,8 +66,8 @@ if ($proyectoId > 0) {
             <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #ffffff;">
                 <thead>
                     <tr style="background-color: #2a2b2f; color: #ffffff; text-align: left;">
-                        <th style="padding: 12px;">Nro riesgo</th>
-                        <th style="padding: 12px;">Origen del riesgo</th>
+                        <th style="padding: 6px;">Nro riesgo</th>
+                        <th style="padding: 6px;">Origen del riesgo</th>
                         <th style="padding: 12px;">Objetivos del negocio</th>
                         <th style="padding: 12px;">Riesgo del negocio</th>
                         <th style="padding: 12px;">Riesgo clave</th>
