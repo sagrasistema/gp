@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let tramoPorc  = parseVenezuelanNumber(inputTramoPorc ? inputTramoPorc.value : 0);
 
         // Alerta visual en tiempo real si está fuera de rango mientras se escribe
-        if (tramoPorc > 0 && (tramoPorc < 5 || tramoPorc > 10)) {
+        if (tramoPorc > 0 && (tramoPorc < 0.5 || tramoPorc > 10)) {
             inputTramoPorc.style.borderColor = '#ef4444'; 
         } else {
             inputTramoPorc.style.borderColor = '#cbd5e1';
