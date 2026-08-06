@@ -182,17 +182,7 @@ include 'conect-actividades.php';
     <!-- FORMULARIO PRINCIPAL DE ACTIVIDADES -->
 <?php
 
-// Asegurar inicialización de variables para evitar warnings (Línea 630 o similar)
-if ((int)$pruebaId === 141) {?>                        
-<form action="cerrar_proyecto.php" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas cerrar este proyecto?');" style="display: inline-block; margin-top: 1rem;">
-    <!-- Este input debe imprimir un número válido, ej: value="15" -->
-    <input type="hidden" name="proyecto_id" value="<?php echo htmlspecialchars((string)($proyectoId ?? 0), ENT_QUOTES, 'UTF-8'); ?>">
-    
-    <button type="submit" style="background-color: #dc2626; color: #ffffff; border: none; padding: 0.6rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
-        Cerrar Proyecto
-    </button>
-</form>
-<?php } ?>     
+
     <form action="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pruebaId ?>" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="action_type" value="save_all">
         
