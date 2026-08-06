@@ -180,7 +180,7 @@ include 'conect-actividades.php';
 
     <!-- FORMULARIO PRINCIPAL DE ACTIVIDADES -->
     <!-- FORMULARIO PRINCIPAL DE ACTIVIDADES -->
-<?php
+
 
 
     <form action="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pruebaId ?>" method="POST" enctype="multipart/form-data">
