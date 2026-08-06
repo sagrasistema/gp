@@ -26,7 +26,7 @@ function xml_escape(?string $value): string
 }
 
 try {
-    $db = $pdo 
+    $db = $pdo;
 
     // ------------------------------------------------------------------
     // 2. Consulta de Datos de la Etapa de Planificación del Proyecto
