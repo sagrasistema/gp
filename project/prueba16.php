@@ -54,6 +54,56 @@ $puntoReferenciaSeleccionado = $datosMaterialidad['punto_referencia'] ?? 'Utilid
 
 if ((int)$pruebaId === 16):
 ?>
+<style>
+.select-materialidad-custom {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 2.25rem 0.5rem 0.85rem;
+    font-size: 0.925rem;
+    font-weight: 500;
+    line-height: 1.5;
+    color: #2b3035;
+    background-color: #ffffff;
+    /* Flecha Chevron SVG estilizada */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%3c343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    background-size: 14px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.select-materialidad-custom:focus {
+    border-color: #0d6efd;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.18);
+}
+
+.select-materialidad-custom:hover {
+    border-color: #b3b7bb;
+}
+
+.input-monto-custom {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.925rem;
+    font-weight: 600;
+    color: #1a252f;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.input-monto-custom:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.18);
+}
+</style>
 <div style="margin-top: 2.5rem; margin-bottom: 1.5rem; background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     
     <!-- Cabecera -->
@@ -73,7 +123,10 @@ if ((int)$pruebaId === 16):
 
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: center;">
                 <div>
-                    <select name="punto_referencia" id="punto_referencia" class="form-select form-control shadow-sm">
+                   <label for="punto_referencia" class="form-label font-weight-bold text-secondary small text-uppercase tracking-wider">
+                        Punto de referencia:
+                    </label>
+                    <select name="punto_referencia" id="punto_referencia" class="select-materialidad-custom">
                         <?php foreach ($opcionesPuntoReferencia as $opcion): ?>
                             <option value="<?= htmlspecialchars($opcion, ENT_QUOTES, 'UTF-8') ?>" 
                                 <?= ($puntoReferenciaSeleccionado === $opcion) ? 'selected' : '' ?>>
