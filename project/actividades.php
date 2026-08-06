@@ -180,7 +180,19 @@ include 'conect-actividades.php';
 
     <!-- FORMULARIO PRINCIPAL DE ACTIVIDADES -->
     <!-- FORMULARIO PRINCIPAL DE ACTIVIDADES -->
-<?php if ((int)$pruebaId === 141) {?>                        
+<?php
+
+// Asegurar inicialización de variables para evitar warnings (Línea 630 o similar)
+$catalogosRiesgo = $catalogosRiesgo ?? [];
+
+// Obtener el estado actual de la base de datos si no está definido
+if (!isset($estadoActual) && isset($pruebaId, $proyectoId, $pdo)) {
+    $stmtEstado = $pdo->prepare("SELECT estado_prueba FROM pruebas_proyecto WHERE id = :prueba_id AND proyecto_id = :proyecto_id");
+    $stmtEstado->execute([':prueba_id' => $pruebaId, ':proyecto_id' => $proyectoId]);
+    $estadoActual = $stmtEstado->fetchColumn() ?: 'pendiente';
+}
+
+if ((int)$pruebaId === 141) {?>                        
 <form action="guardar_estado.php" method="POST" style="display: inline-flex; align-items: center; gap: 0.75rem;">
     <!-- Parámetros ocultos necesarios para identificar el registro -->
     <input type="hidden" name="proyecto_id" value="<?php echo $proyectoId; ?>">

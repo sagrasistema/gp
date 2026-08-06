@@ -26,11 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        // 3. Actualización segura usando sentencias preparadas PDO
+        // 3. Actualización segura usando sentencias preparadas PDO 
+        // Nota: Se omite updated_at temporalmente por compatibilidad con tablas legacy si no existe la columna.
         $stmt = $pdo->prepare("
             UPDATE pruebas_proyecto 
-            SET estado_prueba = :estado_prueba, 
-                updated_at = NOW() 
+            SET estado_prueba = :estado_prueba 
             WHERE id = :prueba_id AND proyecto_id = :proyecto_id
         ");
         
@@ -45,7 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
 
     } catch (Exception $e) {
-        error_log("Error al actualizar el estado: " . $e->getMessage());
+        // Registrar error internamente en el servidor sin exponerlo al usuario
+        error_log("Error crítico al actualizar el estado de la prueba: " . $e->getMessage());
         header("Location: actividades.php?proyectoId={$proyectoId}&pruebaId={$pruebaId}&error=save_failed");
         exit;
     }
