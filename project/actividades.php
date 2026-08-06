@@ -183,15 +183,6 @@ include 'conect-actividades.php';
 <?php
 
 // Asegurar inicialización de variables para evitar warnings (Línea 630 o similar)
-$catalogosRiesgo = $catalogosRiesgo ?? [];
-
-// Obtener el estado actual de la base de datos si no está definido
-if (!isset($estadoActual) && isset($pruebaId, $proyectoId, $pdo)) {
-    $stmtEstado = $pdo->prepare("SELECT estado_prueba FROM pruebas_proyecto WHERE id = :prueba_id AND proyecto_id = :proyecto_id");
-    $stmtEstado->execute([':prueba_id' => $pruebaId, ':proyecto_id' => $proyectoId]);
-    $estadoActual = $stmtEstado->fetchColumn() ?: 'pendiente';
-}
-
 if ((int)$pruebaId === 141) {?>                        
 <form action="cerrar_proyecto.php" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas cerrar este proyecto?');" style="display: inline-block; margin-top: 1rem;">
     <input type="hidden" name="proyecto_id" value="<?php echo htmlspecialchars((string)$proyectoId, ENT_QUOTES, 'UTF-8'); ?>">
