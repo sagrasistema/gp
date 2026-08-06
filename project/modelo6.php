@@ -190,8 +190,8 @@ $valNivelSud = $resolveValue(
                 'aser_c'  => ['sigla' => 'C', 'desc' => '(Completitud / Completeness)'],
                 'aser_a'  => ['sigla' => 'A', 'desc' => '(Exactitud / Accuracy)'],
                 'aser_eo' => ['sigla' => 'E/O', 'desc' => '(Existencia y Ocurrencia / Existence & Occurrence)'],
-                'aser_co' => ['sigla' => 'CO', 'desc' => ' (Corte / Cut-off)'],
-                'aser_ro' => ['sigla' => 'ORO', 'desc' => ' (Derechos y Obligaciones / Rights and Obligations)'],
+                'aser_co' => ['sigla' => 'CO', 'desc' => '(Corte / Cut-off)'],
+                'aser_ro' => ['sigla' => 'ORO', 'desc' => '(Derechos y Obligaciones / Rights and Obligations)'],
                 'aser_va' => ['sigla' => 'VA', 'desc' => '(Valuación y Asignación / Valuation & Allocation)'],
                 'aser_pd' => ['sigla' => 'PD', 'desc' => '(Presentación y Revelación / Presentation & Disclosure)']
             ];
