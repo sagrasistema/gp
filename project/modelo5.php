@@ -63,10 +63,10 @@ $data = $formData5 ?? []; // Inyectado desde el controlador
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <?php 
                 $aserciones = [
-                    'aser_c' => 'C', 'aser_ro' => 'RO', 
-                    'aser_a' => 'A', 'aser_va' => 'VA', 
-                    'aser_eo' => 'E/O', 'aser_pd' => 'PD', 
-                    'aser_co' => 'CO'
+                    'aser_c' => 'C (Completitud / Completeness)', 'aser_ro' => 'RO  (Derechos y Obligaciones / Rights and Obligations)', 
+                    'aser_a' => 'A (Exactitud / Accuracy)', 'aser_va' => 'VA (Valuación y Asignación / Valuation & Allocation)', 
+                    'aser_eo' => 'E/O (Existencia y Ocurrencia / Existence & Occurrence)', 'aser_pd' => 'PD (Presentación y Revelación / Presentation & Disclosure):', 
+                    'aser_co' => 'CO (Corte / Cut-off)'
                 ];
                 foreach ($aserciones as $key => $label): 
                     $checked = !empty($data[$key]) ? 'checked' : '';
