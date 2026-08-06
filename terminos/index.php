@@ -173,7 +173,7 @@ include '../main/layout_header.php';
                     <th style="width: 10%;">Estado</th>
                 </tr>
             </thead>
-            <tbody>
+<tbody>
                 <?php if (empty($records)): ?>
                     <tr>
                         <td colspan="6" style="padding: 2rem; text-align: center; color: #94a3b8;">
@@ -204,20 +204,18 @@ include '../main/layout_header.php';
                                 </a>
                             </td>
                             <?php 
-                            $statusId   = (int)($row->statusId ?? 1);
-                            $isClosed   = ($statusId === 2);
+                            $statusId  = (int)($row->statusId ?? 1);
+                            $isClosed  = ($statusId === 2);
 
-                            $iconClass  = $isClosed ? 'ri-lock-fill' : 'ri-lock-unlock-line';
-                            $iconColor  = $isClosed ? '#0f172a' : '#16a34a'; // Negro para cerrado, Verde para en proceso
-                            $tooltip    = $isClosed ? 'Cerrado' : 'En proceso';
+                            $iconClass = $isClosed ? 'ri-lock-fill' : 'ri-lock-unlock-line';
+                            $iconColor = $isClosed ? '#0f172a' : '#16a34a'; // Negro para cerrado, Verde para en proceso
+                            $tooltip   = $isClosed ? 'Cerrado' : 'En proceso';
                             ?>
-                            <td style='text-align: center; vertical-align: middle;'>
-                                    <span title='<?= echo $tooltip;?>' style='cursor: help; display: inline-flex; align-items: center;'>
-                                        <i class='<?=echo $iconClass;?>' style='font-size: 1.25rem; color: <? echo $iconColor;?>;'></i>
-                                    </span>
+                            <td style="text-align: center; vertical-align: middle;">
+                                <span title="<?= htmlspecialchars($tooltip, ENT_QUOTES, 'UTF-8') ?>" style="cursor: help; display: inline-flex; align-items: center;">
+                                    <i class="<?= htmlspecialchars($iconClass, ENT_QUOTES, 'UTF-8') ?>" style="font-size: 1.25rem; color: <?= htmlspecialchars($iconColor, ENT_QUOTES, 'UTF-8') ?>;"></i>
+                                </span>
                             </td>
-
-
 
                         </tr>
                     <?php endforeach; ?>
