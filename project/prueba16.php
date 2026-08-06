@@ -28,8 +28,9 @@ if (isset($pdo, $proyectoId, $pruebaId) && (int)$pruebaId === 16) {
 
 // Asegurar valores por defecto si aún no existen registros guardados
 $m = $materialidadData ?? (object)[
+    'punto_referencia'           => 'Utilidad antes de Impuestos',
     'beneficios_monto'           => '0.00',
-    'tramo_porc'                 => '5.00', // Valor por defecto dentro del rango válido
+    'tramo_porc'                 => '5.00', // Valor por defecto dentro del rango válido (0.5 - 10)
     'tramo_monto'                => '0.00',
     'importancia_inicial_monto'  => '0.00',
     'recorte_porc'               => '0.00',
@@ -48,9 +49,8 @@ $opcionesPuntoReferencia = [
     'Patrimonio Neto'
 ];
 
-// Asignación de variables desde la consulta previa a $datosMaterialidad
-$puntoReferenciaSeleccionado = $datosMaterialidad['punto_referencia'];
-#$montoBeneficios = (float)($datosMaterialidad['beneficios_monto'] ?? 0.00);
+// Asignación de variable desde el objeto $m de forma segura
+$puntoReferenciaSeleccionado = $m->punto_referencia ?? 'Utilidad antes de Impuestos';
 
 if ((int)$pruebaId === 16):
 ?>
@@ -64,7 +64,6 @@ if ((int)$pruebaId === 16):
     line-height: 1.5;
     color: #2b3035;
     background-color: #ffffff;
-    /* Flecha Chevron SVG estilizada */
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%3c343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 0.85rem center;
@@ -104,6 +103,7 @@ if ((int)$pruebaId === 16):
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.18);
 }
 </style>
+
 <div style="margin-top: 2.5rem; margin-bottom: 1.5rem; background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     
     <!-- Cabecera -->
@@ -123,8 +123,7 @@ if ((int)$pruebaId === 16):
 
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: center;">
                 <div style="margin-top:1em">
-                   
-                    <select name="punto_referencia" id="punto_referencia" class="select-materialidad-custom">
+                    <select name="materialidad[punto_referencia]" id="punto_referencia" class="select-materialidad-custom">
                         <?php foreach ($opcionesPuntoReferencia as $opcion): ?>
                             <option value="<?= htmlspecialchars($opcion, ENT_QUOTES, 'UTF-8') ?>" 
                                 <?= ($puntoReferenciaSeleccionado === $opcion) ? 'selected' : '' ?>>
@@ -133,16 +132,14 @@ if ((int)$pruebaId === 16):
                         <?php endforeach; ?>
                     </select>
                 </div>
-            <div>
-
-
+                <div>
                     <span style="font-size: 0.75rem; color: #64748b; display: block; text-align: right; margin-bottom: 0.2rem;">Monto</span>
                     <input type="text" id="beneficios_monto" name="materialidad[beneficios_monto]" value="<?= htmlspecialchars(number_format((float)($m->beneficios_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
                 </div>
             </div>
         </div>
 
-        <!-- Fila 2: Escoger medición empírica (Tramo 5% - 10%) -->
+        <!-- Fila 2: Escoger medición empírica (Tramo 0.5% - 10%) -->
         <div style="margin-bottom: 1.5rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 1.25rem;">
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem; font-size: 0.85rem; color: #64748b; font-weight: 600;">
                 <div>Escoger medición empírica:</div>
@@ -155,8 +152,8 @@ if ((int)$pruebaId === 16):
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                     <div>
-                        <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: center;">% (5 - 10)</span>
-                        <input type="text" id="tramo_porc" name="materialidad[tramo_porc]" min="5" max="10" value="<?= htmlspecialchars(number_format((float)($m->tramo_porc ?? 5), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+                        <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: center;">% (0.5 - 10)</span>
+                        <input type="text" id="tramo_porc" name="materialidad[tramo_porc]" value="<?= htmlspecialchars(number_format((float)($m->tramo_porc ?? 5), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
                     </div>
                     <div>
                         <span style="font-size: 0.70rem; color: #64748b; display: block; text-align: right;">Monto</span>
@@ -164,7 +161,7 @@ if ((int)$pruebaId === 16):
                     </div>
                 </div>
                 <div style="font-size: 0.8rem; color: #64748b; line-height: 1.4;">
-                    Debe ingresar un porcentaje entre 5% y 10%. Si sale del rango, se restablecerá a 0.
+                    Debe ingresar un porcentaje entre 0.5% y 10%. Si sale del rango, se restablecerá a 0.
                 </div>
             </div>
         </div>
@@ -265,7 +262,6 @@ if ((int)$pruebaId === 16):
     </div>
 </div>
 
-<!-- Script con validación de rango (5% - 10%) y reseteo a 0 al perder el foco si no cumple -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const inputBeneficios       = document.getElementById('beneficios_monto');
@@ -279,10 +275,28 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputMinimisMonto     = document.getElementById('minimis_monto');
     const inputMinimisSec       = document.getElementById('minimis_secundario_monto');
 
+    /**
+     * Parsea un string numérico ingresado en formato de número venezolano o estándar.
+     * Soporta valores decimales con coma (0,5) o punto (0.5).
+     */
     function parseVenezuelanNumber(value) {
         if (!value) return 0;
-        let clean = value.toString().replace(/\./g, '').replace(',', '.');
-        let num = parseFloat(clean);
+        let str = value.toString().trim();
+
+        if (str.includes(',')) {
+            // Formato venezolano puro: 1.000,50 -> elimina miles y reemplaza decimal por punto
+            str = str.replace(/\./g, '').replace(',', '.');
+        } else {
+            // Si no contiene coma, verifica la cantidad de puntos
+            const dotCount = (str.match(/\./g) || []).length;
+            if (dotCount > 1) {
+                // Múltiples puntos: 1.000.000 -> elimina miles
+                str = str.replace(/\./g, '');
+            }
+            // Si hay 1 solo punto (ej. "0.5" o "10.5"), lo mantiene como decimal estándar JS
+        }
+
+        let num = parseFloat(str);
         return isNaN(num) ? 0 : num;
     }
 
@@ -297,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let beneficios = parseVenezuelanNumber(inputBeneficios ? inputBeneficios.value : 0);
         let tramoPorc  = parseVenezuelanNumber(inputTramoPorc ? inputTramoPorc.value : 0);
 
-        // Alerta visual en tiempo real si está fuera de rango mientras se escribe
+        // Alerta visual en tiempo real si está fuera de rango mientras se escribe (0.5% - 10%)
         if (tramoPorc > 0 && (tramoPorc < 0.5 || tramoPorc > 10)) {
             inputTramoPorc.style.borderColor = '#ef4444'; 
         } else {
@@ -353,10 +367,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     decimals = 0;
                 } else if (this.id === 'tramo_porc') {
                     decimals = 2;
-                    // RESTRICCIÓN: Si al salir del campo no está entre 5 y 10, se fuerza a 0
+                    // RESTRICCIÓN: Si al salir del campo no está entre 0.5 y 10, se restablece a 0
                     if (val < 0.5 || val > 10) {
                         val = 0;
-                        this.style.borderColor = '#cbd5e1'; // Limpiar borde de alerta
+                        this.style.borderColor = '#cbd5e1';
                     }
                 } else if (this.id === 'recorte_porc' || this.id === 'minimis_porc') {
                     decimals = 2;
