@@ -18,19 +18,27 @@ include '../main/config.php';
 // -------------------------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_update_ver'])) {
     $clienteId  = filter_input(INPUT_POST, 'cliente_id', FILTER_VALIDATE_INT);
-    $modulo     = filter_input(INPUT_POST, 'modulo', FILTER_SANITIZE_SPECIAL_CHARS); // 'ac', 'terminos', 'proyectos'
+    $modulo     = filter_input(INPUT_POST, 'modulo', FILTER_SANITIZE_SPECIAL_CHARS);
     $nuevoVerId = isset($_POST['ver_id']) ? 1 : 0;
 
-    if ($clienteId && in_array($modulo, ['ac', 'terminos', 'proyectos'], true)) {
+    // Se agrega 'clientes' a los módulos permitidos
+    if ($clienteId && in_array($modulo, ['ac', 'terminos', 'proyectos', 'clientes'], true)) {
         try {
             $pdo->beginTransaction();
 
-            if ($modulo === 'ac') {
-                $stmt = $pdo->prepare("UPDATE ac SET ver_id = :ver WHERE clientId = :cliente_id");
-            } elseif ($modulo === 'terminos') {
-                $stmt = $pdo->prepare("UPDATE terminos_condiciones SET ver_id = :ver WHERE cliente_id = :cliente_id");
-            } elseif ($modulo === 'proyectos') {
-                $stmt = $pdo->prepare("UPDATE proyectos SET ver_id = :ver WHERE cliente_id = :cliente_id");
+            switch ($modulo) {
+                case 'ac':
+                    $stmt = $pdo->prepare("UPDATE ac SET ver_id = :ver WHERE clientId = :cliente_id");
+                    break;
+                case 'terminos':
+                    $stmt = $pdo->prepare("UPDATE terminos_condiciones SET ver_id = :ver WHERE cliente_id = :cliente_id");
+                    break;
+                case 'proyectos':
+                    $stmt = $pdo->prepare("UPDATE proyectos SET ver_id = :ver WHERE cliente_id = :cliente_id");
+                    break;
+                case 'clientes':
+                    $stmt = $pdo->prepare("UPDATE clientes SET ver_id = :ver WHERE id = :cliente_id");
+                    break;
             }
 
             $stmt->execute([
@@ -53,10 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_update_ver']))
 }
 
 // -------------------------------------------------------------------------
-// 2. CONSULTAR CLIENTES Y SU CONFIGURACIÓN DE VISIBILIDAD
+// 2. CONSULTAR CLIENTES Y SU CONFIGURACIÓN
 // -------------------------------------------------------------------------
 try {
-    $stmtClientes = $pdo->query("SELECT id, name, rif FROM clientes ORDER BY name ASC");
+    // Nota: Seleccionamos ver_id del cliente también
+    $stmtClientes = $pdo->query("SELECT id, name, rif, ver_id FROM clientes ORDER BY name ASC");
     $clientesList = $stmtClientes->fetchAll(PDO::FETCH_OBJ);
 } catch (PDOException $e) {
     error_log("Error al consultar clientes: " . $e->getMessage());
@@ -81,14 +90,12 @@ include '../main/layout_header.php';
             <i class="ri-user-settings-line"></i> Control de Visibilidad (Ver ID) por Cliente
         </h1>
         <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.875rem;">
-            Administre los interruptores de control visual (`ver_id`) sin alterar los estados de cierre (`statusId`) en AC, Términos y Proyectos.
+            Administre los interruptores de control visual (`ver_id`).
         </p>
     </div>
 
     <div class="table-actions-container">
-        <a href="../index.php" class="btn btn-primary" data-tooltip="Volver al Inicio">
-            <i class="ri-arrow-go-back-line"></i> Volver
-        </a>
+        <a href="../index.php" class="btn btn-primary"><i class="ri-arrow-go-back-line"></i> Volver</a>
     </div>
 
     <?php if (isset($_GET['success'])): ?>
@@ -103,124 +110,89 @@ include '../main/layout_header.php';
         </div>
     <?php endif; ?>
 
-    <!-- CONTENEDOR DE CINTILLOS POR CLIENTE -->
     <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <?php if (empty($clientesList)): ?>
-            <div style="padding: 3rem; text-align: center; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; color: #94a3b8;">
-                No hay clientes registrados en el sistema.
-            </div>
-        <?php else: ?>
-            <?php foreach ($clientesList as $cli): 
-                // Consultar AC (trayendo ver_id y statusId para conservar integridad)
-                $stmtAc = $pdo->prepare("SELECT acId, ver_id, statusId FROM ac WHERE clientId = ?");
-                $stmtAc->execute([$cli->id]);
-                $acRecords = $stmtAc->fetchAll(PDO::FETCH_OBJ);
+        <?php foreach ($clientesList as $cli): 
+            // Consultas de sub-módulos para el contador y estado
+            $stmtAc = $pdo->prepare("SELECT ver_id FROM ac WHERE clientId = ?");
+            $stmtAc->execute([$cli->id]);
+            $acRecords = $stmtAc->fetchAll(PDO::FETCH_OBJ);
 
-                // Consultar Términos
-                $stmtTerm = $pdo->prepare("SELECT id, ver_id, statusId FROM terminos_condiciones WHERE cliente_id = ?");
-                $stmtTerm->execute([$cli->id]);
-                $termRecords = $stmtTerm->fetchAll(PDO::FETCH_OBJ);
+            $stmtTerm = $pdo->prepare("SELECT ver_id FROM terminos_condiciones WHERE cliente_id = ?");
+            $stmtTerm->execute([$cli->id]);
+            $termRecords = $stmtTerm->fetchAll(PDO::FETCH_OBJ);
 
-                // Consultar Proyectos
-                $stmtProj = $pdo->prepare("SELECT id, ver_id, statusId FROM proyectos WHERE cliente_id = ?");
-                $stmtProj->execute([$cli->id]);
-                $projRecords = $stmtProj->fetchAll(PDO::FETCH_OBJ);
+            $stmtProj = $pdo->prepare("SELECT ver_id FROM proyectos WHERE cliente_id = ?");
+            $stmtProj->execute([$cli->id]);
+            $projRecords = $stmtProj->fetchAll(PDO::FETCH_OBJ);
 
-                // Validar si están vacíos
-                $acEmpty   = empty($acRecords);
-                $termEmpty = empty($termRecords);
-                $projEmpty = empty($projRecords);
+            $acEmpty   = empty($acRecords);
+            $termEmpty = empty($termRecords);
+            $projEmpty = empty($projRecords);
+        ?>
+            <details style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                <summary style="padding: 1rem 1.25rem; background: #f8fafc; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between;">
+                    <span><?= htmlspecialchars($cli->name, ENT_QUOTES, 'UTF-8') ?></span>
+                    <span style="font-size: 0.8rem; font-weight: normal;">RIF: <?= htmlspecialchars($cli->rif ?? 'N/D') ?></span>
+                </summary>
 
-                // Obtener el valor de ver_id (por defecto 1 si existe, 0 si está vacío)
-                $acVer   = !$acEmpty ? (int)($acRecords[0]->ver_id ?? 1) : 0;
-                $termVer = !$termEmpty ? (int)($termRecords[0]->ver_id ?? 1) : 0;
-                $projVer = !$projEmpty ? (int)($projRecords[0]->ver_id ?? 1) : 0;
-            ?>
-                <!-- CINTILLO ACORDIÓN NATIVO -->
-                <details style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                    <summary style="padding: 1rem 1.25rem; background: #f8fafc; cursor: pointer; font-weight: 600; color: #1e293b; display: flex; justify-content: space-between; align-items: center; user-select: none;">
-                        <span style="display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="ri-building-line" style="color: #2563eb;"></i> 
-                            <?= htmlspecialchars($cli->name, ENT_QUOTES, 'UTF-8') ?>
-                            <span style="font-size: 0.75rem; color: #64748b; font-weight: normal; margin-left: 0.5rem;">(RIF: <?= htmlspecialchars($cli->rif ?? 'N/D', ENT_QUOTES, 'UTF-8') ?>)</span>
-                        </span>
-                        <div style="display: flex; gap: 0.5rem; font-size: 0.75rem;">
-                            <span style="padding: 0.2rem 0.5rem; border-radius: 10px; background: <?= !$acEmpty ? '#dcfce7' : '#f1f5f9' ?>; color: <?= !$acEmpty ? '#166534' : '#64748b' ?>;">
-                                AC: <?= !$acEmpty ? ($acVer ? 'Visible (1)' : 'Oculto (0)') : 'Vacío' ?>
-                            </span>
-                            <span style="padding: 0.2rem 0.5rem; border-radius: 10px; background: <?= !$termEmpty ? '#dcfce7' : '#f1f5f9' ?>; color: <?= !$termEmpty ? '#166534' : '#64748b' ?>;">
-                                Términos: <?= !$termEmpty ? ($termVer ? 'Visible (1)' : 'Oculto (0)') : 'Vacío' ?>
-                            </span>
-                            <span style="padding: 0.2rem 0.5rem; border-radius: 10px; background: <?= !$projEmpty ? '#dcfce7' : '#f1f5f9' ?>; color: <?= !$projEmpty ? '#166534' : '#64748b' ?>;">
-                                Proyectos: <?= !$projEmpty ? ($projVer ? 'Visible (1)' : 'Oculto (0)') : 'Vacío' ?>
-                            </span>
-                        </div>
-                    </summary>
-
-                    <!-- CONTENIDO DESPLEGABLE -->
-                    <div style="padding: 1.25rem; border-top: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
-                        
-                        <!-- MÓDULO AC -->
-                        <div style="background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0;">
-                            <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #0f172a;"><i class="ri-shield-check-line"></i> Aceptación y Continuidad (AC)</h4>
-                            <?php if ($acEmpty): ?>
-                                <p style="font-size: 0.8rem; color: #94a3b8; margin: 0 0 1rem 0;">No registra evaluaciones AC. (ver_id en 0).</p>
-                            <?php else: ?>
-                                <form method="POST" action="index.php" style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem;">
-                                    <input type="hidden" name="action_update_ver" value="1">
-                                    <input type="hidden" name="cliente_id" value="<?= $cli->id ?>">
-                                    <input type="hidden" name="modulo" value="ac">
-                                    <label style="font-size: 0.85rem; color: #334155; display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                                        <input type="checkbox" name="ver_id" value="1" <?= $acVer === 1 ? 'checked' : '' ?> onchange="this.form.submit()">
-                                        Visible (ver_id = 1)
-                                    </label>
-                                    <span style="font-size: 0.75rem; color: #64748b;"><?= count($acRecords) ?> registro(s)</span>
-                                </form>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- MÓDULO TERMINOS -->
-                        <div style="background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0;">
-                            <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #0f172a;"><i class="ri-folders-line"></i> Términos y Condiciones</h4>
-                            <?php if ($termEmpty): ?>
-                                <p style="font-size: 0.8rem; color: #94a3b8; margin: 0 0 1rem 0;">No registra términos creados. (ver_id en 0).</p>
-                            <?php else: ?>
-                                <form method="POST" action="index.php" style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem;">
-                                    <input type="hidden" name="action_update_ver" value="1">
-                                    <input type="hidden" name="cliente_id" value="<?= $cli->id ?>">
-                                    <input type="hidden" name="modulo" value="terminos">
-                                    <label style="font-size: 0.85rem; color: #334155; display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                                        <input type="checkbox" name="ver_id" value="1" <?= $termVer === 1 ? 'checked' : '' ?> onchange="this.form.submit()">
-                                        Visible (ver_id = 1)
-                                    </label>
-                                    <span style="font-size: 0.75rem; color: #64748b;"><?= count($termRecords) ?> registro(s)</span>
-                                </form>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- MÓDULO PROYECTOS -->
-                        <div style="background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0;">
-                            <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #0f172a;"><i class="ri-folder-open-line"></i> Proyectos de Auditoría</h4>
-                            <?php if ($projEmpty): ?>
-                                <p style="font-size: 0.8rem; color: #94a3b8; margin: 0 0 1rem 0;">No registra proyectos asociados. (ver_id en 0).</p>
-                            <?php else: ?>
-                                <form method="POST" action="index.php" style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem;">
-                                    <input type="hidden" name="action_update_ver" value="1">
-                                    <input type="hidden" name="cliente_id" value="<?= $cli->id ?>">
-                                    <input type="hidden" name="modulo" value="proyectos">
-                                    <label style="font-size: 0.85rem; color: #334155; display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                                        <input type="checkbox" name="ver_id" value="1" <?= $projVer === 1 ? 'checked' : '' ?> onchange="this.form.submit()">
-                                        Visible (ver_id = 1)
-                                    </label>
-                                    <span style="font-size: 0.75rem; color: #64748b;"><?= count($projRecords) ?> registro(s)</span>
-                                </form>
-                            <?php endif; ?>
-                        </div>
-
+                <div style="padding: 1.25rem; border-top: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                    
+                    <!-- 1. MÓDULO CLIENTE (NUEVO) -->
+                    <div style="background: #eff6ff; padding: 1rem; border-radius: 6px; border: 1px solid #bfdbfe;">
+                        <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;"><i class="ri-building-line"></i> Perfil Cliente</h4>
+                        <form method="POST" action="index.php">
+                            <input type="hidden" name="action_update_ver" value="1">
+                            <input type="hidden" name="cliente_id" value="<?= $cli->id ?>">
+                            <input type="hidden" name="modulo" value="clientes">
+                            <label style="font-size: 0.85rem; cursor: pointer;">
+                                <input type="checkbox" name="ver_id" value="1" <?= (int)$cli->ver_id === 1 ? 'checked' : '' ?> onchange="this.form.submit()">
+                                Visible (ver_id = 1)
+                            </label>
+                        </form>
                     </div>
-                </details>
-            <?php endforeach; ?>
-        <?php endif; ?>
+
+                    <!-- 2. MÓDULO AC -->
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Aceptación (AC)</h4>
+                        <?php if ($acEmpty): ?> <p style="font-size: 0.75rem; color: #94a3b8;">Sin datos.</p> <?php else: ?>
+                            <form method="POST" action="index.php">
+                                <input type="hidden" name="action_update_ver" value="1">
+                                <input type="hidden" name="cliente_id" value="<?= $cli->id ?>">
+                                <input type="hidden" name="modulo" value="ac">
+                                <input type="checkbox" name="ver_id" value="1" <?= (int)$acRecords[0]->ver_id === 1 ? 'checked' : '' ?> onchange="this.form.submit()"> Visible
+                            </form>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- 3. MÓDULO TÉRMINOS -->
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Términos</h4>
+                        <?php if ($termEmpty): ?> <p style="font-size: 0.75rem; color: #94a3b8;">Sin datos.</p> <?php else: ?>
+                            <form method="POST" action="index.php">
+                                <input type="hidden" name="action_update_ver" value="1">
+                                <input type="hidden" name="cliente_id" value="<?= $cli->id ?>">
+                                <input type="hidden" name="modulo" value="terminos">
+                                <input type="checkbox" name="ver_id" value="1" <?= (int)$termRecords[0]->ver_id === 1 ? 'checked' : '' ?> onchange="this.form.submit()"> Visible
+                            </form>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- 4. MÓDULO PROYECTOS -->
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Proyectos</h4>
+                        <?php if ($projEmpty): ?> <p style="font-size: 0.75rem; color: #94a3b8;">Sin datos.</p> <?php else: ?>
+                            <form method="POST" action="index.php">
+                                <input type="hidden" name="action_update_ver" value="1">
+                                <input type="hidden" name="cliente_id" value="<?= $cli->id ?>">
+                                <input type="hidden" name="modulo" value="proyectos">
+                                <input type="checkbox" name="ver_id" value="1" <?= (int)$projRecords[0]->ver_id === 1 ? 'checked' : '' ?> onchange="this.form.submit()"> Visible
+                            </form>
+                        <?php endif; ?>
+                    </div>
+
+                </div>
+            </details>
+        <?php endforeach; ?>
     </div>
 </div>
 
