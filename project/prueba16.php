@@ -70,7 +70,7 @@ if ((int)$pruebaId === 16):
     background-position: right 0.85rem center;
     background-size: 14px 10px;
     border: 1px solid #ced4da;
-    border-radius: 6px;
+    border-radius: 4px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     -webkit-appearance: none;
