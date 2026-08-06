@@ -123,9 +123,7 @@ if ((int)$pruebaId === 16):
 
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: center;">
                 <div>
-                   <label for="punto_referencia" class="form-label font-weight-bold text-secondary small text-uppercase tracking-wider">
-                        Punto de referencia:
-                    </label>
+                   
                     <select name="punto_referencia" id="punto_referencia" class="select-materialidad-custom">
                         <?php foreach ($opcionesPuntoReferencia as $opcion): ?>
                             <option value="<?= htmlspecialchars($opcion, ENT_QUOTES, 'UTF-8') ?>" 
@@ -153,7 +151,7 @@ if ((int)$pruebaId === 16):
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; align-items: center;">
                 <div style="font-size: 0.9rem; font-weight: 600; color: #1e293b;">
-                    Tramo 5% - 10%*:
+                    Tramo 0.5% - 10%*:
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                     <div>
