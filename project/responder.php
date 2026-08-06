@@ -118,7 +118,7 @@ include '../main/h.php';
             <i class="ri-screenshot-2-line"></i>
         </a>
 
-        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
+        <a href="export_planificacion_word.php?proyecto_id=<?= (int)$proyectoId ?>" class="btn btn-primary" data-tooltip="Reporte">
             <i class="ri-book-open-line"></i> 
         </a>
 
