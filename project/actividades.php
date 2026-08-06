@@ -193,19 +193,11 @@ if (!isset($estadoActual) && isset($pruebaId, $proyectoId, $pdo)) {
 }
 
 if ((int)$pruebaId === 141) {?>                        
-<form action="guardar_estado.php" method="POST" style="display: inline-flex; align-items: center; gap: 0.75rem;">
-    <!-- Parámetros ocultos necesarios para identificar el registro -->
-    <input type="hidden" name="proyecto_id" value="<?php echo $proyectoId; ?>">
-    <input type="hidden" name="prueba_id" value="<?php echo $pruebaId; ?>">
-
-    <select name="estado_prueba" class="status-select" style="padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 600;">
-        <option value="pendiente" <?php echo ($estadoActual === 'pendiente') ? 'selected' : ''; ?>>Pendiente</option>
-        <option value="en_proceso" <?php echo ($estadoActual === 'en_proceso') ? 'selected' : ''; ?>>En Proceso</option>
-        <option value="completado" <?php echo ($estadoActual === 'completado') ? 'selected' : ''; ?>>Completado</option>
-    </select>
-
-    <button type="submit" style="background-color: #0284c7; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
-        Actualizar Estado
+<form action="cerrar_proyecto.php" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas cerrar este proyecto?');" style="display: inline-block; margin-top: 1rem;">
+    <input type="hidden" name="proyecto_id" value="<?php echo htmlspecialchars((string)$proyectoId, ENT_QUOTES, 'UTF-8'); ?>">
+    
+    <button type="submit" style="background-color: #dc2626; color: #ffffff; border: none; padding: 0.6rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: background-color 0.2s;">
+        <i class="ri-lock-line"></i> Cerrar Proyecto
     </button>
 </form>
 <?php } ?>     
