@@ -195,7 +195,7 @@ include 'conect-actividades.php';
                         </label>
                     </div>
                 </div>
-                <textarea name="actividades_data[<?= $act->id ?>][contenido]" class="activity-textarea" placeholder="Escriba aquí los hallazgos, papeles de trabajo o evidencias analizadas..." rows="4" style="width:100%; padding:0.75rem; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit; resize:vertical;"><?= htmlspecialchars($act->respuesta, ENT_QUOTES, 'UTF-8') ?></textarea>
+                <textarea class="comment-input auto-expand" name="actividades_data[<?= $act->id ?>][contenido]" class="activity-textarea" placeholder="Escriba aquí los hallazgos, papeles de trabajo o evidencias analizadas..." rows="4" style="width:100%; padding:0.75rem; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit; resize:vertical;"><?= htmlspecialchars($act->respuesta, ENT_QUOTES, 'UTF-8') ?></textarea>
             </div>
         <?php endforeach; ?>
 
