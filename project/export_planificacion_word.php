@@ -2,16 +2,222 @@
 
 declare(strict_types=1);
 
-// 1. Validar y sanitizar la entrada
-$proyectoId = filter_input(INPUT_GET, 'proyecto_id', FILTER_VALIDATE_INT);
+include '../main/config.php';
+use App\Database\Database;
 
-if (!$proyectoId) {
+// ----------------------------------------------------------------------
+// 1. Sanitización y Validación de Entrada (ID de Proyecto)
+// ----------------------------------------------------------------------
+$proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) 
+           ?? filter_input(INPUT_GET, 'proyecto_id', FILTER_VALIDATE_INT);
+
+if (!$proyectoId || $proyectoId <= 0) {
     http_response_code(400);
-    die('Error: El parámetro proyecto_id es obligatorio y debe ser un número entero válido.');
+    echo "Error: El parámetro 'proyectoId' es obligatorio y debe ser un entero válido.";
+    exit;
 }
 
-// 2. Conexión e Inclusión de la BD (Ajusta la ruta segsún tu estructura de archivos)
-include '../main/config.php';
+/**
+ * Escapa caracteres especiales para evitar corromper la estructura OpenXML de Word
+ */
+function xml_escape(?string $value): string
+{
+    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES | ENT_XML1, 'UTF-8');
+}
+
+try {
+    $db = Database::getConnection();
+
+    // ------------------------------------------------------------------
+    // 2. Consulta de Datos de la Etapa de Planificación del Proyecto
+    // ------------------------------------------------------------------
+    
+    // Consulta principal del Proyecto
+    $sqlProyecto = "SELECT 
+                        p.id AS proyectoId,
+                        p.nombre AS nombreProyecto,
+                        p.cliente_id AS clienteId,
+                        p.socio,
+                        p.gerente,
+                        p.fecha_inicio AS fechaInicio,
+                        p.fecha_fin AS fechaFin,
+                        p.estado
+                    FROM proyectos p
+                    WHERE p.id = :proyectoId";
+
+    $stmtProyecto = $db->prepare($sqlProyecto);
+    $stmtProyecto->execute([':proyectoId' => $proyectoId]);
+    $proyecto = $stmtProyecto->fetch();
+
+    if (!$proyecto) {
+        http_response_code(404);
+        echo "Error: No se encontró el proyecto con ID {$proyectoId}.";
+        exit;
+    }
+
+    // Consulta de Actividades / Pruebas Planificadas de Auditoría
+    $sqlActividades = "SELECT 
+                        a.id,
+                        a.name AS nombreActividad,
+                        a.priority AS prioridad,
+                        a.status AS estadoActividad,
+                        aa.descripcion AS pruebaDescripcion,
+                        aa.orden
+                       FROM actividades a
+                       LEFT JOIN audit_actividades aa ON a.id = aa.prueba_id
+                       WHERE a.proyecto_id = :proyectoId OR aa.proyecto_id = :proyectoId
+                       ORDER BY COALESCE(aa.orden, a.id) ASC";
+
+    $stmtActividades = $db->prepare($sqlActividades);
+    $stmtActividades->execute([':proyectoId' => $proyectoId]);
+    $actividades = $stmtActividades->fetchAll();
+
+    // ------------------------------------------------------------------
+    // 3. Generación del Documento OpenXML (word/document.xml)
+    // ------------------------------------------------------------------
+    $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+    $xml .= '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">';
+    $xml .= '<w:body>';
+
+    // --- Título del Memorándum de Planificación ---
+    $xml .= '<w:p>';
+    $xml .= '  <w:pPr><w:jc w:val="center"/><w:spacing w:after="240"/></w:pPr>';
+    $xml .= '  <w:r><w:rPr><w:b/><w:sz w:val="32"/><w:color w:val="1B365D"/></w:rPr><w:t>MEMORÁNDUM DE PLANIFICACIÓN DE AUDITORÍA</w:t></w:r>';
+    $xml .= '</w:p>';
+
+    $xml .= '<w:p>';
+    $xml .= '  <w:pPr><w:jc w:val="center"/><w:spacing w:after="360"/></w:pPr>';
+    $xml .= '  <w:r><w:rPr><w:b/><w:sz w:val="22"/><w:color w:val="555555"/></w:rPr><w:t>Proyecto N°: PRJ-' . xml_escape(str_pad((string)$proyecto['proyectoId'], 6, '0', STR_PAD_LEFT)) . '</w:t></w:r>';
+    $xml .= '</w:p>';
+
+    // --- SECCIÓN 1: DATOS DEL PROYECTO ---
+    $xml .= '<w:p><w:pPr><w:spacing w:before="240" w:after="120"/></w:pPr>';
+    $xml .= '  <w:r><w:rPr><w:b/><w:sz w:val="26"/><w:color w:val="2C3E50"/></w:rPr><w:t>1. Alcance y Datos Generales del Proyecto</w:t></w:r>';
+    $xml .= '</w:p>';
+
+    $tableBorders = '<w:tblBorders>'
+        . '<w:top w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/>'
+        . '<w:left w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/>'
+        . '<w:bottom w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/>'
+        . '<w:right w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/>'
+        . '<w:insideH w:val="single" w:sz="4" w:space="0" w:color="E0E0E0"/>'
+        . '<w:insideV w:val="single" w:sz="4" w:space="0" w:color="E0E0E0"/>'
+        . '</w:tblBorders>';
+
+    $xml .= '<w:tbl><w:tblPr><w:tblW w:w="9000" w:type="dxa"/>' . $tableBorders . '</w:tblPr>';
+
+    $infoRows = [
+        'Nombre del Proyecto' => $proyecto['nombreProyecto'] ?? 'Sin Nombre',
+        'Cliente (ID)'        => (string)($proyecto['clienteId'] ?? 'N/A'),
+        'Socio Asignado'      => $proyecto['socio'] ?? 'No asignado',
+        'Gerente a Cargo'     => $proyecto['gerente'] ?? 'No asignado',
+        'Fecha Inicio Plan'   => $proyecto['fechaInicio'] ?? 'Pendiente',
+        'Fecha Cierre Est.'   => $proyecto['fechaFin'] ?? 'Pendiente',
+        'Estado del Proyecto' => $proyecto['estado'] ?? 'En Proceso'
+    ];
+
+    foreach ($infoRows as $label => $val) {
+        $xml .= '<w:tr>';
+        $xml .= '  <w:tc><w:tcPr><w:tcW w:w="3000" w:type="dxa"/><w:shd w:val="clear" w:color="auto" w:fill="F2F4F4"/></w:tcPr><w:p><w:r><w:rPr><w:b/></w:rPr><w:t>' . xml_escape($label) . '</w:t></w:r></w:p></w:tc>';
+        $xml .= '  <w:tc><w:tcPr><w:tcW w:w="6000" w:type="dxa"/></w:tcPr><w:p><w:r><w:t>' . xml_escape($val) . '</w:t></w:r></w:p></w:tc>';
+        $xml .= '</w:tr>';
+    }
+    $xml .= '</w:tbl>';
+
+    // --- SECCIÓN 2: CRONOGRAMA Y PROGRAMA DE ACTIVIDADES (AUDITORÍA) ---
+    $xml .= '<w:p><w:pPr><w:spacing w:before="360" w:after="120"/></w:pPr>';
+    $xml .= '  <w:r><w:rPr><w:b/><w:sz w:val="26"/><w:color w:val="2C3E50"/></w:rPr><w:t>2. Plan de Actividades y Pruebas Programadas</w:t></w:r>';
+    $xml .= '</w:p>';
+
+    if (!empty($actividades)) {
+        $xml .= '<w:tbl><w:tblPr><w:tblW w:w="9000" w:type="dxa"/>' . $tableBorders . '</w:tblPr>';
+        
+        // Encabezados
+        $xml .= '<w:tr>';
+        $headers = ['Orden', 'Actividad / Nombre', 'Descripción de la Prueba', 'Prioridad', 'Estado'];
+        foreach ($headers as $hdr) {
+            $xml .= '<w:tc><w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="1B365D"/></w:tcPr><w:p><w:r><w:rPr><w:b/><w:color w:val="FFFFFF"/></w:rPr><w:t>' . xml_escape($hdr) . '</w:t></w:r></w:p></w:tc>';
+        }
+        $xml .= '</w:tr>';
+
+        // Filas
+        foreach ($actividades as $index => $act) {
+            $orden = $act['orden'] ?? ($index + 1);
+            $xml .= '<w:tr>';
+            $xml .= '  <w:tc><w:p><w:r><w:t>' . xml_escape((string)$orden) . '</w:t></w:r></w:p></w:tc>';
+            $xml .= '  <w:tc><w:p><w:r><w:t>' . xml_escape($act['nombreActividad'] ?? 'N/A') . '</w:t></w:r></w:p></w:tc>';
+            $xml .= '  <w:tc><w:p><w:r><w:t>' . xml_escape($act['pruebaDescripcion'] ?? 'Sin detalle registrado') . '</w:t></w:r></w:p></w:tc>';
+            $xml .= '  <w:tc><w:p><w:r><w:t>' . xml_escape($act['prioridad'] ?? 'Normal') . '</w:t></w:r></w:p></w:tc>';
+            $xml .= '  <w:tc><w:p><w:r><w:rPr><w:b/></w:rPr><w:t>' . xml_escape($act['estadoActividad'] ?? 'Pendiente') . '</w:t></w:r></w:p></w:tc>';
+            $xml .= '</w:tr>';
+        }
+        $xml .= '</w:tbl>';
+    } else {
+        $xml .= '<w:p><w:r><w:rPr><w:i/></w:rPr><w:t>No existen actividades o pruebas asignadas a la etapa de planificación de este proyecto.</w:t></w:r></w:p>';
+    }
+
+    $xml .= '</w:body>';
+    $xml .= '</w:document>';
+
+    // ------------------------------------------------------------------
+    // 4. Empaquetado ZIP (Generación .docx)
+    // ------------------------------------------------------------------
+    $contentTypesXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        . '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+        . '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+        . '<Default Extension="xml" ContentType="application/xml"/>'
+        . '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'
+        . '</Types>';
+
+    $relsXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        . '<Relationships xmlns="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+        . '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'
+        . '</Relationships>';
+
+    if (!class_exists('ZipArchive')) {
+        throw new RuntimeException('La extensión ZipArchive de PHP no está habilitada en el servidor.');
+    }
+
+    $tempFile = tempnam(sys_get_temp_dir(), 'docx_plan_');
+    $zip = new ZipArchive();
+
+    if ($zip->open($tempFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+        throw new RuntimeException('No se pudo crear el archivo temporal para exportar Word.');
+    }
+
+    $zip->addFromString('[Content_Types].xml', $contentTypesXml);
+    $zip->addFromString('_rels/.rels', $relsXml);
+    $zip->addFromString('word/document.xml', $xml);
+    $zip->close();
+
+    // ------------------------------------------------------------------
+    // 5. Envío de Cabeceras HTTP
+    // ------------------------------------------------------------------
+    if (ob_get_length()) {
+        ob_end_clean();
+    }
+
+    $filename = "Planificacion_Proyecto_" . $proyectoId . ".docx";
+
+    header('Content-Description: File Transfer');
+    header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Content-Transfer-Encoding: binary');
+    header('Content-Length: ' . filesize($tempFile));
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+    header('Pragma: public');
+
+    readfile($tempFile);
+    @unlink($tempFile);
+    exit;
+
+} catch (Exception $e) {
+    error_log("Error al exportar planificación de proyecto (Proyecto ID: {$proyectoId}): " . $e->getMessage());
+    http_response_code(500);
+    echo "Ocurrió un error interno al generar la exportación del proyecto.";
+    exit;
+}
 
 /** @var PDO $pdo */
 
