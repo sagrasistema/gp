@@ -22,7 +22,9 @@ $terminoId = filter_input(INPUT_GET, 'terminoId', FILTER_VALIDATE_INT)
 if (!$terminoId || $terminoId <= 0) {
     die("Error: Identificador de Términos y Condiciones no especificado o inválido.");
 }
-
+$stmtStatus = $pdo->prepare("SELECT statusId FROM terminos_condiciones WHERE id = :id");
+$stmtStatus->execute([':id' => $terminoId]);
+$isClosed = ((int)$stmtStatus->fetchColumn() === 2);
 $itemKey = 'frecuencia';
 
 // -------------------------------------------------------------------------
@@ -229,9 +231,12 @@ include '../main/h.php';
                 <a href="responder-terminos.php?id=<?= $terminoId ?>" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; background: #e2e8f0; color: #334155; border-radius: 6px; text-decoration: none; font-weight: 600;">
                     Cancelar
                 </a>
-                <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="ri-save-line"></i> Guardar Frecuencia
-                </button>
+                <?php if (!$isClosed): ?>
+                    <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="ri-save-line"></i> Guardar Frecuencia
+                    </button>
+                <?php endif; ?>        
+                
             </div>
 
         </form>
