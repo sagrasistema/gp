@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -28,10 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_create_termino
         try {
             $pdo->beginTransaction();
 
-            // Insertar cabecera de Términos y Condiciones
+            // Insertar cabecera de Términos y Condiciones (incluyendo statusId inicial por defecto en 1)
             $stmtMaster = $pdo->prepare("
-                INSERT INTO terminos_condiciones (cliente_id, servicio, estado) 
-                VALUES (:cliente_id, :servicio, 'pendiente')
+                INSERT INTO terminos_condiciones (cliente_id, servicio, estado, statusId) 
+                VALUES (:cliente_id, :servicio, 'pendiente', 1)
             ");
             $stmtMaster->execute([
                 ':cliente_id' => $clienteId,
@@ -42,8 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_create_termino
             // Las 4 actividades requeridas por defecto
             $defaultItems = [
                 1 => ['key' => 'carta_contratacion', 'nombre' => 'Carta de Contratación'],
-                2 => ['key' => 'frecuencia',           'nombre' => 'Frecuencia'],
-                3 => ['key' => 'roles_proyecto',       'nombre' => 'Roles de proyecto'],
+                2 => ['key' => 'frecuencia',          'nombre' => 'Frecuencia'],
+                3 => ['key' => 'roles_proyecto',      'nombre' => 'Roles de proyecto'],
                 4 => ['key' => 'esquema_facturacion',  'nombre' => 'Esquema de facturación']
             ];
 
@@ -81,11 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_create_termino
 // 2. CONSULTAR DATOS PARA LA VISTA
 // -------------------------------------------------------------------------
 try {
-    // Listado de registros creados
+    // Listado de registros filtrando aquellos cuyo statusId sea diferente de 0
     $stmtList = $pdo->prepare("
         SELECT tc.*, c.name AS clientName, c.rif AS clientRif
         FROM terminos_condiciones tc
         INNER JOIN clientes c ON tc.cliente_id = c.id
+        WHERE tc.statusId != 0
         ORDER BY tc.id DESC
     ");
     $stmtList->execute();
@@ -103,7 +104,6 @@ try {
 
 $pageTitle = "Módulo de Términos y Condiciones";
 
-
 include '../main/h.php';
 ?>
 <link rel="stylesheet" href="../main/layout.css">
@@ -112,40 +112,41 @@ $customLogoPath = '../main/logo.png';
 $customHomePath = '../index.php';
 $customAcPath   = '../ac/index.php';
 $currentTab     = 'terminos'; 
-include '../main/layout_header.php'; ?>
+include '../main/layout_header.php'; 
+?>
 
-<div class="view-container" >
+<div class="view-container">
+    <div class="view-header">
+        <h1 class="page-main-title">
+            <i class="ri-folders-line"></i> Términos y Condiciones
+        </h1>
+        <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.875rem;">
+            Gestión y respuesta de cartas de contratación, frecuencia, roles y esquemas de facturación.
+        </p>
+    </div>
         
-        <div class="view-header">
-            <h1 class="page-main-title">
-                <i class="ri-folders-line"></i>Términos y Condiciones
-            </h1>
-            <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.875rem;">
-                Gestión y respuesta de cartas de contratación, frecuencia, roles y esquemas de facturación.
-            </p>
-        </div>
+    <div class="table-actions-container">
+        <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+            <i class="ri-arrow-go-back-line"></i> 
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+            <i class="ri-screenshot-2-line"></i>
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
+            <i class="ri-book-open-line"></i> 
+        </a>
         
-        <div class="table-actions-container">
-            <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
-                <i class="ri-arrow-go-back-line"></i> 
-            </a>
-
-            <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
-                <i class="ri-screenshot-2-line"></i>
-            </a>
-
-            <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
-                <i class="ri-book-open-line"></i> 
-            </a>
-            <button onclick="openModal()" class="btn btn-primary" data-tooltip="Crear Registro">
-                <i class="ri-add-line"></i> 
-            </button>
-            <a href="../index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
-                <i class="ri-close-circle-line"></i> 
-            </a>
-        </div>
+        <button onclick="openModal()" class="btn btn-primary" data-tooltip="Crear Registro">
+            <i class="ri-add-line"></i> 
+        </button>
         
-
+        <a href="../index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+            <i class="ri-close-circle-line"></i> 
+        </a>
+    </div>
+        
     <?php if (isset($_GET['success'])): ?>
         <div style="padding: 1rem; background: #dcfce7; color: #166534; border-radius: 8px; margin-bottom: 1.5rem;">
             <i class="ri-checkbox-circle-fill"></i> Términos y Condiciones creados e inicializados correctamente.
