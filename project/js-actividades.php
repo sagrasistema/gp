@@ -143,7 +143,72 @@ if (btnGuardarRiesgo23) {
         });
     });
 }
+document.addEventListener('DOMContentLoaded', () => {
+    const textareas = document.querySelectorAll('.comment-input.auto-expand');
 
+    /**
+     * Ajusta la altura del textarea según el contenido
+     * @param {HTMLTextAreaElement} el 
+     */
+    const autoResizeTextarea = (el) => {
+        el.style.height = 'auto';
+        el.style.height = `${el.scrollHeight}px`;
+    };
+
+    textareas.forEach((textarea) => {
+        // 1. Ajustar altura inicial si ya existe texto cargado desde BD
+        autoResizeTextarea(textarea);
+
+        // 2. Escuchar evento de tipeo en tiempo real
+        textarea.addEventListener('input', () => {
+            autoResizeTextarea(textarea);
+        });
+    });
+});
+document.addEventListener('DOMContentLoaded', () => {
+    const textareas = document.querySelectorAll('.comment-input.auto-expand');
+
+    /**
+     * Recalcula y ajusta la altura del textarea solo si el elemento es visible
+     * @param {HTMLTextAreaElement} el 
+     */
+    const autoResizeTextarea = (el) => {
+        // Verificar si el elemento es visible en el DOM (no está oculto por display: none)
+        if (el.offsetParent !== null) {
+            el.style.height = 'auto';
+            el.style.height = `${el.scrollHeight}px`;
+        }
+    };
+
+    /**
+     * Redimensiona todos los textareas visibles en la vista
+     */
+    const resizeAllVisibleTextareas = () => {
+        textareas.forEach((textarea) => autoResizeTextarea(textarea));
+    };
+
+    // 1. Escuchar evento de tipeo en tiempo real
+    textareas.forEach((textarea) => {
+        textarea.addEventListener('input', () => autoResizeTextarea(textarea));
+    });
+
+    // 2. Ajuste inicial en carga de la página
+    resizeAllVisibleTextareas();
+
+    // 3. Re-evaluar cuando la ventana cargue completamente (estilos CSS y fuentes aplicados)
+    window.addEventListener('load', resizeAllVisibleTextareas);
+
+    // 4. SOLUCIÓN ACORDEÓN: Escuchar clics en los encabezados/botones de acordeón
+    // Ajusta la clase selector de tu acordeón si usas Bootstrap u otro framework (ej: .accordion-button, .accordion-header)
+    const accordionTriggers = document.querySelectorAll('.accordion-header, .accordion-button, .accordion-toggle');
+
+    accordionTriggers.forEach((trigger) => {
+        trigger.addEventListener('click', () => {
+            // Se usa un pequeño retardador (150ms) para permitir que la animación de apertura CSS finalize
+            setTimeout(resizeAllVisibleTextareas, 150);
+        });
+    });
+});
 </script>
 
 
