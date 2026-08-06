@@ -39,6 +39,18 @@ $m = $materialidadData ?? (object)[
     'minimis_monto'              => '0.00',
     'minimis_secundario_monto'   => '0.00'
 ];
+<?php
+// Opciones estandarizadas para el punto de referencia
+$opcionesPuntoReferencia = [
+    'Ingresos de Actividades Ordinarias',
+    'Utilidad antes de Impuestos',
+    'Activo Total',
+    'Patrimonio Neto'
+];
+
+// Asignación de variables desde la consulta previa a $datosMaterialidad
+$puntoReferenciaSeleccionado = $datosMaterialidad['punto_referencia'] ?? 'Utilidad antes de Impuestos';
+#$montoBeneficios = (float)($datosMaterialidad['beneficios_monto'] ?? 0.00);
 
 if ((int)$pruebaId === 16):
 ?>
@@ -58,11 +70,21 @@ if ((int)$pruebaId === 16):
                 <div><span style="color: #64748b; font-weight: 600;">Punto de referencia:</span></div>
                 <div style="color: #1e293b; font-weight: 500;">Empresas con beneficios normales</div>
             </div>
+
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: center;">
                 <div>
-                    <label style="display: block; font-size: 0.85rem; color: #334155;">Beneficios operaciones continuas antes de impuestos:</label>
+                    <select name="punto_referencia" id="punto_referencia" class="form-select form-control shadow-sm">
+                        <?php foreach ($opcionesPuntoReferencia as $opcion): ?>
+                            <option value="<?= htmlspecialchars($opcion, ENT_QUOTES, 'UTF-8') ?>" 
+                                <?= ($puntoReferenciaSeleccionado === $opcion) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($opcion, ENT_QUOTES, 'UTF-8') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
-                <div>
+            <div>
+
+
                     <span style="font-size: 0.75rem; color: #64748b; display: block; text-align: right; margin-bottom: 0.2rem;">Monto</span>
                     <input type="text" id="beneficios_monto" name="materialidad[beneficios_monto]" value="<?= htmlspecialchars(number_format((float)($m->beneficios_monto ?? 0), 2, ',', '.'), ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-weight: 600;">
                 </div>
@@ -281,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else if (this.id === 'tramo_porc') {
                     decimals = 2;
                     // RESTRICCIÓN: Si al salir del campo no está entre 5 y 10, se fuerza a 0
-                    if (val < 5 || val > 10) {
+                    if (val < 0.5 || val > 10) {
                         val = 0;
                         this.style.borderColor = '#cbd5e1'; // Limpiar borde de alerta
                     }
