@@ -17,7 +17,7 @@ include '../main/config.php';
 
 try {
     // A. Consultar Información General del Proyecto
-    $sqlProyecto = "SELECT id, nombre, fecha_inicio, RIF FROM proyectos WHERE id = :proyecto_id LIMIT 1";
+    $sqlProyecto = "SELECT id, nombre, fecha_inicio FROM proyectos WHERE id = :proyecto_id LIMIT 1";
     $stmtProyecto = $pdo->prepare($sqlProyecto);
     $stmtProyecto->execute([':proyecto_id' => $proyectoId]);
     $proyecto = $stmtProyecto->fetch(PDO::FETCH_ASSOC);
