@@ -38,7 +38,7 @@ if (!isset($formData)) {
     <!-- Cabecera del Módulo -->
     <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.5rem;">
         <h3 style="margin: 0 0 0.25rem 0; font-size: 1.25rem; color: #1e293b; font-weight: 700; display: flex; align-items: center; justify-content: space-between;">
-            <!--<span>Modelo 6 - Ejecución de Auditoría Especial </span>-->
+            <span>Modelo 6 - Ejecución de Auditoría Especial </span>
             <span style="font-size: 0.8rem; background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600;">
                 Prueba ID: <?php echo htmlspecialchars((string)$currentPruebaId, ENT_QUOTES, 'UTF-8'); ?>
             </span>
@@ -125,7 +125,7 @@ if (!isset($formData)) {
     <!-- 4. Definir la Diferencia Tolerable y Umbrales -->
     <div style="margin-bottom: 1.75rem;">
         <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
-            4. Definir Base de selección y error tolerable
+            4. Definir la Diferencia Tolerable
         </h4>
         <textarea name="definicion_diferencia_umbral" rows="3" placeholder="Defina los criterios del umbral..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?php echo htmlspecialchars($formData['definicion_diferencia_umbral'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
     </div>
