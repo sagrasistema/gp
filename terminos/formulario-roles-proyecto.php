@@ -25,6 +25,9 @@ if (!$terminoId || $terminoId <= 0) {
     http_response_code(400);
     die("Error: Identificador de Términos y Condiciones no especificado o inválido.");
 }
+$stmtStatus = $pdo->prepare("SELECT statusId FROM terminos_condiciones WHERE id = :id");
+$stmtStatus->execute([':id' => $terminoId]);
+$isClosed = ((int)$stmtStatus->fetchColumn() === 2);
 
 $itemKey = 'roles_proyecto';
 
@@ -276,9 +279,12 @@ include '../main/h.php';
                 <a href="responder-terminos.php?id=<?= $terminoId ?>" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; background: #e2e8f0; color: #334155; border-radius: 6px; text-decoration: none; font-weight: 600;">
                     Cancelar
                 </a>
-                <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="ri-save-line"></i> Guardar Roles
-                </button>
+                <?php if (!$isClosed): ?>
+                    <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="ri-save-line"></i> Guardar Roles
+                    </button>
+                <?php endif; ?>       
+                
             </div>
 
         </form>
