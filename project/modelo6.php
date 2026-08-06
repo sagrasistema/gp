@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -11,12 +12,23 @@ declare(strict_types=1);
  * La lógica POST y GET es manejada por el controlador padre.
  */
 
-// Rescatamos los identificadores desde el contexto padre de forma segura
-$currentPruebaId   = $pruebaId ?? filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT) ?? 0;
-$currentProyectoId = $proyectoId ?? filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
+// 1. Rescate y sanitización de identificadores con soporte para múltiples nomenclaturas
+$currentPruebaId = (int) (
+    $pruebaId 
+    ?? filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT) 
+    ?? filter_input(INPUT_GET, 'prueba_id', FILTER_VALIDATE_INT) 
+    ?? ($_GET['prueba_id'] ?? 0)
+);
 
-// Si $formData no fue inyectado por actividades.php (prevención de errores), definimos defaults
-if (!isset($formData)) {
+$currentProyectoId = (int) (
+    $proyectoId 
+    ?? filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) 
+    ?? filter_input(INPUT_GET, 'proyecto_id', FILTER_VALIDATE_INT) 
+    ?? ($_GET['proyecto_id'] ?? 0)
+);
+
+// 2. Definición del estado por defecto de $formData si no fue provisto
+if (!isset($formData) || !is_array($formData)) {
     $formData = [
         'partida_estado_financiero' => '',
         'fecha_periodo_prueba' => '',
@@ -31,9 +43,11 @@ if (!isset($formData)) {
         'evaluacion_resultados' => ''
     ];
 }
+
+// 3. Consulta a la tabla `proyecto_materialidad` utilizando la variable correcta ($currentProyectoId)
 $materialidadRef = null;
 
-if (isset($pdo, $proyectoId) && (int)$proyectoId > 0) {
+if (isset($pdo) && $pdo instanceof PDO && $currentProyectoId > 0) {
     try {
         $stmtMatRef = $pdo->prepare("
             SELECT 
@@ -45,18 +59,23 @@ if (isset($pdo, $proyectoId) && (int)$proyectoId > 0) {
             LIMIT 1
         ");
         
-        $stmtMatRef->execute([':proyecto_id' => (int)$proyectoId]);
-        $materialidadRef = $stmtMatRef->fetch(PDO::FETCH_ASSOC);
+        $stmtMatRef->execute([':proyecto_id' => $currentProyectoId]);
+        $materialidadRef = $stmtMatRef->fetch(PDO::FETCH_ASSOC) ?: null;
     } catch (PDOException $e) {
-        // Log seguro en el servidor sin exponer datos al cliente
         error_log('[Error Materialidad Modelo 6] ' . $e->getMessage());
         $materialidadRef = null;
     }
 }
 
-/**
- * Función auxiliar para formatear montos a representación visual de moneda
- */
+// 4. Función auxiliar para evaluar valores vacíos/nulos evitando fallos por cadenas vacías ('')
+$resolveValue = static function (mixed $formValue, mixed $dbValue): mixed {
+    if ($formValue !== null && $formValue !== '') {
+        return $formValue;
+    }
+    return $dbValue ?? 0.00;
+};
+
+// 5. Helper para formatear valores numéricos a formato de moneda
 $formatMonto = static function (mixed $valor): string {
     if ($valor === null || $valor === '') {
         return '0,00';
@@ -67,18 +86,24 @@ $formatMonto = static function (mixed $valor): string {
         return $valor;
     }
     
-    return number_format((float)$valor, 2, ',', '.');
+    return number_format((float) $valor, 2, ',', '.');
 };
 
-// Asignación de valores con fallback a la tabla proyecto_materialidad
-$valImportanciaGeneral = $formData['importancia_relativa_general'] 
-    ?? ($materialidadRef['importancia_inicial_monto'] ?? 0.00);
+// 6. Asignación de valores finales resueltos
+$valImportanciaGeneral = $resolveValue(
+    $formData['importancia_relativa_general'] ?? null,
+    $materialidadRef['importancia_inicial_monto'] ?? null
+);
 
-$valImportanciaPlanificacion = $formData['importancia_relativa_planificacion'] 
-    ?? ($materialidadRef['importancia_ajustada_monto'] ?? 0.00);
+$valImportanciaPlanificacion = $resolveValue(
+    $formData['importancia_relativa_planificacion'] ?? null,
+    $materialidadRef['importancia_ajustada_monto'] ?? null
+);
 
-$valNivelSud = $formData['nivel_registro_sud'] 
-    ?? ($materialidadRef['minimis_secundario_monto'] ?? 0.00);
+$valNivelSud = $resolveValue(
+    $formData['nivel_registro_sud'] ?? null,
+    $materialidadRef['minimis_secundario_monto'] ?? null
+);
 ?>
 
 <div class="card-modelo-6" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 2rem;">
@@ -86,9 +111,8 @@ $valNivelSud = $formData['nivel_registro_sud']
     <!-- Cabecera del Módulo -->
     <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.5rem;">
         <h3 style="margin: 0 0 0.25rem 0; font-size: 1.25rem; color: #1e293b; font-weight: 700; display: flex; align-items: center; justify-content: space-between;">
-            <!--<span>Modelo 6 - Ejecución de Auditoría Especial </span>-->
             <span style="font-size: 0.8rem; background: #e0f2fe; color: #0369a1; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600;">
-                Prueba ID: <?php echo htmlspecialchars((string)$currentPruebaId, ENT_QUOTES, 'UTF-8'); ?>
+                Prueba ID: <?= htmlspecialchars((string) $currentPruebaId, ENT_QUOTES, 'UTF-8'); ?>
             </span>
         </h3>
         <p style="margin: 0; color: #64748b; font-size: 0.9rem;">
@@ -96,10 +120,10 @@ $valNivelSud = $formData['nivel_registro_sud']
         </p>
     </div>
 
-    <!-- IMPORTANTE: Campos ocultos para enrutar la petición en actividades.php -->
+    <!-- Campos ocultos para enrutar la petición en actividades.php -->
     <input type="hidden" name="action_type" value="save_modelo_6">
-    <input type="hidden" name="proyecto_id" value="<?php echo htmlspecialchars((string)$currentProyectoId, ENT_QUOTES, 'UTF-8'); ?>">
-    <input type="hidden" name="prueba_id" value="<?php echo htmlspecialchars((string)$currentPruebaId, ENT_QUOTES, 'UTF-8'); ?>">
+    <input type="hidden" name="proyecto_id" value="<?= htmlspecialchars((string) $currentProyectoId, ENT_QUOTES, 'UTF-8'); ?>">
+    <input type="hidden" name="prueba_id" value="<?= htmlspecialchars((string) $currentPruebaId, ENT_QUOTES, 'UTF-8'); ?>">
 
     <!-- 1. Información de la Cuenta y Objetivo -->
     <div style="margin-bottom: 1.75rem;">
@@ -110,18 +134,18 @@ $valNivelSud = $formData['nivel_registro_sud']
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
             <div>
                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Partida del estado Financiero</label>
-                <input type="text" name="partida_estado_financiero" value="<?php echo htmlspecialchars($formData['partida_estado_financiero'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="Ej. Efectivo" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
+                <input type="text" name="partida_estado_financiero" value="<?= htmlspecialchars((string) ($formData['partida_estado_financiero'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" placeholder="Ej. Efectivo" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
             </div>
             <div>
                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Fecha y período de la prueba</label>
-                <input type="text" name="fecha_periodo_prueba" value="<?php echo htmlspecialchars($formData['fecha_periodo_prueba'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="DD-MM-AA" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
+                <input type="text" name="fecha_periodo_prueba" value="<?= htmlspecialchars((string) ($formData['fecha_periodo_prueba'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" placeholder="DD-MM-AA" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
             </div>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
             <div>
                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">
-                    Importancia relativa Generaldd
+                    Importancia relativa General
                 </label>
                 <input 
                     type="text" 
@@ -176,8 +200,8 @@ $valNivelSud = $formData['nivel_registro_sud']
                 $isChecked = !empty($formData[$key]) ? 'checked' : '';
             ?>
                 <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #334155; cursor: pointer;">
-                    <input type="checkbox" name="<?php echo $key; ?>" value="1" <?php echo $isChecked; ?> style="width: 16px; height: 16px; accent-color: #2563eb;">
-                    <span><strong><?php echo $data['sigla']; ?></strong> - <?php echo $data['desc']; ?></span>
+                    <input type="checkbox" name="<?= $key; ?>" value="1" <?= $isChecked; ?> style="width: 16px; height: 16px; accent-color: #2563eb;">
+                    <span><strong><?= $data['sigla']; ?></strong> - <?= $data['desc']; ?></span>
                 </label>
             <?php endforeach; ?>
         </div>
@@ -188,7 +212,7 @@ $valNivelSud = $formData['nivel_registro_sud']
         <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
             3. Desarrollar una Expectativa
         </h4>
-        <textarea name="desarrollar_expectativa" rows="4" placeholder="Describa analíticamente la expectativa..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?php echo htmlspecialchars($formData['desarrollar_expectativa'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+        <textarea name="desarrollar_expectativa" rows="4" placeholder="Describa analíticamente la expectativa..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?= htmlspecialchars((string) ($formData['desarrollar_expectativa'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
     </div>
 
     <!-- 4. Definir la Diferencia Tolerable y Umbrales -->
@@ -196,7 +220,7 @@ $valNivelSud = $formData['nivel_registro_sud']
         <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
             4. Definir Base de selección y error tolerable
         </h4>
-        <textarea name="definicion_diferencia_umbral" rows="3" placeholder="Defina los criterios del umbral..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?php echo htmlspecialchars($formData['definicion_diferencia_umbral'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+        <textarea name="definicion_diferencia_umbral" rows="3" placeholder="Defina los criterios del umbral..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?= htmlspecialchars((string) ($formData['definicion_diferencia_umbral'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
     </div>
 
     <!-- 5. Ejecución y Registro de Resultados -->
@@ -204,7 +228,7 @@ $valNivelSud = $formData['nivel_registro_sud']
         <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
             5. Registro de Resultados y Desviaciones Obtenidas
         </h4>
-        <textarea name="determinacion_diferencias" rows="4" placeholder="Indique los valores reales obtenidos..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?php echo htmlspecialchars($formData['determinacion_diferencias'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+        <textarea name="determinacion_diferencias" rows="4" placeholder="Indique los valores reales obtenidos..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?= htmlspecialchars((string) ($formData['determinacion_diferencias'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
     </div>
 
     <!-- 6. Conclusión y Evaluación del Hallazgo -->
@@ -212,10 +236,10 @@ $valNivelSud = $formData['nivel_registro_sud']
         <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
             6. Conclusión y Evaluación de Resultados
         </h4>
-        <textarea name="evaluacion_resultados" rows="3" placeholder="Redacte la conclusión técnica..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?php echo htmlspecialchars($formData['evaluacion_resultados'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+        <textarea name="evaluacion_resultados" rows="3" placeholder="Redacte la conclusión técnica..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; resize: vertical;"><?= htmlspecialchars((string) ($formData['evaluacion_resultados'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
     </div>
 
-    <!-- Botón de Envío: Desencadena el envío del formulario PADRE en actividades.php -->
+    <!-- Botón de Envío -->
     <div style="text-align: right; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
         <button type="submit" style="background: #2563eb; color: white; border: none; padding: 0.65rem 1.75rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
             Guardar Avance Completo (Modelo 6)
