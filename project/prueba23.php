@@ -65,7 +65,8 @@ if ($proyectoId > 0) {
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #ffffff;">
                 <thead>
-                    <tr style="background-color: #2a2b2f; color: #9ca3af; text-align: left;">
+                    <tr style="background-color: #2a2b2f; color: #ffffff; text-align: left;">
+                        <th style="padding: 12px;">Nro riesgo</th>
                         <th style="padding: 12px;">Origen del riesgo</th>
                         <th style="padding: 12px;">Objetivos del negocio</th>
                         <th style="padding: 12px;">Riesgo del negocio</th>
@@ -84,7 +85,8 @@ if ($proyectoId > 0) {
                     <?php else: ?>
                         <?php foreach ($listaRiesgos as $item): ?>
                             <tr style="border-bottom: 1px solid #2a2b2f;">
-                                <td style="padding: 12px;"><?php echo htmlspecialchars($item['origen_riesgo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td style="padding: 6px;"><?php echo htmlspecialchars($item['nro_riesgo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td style="padding: 6px;"><?php echo htmlspecialchars($item['origen_riesgo'], ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td style="padding: 12px;"><?php echo htmlspecialchars($item['objetivos_negocio'], ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td style="padding: 12px;"><?php echo htmlspecialchars($item['riesgo_negocio'], ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td style="padding: 12px;"><?php echo htmlspecialchars($item['riesgo_clave'], ENT_QUOTES, 'UTF-8'); ?></td>
