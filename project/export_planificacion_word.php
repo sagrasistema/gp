@@ -10,8 +10,8 @@ if (!$proyectoId) {
     die('Error: El parámetro proyecto_id es obligatorio y debe ser un número entero válido.');
 }
 
-// 2. Conexión e Inclusión de la BD (Ajusta la ruta según tu estructura de archivos)
-require_once __DIR__ . '/conexion.php'; 
+// 2. Conexión e Inclusión de la BD (Ajusta la ruta segsún tu estructura de archivos)
+include '../main/config.php';
 
 /** @var PDO $pdo */
 
