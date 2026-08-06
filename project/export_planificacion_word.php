@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 include '../main/config.php';
-use App\Database\Database;
 
 // ----------------------------------------------------------------------
 // 1. Sanitización y Validación de Entrada (ID de Proyecto)
