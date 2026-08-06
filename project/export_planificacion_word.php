@@ -39,7 +39,7 @@ try {
                         p.socioLider,
                         p.gerente,
                         p.fecha_inicio AS fechaInicio,
-                        p.fecha_fin AS fechaFin,
+                        p.fechaRemision AS fechaFin,
                         p.estado
                     FROM proyectos p
                     WHERE p.id = :proyectoId";
@@ -111,7 +111,7 @@ try {
         'Socio Asignado'      => $proyecto['socioLider'] ?? 'No asignado',
         'Gerente a Cargo'     => $proyecto['gerente'] ?? 'No asignado',
         'Fecha Inicio Plan'   => $proyecto['fechaInicio'] ?? 'Pendiente',
-        'Fecha Cierre Est.'   => $proyecto['fechaFin'] ?? 'Pendiente',
+        'Fecha Cierre Est.'   => $proyecto['fechaRemision'] ?? 'Pendiente',
         'Estado del Proyecto' => $proyecto['estado'] ?? 'En Proceso'
     ];
 
