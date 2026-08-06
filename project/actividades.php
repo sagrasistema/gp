@@ -171,7 +171,6 @@ include 'conect-actividades.php';
             <i class="ri-book-line"></i> Instruciones
         </button>
     </div>
-    
 
     <?php if (isset($_GET['success'])): ?>
         <div class="alert-success" style="padding:1rem; background:#d1fae5; color:#065f46; border-radius:8px; margin-bottom:1.5rem;">
