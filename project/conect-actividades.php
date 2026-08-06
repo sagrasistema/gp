@@ -10,7 +10,10 @@ $pruebaId = filter_input(INPUT_GET, 'pruebaId', FILTER_VALIDATE_INT);
 if (!$proyectoId || !$pruebaId) {
     die("Error: Parámetros relacionales faltantes.");
 }
-
+// 1. Verificar estado del registro maestro
+$stmtStatus = $pdo->prepare("SELECT statusId FROM proyectos WHERE id = :id");
+$stmtStatus->execute([':id' => $proyectoId]);
+$isClosed = ((int)$stmtStatus->fetchColumn() === 2);
 /**
  * Convierte un número en formato venezolano (ej. "5.000.000,00") a un float estándar de PHP.
  */

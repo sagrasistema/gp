@@ -434,26 +434,29 @@ include 'conect-actividades.php';
         </script>
 
         <!-- CAJA DE ESTATUS GENERAL DE LA PRUEBA -->
-        <div style="background: #ffffff; border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; margin-top: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <div>
-                <h4 style="margin: 0 0 0.25rem 0; font-size: 1rem; color: #1e293b;">Estatus General de la Prueba</h4>
-                <p style="margin: 0; font-size: 0.85rem; color: #64748b;">El estatus se actualizará al guardar todo el formulario.</p>
+        <?php if (!$isClosed): ?>
+            <div style="background: #ffffff; border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; margin-top: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <div>
+                    <h4 style="margin: 0 0 0.25rem 0; font-size: 1rem; color: #1e293b;">Estatus General de la Prueba</h4>
+                    <p style="margin: 0; font-size: 0.85rem; color: #64748b;">El estatus se actualizará al guardar todo el formulario.</p>
+                </div>
+
+                <div>
+                    <select name="estado_prueba" class="status-select" style="padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.9rem; border: 1px solid #cbd5e1; font-weight: 600; background: #f8fafc;">
+                        <option value="en_proceso" <?= $estadoActualPrueba === 'en_proceso' ? 'selected' : '' ?>>⏳ En proceso</option>
+                        <option value="completado" <?= $estadoActualPrueba === 'completado' ? 'selected' : '' ?>>✅ Completado</option>
+                        <option value="por_corregir_lider" <?= $estadoActualPrueba === 'por_corregir_lider' ? 'selected' : '' ?>>⚠️ Por Corregir Lider</option>
+                        <option value="por_corregir_riesgo" <?= $estadoActualPrueba === 'por_corregir_riesgo' ? 'selected' : '' ?>>🚨 Por Corregir Riesgo</option>
+                        <option value="revisado" <?= $estadoActualPrueba === 'revisado' ? 'selected' : '' ?>>🔹 Revisado</option>
+                        <option value="cerrado" <?= $estadoActualPrueba === 'cerrado' ? 'selected' : '' ?>>🔒 Cerrado</option>
+                    </select>
+                </div>
+                <div>
+                    <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="btn btn-secondary">Volver al Panel</a>
+                    <button type="submit" class="btn btn-primary" style="padding:0.75rem 2.5rem;"><i class="ri-save-3-line"></i> Guardar Todo</button>
+                </div>
             </div>
-            <div>
-                <select name="estado_prueba" class="status-select" style="padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.9rem; border: 1px solid #cbd5e1; font-weight: 600; background: #f8fafc;">
-                    <option value="en_proceso" <?= $estadoActualPrueba === 'en_proceso' ? 'selected' : '' ?>>⏳ En proceso</option>
-                    <option value="completado" <?= $estadoActualPrueba === 'completado' ? 'selected' : '' ?>>✅ Completado</option>
-                    <option value="por_corregir_lider" <?= $estadoActualPrueba === 'por_corregir_lider' ? 'selected' : '' ?>>⚠️ Por Corregir Lider</option>
-                    <option value="por_corregir_riesgo" <?= $estadoActualPrueba === 'por_corregir_riesgo' ? 'selected' : '' ?>>🚨 Por Corregir Riesgo</option>
-                    <option value="revisado" <?= $estadoActualPrueba === 'revisado' ? 'selected' : '' ?>>🔹 Revisado</option>
-                    <option value="cerrado" <?= $estadoActualPrueba === 'cerrado' ? 'selected' : '' ?>>🔒 Cerrado</option>
-                </select>
-            </div>
-            <div>
-                <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="btn btn-secondary">Volver al Panel</a>
-                <button type="submit" class="btn btn-primary" style="padding:0.75rem 2.5rem;"><i class="ri-save-3-line"></i> Guardar Todo</button>
-            </div>
-        </div>
+        <?php endif; ?> 
     </form>
 
     <!-- Formularios ocultos individuales para eliminar registros de indicadores -->
