@@ -1,8 +1,6 @@
 <?php
-// v/ac/index.php
-// ac/index.php
+declare(strict_types=1);
 
-// 1. Iniciar sesión obligatoriamente antes de procesar lógica o incluir layouts
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -12,8 +10,9 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: ../login.php');
     exit;
 }
+
 $pageTitle = "Aceptación y Continuidad";
-include '../main/h.php'; // Tu cabecera PHP normal de base de datos / sesiones
+include '../main/h.php'; 
 include '../main/config.php'; 
 ?>
 
@@ -73,20 +72,20 @@ include '../main/layout_header.php';
             <tbody>
                 <?php
                 try {
-                    // Consulta con filtro aplicado para excluir registros con statusId igual a 0
+                    // Consulta filtrando por ver_id para preservar el statusId de negocio (ej. 2 para registros cerrados)
                     $query = "SELECT 
                                 a.acId, 
                                 a.riskScore, 
                                 a.riskLevel, 
                                 a.statusId,
-                                a.verId,
+                                a.ver_id,
                                 a.created_at, 
                                 c.name AS clientName, 
                                 t.typeName 
                             FROM ac a
                             INNER JOIN clientes c ON a.clientId = c.id
                             INNER JOIN ac_types t ON a.typeId = t.typeId
-                            WHERE a.verId != 0
+                            WHERE a.ver_id != 0
                             ORDER BY a.acId DESC";
 
                     $stmt = $pdo->query($query);
@@ -99,7 +98,7 @@ include '../main/layout_header.php';
                             $riskLevel  = htmlspecialchars((string)($ac->riskLevel ?? 'Sin Evaluar'), ENT_QUOTES, 'UTF-8');
                             $fecha      = date('d/m/Y', strtotime($ac->created_at));
                             
-                            // Mapeo dinámico según statusId
+                            // Mapeo dinámico según statusId operativo
                             $statusId   = (int)($ac->statusId ?? 1);
                             $isClosed   = ($statusId === 2);
 
