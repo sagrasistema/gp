@@ -49,7 +49,7 @@ $opcionesPuntoReferencia = [
 ];
 
 // Asignación de variables desde la consulta previa a $datosMaterialidad
-$puntoReferenciaSeleccionado = $datosMaterialidad['punto_referencia'] ?? 'Utilidad antes de Impuestos';
+$puntoReferenciaSeleccionado = $datosMaterialidad['punto_referencia'];
 #$montoBeneficios = (float)($datosMaterialidad['beneficios_monto'] ?? 0.00);
 
 if ((int)$pruebaId === 16):
