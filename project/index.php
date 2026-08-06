@@ -1,5 +1,6 @@
 <?php
-// v/proyectos/index.phpss
+declare(strict_types=1);
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -9,7 +10,8 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: ../login.php');
     exit;
 }
-$pageTitle = "Gestión de Proyectos de Auditoría";
+
+// v/proyectos/index.php
 include '../main/h.php'; 
 include '../main/config.php'; 
 ?>
@@ -31,6 +33,7 @@ include '../main/layout_header.php';
             <i class="ri-folders-line"></i> Control de Proyectos de Auditoría
         </h1>
     </div>
+    
     <div class="table-actions-container">
         <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
             <i class="ri-arrow-go-back-line"></i> 
@@ -67,10 +70,13 @@ include '../main/layout_header.php';
             <tbody>
                 <?php
                 try {
-                    $query = "SELECT p.id AS proyectoId, c.name AS clientName, p.nombre AS proyectoNombre, p.fecha_inicio 
+                    // Consulta con filtro para excluir proyectos con statusId igual a 0
+                    $query = "SELECT p.id AS proyectoId, c.name AS clientName, p.nombre AS proyectoNombre, p.fecha_inicio, p.statusId 
                               FROM proyectos p
                               INNER JOIN clientes c ON p.cliente_id = c.id
+                              WHERE p.statusId != 0
                               ORDER BY p.id DESC";
+                              
                     $stmt = $pdo->query($query);
                     $proyectos = $stmt->fetchAll(PDO::FETCH_OBJ);
                     
@@ -91,10 +97,6 @@ include '../main/layout_header.php';
                             echo "<a href='responder.php?proyectoId={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; margin-right: 4px;' data-tooltip='Gestionar Pruebas'>";
                             echo "<i class='ri-folder-open-line'></i>";
                             echo "</a>";
-                            // Botón de Pruebas / Gestionar (responder2.php)
-                            //echo "<a href='responder2.php?proyectoId={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; margin-right: 4px;' data-tooltip='Gestionar Pruebas'>";
-                           // echo "<i class='ri-folder-open-line'></i>";
-                            //echo "</a>";
 
                             // Botón de Asignación de Equipo (proyecto_equipo.php)
                             echo "<a href='proyecto_equipo.php?id={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; background-color: rgba(0, 188, 212, 0.1); color: var(--accent-cian, #00bcd4); border: 1px solid var(--accent-cian, #00bcd4);' data-tooltip='Asignar Equipo'>";
