@@ -36,7 +36,7 @@ try {
                         p.id AS proyectoId,
                         p.nombre AS nombreProyecto,
                         p.cliente_id AS clienteId,
-                        p.socio,
+                        p.socioLider,
                         p.gerente,
                         p.fecha_inicio AS fechaInicio,
                         p.fecha_fin AS fechaFin,
@@ -108,7 +108,7 @@ try {
     $infoRows = [
         'Nombre del Proyecto' => $proyecto['nombreProyecto'] ?? 'Sin Nombre',
         'Cliente (ID)'        => (string)($proyecto['clienteId'] ?? 'N/A'),
-        'Socio Asignado'      => $proyecto['socio'] ?? 'No asignado',
+        'Socio Asignado'      => $proyecto['socioLider'] ?? 'No asignado',
         'Gerente a Cargo'     => $proyecto['gerente'] ?? 'No asignado',
         'Fecha Inicio Plan'   => $proyecto['fechaInicio'] ?? 'Pendiente',
         'Fecha Cierre Est.'   => $proyecto['fechaFin'] ?? 'Pendiente',
