@@ -1,4 +1,4 @@
-<?php 
+<?php
 // v/ac/index.php
 // ac/index.php
 
@@ -15,13 +15,11 @@ if (!isset($_SESSION['user_id'])) {
 $pageTitle = "Aceptación y Continuidad";
 include '../main/h.php'; // Tu cabecera PHP normal de base de datos / sesiones
 include '../main/config.php'; 
-//include '../main/user.php'; // Tu cabecera PHP normal de base de datos / sesiones
 ?>
 
 <link rel="stylesheet" href="../main/layout.css">
 
 <?php
-
 // Configuración para que el componente apunte a las carpetas correctas desde v/ac/
 $customLogoPath = '../main/logo.png';
 $customHomePath = '../index.php';
@@ -30,7 +28,6 @@ $currentTab     = 'aceptacion'; // Marca "Aceptación" activo en el sidebar
 
 include '../main/layout_header.php';
 ?>
-
 
 <div class="view-container">
     <div class="view-header">
@@ -60,49 +57,47 @@ include '../main/layout_header.php';
             <i class="ri-close-circle-line"></i> 
         </a>
     </div>
+
     <div class="table-container">
         <table class="custom-table">
             <thead>
                 <tr>
-                    <!--<th style="width: 10%;">ID AC</th>-->
-                    
                     <th style="width: 35%;">Cliente / Empresa</th>
                     <th style="width: 15%;">Tipo de Evaluación</th>
                     <th style="width: 15%;">Fecha Creación</th>
-                    
-                    <th style="width: 15%;"> Nivel de Riesgo</th>
-                    
+                    <th style="width: 15%;">Nivel de Riesgo</th>
                     <th style="width: 10%; text-align: center;">Acciones</th>
-                    
-                    <th style="width: 10%;">Estado </th>
+                    <th style="width: 10%;">Estado</th>
                 </tr>
             </thead>
             <tbody>
                 <?php
                 try {
-                   $query = "SELECT 
-                                    a.acId, 
-                                    a.riskScore, 
-                                    a.riskLevel, 
-                                    a.riskLevel, 
-                                    a.statusId,
-                                    a.created_at, 
-                                    c.name AS clientName, 
-                                    t.typeName 
-                                FROM ac a
-                                INNER JOIN clientes c ON a.clientId = c.id
-                                INNER JOIN ac_types t ON a.typeId = t.typeId
-                                ORDER BY a.acId DESC";
+                    // Consulta con filtro aplicado para excluir registros con statusId igual a 0
+                    $query = "SELECT 
+                                a.acId, 
+                                a.riskScore, 
+                                a.riskLevel, 
+                                a.statusId,
+                                a.created_at, 
+                                c.name AS clientName, 
+                                t.typeName 
+                            FROM ac a
+                            INNER JOIN clientes c ON a.clientId = c.id
+                            INNER JOIN ac_types t ON a.typeId = t.typeId
+                            WHERE a.statusId != 0
+                            ORDER BY a.acId DESC";
+
                     $stmt = $pdo->query($query);
                     $evaluaciones = $stmt->fetchAll(PDO::FETCH_OBJ);
-                    $riskScore  = htmlspecialchars((string)($ac->riskScore ?? '0'), ENT_QUOTES, 'UTF-8');
-                    $riskLevel  = htmlspecialchars((string)($ac->riskLevel ?? 'Sin Evaluar'), ENT_QUOTES, 'UTF-8');
-                    
+
                     if (!empty($evaluaciones)) {
                         foreach ($evaluaciones as $ac) {
                             $clientName = htmlspecialchars($ac->clientName, ENT_QUOTES, 'UTF-8');
                             $typeName   = htmlspecialchars($ac->typeName, ENT_QUOTES, 'UTF-8');
+                            $riskLevel  = htmlspecialchars((string)($ac->riskLevel ?? 'Sin Evaluar'), ENT_QUOTES, 'UTF-8');
                             $fecha      = date('d/m/Y', strtotime($ac->created_at));
+                            
                             // Mapeo dinámico según statusId
                             $statusId   = (int)($ac->statusId ?? 1);
                             $isClosed   = ($statusId === 2);
@@ -112,13 +107,12 @@ include '../main/layout_header.php';
                             $tooltip    = $isClosed ? 'Cerrado' : 'En proceso';
 
                             echo "<tr>";
-                            
                             echo "<td><strong>{$clientName}</strong></td>";
                             echo "<td>{$typeName}</td>";
                             echo "<td>{$fecha}</td>";
-                            echo "<td style='font-weight: 600; color: #64748b;'> {$ac->riskLevel} </td>";
+                            echo "<td style='font-weight: 600; color: #64748b;'> {$riskLevel} </td>";
                             echo "<td style='text-align: center;'>
-                                    <a href='responder.php?acId={$ac->acId}' class='btn btn-secondary' style=' background: #0bcf8e; color: #ffffff;;padding: 0.4rem 0.8rem; font-size: 0.85rem;'>
+                                    <a href='responder.php?acId={$ac->acId}' class='btn btn-secondary' style='background: #0bcf8e; color: #ffffff; padding: 0.4rem 0.8rem; font-size: 0.85rem;'>
                                         <i class='ri-file-list-3-line'></i> Responder
                                     </a>
                                   </td>";
@@ -126,14 +120,15 @@ include '../main/layout_header.php';
                                     <span title='{$tooltip}' style='cursor: help; display: inline-flex; align-items: center;'>
                                         <i class='{$iconClass}' style='font-size: 1.25rem; color: {$iconColor};'></i>
                                     </span>
-                                </td>";
+                                  </td>";
                             echo "</tr>";
                         }
                     } else {
-                        echo "<tr><td colspan='5' style='text-align: center; color: #64748b; padding: 3rem;'>No se han encontrado evaluaciones.</td></tr>";
+                        echo "<tr><td colspan='6' style='text-align: center; color: #64748b; padding: 3rem;'>No se han encontrado evaluaciones.</td></tr>";
                     }
                 } catch (PDOException $e) {
-                    echo "<tr><td colspan='5' style='text-align: center; color: red; padding: 2rem;'>Error al cargar los datos del servidor.</td></tr>";
+                    error_log("Error en v/ac/index.php: " . $e->getMessage());
+                    echo "<tr><td colspan='6' style='text-align: center; color: red; padding: 2rem;'>Error al cargar los datos del servidor.</td></tr>";
                 }
                 ?>
             </tbody>
