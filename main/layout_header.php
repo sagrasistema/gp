@@ -80,7 +80,7 @@ $activeTab = isset($currentTab) ? $currentTab : '';
                 <i class="ri-briefcase-line"></i>
                 <span>Proyectos</span>
             </a>
-             <a href="user/index.php" class="menu-item <?php echo ($activeTab === 'usuarios') ? 'active' : ''; ?>">
+             <a href="clientes_status/index.php" class="menu-item <?php echo ($activeTab === 'usuarios') ? 'active' : ''; ?>">
                 <i class="ri-user-line"></i>
                 <span>Usuarios</span>
             </a>
