@@ -75,6 +75,9 @@ if (!$terminoId || $terminoId <= 0) {
     http_response_code(400);
     die("Error: Identificador de Términos y Condiciones no especificado o inválido.");
 }
+$stmtStatus = $pdo->prepare("SELECT statusId FROM terminos_condiciones WHERE id = :id");
+$stmtStatus->execute([':id' => $terminoId]);
+$isClosed = ((int)$stmtStatus->fetchColumn() === 2);
 
 $itemKey = 'esquema_facturacion';
 
@@ -382,9 +385,12 @@ include '../main/h.php';
                     </div>
 
                     <div>
-                        <button type="submit" name="btn_generar_cuotas" value="1" class="btn-blue-icon" title="Generar / Re-calcular Cuotas">
-                            <i class="ri-save-3-fill" style="font-size: 1.25rem;"></i>
-                        </button>
+                        <?php if (!$isClosed): ?>
+                            <button type="submit" name="btn_generar_cuotas" value="1" class="btn-blue-icon" title="Generar / Re-calcular Cuotas">
+                                <i class="ri-save-3-fill" style="font-size: 1.25rem;"></i>
+                            </button>
+                        <?php endif; ?>  
+                        
                     </div>
                 </div>
             </form>
@@ -487,9 +493,12 @@ include '../main/h.php';
 
                 <!-- BOTÓN GUARDAR -->
                 <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
-                    <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="ri-save-line"></i> Guardar Esquema Detallado
-                    </button>
+                    <?php if (!$isClosed): ?>
+                            <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="ri-save-line"></i> Guardar Esquema Detallado
+                            </button>
+                    <?php endif; ?>  
+                    
                 </div>
 
             </div>
