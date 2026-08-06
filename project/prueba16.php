@@ -228,13 +228,13 @@ if ((int)$pruebaId === 16):
             <div style="margin-bottom: 1rem;">
                 <strong style="font-size: 0.9rem; color: #1e293b; display: block; margin-bottom: 0.25rem;">Nivel de mínimo registro de incorrecciones (Norma NIA 450) *</strong>
                 <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.4;">
-                    Umbral o nivel <em>De Minimis</em> conforme a la <strong>NIA 450</strong> (Evaluación de las incorrecciones identificadas durante la auditoría). Establece el límite por debajo del cual las diferencias acumuladas se consideran claramente insignificantes.
+                    Umbral o nivel <em>De Minimo</em> conforme a la <strong>NIA 450</strong> (Evaluación de las incorrecciones identificadas durante la auditoría). Establece el límite por debajo del cual las diferencias acumuladas se consideran claramente insignificantes.
                 </p>
             </div>
             
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: center; margin-bottom: 1rem;">
                 <div>
-                    <label style="font-size: 0.85rem; color: #334155; font-weight: 600;">Nivel minimis registro de incorrecciones</label>
+                    <label style="font-size: 0.85rem; color: #334155; font-weight: 600;">Nivel minimo registro de incorrecciones</label>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                     <div>
@@ -250,7 +250,7 @@ if ((int)$pruebaId === 16):
 
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: center;">
                 <div>
-                    <label style="font-size: 0.85rem; color: #334155; font-weight: 600;">Nivel minimis registro de incorrecciones (Secundario):</label>
+                    <label style="font-size: 0.85rem; color: #334155; font-weight: 600;">Nivel minimo registro de incorrecciones (Secundario):</label>
                 </div>
                 <div>
                     <span style="font-size: 0.75rem; color: #64748b; display: block; text-align: right; margin-bottom: 0.2rem;">Monto</span>
