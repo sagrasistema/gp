@@ -238,7 +238,7 @@ try {
                         p.nombre_prueba, 
                         pr.respuesta, 
                         pr.observaciones 
-                      FROM proyecto_respuestas pr
+                      FROM proyecto_actividades_ejecucion pr
                       INNER JOIN pruebas p ON pr.prueba_id = p.id
                       WHERE pr.proyecto_id = :proyecto_id AND p.etapa = 2
                       ORDER BY p.id ASC";
