@@ -1,26 +1,50 @@
 <?php
-
 declare(strict_types=1);
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 2. Validar autenticación de usuario
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../login.php');
     exit;
 }
-// v/terminos/responder-terminos.php
-include '../main/config.php';
+
+require_once '../main/config.php';
+
+/** @var PDO $pdo */
 
 $terminoId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-
 if (!$terminoId || $terminoId <= 0) {
+    http_response_code(400);
     die("Error: Registro de Términos y Condiciones no especificado.");
 }
 
+$currentUserId = (int)$sessionUserId = $_SESSION['user_id'];
+
+// PROCESAR CAMBIO DE ESTADO A CERRADO (Solo usuarios 1 y 2)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_cerrar_termino'])) {
+    if ($currentUserId === 1 || $currentUserId === 2) {
+        try {
+            $stmtCerrar = $pdo->prepare("
+                UPDATE terminos_condiciones 
+                SET statusId = 2, updated_at = NOW() 
+                WHERE id = :id
+            ");
+            $stmtCerrar->execute([':id' => $terminoId]);
+
+            header("Location: responder-terminos.php?id={$terminoId}&success=cerrado");
+            exit();
+        } catch (PDOException $e) {
+            error_log("Error al cerrar términos y condiciones: " . $e->getMessage());
+            $errorMessage = "Error interno al intentar cerrar el registro.";
+        }
+    } else {
+        http_response_code(403);
+        die("Acceso denegado: No tienes permisos para cerrar este registro.");
+    }
+}
+
 try {
-    // Cargar datos de la cabecera
     $stmtHeader = $pdo->prepare("
         SELECT tc.*, c.name AS clientName
         FROM terminos_condiciones tc
@@ -31,10 +55,10 @@ try {
     $headerData = $stmtHeader->fetch(PDO::FETCH_OBJ);
 
     if (!$headerData) {
+        http_response_code(404);
         die("Error: El registro de términos y condiciones no existe.");
     }
 
-    // Cargar los 4 ítems asociados
     $stmtItems = $pdo->prepare("
         SELECT * FROM terminos_condiciones_items 
         WHERE termino_id = :termino_id 
@@ -44,18 +68,18 @@ try {
     $itemsList = $stmtItems->fetchAll(PDO::FETCH_OBJ);
 
 } catch (PDOException $e) {
-    error_log("Error al cargar vista de respuesta de Términos: " . $e->getMessage());
+    error_log("Error al cargar vista de respuesta: " . $e->getMessage());
     die("Error crítico de base de datos.");
 }
 
+$isCerrado = ((int)($headerData->statusId ?? 1) === 2);
 $pageTitle = "Responder Términos y Condiciones";
 include '../main/h.php';
 
-// Mapa de enrutamiento para los formularios por item_key
 $mapaFormularios = [
     'carta_contratacion'  => 'formulario-carta-contratacion.php',
     'frecuencia'          => 'formulario-frecuencia.php',
-    'roles_proyecto'       => 'formulario-roles-proyecto.php',
+    'roles_proyecto'      => 'formulario-roles-proyecto.php',
     'esquema_facturacion' => 'formulario-esquema-facturacion.php',
 ];
 ?>
@@ -64,74 +88,58 @@ $mapaFormularios = [
 
 <div class="view-container">
     
-    <!-- ENCABEZADO -->
-     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">
             <i class="ri-file-list-3-line" style="color: #2563eb;"></i> Responder Términos y Condiciones
         </h1>
-        
     </div>
+
     <div class="table-actions-container">
-        <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
-            <i class="ri-arrow-go-back-line"></i> 
-        </a>
-
-        <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
-            <i class="ri-screenshot-2-line"></i>
-        </a>
-
-        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
-            <i class="ri-book-open-line"></i> 
-        </a>
-
-        <a href="#" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
-            <i class="ri-add-line"></i>
-        </a>
-
-        <a href="../terminos/index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+        <a href="../terminos/index.php" class="btn btn-primary" data-tooltip="Volver al Listado">
             <i class="ri-close-circle-line"></i> 
         </a>
     </div>
 
+    <?php if (isset($_GET['success']) && $_GET['success'] === 'cerrado'): ?>
+        <div style="padding: 1rem; background: #dcfce7; color: #166534; border-radius: 8px; margin-bottom: 1.5rem;">
+            <i class="ri-checkbox-circle-fill">Formatter</i> El registro ha sido cerrado exitosamente. Ningún usuario podrá editarlo.
+        </div>
+    <?php endif; ?>
 
-    <!-- Cabecera de Metadatos del Proyecto -->
-    <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.25rem; border-radius: 12px; background: #ffffff; border: 1px solid var(--border-color);">
-        <div style="display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid #e2e8f0; padding-right: 1rem; font-size: 0.9rem;">
+    <?php if (isset($errorMessage)): ?>
+        <div style="padding: 1rem; background: #fee2e2; color: #991b1b; border-radius: 8px; margin-bottom: 1.5rem;">
+            <i class="ri-error-warning-fill"></i> <?= htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') ?>
+        </div>
+    <?php endif; ?>
+
+    <!-- PANEL DE ESTADO Y ZONA DE CIERRE (VISIBLE SOLO PARA ID 1 Y 2) -->
+    <?php if ($currentUserId === 1 || $currentUserId === 2): ?>
+        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
             <div>
-                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Cliente / Empresa</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($headerData->clientName ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+                <h3 style="margin: 0 0 0.25rem 0; font-size: 1rem; color: #0f172a;">
+                    <i class="ri-lock-password-line" style="color: #2563eb;"></i> Panel de Control Administrativo (Cierre)
+                </h3>
+                <p style="margin: 0; font-size: 0.85rem; color: #64748b;">
+                    Estado actual: <strong><?= $isCerrado ? 'CERRADO (Bloqueado)' : 'ABIERTO (Editable)' ?></strong>
+                </p>
             </div>
-            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.5rem;">
-                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Socio Líder</span><br>
-                <strong style="color: #1e293b;"></strong>
+
+            <div>
+                <?php if (!$isCerrado): ?>
+                    <form method="POST" action="responder-terminos.php?id=<?= $terminoId ?>" onsubmit="return confirm('¿Está seguro de cerrar este registro? Una vez cerrado, no se podrá editar ninguna información.');">
+                        <input type="hidden" name="action_cerrar_termino" value="1">
+                        <button type="submit" class="btn" style="background: #dc2626; color: #fff; padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="ri-lock-fill"></i> Cerrar Términos
+                        </button>
+                    </form>
+                <?php else: ?>
+                    <span style="background: #fee2e2; color: #991b1b; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <i class="ri-lock-line"></i> Registro Cerrado Definitivamente
+                    </span>
+                <?php endif; ?>
             </div>
         </div>
-
-        <div style="display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid #e2e8f0; padding-right: 1rem; padding-left: 0.5rem; font-size: 0.9rem;">
-            <div>
-                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Proyecto / Alcance</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($headerData->servicio, ENT_QUOTES, 'UTF-8') ?></strong>
-            </div>
-            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.5rem;">
-                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Socio de Calidad</span><br>
-                <strong style="color: #1e293b;"></strong>
-            </div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 0.75rem; padding-left: 0.5rem; font-size: 0.9rem;">
-            <div>
-                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Fecha de Remisión</span><br>
-                <strong style="color: #1e293b;"></strong>
-            </div>
-            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.5rem;">
-                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Gerente Encargado</span><br>
-                <strong style="color: #1e293b;"></strong>
-            </div>
-        </div>
-    </div>
-
-
-
+    <?php endif; ?>
 
     <!-- LISTADO DE LAS 4 ACTIVIDADES -->
     <div class="terminos-container" style="display: flex; flex-direction: column; gap: 0.6rem;">
@@ -139,10 +147,10 @@ $mapaFormularios = [
             <div class="termino-row" style="display: flex; align-items: center; background: #94a3b8; color: #ffffff; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                 
                 <div style="padding: 0.85rem 1.25rem; background: rgba(0, 0, 0, 0.12); font-weight: 700; font-size: 1rem; min-width: 45px; text-align: center;">
-                    <?= $item->orden ?>
+                    <?= (int)$item->orden ?>
                 </div>
 
-                <div style="flex: 1; padding: 0.85rem 1.25rem; font-weight: 600; font-size: 0.95rem; letter-spacing: 0.2px;">
+                <div style="flex: 1; padding: 0.85rem 1.25rem; font-weight: 600; font-size: 0.95rem;">
                     <?= htmlspecialchars($item->item_nombre, ENT_QUOTES, 'UTF-8') ?>
                 </div>
 
@@ -153,14 +161,18 @@ $mapaFormularios = [
                         <span style="background: rgba(255,255,255,0.2); color: #f8fafc; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 12px; font-weight: 500;">Pendiente</span>
                     <?php endif; ?>
                 </div>
+
                 <?php 
-                    // Determinar el archivo de destino o usar el genérico por defecto
                     $scriptDestino = $mapaFormularios[$item->item_key] ?? 'formulario-termino.php'; 
                 ?>
                 <a href="<?= htmlspecialchars($scriptDestino, ENT_QUOTES, 'UTF-8') ?>?terminoId=<?= $terminoId ?>&item=<?= htmlspecialchars($item->item_key, ENT_QUOTES, 'UTF-8') ?>" 
-                title="Editar <?= htmlspecialchars($item->item_nombre, ENT_QUOTES, 'UTF-8') ?>"
-                style="display: flex; align-items: center; justify-content: center; padding: 0.85rem 1.25rem; background: rgba(0, 0, 0, 0.08); color: #ffffff; text-decoration: none; transition: background 0.2s;">
-                    <i class="ri-pencil-fill" style="font-size: 1.1rem;"></i>
+                title="<?= $isCerrado ? 'Ver Registro' : 'Editar' ?>"
+                style="display: flex; align-items: center; justify-content: center; padding: 0.85rem 1.25rem; background: rgba(0, 0, 0, 0.08); color: #ffffff; text-decoration: none;">
+                    <?php if ($isCerrado): ?>
+                        <i class="ri-eye-fill" style="font-size: 1.1rem;"></i>
+                    <?php else: ?>
+                        <i class="ri-pencil-fill" style="font-size: 1.1rem;"></i>
+                    <?php endif; ?>
                 </a>
 
             </div>
