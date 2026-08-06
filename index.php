@@ -64,6 +64,23 @@ $currentTab     = 'inicio'; // Marca "Inicio" activo en el sidebar
         .module-card:hover .icon-box { background-color: var(--accent); color: #ffffff; }
         .module-card h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text-main); }
         .module-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.4; }
+        
+        /* Estilo para la tarjeta compacta y exclusiva de administración */
+        .module-card.admin-card {
+            padding: 1.5rem;
+            border: 1px dashed var(--accent);
+            background: linear-gradient(to bottom, #ffffff, #f0f9ff);
+        }
+        .module-card.admin-card .icon-box {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .module-card.admin-card h2 {
+            font-size: 1.1rem;
+        }
+
         .module-card.disabled { cursor: not-allowed; opacity: 0.75; }
         .module-card.disabled:hover { transform: none; border-color: var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
         .module-card.disabled .icon-box { background-color: #f1f5f9; color: #94a3b8; }
@@ -107,6 +124,15 @@ include 'main/layout_header.php';
             <h2>Proyecto</h2>
             <p>Planificación de flujos de trabajo, entregables y asignación de tareas.</p>
         </a>
+
+        <!-- ACCESO EXCLUSIVO PARA USUARIOS ID 1 Y 2 -->
+        <?php if (isset($_SESSION['user_id']) && in_array((int)$_SESSION['user_id'], [1, 2], true)): ?>
+            <a href="tu_modulo_especial/index.php" class="module-card admin-card">
+                <div class="icon-box"><i class="ri-admin-line"></i></div>
+                <h2>Panel Especial</h2>
+                <p>Módulo de gestión avanzada y control exclusivo de superusuarios.</p>
+            </a>
+        <?php endif; ?>
     </div>
 </div>
 
