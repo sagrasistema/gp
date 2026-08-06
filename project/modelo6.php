@@ -31,6 +31,54 @@ if (!isset($formData)) {
         'evaluacion_resultados' => ''
     ];
 }
+$materialidadRef = null;
+
+if (isset($pdo, $proyectoId) && (int)$proyectoId > 0) {
+    try {
+        $stmtMatRef = $pdo->prepare("
+            SELECT 
+                importancia_inicial_monto,
+                importancia_ajustada_monto,
+                minimis_secundario_monto
+            FROM proyecto_materialidad
+            WHERE proyecto_id = :proyecto_id
+            LIMIT 1
+        ");
+        
+        $stmtMatRef->execute([':proyecto_id' => (int)$proyectoId]);
+        $materialidadRef = $stmtMatRef->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Log seguro en el servidor sin exponer datos al cliente
+        error_log('[Error Materialidad Modelo 6] ' . $e->getMessage());
+        $materialidadRef = null;
+    }
+}
+
+/**
+ * Función auxiliar para formatear montos a representación visual de moneda
+ */
+$formatMonto = static function (mixed $valor): string {
+    if ($valor === null || $valor === '') {
+        return '0,00';
+    }
+    
+    // Si ya viene formateado en formato venezuelano (con coma decimal)
+    if (is_string($valor) && str_contains($valor, ',')) {
+        return $valor;
+    }
+    
+    return number_format((float)$valor, 2, ',', '.');
+};
+
+// Asignación de valores con fallback a la tabla proyecto_materialidad
+$valImportanciaGeneral = $formData['importancia_relativa_general'] 
+    ?? ($materialidadRef['importancia_inicial_monto'] ?? 0.00);
+
+$valImportanciaPlanificacion = $formData['importancia_relativa_planificacion'] 
+    ?? ($materialidadRef['importancia_ajustada_monto'] ?? 0.00);
+
+$valNivelSud = $formData['nivel_registro_sud'] 
+    ?? ($materialidadRef['minimis_secundario_monto'] ?? 0.00);
 ?>
 
 <div class="card-modelo-6" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 2rem;">
@@ -72,16 +120,37 @@ if (!isset($formData)) {
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
             <div>
-                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Importancia relativa General</label>
-                <input type="text" name="importancia_relativa_general" value="<?php echo htmlspecialchars((string)($formData['importancia_relativa_general'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">
+                    Importancia relativa General
+                </label>
+                <input 
+                    type="text" 
+                    name="importancia_relativa_general" 
+                    value="<?= htmlspecialchars($formatMonto($valImportanciaGeneral), ENT_QUOTES, 'UTF-8'); ?>" 
+                    style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;"
+                >
             </div>
             <div>
-                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Importancia relativa Planificación</label>
-                <input type="text" name="importancia_relativa_planificacion" value="<?php echo htmlspecialchars((string)($formData['importancia_relativa_planificacion'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">
+                    Importancia relativa Planificación
+                </label>
+                <input 
+                    type="text" 
+                    name="importancia_relativa_planificacion" 
+                    value="<?= htmlspecialchars($formatMonto($valImportanciaPlanificacion), ENT_QUOTES, 'UTF-8'); ?>" 
+                    style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;"
+                >
             </div>
             <div>
-                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Nivel de registro SUD</label>
-                <input type="text" name="nivel_registro_sud" value="<?php echo htmlspecialchars((string)($formData['nivel_registro_sud'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">
+                    Nivel de registro SUD
+                </label>
+                <input 
+                    type="text" 
+                    name="nivel_registro_sud" 
+                    value="<?= htmlspecialchars($formatMonto($valNivelSud), ENT_QUOTES, 'UTF-8'); ?>" 
+                    style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;"
+                >
             </div>
         </div>
     </div>
