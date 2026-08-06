@@ -118,7 +118,7 @@ if ((int)$pruebaId === 16):
         <div style="margin-bottom: 1.5rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 1.25rem;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; font-size: 0.9rem;">
                 <div><span style="color: #64748b; font-weight: 600;">Punto de referencia:</span></div>
-                <div style="color: #1e293b; font-weight: 500;">Empresas con beneficios normales</div>
+                <div style="color: #1e293b; font-weight: 500; text-align: right;">Empresas con beneficios normales</div>
             </div>
 
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: center;">
