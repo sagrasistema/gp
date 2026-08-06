@@ -182,18 +182,18 @@ $valNivelSud = $resolveValue(
     <!-- 2. Aseveraciones a los Estados Financieros -->
     <div style="margin-bottom: 1.75rem;">
         <h4 style="font-size: 0.95rem; color: #334155; margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; border-left: 3px solid #2563eb; padding-left: 0.5rem;">
-            2. Aseveraciones a los Estados Financieros
+            2. Aserciones a los Estados Financieros
         </h4>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
             <?php 
             $aseveraciones = [
-                'aser_c'  => ['sigla' => 'C', 'desc' => 'Completitud'],
-                'aser_a'  => ['sigla' => 'A', 'desc' => 'Exactitud'],
-                'aser_eo' => ['sigla' => 'E/O', 'desc' => 'Existencia / Ocurrencia'],
-                'aser_co' => ['sigla' => 'CO', 'desc' => 'Corte'],
-                'aser_ro' => ['sigla' => 'ORO', 'desc' => 'Derechos y Obligaciones'],
-                'aser_va' => ['sigla' => 'VA', 'desc' => 'Valoración'],
-                'aser_pd' => ['sigla' => 'PD', 'desc' => 'Presentación y Desglose']
+                'aser_c'  => ['sigla' => 'C', 'desc' => '(Completitud / Completeness)'],
+                'aser_a'  => ['sigla' => 'A', 'desc' => '(Exactitud / Accuracy)'],
+                'aser_eo' => ['sigla' => 'E/O', 'desc' => '(Existencia y Ocurrencia / Existence & Occurrence)'],
+                'aser_co' => ['sigla' => 'CO', 'desc' => ' (Corte / Cut-off)'],
+                'aser_ro' => ['sigla' => 'ORO', 'desc' => ' (Derechos y Obligaciones / Rights and Obligations)'],
+                'aser_va' => ['sigla' => 'VA', 'desc' => '(Valuación y Asignación / Valuation & Allocation)'],
+                'aser_pd' => ['sigla' => 'PD', 'desc' => '(Presentación y Revelación / Presentation & Disclosure)']
             ];
             
             foreach ($aseveraciones as $key => $data): 
