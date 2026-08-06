@@ -351,8 +351,13 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
                                     Frecuencia <?= $frecuenciaNum ?>
                                 </span>
                             </div>
+
                             
                             <div class="prueba-actions" style="display: flex; align-items: center; gap: 0.75rem;">
+                                 <!-- Estatus de solo lectura -->
+                                <span style="font-size: 0.8rem; font-weight: 600; padding: 0.35rem 0.75rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155;">
+                                    <?= $statusText ?>
+                                </span>
                                 <a href="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pr->id ?>&frecuencia=<?= $frecuenciaNum ?>" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.85rem;">
                                     <i class="ri-survey-line"></i> Actividades (Frecuencia <?= $frecuenciaNum ?>)
                                 </a>
