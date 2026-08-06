@@ -98,35 +98,3 @@ foreach ($pruebasList as $pruebaItem) {
 
 $porcentajeProgreso = $totalPruebasCount > 0 ? round(($completadasCount / $totalPruebasCount) * 100) : 0;
 $currentUserId = (int)($_SESSION['user_id'] ?? 0);
-
-// PROCESAR CAMBIO DE ESTADO DEL PROYECTO (Solo usuarios 1 y 2)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['statusId'])) {
-    if ($currentUserId === 1 || $currentUserId === 2) {
-        $newStatusId = (int)$_POST['statusId'];
-        $targetProyectoId = filter_input(INPUT_POST, 'proyecto_id', FILTER_VALIDATE_INT) ?: ($proyectoId ?? 0);
-        
-        if (in_array($newStatusId, [1, 2], true) && $targetProyectoId > 0) {
-            try {
-                // Actualización segura en la tabla 'proyectos' modificando statusId
-                $stmtUpdateStatus = $pdo->prepare("
-                    UPDATE proyectos 
-                    SET statusId = :statusId, updated_at = NOW() 
-                    WHERE id = :proyecto_id
-                ");
-                $stmtUpdateStatus->execute([
-                    ':statusId'    => $newStatusId,
-                    ':proyecto_id' => $targetProyectoId
-                ]);
-
-                header("Location: actividades.php?proyectoId={$targetProyectoId}&success=project_updated");
-                exit();
-            } catch (PDOException $e) {
-                error_log("Error al actualizar el estado del proyecto: " . $e->getMessage());
-                $errorMessage = "Error interno al intentar actualizar el estado del proyecto.";
-            }
-        }
-    } else {
-        http_response_code(403);
-        die("Acceso denegado: No tienes permisos para modificar el estado de este proyecto.");
-    }
-}
