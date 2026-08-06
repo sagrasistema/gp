@@ -19,28 +19,35 @@ if (!$terminoId || $terminoId <= 0) {
     die("Error: Registro de Términos y Condiciones no especificado.");
 }
 
-$currentUserId = (int)$sessionUserId = $_SESSION['user_id'];
+$currentUserId = (int)$_SESSION['user_id'];
 
-// PROCESAR CAMBIO DE ESTADO A CERRADO (Solo usuarios 1 y 2)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_cerrar_termino'])) {
+// PROCESAR CAMBIO DE ESTADO (Solo usuarios 1 y 2)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['statusId'])) {
     if ($currentUserId === 1 || $currentUserId === 2) {
-        try {
-            $stmtCerrar = $pdo->prepare("
-                UPDATE terminos_condiciones 
-                SET statusId = 2, updated_at = NOW() 
-                WHERE id = :id
-            ");
-            $stmtCerrar->execute([':id' => $terminoId]);
+        $newStatusId = (int)$_POST['statusId'];
+        
+        if (in_array($newStatusId, [1, 2], true)) {
+            try {
+                $stmtUpdateStatus = $pdo->prepare("
+                    UPDATE terminos_condiciones 
+                    SET statusId = :statusId, updated_at = NOW() 
+                    WHERE id = :id
+                ");
+                $stmtUpdateStatus->execute([
+                    ':statusId' => $newStatusId,
+                    ':id'       => $terminoId
+                ]);
 
-            header("Location: responder-terminos.php?id={$terminoId}&success=cerrado");
-            exit();
-        } catch (PDOException $e) {
-            error_log("Error al cerrar términos y condiciones: " . $e->getMessage());
-            $errorMessage = "Error interno al intentar cerrar el registro.";
+                header("Location: responder-terminos.php?id={$terminoId}&success=updated");
+                exit();
+            } catch (PDOException $e) {
+                error_log("Error al actualizar el estado de los términos: " . $e->getMessage());
+                $errorMessage = "Error interno al intentar actualizar el estado.";
+            }
         }
     } else {
         http_response_code(403);
-        die("Acceso denegado: No tienes permisos para cerrar este registro.");
+        die("Acceso denegado: No tienes permisos para modificar el estado de este registro.");
     }
 }
 
@@ -72,7 +79,8 @@ try {
     die("Error crítico de base de datos.");
 }
 
-$isCerrado = ((int)($headerData->statusId ?? 1) === 2);
+$currentStatusId = (int)($headerData->statusId ?? 1);
+$isClosed = ($currentStatusId === 2);
 $pageTitle = "Responder Términos y Condiciones";
 include '../main/h.php';
 
@@ -100,9 +108,9 @@ $mapaFormularios = [
         </a>
     </div>
 
-    <?php if (isset($_GET['success']) && $_GET['success'] === 'cerrado'): ?>
+    <?php if (isset($_GET['success']) && $_GET['success'] === 'updated'): ?>
         <div style="padding: 1rem; background: #dcfce7; color: #166534; border-radius: 8px; margin-bottom: 1.5rem;">
-            <i class="ri-checkbox-circle-fill">Formatter</i> El registro ha sido cerrado exitosamente. Ningún usuario podrá editarlo.
+            <i class="ri-checkbox-circle-fill"></i> El estado del registro ha sido actualizado exitosamente.
         </div>
     <?php endif; ?>
 
@@ -112,33 +120,49 @@ $mapaFormularios = [
         </div>
     <?php endif; ?>
 
-    <!-- PANEL DE ESTADO Y ZONA DE CIERRE (VISIBLE SOLO PARA ID 1 Y 2) -->
+    <!-- CUADRO DE CIERRE Y ESTADO (DISEÑO SOLICITADO) -->
     <?php if ($currentUserId === 1 || $currentUserId === 2): ?>
-        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <div>
-                <h3 style="margin: 0 0 0.25rem 0; font-size: 1rem; color: #0f172a;">
-                    <i class="ri-lock-password-line" style="color: #2563eb;"></i> Panel de Control Administrativo (Cierre)
-                </h3>
-                <p style="margin: 0; font-size: 0.85rem; color: #64748b;">
-                    Estado actual: <strong><?= $isCerrado ? 'CERRADO (Bloqueado)' : 'ABIERTO (Editable)' ?></strong>
-                </p>
-            </div>
+        <form method="POST" action="responder-terminos.php?id=<?= $terminoId ?>">
+            <div style="margin-top: 2rem; margin-bottom: 2rem; border: 1px solid <?= $isClosed ? '#fecaca' : '#cbd5e1' ?>; border-radius: 8px; background: <?= $isClosed ? '#fef2f2' : '#ffffff' ?>; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid <?= $isClosed ? '#fee2e2' : '#f1f5f9' ?>; padding-bottom: 0.75rem;">
+                    <h3 style="margin: 0; font-size: 1.05rem; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; font-weight: 700;">
+                        <i class="ri-shield-keyhole-line" style="color: <?= $isClosed ? '#dc2626' : '#0284c7' ?>; font-size: 1.25rem;"></i> Cierre y Estado del Registro
+                    </h3>
+                    
+                    <?php if ($isClosed): ?>
+                        <span style="background: #dc2626; color: #ffffff; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem;">
+                            <i class="ri-lock-fill"></i> REGISTRO CERRADO
+                        </span>
+                    <?php else: ?>
+                        <span style="background: #e0f2fe; color: #0369a1; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem;">
+                            <i class="ri-time-line"></i> EN PROCESO
+                        </span>
+                    <?php endif; ?>
+                </div>
 
-            <div>
-                <?php if (!$isCerrado): ?>
-                    <form method="POST" action="responder-terminos.php?id=<?= $terminoId ?>" onsubmit="return confirm('¿Está seguro de cerrar este registro? Una vez cerrado, no se podrá editar ninguna información.');">
-                        <input type="hidden" name="action_cerrar_termino" value="1">
-                        <button type="submit" class="btn" style="background: #dc2626; color: #fff; padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="ri-lock-fill"></i> Cerrar Términos
-                        </button>
-                    </form>
-                <?php else: ?>
-                    <span style="background: #fee2e2; color: #991b1b; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.35rem;">
-                        <i class="ri-lock-line"></i> Registro Cerrado Definitivamente
-                    </span>
-                <?php endif; ?>
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                    <p style="margin: 0; font-size: 0.875rem; color: #475569; max-width: 600px;">
+                        <?php if ($isClosed): ?>
+                            Este registro ha sido finalizado y cerrado. Los campos se encuentran bloqueados para evitar alteraciones en la información.
+                        <?php else: ?>
+                            Selecciona <strong>"Cerrado"</strong> cuando hayas finalizado para bloquear la modificación de las respuestas.
+                        <?php endif; ?>
+                    </p>
+
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <label for="statusId" style="font-weight: 700; color: #334155; font-size: 0.875rem; white-space: nowrap;">
+                            Estado:
+                        </label>
+                        <select name="statusId" id="statusId" onchange="this.form.submit()" style="padding: 0.5rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.875rem; font-weight: 600; background-color: #ffffff; color: #0f172a; cursor: pointer;">
+                            <option value="1" <?= $currentStatusId === 1 ? 'selected' : '' ?>>En Proceso</option>
+                            <option value="2" <?= $currentStatusId === 2 ? 'selected' : '' ?>>Cerrado</option>
+                        </select>
+                    </div>
+                </div>
+
             </div>
-        </div>
+        </form>
     <?php endif; ?>
 
     <!-- LISTADO DE LAS 4 ACTIVIDADES -->
@@ -166,9 +190,9 @@ $mapaFormularios = [
                     $scriptDestino = $mapaFormularios[$item->item_key] ?? 'formulario-termino.php'; 
                 ?>
                 <a href="<?= htmlspecialchars($scriptDestino, ENT_QUOTES, 'UTF-8') ?>?terminoId=<?= $terminoId ?>&item=<?= htmlspecialchars($item->item_key, ENT_QUOTES, 'UTF-8') ?>" 
-                title="<?= $isCerrado ? 'Ver Registro' : 'Editar' ?>"
+                title="<?= $isClosed ? 'Ver Registro' : 'Editar' ?>"
                 style="display: flex; align-items: center; justify-content: center; padding: 0.85rem 1.25rem; background: rgba(0, 0, 0, 0.08); color: #ffffff; text-decoration: none;">
-                    <?php if ($isCerrado): ?>
+                    <?php if ($isClosed): ?>
                         <i class="ri-eye-fill" style="font-size: 1.1rem;"></i>
                     <?php else: ?>
                         <i class="ri-pencil-fill" style="font-size: 1.1rem;"></i>
