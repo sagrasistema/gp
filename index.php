@@ -129,7 +129,7 @@ include 'main/layout_header.php';
         <?php if (isset($_SESSION['user_id']) && in_array((int)$_SESSION['user_id'], [1, 2], true)): ?>
             <a href="clientes_status/index.php" class="module-card admin-card">
                 <div class="icon-box"><i class="ri-admin-line"></i></div>
-                <h2>Panel Especial</h2>
+                <h2>Visibilidad</h2>
                 <p>Módulo de gestión avanzada y control exclusivo de superusuarios.</p>
             </a>
         <?php endif; ?>
