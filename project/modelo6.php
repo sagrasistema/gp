@@ -151,7 +151,7 @@ $valNivelSud = $resolveValue(
                     type="text" 
                     name="importancia_relativa_general" 
                     value="<?= htmlspecialchars($formatMonto($valImportanciaGeneral), ENT_QUOTES, 'UTF-8'); ?>" 
-                    style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;"
+                    style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; text-align: right; font-weight: 600; color: #1e293b;"
                 >
             </div>
             <div>
@@ -162,7 +162,7 @@ $valNivelSud = $resolveValue(
                     type="text" 
                     name="importancia_relativa_planificacion" 
                     value="<?= htmlspecialchars($formatMonto($valImportanciaPlanificacion), ENT_QUOTES, 'UTF-8'); ?>" 
-                    style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;"
+                    style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; text-align: right; font-weight: 600; color: #1e293b;"
                 >
             </div>
             <div>
@@ -173,7 +173,7 @@ $valNivelSud = $resolveValue(
                     type="text" 
                     name="nivel_registro_sud" 
                     value="<?= htmlspecialchars($formatMonto($valNivelSud), ENT_QUOTES, 'UTF-8'); ?>" 
-                    style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc;"
+                    style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #f8fafc; text-align: right; font-weight: 600; color: #1e293b;"
                 >
             </div>
         </div>
@@ -191,7 +191,7 @@ $valNivelSud = $resolveValue(
                 'aser_a'  => ['sigla' => 'A', 'desc' => '(Exactitud / Accuracy)'],
                 'aser_eo' => ['sigla' => 'E/O', 'desc' => '(Existencia y Ocurrencia / Existence & Occurrence)'],
                 'aser_co' => ['sigla' => 'CO', 'desc' => '(Corte / Cut-off)'],
-                'aser_ro' => ['sigla' => 'ORO', 'desc' => '(Derechos y Obligaciones / Rights and Obligations)'],
+                'aser_ro' => ['sigla' => 'RO', 'desc' => '(Derechos y Obligaciones / Rights and Obligations)'],
                 'aser_va' => ['sigla' => 'VA', 'desc' => '(Valuación y Asignación / Valuation & Allocation)'],
                 'aser_pd' => ['sigla' => 'PD', 'desc' => '(Presentación y Revelación / Presentation & Disclosure)']
             ];
