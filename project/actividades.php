@@ -289,7 +289,7 @@ $porcentajeProgreso = $totalPruebasCount > 0 ? round(($completadasCount / $total
             <strong style="color: #1e293b; font-size: 0.9rem; text-transform: capitalize;"><?= str_replace('_', ' ', $estadoActualPrueba) ?></strong>
         </div>
     </div>
-    <!-- Bloque de Progreso General de Pruebas -->
+<!-- Bloque de Progreso General de Pruebas -->
     <div class="pruebas-progress-container" style="margin-bottom: 2rem; background: #ffffff; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.0rem;">
             <h4 style="margin: 0; font-size: 0.95rem; color: #1e293b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.025em;">
@@ -341,15 +341,6 @@ $porcentajeProgreso = $totalPruebasCount > 0 ? round(($completadasCount / $total
             <?php endif; ?>
         </div>
 
-        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #475569;">
-                <span>Progreso del Formulario</span>
-                <span style="color: #0f172a; font-weight: 700;"><?= $porcentajeProgreso ?>%</span>
-            </div>
-            <div style="width: 100%; background-color: #e2e8f0; height: 10px; border-radius: 9999px; overflow: hidden;">
-                <div style="width: <?= $porcentajeProgreso ?>%; background-color: #10b981; height: 100%; border-radius: 9999px; transition: width 0.4s ease;"></div>
-            </div>
-        </div>
     </div>
     <!-- Cabecera de la Prueba -->
     <div style="background: #1e293b; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
