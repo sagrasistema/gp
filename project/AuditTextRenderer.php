@@ -2,13 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
-
+/**
+ * Clase de servicio para parsear y renderizar textos planos de auditoría en HTML.
+ * Compatible con PHP 8.x (Estándar PSR-12).
+ */
 class AuditTextRenderer
 {
     /**
-     * Procesa texto plano desde la BD y lo transforma dinámicamente en HTML
-     * estructurado sin modificar la BD original.
+     * Procesa una cadena de texto plano proveniente de BD y la transforma en HTML maquetado.
+     *
+     * @param string|null $plainText Texto plano extraído de la base de datos.
+     * @return string Código HTML generado y sanitizado contra XSS.
      */
     public static function render(?string $plainText): string
     {
@@ -16,31 +20,35 @@ class AuditTextRenderer
             return '<em class="text-muted">No hay información registrada para esta prueba.</em>';
         }
 
-        // 1. Sanitización anti-XSS antes de manipular
+        // Sanitización estricta anti-XSS antes de manipular la cadena
         $safeText = htmlspecialchars(trim($plainText), ENT_QUOTES, 'UTF-8');
 
-        // Limpieza de comillas excesivas de exportaciones/importaciones previa
+        // Limpieza de comillas dobles excesivas resultantes de exportaciones CSV/Excel
         if (str_starts_with($safeText, '&quot;') && str_ends_with($safeText, '&quot;')) {
             $safeText = mb_substr($safeText, 6, -6);
         }
         $safeText = str_replace('&quot;&quot;', '&quot;', $safeText);
 
-        // 2. Normalización de patrones para aislar secciones principales
+        // Identificación de patrones clave para insertar delimitadores de estructura
         $patterns = [
-            '/\s*(PRUEBA\s+\d+:)/u'           => "\n[HEADER]$1",
-            '/\s*(Actividad\s+\d+:)/u'        => "\n[SUBHEADER]$1",
-            '/\s*(•\s*Objetivo:)/u'           => "\n[OBJETIVO]$1",
-            '/\s*(•\s*¿Qué significa\?:)/u'   => "\n[EXPLANATION]$1",
-            '/\s*(•\s*Instrucción Técnica:)/u'=> "\n[INSTRUCTION]$1",
-            '/\s*(•\s*Respuesta Sugerida:)/u' => "\n[ANSWER]$1",
+            '/\s*(PRUEBA\s+\d+:)/u'            => "\n[HEADER]$1",
+            '/\s*(Actividad\s+\d+:)/u'         => "\n[SUBHEADER]$1",
+            '/\s*(•\s*Objetivo:)/u'            => "\n[OBJETIVO]$1",
+            '/\s*(•\s*¿Qué significa\?:)/u'    => "\n[EXPLANATION]$1",
+            '/\s*(•\s*Instrucción Técnica:)/u' => "\n[INSTRUCTION]$1",
+            '/\s*(•\s*Respuesta Sugerida:)/u'  => "\n[ANSWER]$1",
         ];
 
         foreach ($patterns as $pattern => $replacement) {
             $safeText = (string) preg_replace($pattern, $replacement, $safeText);
         }
 
-        // 3. Procesamiento por líneas e inyección de clases CSS
-        $lines = array_filter(explode("\n", $safeText), static fn(string $line) => trim($line) !== '');
+        // División del contenido por líneas y formateo visual dinámico
+        $lines = array_filter(
+            explode("\n", $safeText),
+            static fn(string $line): bool => trim($line) !== ''
+        );
+
         $outputHtml = [];
 
         foreach ($lines as $line) {
