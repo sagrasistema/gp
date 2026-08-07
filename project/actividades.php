@@ -173,8 +173,21 @@ include 'conect-actividades.php';
             <strong style="color: #1e293b; font-size: 0.9rem;"><?= htmlspecialchars($projectData->socioLider ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
         </div>
         <div style="display: flex; flex-direction: column; gap: 0.2rem; border-right: 1px solid #e2e8f0; padding-right: 0.75rem; padding-left: 0.5rem; font-size: 0.85rem;">
+           <?php
+// Procesar y formatear la fecha de manera segura si existe
+                    $fecharevisadoFormateada = 'N/D';
+                    if (!empty($projectData->revisado)) {
+                        try {
+                            $dateObj = new DateTime($projectData->revisado);
+                            $fecharevisadoFormateada = $dateObj->format('d/m/Y'); // Cambia a 'd-m-Y' si prefieres guiones
+                        } catch (Exception $e) {
+                            // Fallback seguro por si el string de la fecha está corrupto
+                            $fecharevisadoFormateada = htmlspecialchars($projectData->revisado, ENT_QUOTES, 'UTF-8');
+                        }
+                    }
+                    ?>
             <span style="font-size: 0.7rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Fecha</span>
-            <strong style="color: #1e293b; font-size: 0.9rem;"><?= htmlspecialchars($projectData->fechaRemision ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+            <strong style="color: #1e293b; font-size: 0.9rem;"><?= htmlspecialchars($fecharevisadoFormateada ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
         </div>
         <div style="display: flex; flex-direction: column; gap: 0.2rem; padding-left: 0.5rem; font-size: 0.85rem;">
             <span style="font-size: 0.7rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Estatus</span>
