@@ -269,6 +269,7 @@ if ($frecuenciaNum <= 0) {
     $porcentajeProgreso = $totalPruebasCount > 0 ? round(($completadasCount / $totalPruebasCount) * 100) : 0;
 
 }
+$letraCategoria = chr(64 + $categoriaId);
 ?>
 <style>
 .project-stages-bar {
@@ -511,7 +512,7 @@ if ($frecuenciaNum <= 0) {
             Etapa <?= htmlspecialchars($etapaId, ENT_QUOTES, 'UTF-8') ?>
         </span>
         <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
-            <?= htmlspecialchars($categoriaId, ENT_QUOTES, 'UTF-8') ?>
+            <?= htmlspecialchars($letraCategoria, ENT_QUOTES, 'UTF-8') ?>
             <?= htmlspecialchars($metaPrueba->catNombre, ENT_QUOTES, 'UTF-8') ?>
         </span>
         <h2 style="margin: 0 0 1rem 0; font-size: 1.35rem; color: #ffffff; font-weight: 700; line-height: 1.4;">
