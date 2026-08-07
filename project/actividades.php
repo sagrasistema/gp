@@ -9,6 +9,37 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 include 'conect-actividades.php';
+$pruebaId = filter_var($pruebaId ?? 0, FILTER_VALIDATE_INT);
+
+$categoriaId = null;
+$etapaId = null;
+
+if ($pruebaId > 0 && isset($pdo)) {
+    try {
+        // Consulta optimizada: Trae categoria_id de audit_pruebas y etapa_id de audit_categorias en un solo paso
+        $stmt = $pdo->prepare("
+            SELECT 
+                p.categoria_id, 
+                c.etapa_id 
+            FROM audit_pruebas p
+            INNER JOIN audit_categorias c ON p.categoria_id = c.id
+            WHERE p.id = :prueba_id
+            LIMIT 1
+        ");
+        
+        $stmt->execute([':prueba_id' => $pruebaId]);
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($resultado) {
+            $categoriaId = (int)$resultado['categoria_id'];
+            $etapaId = (int)$resultado['etapa_id'];
+        }
+
+    } catch (PDOException $e) {
+        // Registrar el error de forma segura en el servidor sin exponer detalles al usuario final
+        error_log("Error crítico al obtener categoría y etapa para la prueba ID {$pruebaId}: " . $e->getMessage());
+    }
+}
 ?>
 <style>
 .project-stages-bar {
@@ -201,7 +232,7 @@ include 'conect-actividades.php';
             <?= htmlspecialchars($metaPrueba->catNombre, ENT_QUOTES, 'UTF-8') ?>
         </span>
         <h2 style="margin: 0 0 1rem 0; font-size: 1.35rem; color: #ffffff; font-weight: 700; line-height: 1.4;">
-            <?= htmlspecialchars($pruebaId, ENT_QUOTES, 'UTF-8') ?> <?= htmlspecialchars($metaPrueba->nombre, ENT_QUOTES, 'UTF-8') ?>
+            <?= htmlspecialchars($etapaId, ENT_QUOTES, 'UTF-8') ?> <?= htmlspecialchars($metaPrueba->nombre, ENT_QUOTES, 'UTF-8') ?>
         </h2>
         <button type="button" onclick="openNormaModal()" style="background: #0284c7; color: #ffffff; border: none; font-size: 0.85rem; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
             <i class="ri-book-line"></i> Norma 
