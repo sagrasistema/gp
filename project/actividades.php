@@ -1068,7 +1068,7 @@ $letraCategoria = chr(64 + $categoriaId);
 
         <!-- Cuerpo del Modal: Renderizado de Texto Plano -->
         <div class="audit-container" style="max-height:60vh; overflow-y:auto; padding-right:0.5rem;">
-            <?= AuditTextRenderer::render($metaPrueba->informacion ?? null) ?>
+            
         </div>
 
         <!-- Pie -->
