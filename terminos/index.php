@@ -160,8 +160,9 @@ include '../main/layout_header.php';
     <?php endif; ?>
 
     <!-- TABLA DE REGISTROS -->
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+    
+    <div class="table-container">
+        <table class="custom-table">
             <thead>
                 <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 700;">
                     <!--<th style="padding: 0.85rem 1rem;">#</th>-->
@@ -184,9 +185,9 @@ include '../main/layout_header.php';
                     <?php foreach ($records as $index => $row): ?>
                         <tr style="border-bottom: 1px solid #f1f5f9;">
                             
-                            <td style="padding: 0.85rem 1rem; font-weight: 600; color: #1e293b;"><?= htmlspecialchars($row->clientName, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td style="padding: 0.85rem 1rem; color: #334155;"><?= htmlspecialchars($row->servicio, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td style="padding: 0.85rem 1rem;">
+                            <td><?= htmlspecialchars($row->clientName, ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars($row->servicio, ENT_QUOTES, 'UTF-8') ?></td>
+                            <td>
                                 <?php if ($row->estado === 'completado'): ?>
                                     <span style="background: #dcfce7; color: #15803d; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 12px; font-weight: 600;">Completado</span>
                                 <?php elseif ($row->estado === 'en_proceso'): ?>
@@ -195,7 +196,7 @@ include '../main/layout_header.php';
                                     <span style="background: #f1f5f9; color: #64748b; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 12px; font-weight: 600;">Pendiente</span>
                                 <?php endif; ?>
                             </td>
-                            <td style="padding: 0.85rem 1rem; color: #64748b; font-size: 0.85rem;">
+                            <td style="">
                                 <?= date('d/m/Y H:i', strtotime($row->created_at)) ?>
                             </td>
                             <td style="padding: 0.85rem 1rem; text-align: center;">
