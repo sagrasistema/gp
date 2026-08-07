@@ -201,7 +201,7 @@ include 'conect-actividades.php';
             <?= htmlspecialchars($metaPrueba->catNombre, ENT_QUOTES, 'UTF-8') ?>
         </span>
         <h2 style="margin: 0 0 1rem 0; font-size: 1.35rem; color: #ffffff; font-weight: 700; line-height: 1.4;">
-            <?= htmlspecialchars($metaPrueba->nombre, ENT_QUOTES, 'UTF-8') ?>
+            <?= htmlspecialchars($metaPrueba->id, ENT_QUOTES, 'UTF-8') ?> <?= htmlspecialchars($metaPrueba->nombre, ENT_QUOTES, 'UTF-8') ?>
         </h2>
         <button type="button" onclick="openNormaModal()" style="background: #0284c7; color: #ffffff; border: none; font-size: 0.85rem; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
             <i class="ri-book-line"></i> Norma 
