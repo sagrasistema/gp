@@ -131,10 +131,6 @@ include '../main/h.php';
             <i class="ri-screenshot-2-line"></i>
         </a>
 
-        <a href="export_planificacion_word.php?proyecto_id=<?= (int)$proyectoId ?>" class="btn btn-primary" data-tooltip="Reporte">
-            <i class="ri-book-open-line"></i> 
-        </a>
-
         <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
             <i class="ri-add-line"></i>
         </a>
