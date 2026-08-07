@@ -8,7 +8,7 @@ include '../ac/conect-responder.php';
 $currentStatusId = (int)($acData->statusId ?? 1);
 $isClosed = ($currentStatusId === 2);
 $disabledAttr = $isClosed ? 'disabled' : '';
-
+// 1. Verificar estado del registro maestro
 ?>
 <div class="view-container">
     
@@ -400,16 +400,59 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
 
 
 <!-- CUADRO DE CIERRE DE PROYECTO / EVALUACIÓN -->
+ <?php if ($userId == 2) {?>
+    <div style="margin-top: 2rem; border: 1px solid <?= $isClosed ? '#fecaca' : '#cbd5e1' ?>; border-radius: 8px; background: <?= $isClosed ? '#fef2f2' : '#ffffff' ?>; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid <?= $isClosed ? '#fee2e2' : '#f1f5f9' ?>; padding-bottom: 0.75rem;">
+        <h3 style="margin: 0; font-size: 1.05rem; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; font-weight: 700;">
+            <i class="ri-shield-keyhole-line" style="color: <?= $isClosed ? '#dc2626' : '#0284c7' ?>; font-size: 1.25rem;"></i> Cierre y Estado de la Evaluación
+        </h3>
+        <?php if ($isClosed): ?>
+            <span style="background: #dc2626; color: #ffffff; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem;">
+                <i class="ri-lock-fill"></i> EVALUACIÓN CERRADA
+            </span>
+        <?php else: ?>
+            <span style="background: #e0f2fe; color: #0369a1; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem;">
+                <i class="ri-time-line"></i> EN PROCESO
+            </span>
+        <?php endif; ?>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <p style="margin: 0; font-size: 0.875rem; color: #475569; max-width: 600px;">
+            <?php if ($isClosed): ?>
+                Esta evaluación ha sido finalizada y cerrada. Los campos se encuentran bloqueados para evitar alteraciones en la auditoría.
+            <?php else: ?>
+                Selecciona <strong>"Cerrado"</strong> cuando hayas finalizado la auditoría para bloquear la modificación de las respuestas y la matriz de riesgo.
+            <?php endif; ?>
+        </p>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <label for="statusId" style="font-weight: 700; color: #334155; font-size: 0.875rem; whitespace: nowrap;">
+                Estado:
+            </label>
+            <select name="statusId" id="statusId" style="padding: 0.5rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.875rem; font-weight: 600; background-color: #ffffff; color: #0f172a; cursor: pointer;">
+                <option value="1" <?= $currentStatusId === 1 ? 'selected' : '' ?>>En Proceso</option>
+                <option value="2" <?= $currentStatusId === 2 ? 'selected' : '' ?>>Cerrado</option>
+            </select>
+        </div>
+    </div>
+</div>
+ <?php }?>
 
 
         <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end; margin-bottom: 4rem;">
             <a href="index.php" class="btn btn-secondary">Regresar al panel</a>
+        <?php if ($isClosed) {?>
             <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem;">
                 <i class="ri-save-3-line"></i> Guardar Cuestionario Completo
             </button>
+        <?php} ?>
+            
         </div>
+
     </form>
 </div>
+
 <!-- MODAL PARA REGISTRAR / EDITAR MATRIZ DE RIESGO -->
 <div id="modalRiesgoAC" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 10000; align-items: center; justify-content: center;">
     <div style="background: #ffffff; width: 100%; max-width: 580px; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
