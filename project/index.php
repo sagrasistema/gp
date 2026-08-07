@@ -95,7 +95,7 @@ include '../main/layout_header.php';
                             
                             // Botón de Pruebas / Gestionar (responder.php)
                             echo "<a href='responder.php?proyectoId={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.8rem; background: #08855b; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 0.8rem; font-weight: 600; data-tooltip='Gestionar Pruebas'>";
-                            echo "<i class='ri-pencil-fill'></i>";
+                            echo "<i class='ri-pencil-fill'></i> Consultar";
                             echo "</a>";
 
                             // Botón de Asignación de Equipo (proyecto_equipo.php)
