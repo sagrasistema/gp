@@ -120,9 +120,6 @@ include '../main/layout_header.php';
         <h1 class="page-main-title">
             <i class="ri-folders-line"></i> Términos y Condiciones
         </h1>
-        <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.875rem;">
-            Gestión y respuesta de cartas de contratación, frecuencia, roles y esquemas de facturación.
-        </p>
     </div>
         
     <div class="table-actions-container">
@@ -140,7 +137,7 @@ include '../main/layout_header.php';
         
         <!--<button onclick="openModal()" class="btn btn-primary" data-tooltip="Crear Registro">
             <i class="ri-add-line"></i> 
-        </button>-->
+        </buttonss>-->
         
         <a href="../index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
             <i class="ri-close-circle-line"></i> 
@@ -185,9 +182,9 @@ include '../main/layout_header.php';
                     <?php foreach ($records as $index => $row): ?>
                         <tr style="border-bottom: 1px solid #f1f5f9;">
                             
-                            <td><?= htmlspecialchars($row->clientName, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= htmlspecialchars($row->servicio, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td>
+                            <td><strong><?= htmlspecialchars($row->clientName, ENT_QUOTES, 'UTF-8') ?></strong></td>
+                            <td style="padding: 0.85rem 1rem; color: #334155;"><?= htmlspecialchars($row->servicio, ENT_QUOTES, 'UTF-8') ?></td>
+                            <td style="padding: 0.85rem 1rem;">
                                 <?php if ($row->estado === 'completado'): ?>
                                     <span style="background: #dcfce7; color: #15803d; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 12px; font-weight: 600;">Completado</span>
                                 <?php elseif ($row->estado === 'en_proceso'): ?>
