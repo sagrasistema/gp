@@ -210,7 +210,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
         </a>
     </div>
 </div>
-    <!-- Bloque de Progreso General de Pruebas (Numerado Dinámico) -->
+    <!-- Bloque de Progreso General de Pruebas (Numerado Dinámicoaa) -->
 <!-- Bloque de Progreso General de Pruebas (Numerado Consecutivo Global 1-19) -->
 <div class="pruebas-progress-container" style="margin-bottom: 2rem; background: #ffffff; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.0rem;">
