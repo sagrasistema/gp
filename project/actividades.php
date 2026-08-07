@@ -267,6 +267,38 @@ if ($frecuenciaNum <= 0) {
     }
 
     $porcentajeProgreso = $totalPruebasCount > 0 ? round(($completadasCount / $totalPruebasCount) * 100) : 0;
+    if (isset($pdo, $proyectoId) && $proyectoId > 0) {
+    try {
+        // 1. Consultar las pruebas de ejecución del proyecto en su orden secuencial exacto
+        $stmtEjecucion = $pdo->prepare("
+            SELECT prueba_id 
+            FROM proyecto_pruebas_ejecucion 
+            WHERE proyecto_id = :proyecto_id 
+            ORDER BY id ASC
+        ");
+        
+        $stmtEjecucion->execute([':proyecto_id' => $proyectoId]);
+        $pruebasEjecucionList = $stmtEjecucion->fetchAll(PDO::FETCH_ASSOC);
+
+        // 2. Buscar la posición ordinal (índice 1-based) de la prueba actual dentro de la ejecución
+        $contador = 1;
+        if (!empty($pruebasEjecucionList)) {
+            foreach ($pruebasEjecucionList as $row) {
+                // Comparamos el prueba_id de la tabla con el parámetro actual de la prueba
+                if (isset($pruebaId) && (int)$row['prueba_id'] === (int)$pruebaId) {
+                    $ordinalPruebaEnEtapa = $contador;
+                    break; // Detenemos el bucle al encontrar la coincidencia exacta
+                }
+                $contador++;
+            }
+        }
+
+    } catch (PDOException $e) {
+        // Control robusto de errores mediante registro interno y fallback seguro
+        error_log("Error al calcular el ordinal de ejecución para el proyecto {$proyectoId}: " . $e->getMessage());
+        $ordinalPruebaEnEtapa = 1;
+    }
+}
 
 }
 $letraCategoria = chr(64 + $categoriaId);
