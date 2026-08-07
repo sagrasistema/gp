@@ -135,8 +135,21 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 
         <div style="display: flex; flex-direction: column; gap: 0.75rem; padding-left: 0.5rem; font-size: 0.9rem;">
             <div>
+                 <?php
+// Procesar y formatear la fecha de manera segura si existe
+                    $fechaRemisionFormateada = 'N/D';
+                    if (!empty($projectData->fechaRemision)) {
+                        try {
+                            $dateObj = new DateTime($projectData->fechaRemision);
+                            $fechaRemisionFormateada = $dateObj->format('d/m/Y'); // Cambia a 'd-m-Y' si prefieres guiones
+                        } catch (Exception $e) {
+                            // Fallback seguro por si el string de la fecha está corrupto
+                            $fechaRemisionFormateada = htmlspecialchars($projectData->fechaRemision, ENT_QUOTES, 'UTF-8');
+                        }
+                    }
+                    ?>
                 <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Fecha de Revisión</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->fechaRemision ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+                <strong style="color: #1e293b;"><?= htmlspecialchars($fechaRemisionFormateada ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
             <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.5rem;">
                 <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Gerente Encargado</span><br>
