@@ -546,10 +546,25 @@ $letraCategoria = chr(64 + $categoriaId);
         <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
             
             <?= htmlspecialchars($metaPrueba->catNombre, ENT_QUOTES, 'UTF-8') ?>
-        </span>
+        </span><?php
+        // Sanitizar y asegurar que el ID sea numérico
+        $pruebaId = (int) ($pruebaId ?? 0);
+        $nombrePrueba = $metaPrueba->nombre ?? '';
+
+        // Definir el prefijo a renderizar mediante match (PHP 8.0+) o fallback predeterminado
+        $prefijoOrdinal = match ($pruebaId) {
+            113 => '20',
+            123 => '21',
+            default => (string) ($ordinalPruebaEnEtapa ?? ''),
+        };
+        ?>
+
+        <!-- Renderizado Único y Limpio en la Plantilla HTML -->
         <h2 style="margin: 0 0 1rem 0; font-size: 1.35rem; color: #ffffff; font-weight: 700; line-height: 1.4;">
-            <?=  htmlspecialchars($ordinalPruebaEnEtapa, ENT_QUOTES, 'UTF-8') ?>    
-            <?= htmlspecialchars($metaPrueba->nombre, ENT_QUOTES, 'UTF-8') ?>
+            <?php if ($prefijoOrdinal !== ''): ?>
+                <?= htmlspecialchars($prefijoOrdinal, ENT_QUOTES, 'UTF-8') ?>
+            <?php endif; ?>
+            <?= htmlspecialchars($nombrePrueba, ENT_QUOTES, 'UTF-8') ?>
         </h2>
         <button type="button" onclick="openNormaModal()" style="background: #0284c7; color: #ffffff; border: none; font-size: 0.85rem; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
             <i class="ri-book-line"></i> Norma 
