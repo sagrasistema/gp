@@ -13,6 +13,10 @@ $frecuenciaNum = filter_input(INPUT_GET, 'frecuencia', FILTER_VALIDATE_INT) ?: 1
 if (!$proyectoId || $proyectoId <= 0) {
     die("Error: Proyecto no especificado o ID inválido.");
 }
+// 1. Verificar estado del registro maestro
+$stmtStatus = $pdo->prepare("SELECT statusId FROM proyectos WHERE id = :id");
+$stmtStatus->execute([':id' => $proyectoId]);
+$isClosed = ((int)$stmtStatus->fetchColumn() === 2);
 
 if ($frecuenciaNum <= 0) {
     $frecuenciaNum = 1;
