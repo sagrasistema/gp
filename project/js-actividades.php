@@ -18,9 +18,17 @@ function openNormaModal() {
     const modal = document.getElementById('normaModal');
     if (modal) modal.style.display = 'flex';
 }
+function openNormaModal2() {
+    const modal = document.getElementById('normaModal2');
+    if (modal) modal.style.display = 'flex';
+}
 
 function closeNormaModal() {
     const modal = document.getElementById('normaModal');
+    if (modal) modal.style.display = 'none';
+}
+function closeNormaModal2() {
+    const modal = document.getElementById('normaModal2');
     if (modal) modal.style.display = 'none';
 }
 
@@ -29,6 +37,7 @@ function closeNormaModal() {
 // Cierre global de modales al hacer clic fuera de su contenido
 window.onclick = function(event) {
     const modalNorma = document.getElementById('normaModal');
+    const modalNorma2 = document.getElementById('normaModal2');
     const modalInd = document.getElementById('indicatorModal');
     const modalAnalitica = document.getElementById('analiticaModal');
 

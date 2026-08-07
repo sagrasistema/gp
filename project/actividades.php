@@ -1058,7 +1058,7 @@ $letraCategoria = chr(64 + $categoriaId);
             <h3 style="margin:0; color:#1e293b; font-size:1.15rem; display:flex; align-items:center; gap:0.5rem;">
                 <i class="ri-book-2-line" style="color:var(--accent);"></i> Instruciones
             </h3>
-            <button type="button" onclick="closeNormaModal()" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748b;">
+            <button type="button" onclick="closeNormaModal2()" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748b;">
                 <i class="ri-close-line"></i>
             </button>
         </div>
@@ -1066,7 +1066,7 @@ $letraCategoria = chr(64 + $categoriaId);
             <?= !empty($metaPrueba->informacion) ? nl2br(htmlspecialchars($metaPrueba->informacion, ENT_QUOTES, 'UTF-8')) : '<em style="color:#64748b;">No hay una norma registrada.</em>' ?>
         </div>
         <div style="text-align:right; margin-top:1.5rem; border-top:1px solid #e2e8f0; padding-top:1rem;">
-            <button type="button" class="btn btn-primary" onclick="closeNormaModal()" style="padding: 0.5rem 1.5rem;">Cerrar</button>
+            <button type="button" class="btn btn-primary" onclick="closeNormaModal2()" style="padding: 0.5rem 1.5rem;">Cerrar</button>
         </div>
     </div>
 </div>
