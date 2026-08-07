@@ -300,6 +300,13 @@ $porcentajeProgreso = $totalPruebasCount > 0 ? round(($completadasCount / $total
     </div>
 <!-- Bloque de Progreso General de Pruebas -->
     <div class="pruebas-progress-container" style="margin-bottom: 2rem; background: #ffffff; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.0rem;">
+            <h4 style="margin: 0; font-size: 0.95rem; color: #1e293b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.025em;">
+                Pruebas
+            </h4>
+         
+        </div>
+
         <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
             <?php if (!empty($pruebasList)): ?>
                 <?php 
