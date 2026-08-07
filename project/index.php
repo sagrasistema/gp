@@ -60,11 +60,12 @@ include '../main/layout_header.php';
         <table class="custom-table">
             <thead>
                 <tr>
-                    <th style="width: 10%;">ID Proj</th>
+                    
                     <th style="width: 35%;">Cliente / Empresa</th>
                     <th style="width: 25%;">Proyecto / Alcance</th>
                     <th style="width: 15%;">Fecha Inicio</th>
                     <th style="width: 15%; text-align: center;">Acciones</th>
+                    <th style="width: 10%;">Estado</th>
                 </tr>
             </thead>
             <tbody>
@@ -87,7 +88,8 @@ include '../main/layout_header.php';
                             $fecha      = date('d/m/Y', strtotime($proj->fecha_inicio));
 
                             echo "<tr>";
-                            echo "<td style='font-weight: 600; color: #64748b;'>#{$proj->proyectoId}</td>";
+                            
+
                             echo "<td><strong>{$clientName}</strong></td>";
                             echo "<td>{$projName}</td>";
                             echo "<td>{$fecha}</td>";
@@ -104,6 +106,20 @@ include '../main/layout_header.php';
                             //echo "</a>";
 
                             echo "</td>";
+                             
+                            $statusId  = (int)($proj->statusId ?? 1);
+                            $isClosed  = ($statusId === 2);
+
+                            $iconClass = $isClosed ? 'ri-lock-fill' : 'ri-lock-unlock-line';
+                            $iconColor = $isClosed ? '#0f172a' : '#16a34a'; // Negro para cerrado, Verde para en proceso
+                            $tooltip   = $isClosed ? 'Cerrado' : 'En proceso';
+                        
+                          // Indicador de Estado / Tooltip con Ícono
+                            echo '<td style="text-align: center; vertical-align: middle;">';
+                            echo '    <span title="' . htmlspecialchars($tooltip ?? '', ENT_QUOTES, 'UTF-8') . '" style="cursor: help; display: inline-flex; align-items: center;">';
+                            echo '        <i class="' . htmlspecialchars($iconClass ?? '', ENT_QUOTES, 'UTF-8') . '" style="font-size: 1.25rem; color: ' . htmlspecialchars($iconColor ?? '', ENT_QUOTES, 'UTF-8') . ';"></i>';
+                            echo '    </span>';
+                            echo '</td>';
                             echo "</tr>";
                         }
                     } else {
