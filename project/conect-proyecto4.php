@@ -87,14 +87,19 @@ try {
 // 5. Calcular el porcentaje global de avance de la fase
 $totalPruebasCount = count($pruebasList);
 $completadasCount = 0;
+$completadasCountt = 0;
 
 foreach ($pruebasList as $pruebaItem) {
     $pIdCheck = $pruebaItem['id'];
     $estadoActual = strtolower($pruebasEjecutadas[$pIdCheck]['estado'] ?? 'en_proceso');
-    if ($estadoActual === 'completado' || $estadoActual === 'cerrado' || $estadoActual === 'revisado') {
+    if ($estadoActual === 'completado' || $estadoActual === 'cerrado') {
         $completadasCount++;
+    }
+    if ($estadoActual === 'revisado') {
+        $completadasCountt++;
     }
 }
 
 $porcentajeProgreso = $totalPruebasCount > 0 ? round(($completadasCount / $totalPruebasCount) * 100) : 0;
+$porcentajeProgresoo = $totalPruebasCount > 0 ? round(($completadasCountt / $totalPruebasCount) * 100) : 0;
 $currentUserId = (int)($_SESSION['user_id'] ?? 0);
