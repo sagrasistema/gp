@@ -126,6 +126,37 @@ if (!empty($pruebasList)) {
         }
     }
 }
+$categoriaId = null;
+$etapaId = null;
+$categoriaNombre = ''; // Variable para almacenar el nombre de la categoría
+
+if ($pruebaId > 0 && isset($pdo)) {
+    try {
+        // Consulta optimizada: Trae categoria_id, etapa_id y el nombre de la categoría en un solo paso
+        $stmt = $pdo->prepare("
+            SELECT 
+                p.categoria_id, 
+                c.etapa_id,
+                c.nombre AS categoria_nombre 
+            FROM audit_pruebas p
+            INNER JOIN audit_categorias c ON p.categoria_id = c.id
+            WHERE p.id = :prueba_id
+            LIMIT 1
+        ");
+        
+        $stmt->execute([':prueba_id' => $pruebaId]);
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($resultado) {
+            $categoriaId     = (int)$resultado['categoria_id'];
+            $etapaId         = (int)$resultado['etapa_id'];
+            $categoriaNombre = (string)$resultado['categoria_nombre'];
+        }
+
+    } catch (PDOException $e) {
+        error_log("Error crítico al obtener categoría y etapa para la prueba ID {$pruebaId}: " . $e->getMessage());
+    }
+}
 ?>
 <style>
 .project-stages-bar {
@@ -368,7 +399,7 @@ if (!empty($pruebasList)) {
             Etapa <?= htmlspecialchars($etapaId, ENT_QUOTES, 'UTF-8') ?>
         </span>
         <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
-            <?= htmlspecialchars($metaPrueba->catNombre, ENT_QUOTES, 'UTF-8') ?>
+            <?= htmlspecialchars($categoriaId, ENT_QUOTES, 'UTF-8') ?><?= htmlspecialchars($metaPrueba->catNombre, ENT_QUOTES, 'UTF-8') ?>
         </span>
         <h2 style="margin: 0 0 1rem 0; font-size: 1.35rem; color: #ffffff; font-weight: 700; line-height: 1.4;">
             <?= htmlspecialchars($ordinalPruebaEnEtapa, ENT_QUOTES, 'UTF-8') ?> <?= htmlspecialchars($metaPrueba->nombre, ENT_QUOTES, 'UTF-8') ?>
