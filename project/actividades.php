@@ -113,6 +113,19 @@ foreach ($pruebasList as $pruebaItem) {
 }
 
 $porcentajeProgreso = $totalPruebasCount > 0 ? round(($completadasCount / $totalPruebasCount) * 100) : 0;
+// 6. Determinar el orden (ordinal) de la prueba actual dentro de la etapa
+$ordinalPruebaEnEtapa = 0;
+
+if (!empty($pruebasList)) {
+    // Buscamos el ID en el array de pruebas de la etapa
+    foreach ($pruebasList as $index => $pruebaItem) {
+        if ((int)$pruebaItem['id'] === (int)$pruebaId) {
+            // El índice comienza en 0, sumamos 1 para obtener la posición humana (1ª, 2ª, etc.)
+            $ordinalPruebaEnEtapa = $index + 1;
+            break; // Detenemos el bucle al encontrarla
+        }
+    }
+}
 ?>
 <style>
 .project-stages-bar {
@@ -351,6 +364,9 @@ $porcentajeProgreso = $totalPruebasCount > 0 ? round(($completadasCount / $total
     </div>
     <!-- Cabecera de la Prueba -->
     <div style="background: #1e293b; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+        <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
+            Etapa <?= htmlspecialchars($etapaId, ENT_QUOTES, 'UTF-8') ?>
+        </span>
         <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
             <?= htmlspecialchars($metaPrueba->catNombre, ENT_QUOTES, 'UTF-8') ?>
         </span>
