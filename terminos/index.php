@@ -163,9 +163,9 @@ include '../main/layout_header.php';
             <thead>
                 <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 700;">
                     <!--<th style="padding: 0.85rem 1rem;">#</th>-->
-                    <th style="padding: 0.85rem 1rem;">Cliente</th>
+                    <th style="padding: 0.85rem 1rem;">Cliente / Empresa</th>
                     <th style="padding: 0.85rem 1rem;">Servicio</th>
-                    <th style="padding: 0.85rem 1rem;">Estado</th>
+                    
                     <th style="padding: 0.85rem 1rem;">Fecha Creación</th>
                     <th style="padding: 0.85rem 1rem; text-align: center;">Acciones</th>
                     <th style="width: 10%;">Estado</th>
@@ -184,15 +184,7 @@ include '../main/layout_header.php';
                             
                             <td><strong><?= htmlspecialchars($row->clientName, ENT_QUOTES, 'UTF-8') ?></strong></td>
                             <td style="padding: 0.85rem 1rem; color: #334155;"><?= htmlspecialchars($row->servicio, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td style="padding: 0.85rem 1rem;">
-                                <?php if ($row->estado === 'completado'): ?>
-                                    <span style="background: #dcfce7; color: #15803d; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 12px; font-weight: 600;">Completado</span>
-                                <?php elseif ($row->estado === 'en_proceso'): ?>
-                                    <span style="background: #fef3c7; color: #b45309; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 12px; font-weight: 600;">En Proceso</span>
-                                <?php else: ?>
-                                    <span style="background: #f1f5f9; color: #64748b; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 12px; font-weight: 600;">Pendiente</span>
-                                <?php endif; ?>
-                            </td>
+                            
                             <td style="">
                                 <?= date('d/m/Y H:i', strtotime($row->created_at)) ?>
                             </td>
