@@ -91,7 +91,7 @@ $completadasCount = 0;
 foreach ($pruebasList as $pruebaItem) {
     $pIdCheck = $pruebaItem['id'];
     $estadoActual = strtolower($pruebasEjecutadas[$pIdCheck]['estado'] ?? 'en_proceso');
-    if ($estadoActual === 'completado' || $estadoActual === 'cerrado') {
+    if ($estadoActual === 'completado' || $estadoActual === 'cerrado' || $estadoActual === 'revisado') {
         $completadasCount++;
     }
 }
