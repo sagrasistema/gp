@@ -1053,7 +1053,8 @@ $letraCategoria = chr(64 + $categoriaId);
     </div>
 </div>
 <div id="normaModal2" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1000; align-items:center; justify-content:center;">
-    <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:650px; width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid var(--border-color);">
+        <!-- CAMBIO CLAVE: Se incrementa max-width a 900px (o 1000px / 1100px según tu preferencia) -->
+    <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:900px; width:92%; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid var(--border-color, #e2e8f0); margin: auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:0.75rem;">
             <h3 style="margin:0; color:#1e293b; font-size:1.15rem; display:flex; align-items:center; gap:0.5rem;">
                 <i class="ri-book-2-line" style="color:var(--accent);"></i> Instruciones
