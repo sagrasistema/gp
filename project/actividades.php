@@ -157,6 +157,118 @@ if ($pruebaId > 0 && isset($pdo)) {
         error_log("Error crítico al obtener categoría y etapa para la prueba ID {$pruebaId}: " . $e->getMessage());
     }
 }
+if ($etapaId == 3) {
+$frecuenciaNum = filter_input(INPUT_GET, 'frecuencia', FILTER_VALIDATE_INT) ?: 1;
+if ($frecuenciaNum <= 0) {
+    $frecuenciaNum = 1;
+    try {
+    $stmtPruebas = $pdo->prepare("
+        SELECT prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado 
+        FROM proyecto_pruebas_ejecucion 
+        WHERE proyecto_id = :proyecto_id AND frecuencia_num = :frecuencia_num
+    ");
+    $stmtPruebas->execute([
+        ':proyecto_id'   => $proyectoId,
+        ':frecuencia_num' => $frecuenciaNum
+    ]);
+    // Indexamos por prueba_id para acceso O(1) en la vista
+    $pruebasEjecutadas = $stmtPruebas->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log("Error al cargar ejecución de pruebas por frecuencia: " . $e->getMessage());
+    $pruebasEjecutadas = [];
+}
+}
+// -------------------------------------------------------------------------
+// 2. CARGAR MAPEO DE ESTADOS E INDICADORES DE LA FRECUENCIA ACTIVA
+// -------------------------------------------------------------------------
+    try {
+        $stmtPruebas = $pdo->prepare("
+            SELECT prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado 
+            FROM proyecto_pruebas_ejecucion 
+            WHERE proyecto_id = :proyecto_id AND frecuencia_num = :frecuencia_num
+        ");
+        $stmtPruebas->execute([
+            ':proyecto_id'   => $proyectoId,
+            ':frecuencia_num' => $frecuenciaNum
+        ]);
+        // Indexamos por prueba_id para acceso O(1) en la vista
+        $pruebasEjecutadas = $stmtPruebas->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error al cargar ejecución de pruebas por frecuencia: " . $e->getMessage());
+        $pruebasEjecutadas = [];
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. CARGAR LISTA DE PRUEBAS SELECCIONADAS DE LA FRECUENCIA ACTIVA (ETAPA 3)
+    // -------------------------------------------------------------------------
+    try {
+        $stmtList = $pdo->prepare("
+            SELECT p.id, p.nombre, p.orden, c.nombre as categoria_nombre 
+            FROM audit_pruebas p
+            INNER JOIN audit_categorias c ON p.categoria_id = c.id
+            INNER JOIN proyecto_pruebas_ejecucion pe ON pe.prueba_id = p.id
+            WHERE c.etapa_id = 3 
+            AND pe.proyecto_id = :proyecto_id 
+            AND pe.frecuencia_num = :frecuencia_num
+            ORDER BY p.id ASC
+        ");
+        $stmtList->execute([
+            ':proyecto_id'   => $proyectoId,
+            ':frecuencia_num' => $frecuenciaNum
+        ]);
+        $pruebasList = $stmtList->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error al cargar listado de pruebas seleccionadas por frecuencia: " . $e->getMessage());
+        $pruebasList = [];
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. CARGAR MÉTRICAS DE PROGRESO DE ACTIVIDADES DE LA FRECUENCIA ACTIVA
+    // -------------------------------------------------------------------------
+    try {
+        $stmtActProgress = $pdo->prepare("
+            SELECT 
+                p.id AS prueba_id,
+                COUNT(a.id) AS total_actividades,
+                SUM(CASE WHEN ae.completado = 1 THEN 1 ELSE 0 END) AS actividades_completadas
+            FROM audit_pruebas p
+            INNER JOIN audit_categorias c ON p.categoria_id = c.id
+            LEFT JOIN audit_actividades a ON a.prueba_id = p.id
+            LEFT JOIN proyecto_actividades_ejecucion ae 
+                ON ae.actividad_id = a.id 
+            AND ae.proyecto_id = :proyecto_id 
+            AND (ae.frecuencia_num = :frecuencia_num OR ae.frecuencia_num IS NULL)
+            WHERE c.etapa_id = 3
+            GROUP BY p.id
+        ");
+        $stmtActProgress->execute([
+            ':proyecto_id'   => $proyectoId,
+            ':frecuencia_num' => $frecuenciaNum
+        ]);
+        // Indexamos por prueba_id para acceso O(1) en la vista
+        $progresoActividades = $stmtActProgress->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error al calcular progreso de actividades por frecuencia: " . $e->getMessage());
+        $progresoActividades = [];
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. CALCULAR EL PORCENTAJE GLOBAL DE AVANCE DE LA FRECUENCIA ACTIVA
+    // -------------------------------------------------------------------------
+    $totalPruebasCount = count($pruebasList);
+    $completadasCount = 0;
+
+    foreach ($pruebasList as $pruebaItem) {
+        $pIdCheck = $pruebaItem['id'];
+        $estadoActual = strtolower($pruebasEjecutadas[$pIdCheck]['estado'] ?? 'en_proceso');
+        if ($estadoActual === 'completado' || $estadoActual === 'cerrado') {
+            $completadasCount++;
+        }
+    }
+
+    $porcentajeProgreso = $totalPruebasCount > 0 ? round(($completadasCount / $totalPruebasCount) * 100) : 0;
+
+}
 ?>
 <style>
 .project-stages-bar {
