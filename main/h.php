@@ -287,7 +287,58 @@
     border-radius: 4px !important; /* Esquinas ligeramente redondeadas para un look moderno */
 }
 
+/* Posicionamiento relativo para el botón contenedor */
+.btn[data-tooltip] {
+    position: relative;
+}
 
+/* Estilo y contenido del Tooltip flotante */
+.btn[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #0f172a; /* Fondo oscuro moderno */
+    color: #ffffff;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Pequeña flecha indicadora opcional */
+.btn[data-tooltip]::before {
+    content: '';
+    position: absolute;
+    bottom: 115%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 4px;
+    border-style: solid;
+    border-color: #0f172a transparent transparent transparent;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* Activación al hacer Hover */
+.btn[data-tooltip]:hover::after,
+.btn[data-tooltip]:hover::before {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-2px);
+}
     </style>
 </head>
 <body>
