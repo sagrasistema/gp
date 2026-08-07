@@ -1056,9 +1056,9 @@ $letraCategoria = chr(64 + $categoriaId);
  <?php 
  
 // Al inicio de actividades.php
+
 include 'AuditTextRenderer.php';
 // Asegurarse de tener el ID de la prueba disponible en el objeto $metaPrueba
-$pruebaId = $metaPrueba->id ?? 0;
 $textoInadecuado = (bool)($metaPrueba->texto_inadecuado ?? false);
 ?>
 
@@ -1080,38 +1080,58 @@ $textoInadecuado = (bool)($metaPrueba->texto_inadecuado ?? false);
             <?= AuditTextRenderer::render($metaPrueba->informacion ?? null) ?>
         </div>
 
-        <!-- Pie con Control Booleano y Guardado -->
+        <!-- Pie con Control y Acciones -->
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; border-top:1px solid #e2e8f0; padding-top:1rem;">
             
-            <!-- Checkbox de conformidad -->
+            <!-- Checkbox de estado (Sin evento onchange automático) -->
             <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; color:#475569; cursor:pointer; user-select:none;">
                 <input 
                     type="checkbox" 
                     id="chkTextoInadecuado" 
                     value="1" 
                     <?= $textoInadecuado ? 'checked' : '' ?>
-                    onchange="guardarFeedbackTexto(<?= (int)$pruebaId ?>, this.checked)"
                     style="width:1.1rem; height:1.1rem; accent-color:#ef4444; cursor:pointer;"
                 >
                 <span style="font-weight: 500;">No me parece correcta esta redacción / contenido</span>
             </label>
 
-            <button type="button" class="btn btn-primary" onclick="closeNormaModal2()" style="padding: 0.5rem 1.5rem;">Cerrar</button>
+            <!-- Acciones Explícitas -->
+            <div style="display:flex; gap:0.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeNormaModal2()" style="padding: 0.5rem 1rem; background:#cbd5e1; color:#334155; border:none; border-radius:6px; cursor:pointer;">
+                    Cancelar
+                </button>
+                <button type="button" id="btnGuardarFeedback" onclick="procesarGuardadoFeedback(<?= $pruebaId ?>)" class="btn btn-primary" style="padding: 0.5rem 1.25rem; background:#2563eb; color:#ffffff; border:none; border-radius:6px; cursor:pointer;">
+                    Guardar
+                </button>
+            </div>
+
         </div>
 
     </div>
 </div>
 
 <script>
-function guardarFeedbackTexto(pruebaId, estaMarcado) {
-    if (!pruebaId) {
-        console.error('ID de prueba no válido.');
+function procesarGuardadoFeedback(pruebaId) {
+    if (!pruebaId || pruebaId <= 0) {
+        alert('Error: El identificador de la prueba no es válido.');
         return;
     }
 
+    const checkbox = document.getElementById('chkTextoInadecuado');
+    const btnGuardar = document.getElementById('btnGuardarFeedback');
+
+    if (!checkbox) {
+        console.error('No se encontró el elemento checkbox en el DOM.');
+        return;
+    }
+
+    // Deshabilitar botón durante el envío para evitar doble clic
+    btnGuardar.disabled = true;
+    btnGuardar.innerText = 'Guardando...';
+
     const formData = new FormData();
     formData.append('prueba_id', pruebaId);
-    formData.append('texto_inadecuado', estaMarcado ? '1' : '0');
+    formData.append('texto_inadecuado', checkbox.checked ? '1' : '0');
 
     fetch('update_feedback.php', {
         method: 'POST',
@@ -1119,18 +1139,26 @@ function guardarFeedbackTexto(pruebaId, estaMarcado) {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Error en la respuesta del servidor');
+            throw new Error(`Error en el servidor: HTTP ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        if (!data.success) {
-            alert('No se pudo guardar la preferencia: ' + data.error);
+        if (data.success) {
+            // Cerrar el modal al confirmar guardado exitoso
+            closeNormaModal2();
+        } else {
+            alert('Atención: ' + (data.error || 'No se pudo guardar la evaluación.'));
         }
     })
     .catch(error => {
-        console.error('Error al actualizar el estado:', error);
-        alert('Ocurrió un error de conexión al intentar guardar la evaluación.');
+        console.error('Error durante la persistencia del feedback:', error);
+        alert('Error de conexión al guardar el registro.');
+    })
+    .finally(() => {
+        // Restaurar estado del botón
+        btnGuardar.disabled = false;
+        btnGuardar.innerText = 'Guardar';
     });
 }
 </script>
