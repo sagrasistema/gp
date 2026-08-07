@@ -376,7 +376,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
 
                                 <!-- Enlace a la pantalla de actividades para edición -->
                                 <a href="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pr->id ?>" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.85rem;" data-tooltip="Llenar Cuestionario y Gestionar Estatus">
-                                    <i class="ri-survey-line"></i> Actividades
+                                    <i class="ri-pencil-fill"></i> Consultar
                                 </a>
                             </div>
                         </div>

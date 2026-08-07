@@ -422,7 +422,8 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
                                     <?= $statusText ?>
                                 </span>
                                 <a href="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pr->id ?>&frecuencia=<?= $frecuenciaNum ?>" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.85rem;">
-                                    <i class="ri-survey-line"></i> Actividades (Frecuencia <?= $frecuenciaNum ?>)
+                                <i class="ri-pencil-fill"></i> Consultar   
+                                
                                 </a>
                             </div>
                         </div>
