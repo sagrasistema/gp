@@ -395,7 +395,7 @@ if ($pruebaId > 0 && isset($pdo)) {
     </div>
     <!-- Cabecera de la Prueba -->
     <div style="background: #1e293b; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-        <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
+        <span style="font-size: 0.75rem; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
             Etapa <?= htmlspecialchars($etapaId, ENT_QUOTES, 'UTF-8') ?>
         </span>
         <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
