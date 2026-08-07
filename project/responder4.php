@@ -263,25 +263,31 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
             </p>
         <?php endif; ?>
     </div>
-    <!-- Barra de Carga de Progreso del Formulario -->
-    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #475569;">
-            <span>Progreso del Formulario Completado</span>
-            <span style="color: #0f172a; font-weight: 700;"><?= $porcentajeProgreso ?>%</span>
+    <!-- Contenedor en Fila (Grid de 12 Columnas) -->
+    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(12, 1fr); gap: 1rem;">
+        
+        <!-- Columna 1: Progreso Completado (Span 6 de 12) -->
+        <div style="grid-column: span 6; background: #ffffff; padding: 0.75rem; border-radius: 6px; border: 1px solid #f1f5f9;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #475569;">
+                <span>Progreso del Formulario Completado</span>
+                <span style="color: #0f172a; font-weight: 700;"><?= $porcentajeProgreso ?>%</span>
+            </div>
+            <div style="width: 100%; background-color: #e2e8f0; height: 10px; border-radius: 9999px; overflow: hidden;">
+                <div style="width: <?= $porcentajeProgreso ?>%; background-color: #10b981; height: 100%; border-radius: 9999px; transition: width 0.4s ease;"></div>
+            </div>
         </div>
-        <div style="width: 100%; background-color: #e2e8f0; height: 10px; border-radius: 9999px; overflow: hidden;">
-            <div style="width: <?= $porcentajeProgreso ?>%; background-color: #10b981; height: 100%; border-radius: 9999px; transition: width 0.4s ease;"></div>
+
+        <!-- Columna 2: Progreso Revisado (Span 6 de 12) -->
+        <div style="grid-column: span 6; background: #ffffff; padding: 0.75rem; border-radius: 6px; border: 1px solid #f1f5f9;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #475569;">
+                <span>Progreso del Formulario Revisado</span>
+                <span style="color: #0f172a; font-weight: 700;"><?= $porcentajeProgresoo ?>%</span>
+            </div>
+            <div style="width: 100%; background-color: #e2e8f0; height: 10px; border-radius: 9999px; overflow: hidden;">
+                <div style="width: <?= $porcentajeProgresoo ?>%; background-color: #3b82f6; height: 100%; border-radius: 9999px; transition: width 0.4s ease;"></div>
+            </div>
         </div>
-    </div>
-    <!-- Barra de Carga de Progreso del Formulario -->
-    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #475569;">
-            <span>Progreso del Formulario Revisado</span>
-            <span style="color: #0f172a; font-weight: 700;"><?= $porcentajeProgresoo ?>%</span>
-        </div>
-        <div style="width: 100%; background-color: #e2e8f0; height: 10px; border-radius: 9999px; overflow: hidden;">
-            <div style="width: <?= $porcentajeProgresoo ?>%; background-color: #3b82f6; height: 100%; border-radius: 9999px; transition: width 0.4s ease;"></div>
-        </div>
+
     </div>
 
 </div>
