@@ -1057,7 +1057,11 @@ $letraCategoria = chr(64 + $categoriaId);
  
 // Al inicio de actividades.php
 include 'AuditTextRenderer.php';
- ?>
+// Asegurarse de tener el ID de la prueba disponible en el objeto $metaPrueba
+$pruebaId = $metaPrueba->id ?? 0;
+$textoInadecuado = (bool)($metaPrueba->texto_inadecuado ?? false);
+?>
+
 <div id="normaModal2" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1000; align-items:center; justify-content:center;">
     <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:900px; width:92%; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid #e2e8f0; margin:auto;">
         
@@ -1071,19 +1075,65 @@ include 'AuditTextRenderer.php';
             </button>
         </div>
 
-        <!-- Cuerpo del Modal: Renderizado de Texto Plano -->
         <!-- Cuerpo del Modal -->
         <div class="audit-container" style="max-height:60vh; overflow-y:auto; padding-right:0.5rem;">
             <?= AuditTextRenderer::render($metaPrueba->informacion ?? null) ?>
         </div>
 
-        <!-- Pie -->
-        <div style="text-align:right; margin-top:1.5rem; border-top:1px solid #e2e8f0; padding-top:1rem;">
+        <!-- Pie con Control Booleano y Guardado -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; border-top:1px solid #e2e8f0; padding-top:1rem;">
+            
+            <!-- Checkbox de conformidad -->
+            <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; color:#475569; cursor:pointer; user-select:none;">
+                <input 
+                    type="checkbox" 
+                    id="chkTextoInadecuado" 
+                    value="1" 
+                    <?= $textoInadecuado ? 'checked' : '' ?>
+                    onchange="guardarFeedbackTexto(<?= (int)$pruebaId ?>, this.checked)"
+                    style="width:1.1rem; height:1.1rem; accent-color:#ef4444; cursor:pointer;"
+                >
+                <span style="font-weight: 500;">No me parece correcta esta redacción / contenido</span>
+            </label>
+
             <button type="button" class="btn btn-primary" onclick="closeNormaModal2()" style="padding: 0.5rem 1.5rem;">Cerrar</button>
         </div>
 
     </div>
 </div>
+
+<script>
+function guardarFeedbackTexto(pruebaId, estaMarcado) {
+    if (!pruebaId) {
+        console.error('ID de prueba no válido.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('prueba_id', pruebaId);
+    formData.append('texto_inadecuado', estaMarcado ? '1' : '0');
+
+    fetch('update_feedback.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data.success) {
+            alert('No se pudo guardar la preferencia: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error al actualizar el estado:', error);
+        alert('Ocurrió un error de conexión al intentar guardar la evaluación.');
+    });
+}
+</script>
 
 <?php 
 include 'js-actividades.php'; 
