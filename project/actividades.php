@@ -511,11 +511,11 @@ if ($frecuenciaNum <= 0) {
             Etapa <?= htmlspecialchars($etapaId, ENT_QUOTES, 'UTF-8') ?>
         </span>
         <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
-            <?php if ($etapaId < 3) { htmlspecialchars($categoriaId, ENT_QUOTES, 'UTF-8'); }?>
+            <?= htmlspecialchars($categoriaId, ENT_QUOTES, 'UTF-8'); ?>
             <?= htmlspecialchars($metaPrueba->catNombre, ENT_QUOTES, 'UTF-8') ?>
         </span>
         <h2 style="margin: 0 0 1rem 0; font-size: 1.35rem; color: #ffffff; font-weight: 700; line-height: 1.4;">
-            <?php  if ($etapaId < 3) { htmlspecialchars($ordinalPruebaEnEtapa, ENT_QUOTES, 'UTF-8'); }?>    
+            <?=  htmlspecialchars($ordinalPruebaEnEtapa, ENT_QUOTES, 'UTF-8'); ?>    
             <?= htmlspecialchars($metaPrueba->nombre, ENT_QUOTES, 'UTF-8') ?>
         </h2>
         <button type="button" onclick="openNormaModal()" style="background: #0284c7; color: #ffffff; border: none; font-size: 0.85rem; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
