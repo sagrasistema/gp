@@ -1056,7 +1056,7 @@ $letraCategoria = chr(64 + $categoriaId);
  <?php 
  
 // Al inicio de actividades.php
-require_once __DIR__ . '/AuditTextRenderer.php';
+include 'AuditTextRenderer.php';
  ?>
 <div id="normaModal2" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1000; align-items:center; justify-content:center;">
     <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:900px; width:92%; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid #e2e8f0; margin:auto;">
