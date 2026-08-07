@@ -247,7 +247,7 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
             Progreso General de Pruebas (Fase de Ejecución)
         </h4>
         <span style="font-size: 0.75rem; background-color: #f1f5f9; color: #475569; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600;">
-            Total: <?= count($pruebasList ?? []) ?> Actividades / Pruebas
+            Total: <?= count($pruebasList ?? []) ?>Actividades / Pruebas
         </span>
     </div>
 
