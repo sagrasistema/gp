@@ -199,8 +199,8 @@ include '../main/layout_header.php';
                                 <?= date('d/m/Y H:i', strtotime($row->created_at)) ?>
                             </td>
                             <td style="padding: 0.85rem 1rem; text-align: center;">
-                                <a href="responder-terminos.php?id=<?= $row->id ?>" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; background: #0f172a; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 0.8rem; font-weight: 600;">
-                                    <i class="ri-reply-fill"></i> Responder
+                                <a href="responder-terminos.php?id=<?= $row->id ?>" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; background: #08855b; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 0.8rem; font-weight: 600;">
+                                    <i class="ri-pencil-fill"></i> Consultar
                                 </a>
                             </td>
                             <?php 

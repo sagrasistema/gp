@@ -112,8 +112,8 @@ include '../main/layout_header.php';
                             echo "<td>{$fecha}</td>";
                             echo "<td style='font-weight: 600; color: #64748b;'> {$riskLevel} </td>";
                             echo "<td style='text-align: center;'>
-                                    <a href='responder.php?acId={$ac->acId}' class='btn btn-secondary' style='background: #0bcf8e; color: #ffffff; padding: 0.4rem 0.8rem; font-size: 0.85rem;'>
-                                        <i class='ri-file-list-3-line'></i> Responder
+                                    <a href='responder.php?acId={$ac->acId}' class='btn btn-secondary' style='background: #08855b; color: #ffffff; padding: 0.4rem 0.8rem; font-size: 0.85rem;'>
+                                        <i class='ri-pencil-fill'></i> Consultar
                                     </a>
                                   </td>";
                             echo "<td style='text-align: center; vertical-align: middle;'>

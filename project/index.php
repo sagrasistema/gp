@@ -94,14 +94,14 @@ include '../main/layout_header.php';
                             echo "<td style='text-align: center; white-space: nowrap;'>";
                             
                             // Botón de Pruebas / Gestionar (responder.php)
-                            echo "<a href='responder.php?proyectoId={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; margin-right: 4px;' data-tooltip='Gestionar Pruebas'>";
-                            echo "<i class='ri-folder-open-line'></i>";
+                            echo "<a href='responder.php?proyectoId={$proj->proyectoId}' class='btn btn-secondary' style='background: #08855b; color: #ffffff; ;padding: 0.4rem 0.6rem; font-size: 0.8rem; margin-right: 4px;' data-tooltip='Gestionar Pruebas'>";
+                            echo "<i class='ri-folder-pencil-fill'></i>";
                             echo "</a>";
 
                             // Botón de Asignación de Equipo (proyecto_equipo.php)
-                            echo "<a href='proyecto_equipo.php?id={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; background-color: rgba(0, 188, 212, 0.1); color: var(--accent-cian, #00bcd4); border: 1px solid var(--accent-cian, #00bcd4);' data-tooltip='Asignar Equipo'>";
-                            echo "<i class='ri-team-line'></i>";
-                            echo "</a>";
+                            //echo "<a href='proyecto_equipo.php?id={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; background-color: rgba(0, 188, 212, 0.1); color: var(--accent-cian, #00bcd4); border: 1px solid var(--accent-cian, #00bcd4);' data-tooltip='Asignar Equipo'>";
+                            //echo "<i class='ri-team-line'></i>";
+                            //echo "</a>";
 
                             echo "</td>";
                             echo "</tr>";
