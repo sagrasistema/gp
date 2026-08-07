@@ -277,10 +277,10 @@ $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
     <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #475569;">
             <span>Progreso del Formulario</span>
-            <span style="color: #0f172a; font-weight: 700;"><?= $porcentajeProgreso ?>%</span>
+            <span style="color: #0f172a; font-weight: 700;"><?= $porcentajeProgresoo ?>%</span>
         </div>
         <div style="width: 100%; background-color: #e2e8f0; height: 10px; border-radius: 9999px; overflow: hidden;">
-            <div style="width: <?= $porcentajeProgreso ?>%; background-color: #3b82f6; height: 100%; border-radius: 9999px; transition: width 0.4s ease;"></div>
+            <div style="width: <?= $porcentajeProgresoo ?>%; background-color: #3b82f6; height: 100%; border-radius: 9999px; transition: width 0.4s ease;"></div>
         </div>
     </div>
 
