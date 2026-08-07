@@ -95,7 +95,7 @@ foreach ($pruebasList as $pruebaItem) {
     if ($estadoActual === 'completado' || $estadoActual === 'cerrado' || $estadoActual === 'revisado') {
         $completadasCount++;
     }
-    if ($estadoActual === 'revisado') {
+    if ($estadoActual === 'revisado' || $estadoActual === 'cerrado') {
         $completadasCountt++;
     }
 }
