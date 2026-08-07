@@ -130,7 +130,6 @@ function renderTable() {
             <td>
                 <div class="actions-cell">
                     <a href="editar.php?id=${c.id}" class="btn-icon btn-icon-edit"><i class="ri-edit-line"></i></a>
-                    
                 </div>
             </td>
         `;
