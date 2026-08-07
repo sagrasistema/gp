@@ -94,6 +94,10 @@ foreach ($pruebasList as $pruebaItem) {
     if ($estadoActual === 'completado' || $estadoActual === 'cerrado' || $estadoActual === 'revisado') {
         $completadasCount++;
     }
+    if ($estadoActual === 'revisado' || $estadoActual === 'cerrado') {
+        $completadasCountt++;
+    }
 }
 
 $porcentajeProgreso = $totalPruebasCount > 0 ? round(($completadasCount / $totalPruebasCount) * 100) : 0;
+$porcentajeProgresoo = $totalPruebasCount > 0 ? round(($completadasCountt / $totalPruebasCount) * 100) : 0;
