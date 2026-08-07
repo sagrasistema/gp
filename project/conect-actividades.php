@@ -751,4 +751,84 @@ function mostrarModalAlertaPersonalizado(mensaje) {
     border-color: #0284c7;
     box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
 }
+/* Estilos para renderizado estructurado de Auditoría */
+.audit-container {
+    color: #334155;
+    font-size: 0.93rem;
+    line-height: 1.6;
+}
+
+.audit-badge-header {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 1.25rem;
+    border-left: 5px solid #0284c7;
+}
+
+.audit-activity-title {
+    margin: 1.25rem 0 0.5rem 0;
+    color: #1e293b;
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.35rem;
+}
+
+.audit-activity-title i {
+    color: #2563eb;
+}
+
+.audit-item {
+    margin-left: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.audit-label {
+    font-weight: 700;
+}
+
+.text-primary { color: #0284c7; }
+.text-secondary { color: #475569; }
+
+.audit-callout {
+    margin: 0.5rem 0 0.75rem 0.5rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.audit-callout-info {
+    background-color: #f8fafc;
+    border-left: 3px solid #06b6d4;
+    color: #334155;
+}
+
+.audit-callout-info strong {
+    color: #0891b2;
+    display: block;
+    margin-bottom: 0.2rem;
+}
+
+.audit-callout-success {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+}
+
+.audit-callout-success strong {
+    color: #15803d;
+    display: block;
+    margin-bottom: 0.2rem;
+}
+
+.audit-paragraph {
+    margin: 0.25rem 0 0.5rem 0.5rem;
+}
 </style>
