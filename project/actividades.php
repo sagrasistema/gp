@@ -55,14 +55,16 @@ try {
 }
 // 3. Cargar lista completa de pruebas para la Fase de Planificación (Etapa 1) con sus categorías
 try {
+    $etapaId = (int)($etapaId ?? 0);
     $stmtList = $pdo->prepare("
         SELECT p.id, p.nombre, p.orden, c.nombre as categoria_nombre 
         FROM audit_pruebas p
         INNER JOIN audit_categorias c ON p.categoria_id = c.id
-        WHERE c.etapa_id = 1
+        WHERE c.etapa_id = :etapa_id
         ORDER BY p.id ASC
     ");
-    $stmtList->execute();
+    // Pasamos el valor de forma segura en el array de ejecución
+    $stmtList->execute([':etapa_id' => $etapaId]);
     $pruebasList = $stmtList->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log("Error al cargar listado de pruebas: " . $e->getMessage());
@@ -71,6 +73,8 @@ try {
 
 // 4. Cargar métricas de progreso de actividades por prueba para este proyecto
 try {
+    // Aseguramos que la etapa sea un entero antes de procesar
+    $etapaId = (int)($etapaId ?? 0);
     $stmtActProgress = $pdo->prepare("
         SELECT 
             p.id AS prueba_id,
@@ -80,10 +84,15 @@ try {
         INNER JOIN audit_categorias c ON p.categoria_id = c.id
         LEFT JOIN audit_actividades a ON a.prueba_id = p.id
         LEFT JOIN proyecto_actividades_ejecucion ae ON ae.actividad_id = a.id AND ae.proyecto_id = :proyecto_id
-        WHERE c.etapa_id = 1
+        WHERE c.etapa_id = :etapa_id
         GROUP BY p.id
     ");
-    $stmtActProgress->execute([':proyecto_id' => $proyectoId]);
+    // Ejecutamos pasando ambos parámetros de forma segura
+    $stmtActProgress->execute([
+        ':proyecto_id' => $proyectoId,
+        ':etapa_id'    => $etapaId
+    ]);
+
     // Indexamos por prueba_id para acceso O(1) en la vista
     $progresoActividades = $stmtActProgress->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
