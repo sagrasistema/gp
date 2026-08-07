@@ -40,7 +40,19 @@ if ($pruebaId > 0 && isset($pdo)) {
         error_log("Error crítico al obtener categoría y etapa para la prueba ID {$pruebaId}: " . $e->getMessage());
     }
 }
-
+// 2. Cargar mapeo de estados y banderas de indicadores de las pruebas desde la ejecución
+try {
+    $stmtPruebas = $pdo->prepare("
+        SELECT prueba_id, indicador_ci, indicador_cg, indicador_sc, indicador_aa, estado 
+        FROM proyecto_pruebas_ejecucion 
+        WHERE proyecto_id = :proyecto_id
+    ");
+    $stmtPruebas->execute([':proyecto_id' => $proyectoId]);
+    $pruebasEjecutadas = $stmtPruebas->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log("Error al cargar ejecución de pruebas: " . $e->getMessage());
+    $pruebasEjecutadas = [];
+}
 // 3. Cargar lista completa de pruebas para la Fase de Planificación (Etapa 1) con sus categorías
 try {
     $stmtList = $pdo->prepare("
