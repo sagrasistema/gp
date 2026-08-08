@@ -79,27 +79,26 @@ foreach ($categorias as $cat) {
             --text-dark: #0f172a;
             --text-muted: #64748b;
             
-            /* Colores Escala Likert */
-            --lvl-1: #ef4444;
-            --lvl-2: #f97316;
-            --lvl-3: #eab308;
-            --lvl-4: #84cc16;
-            --lvl-5: #10b981;
+            /* Colores escala Likert */
+            --lvl-1: #ef4444; /* Rojo */
+            --lvl-2: #f97316; /* Naranja */
+            --lvl-3: #eab308; /* Amarillo */
+            --lvl-4: #84cc16; /* Verde Lima */
+            --lvl-5: #10b981; /* Verde Esmeralda */
         }
 
-       * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-image: var(--bg-pattern), var(--bg-gradient);
-            background-repeat: repeat, no-repeat;
-            background-position: top left, center;
-            background-size: 70px 70px, cover;
-            background-attachment: fixed, fixed;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
             color: var(--text-dark);
             min-height: 100vh;
             padding: 2rem 1rem 4rem 1rem;
+            position: relative;
         }
+
 
 
         /* Barra de Progreso Superior */
