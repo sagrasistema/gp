@@ -3,8 +3,7 @@
 header('Content-Type: application/json; charset=utf-8');
 
 // Cargar PDO desde tu archivo de configuración
-require_once __DIR__ . '/config.php'; // Asegúrate de definir $pdo aquí
-
+include '../main/config.php';
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
