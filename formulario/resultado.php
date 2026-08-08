@@ -213,7 +213,30 @@ $reporte = $_SESSION['diagnostico_resultado'];
             </div>
         <?php endforeach; ?>
     </div>
+<!-- NUEVO BLOQUE: Puntos Más Fortes / Pilares Estratégicos -->
+    <div class="glass-card strength-card" style="border-left: 6px solid #10b981;">
+        <h3 style="color:#10b981; font-size:1.2rem; font-weight:800; display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+            <i class="ri-shield-check-fill"></i> Principales Fortalezas Organizacionales
+        </h3>
 
+        <?php if (empty($reporte['preguntas_fuertes'])): ?>
+            <p style="color:#64748b; font-size:0.9rem;">No se detectaron aspectos sobresalientes (puntuación de 4 o 5) en esta evaluación. Se recomienda enfocar esfuerzos en institucionalizar los procesos base.</p>
+        <?php else: ?>
+            <?php foreach ($reporte['preguntas_fuertes'] as $fort): ?>
+                <div class="weakness-item"> <!-- Reutiliza estructura con clases específicas -->
+                    <span class="score-pill" style="background:#d1fae5; color:#059669;">Puntaje: <?= $fort['score'] ?>/5</span>
+                    <div>
+                        <div style="font-weight:700; color:#0f172a; font-size:0.95rem; margin-bottom:0.25rem;">
+                            [<?= $fort['categoria'] ?>] Ámbito Destacado: <?= strtoupper($fort['id']) ?>
+                        </div>
+                        <div style="font-size:0.88rem; color:#334155;">
+                            <strong>Logro Consolidado:</strong> <?= htmlspecialchars($fort['fortaleza'], ENT_QUOTES, 'UTF-8') ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
     <!-- Cuadro Específico: Preguntas con Mayor Debilidad -->
     <div class="glass-card weakness-card">
         <h3 style="color:#ef4444; font-size:1.2rem; font-weight:800; display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">

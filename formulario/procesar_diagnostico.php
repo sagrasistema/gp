@@ -1,48 +1,53 @@
 <?php
+
 // procesar_diagnostico.php - Controlador de Evaluación y Reglas de Negocio
-// Estándar PSR-12 | Compatibilidad PHP 8.x
+// Estándar PSR-12 | Compatibilidad PHP 8.x / Seguridad Estricta
 
 declare(strict_types=1);
-session_start();
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Matriz de Reglas de Negocio y Recomendaciones
+// Matriz de Reglas de Negocio y Recomendaciones por Categoría
 $reglasCategorias = [
     'GOBERNANZA' => [
-        'titulo' => 'Gobernanza y Órganos de Dirección',
-        'icon'   => 'ri-government-line',
-        'color'  => '#6366f1',
-        'recom_critica' => 'Priorice la constitución del Consejo de Familia y delimite las decisiones operativas de las estratégicas.',
-        'recom_media'   => 'Formalice la frecuencia de las reuniones de la Junta Directiva e incluya la figura de consejeros independientes.',
+        'titulo'          => 'Gobernanza y Órganos de Dirección',
+        'icon'            => 'ri-government-line',
+        'color'           => '#6366f1',
+        'recom_critica'   => 'Priorice la constitución del Consejo de Familia y delimite las decisiones operativas de las estratégicas.',
+        'recom_media'     => 'Formalice la frecuencia de las reuniones de la Junta Directiva e incluya la figura de consejeros independientes.',
         'recom_excelente' => 'El esquema de gobernanza es sólido. Mantenga la auditoría externa y la rendición de cuentas continua.'
     ],
     'PROTOCOLO' => [
-        'titulo' => 'Protocolo y Normativa Familiar',
-        'icon'   => 'ri-file-paper-2-line',
-        'color'  => '#ec4899',
-        'recom_critica' => 'Es urgente redactar y firmar un Protocolo Familiar que reglamente el ingreso y remuneración de familiares.',
-        'recom_media'   => 'Ajuste la política salarial a valores de mercado y establezca un comité de mediación para conflictos.',
+        'titulo'          => 'Protocolo y Normativa Familiar',
+        'icon'            => 'ri-file-paper-2-line',
+        'color'           => '#ec4899',
+        'recom_critica'   => 'Es urgente redactar y firmar un Protocolo Familiar que reglamente el ingreso y remuneración de familiares.',
+        'recom_media'     => 'Ajuste la política salarial a valores de mercado y establezca un comité de mediación para conflictos.',
         'recom_excelente' => 'Existe un marco normativo normado eficaz. Revíselo quinquenalmente para adaptarlo a nuevas generaciones.'
     ],
     'SUCESIÓN' => [
-        'titulo' => 'Sucesión y Continuidad',
-        'icon'   => 'ri-git-merge-line',
-        'color'  => '#8b5cf6',
-        'recom_critica' => 'Estructure de inmediato un plan de emergencia y un esquema de formación directiva para la siguiente generación.',
-        'recom_media'   => 'Defina la hoja de ruta fiscal/legal para la transferencia accionaria y formalice el plan de sucesión del CEO.',
+        'titulo'          => 'Sucesión y Continuidad',
+        'icon'            => 'ri-git-merge-line',
+        'color'           => '#8b5cf6',
+        'recom_critica'   => 'Estructure de inmediato un plan de emergencia y un esquema de formación directiva para la siguiente generación.',
+        'recom_media'     => 'Defina la hoja de ruta fiscal/legal para la transferencia accionaria y formalice el plan de sucesión del CEO.',
         'recom_excelente' => 'El plan de continuidad está blindado. Asegure la ejecución del programa de liderazgo futuro.'
     ],
     'FINANZAS' => [
-        'titulo' => 'Estrategia y Gestión Financiera',
-        'icon'   => 'ri-bank-card-line',
-        'color'  => '#06b6d4',
-        'recom_critica' => 'Separe inmediatamente las finanzas personales de las empresariales e implemente presupuestos mensuales.',
-        'recom_media'   => 'Fortalezca el control de flujo de caja y estipule políticas formales para el endeudamiento e inversión.',
+        'titulo'          => 'Estrategia y Gestión Financiera',
+        'icon'            => 'ri-bank-card-line',
+        'color'           => '#06b6d4',
+        'recom_critica'   => 'Separe inmediatamente las finanzas personales de las empresariales e implemente presupuestos mensuales.',
+        'recom_media'     => 'Fortalezca el control de flujo de caja y estipule políticas formales para el endeudamiento e inversión.',
         'recom_excelente' => 'Excelente disciplina financiera. Continúe con las auditorías de riesgo operativo y legal.'
     ]
 ];
 
+// Recomendaciones para Puntos Críticos (Score <= 2)
 $recomendacionesPreguntas = [
     'p1'  => 'Forme el Consejo de Familia para institucionalizar la toma de decisiones.',
     'p2'  => 'Incorpore un consejero independiente para aportar objetividad en la junta.',
@@ -66,48 +71,83 @@ $recomendacionesPreguntas = [
     'p20' => 'Contrate una auditoría de matriz de riesgos legales y operativos.'
 ];
 
+// Matriz de Fortalezas Consolidadas (Score >= 4)
+$fortalezasPreguntas = [
+    'p1'  => 'El Consejo de Familia está constituido y garantiza un espacio institucional de diálogo.',
+    'p2'  => 'La Junta Directiva cuenta con objetividad e independencia estratégica en la toma de decisiones.',
+    'p3'  => 'Existe una clara delimitación entre los roles de socio, consejero y gestor operativo.',
+    'p4'  => 'Alta transparencia y cultura de rendición de cuentas mediante estados financieros auditados.',
+    'p5'  => 'Límites de autoridad y políticas de inversión bien definidos que protegen el patrimonio.',
+    'p6'  => 'Cuenta con un Protocolo Familiar formalizado que regula la relación familia-empresa.',
+    'p7'  => 'Criterios meritocráticos y profesionales estrictos para el ingreso de miembros de la familia.',
+    'p8'  => 'Política salarial alineada a estándares de mercado para los ejecutivos familiares.',
+    'p9'  => 'Mecanismos efectivos y pactados para la resolución pacífica de conflictos de intereses.',
+    'p10' => 'Política de dividendos clara que equilibra la capitalización y la retribución al socio.',
+    'p11' => 'Plan de sucesión directiva formalizado que asegura la continuidad del liderazgo.',
+    'p12' => 'Programa de desarrollo y formación estructurado para la siguiente generación.',
+    'p13' => 'Estructura legal y fiscal óptima para la transferencia de la propiedad accionaria.',
+    'p14' => 'Plan de contingencia y emergencia ante ausencias imprevistas del liderazgo clave.',
+    'p15' => 'Fuerte vocación, compromiso y preparación en la siguiente generación de la familia.',
+    'p16' => 'Blindaje total entre el patrimonio personal/familiar y los recursos corporativos.',
+    'p17' => 'Planificación estratégica sólida respaldada por indicadores clave de desempeño (KPIs).',
+    'p18' => 'Control presupuestario continuo y seguimiento riguroso del flujo de caja.',
+    'p19' => 'Estructura de capital prudente con una política equilibrada de endeudamiento.',
+    'p20' => 'Monitoreo constante y gestión proactiva de la matriz de riesgos corporativos.'
+];
+
+// Mapeo Estático de Preguntas por Categoría
+$mapaPreguntas = [
+    'p1'  => 'GOBERNANZA', 'p2'  => 'GOBERNANZA', 'p3'  => 'GOBERNANZA', 'p4'  => 'GOBERNANZA', 'p5'  => 'GOBERNANZA',
+    'p6'  => 'PROTOCOLO',  'p7'  => 'PROTOCOLO',  'p8'  => 'PROTOCOLO',  'p9'  => 'PROTOCOLO',  'p10' => 'PROTOCOLO',
+    'p11' => 'SUCESIÓN',   'p12' => 'SUCESIÓN',   'p13' => 'SUCESIÓN',   'p14' => 'SUCESIÓN',   'p15' => 'SUCESIÓN',
+    'p16' => 'FINANZAS',   'p17' => 'FINANZAS',   'p18' => 'FINANZAS',   'p19' => 'FINANZAS',   'p20' => 'FINANZAS'
+];
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+    http_response_code(405);
+    echo json_encode(['success' => false, 'message' => 'Método no permitido. Utilice POST.']);
     exit;
 }
 
 try {
-    // Sanitización de entradas corporativas
-    $empresa  = filter_var($_POST['nombre_empresa'] ?? '', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    $contacto = filter_var($_POST['nombre_contacto'] ?? '', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    $email    = filter_var($_POST['email_contacto'] ?? '', FILTER_VALIDATE_EMAIL);
-    $sector   = filter_var($_POST['sector'] ?? '', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    // Sanitización y Validación Estricta
+    $empresa  = filter_var(trim($_POST['nombre_empresa'] ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $contacto = filter_var(trim($_POST['nombre_contacto'] ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $email    = filter_var(trim($_POST['email_contacto'] ?? ''), FILTER_VALIDATE_EMAIL);
+    $sector   = filter_var(trim($_POST['sector'] ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     $answers  = $_POST['preguntas'] ?? [];
 
     if (!$empresa || !$contacto || !$email || empty($answers) || !is_array($answers)) {
-        echo json_encode(['success' => false, 'message' => 'Por favor, complete todos los campos obligatorios.']);
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Por favor, complete todos los campos obligatorios válidamente.']);
         exit;
     }
 
-    // Procesamiento de puntuación y evaluación de negocio
     $evaluacionCategorias = [];
     $preguntasDebiles     = [];
+    $preguntasFuertes     = [];
     $puntuacionTotal      = 0;
-
-    $mapaPreguntas = [
-        'p1'=>'GOBERNANZA','p2'=>'GOBERNANZA','p3'=>'GOBERNANZA','p4'=>'GOBERNANZA','p5'=>'GOBERNANZA',
-        'p6'=>'PROTOCOLO','p7'=>'PROTOCOLO','p8'=>'PROTOCOLO','p9'=>'PROTOCOLO','p10'=>'PROTOCOLO',
-        'p11'=>'SUCESIÓN','p12'=>'SUCESIÓN','p13'=>'SUCESIÓN','p14'=>'SUCESIÓN','p15'=>'SUCESIÓN',
-        'p16'=>'FINANZAS','p17'=>'FINANZAS','p18'=>'FINANZAS','p19'=>'FINANZAS','p20'=>'FINANZAS'
-    ];
 
     $conteoCat = ['GOBERNANZA' => 0, 'PROTOCOLO' => 0, 'SUCESIÓN' => 0, 'FINANZAS' => 0];
 
+    // Procesamiento de Puntuaciones y Clasificación
     foreach ($answers as $pId => $val) {
-        $score = (int)$val;
+        $score = filter_var($val, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1, 'max_range' => 5]
+        ]);
+
+        if ($score === false) {
+            continue; // Ignora variables alteradas o fuera de rango
+        }
+
         $puntuacionTotal += $score;
         $cat = $mapaPreguntas[$pId] ?? null;
 
-        if ($cat) {
+        if ($cat && isset($conteoCat[$cat])) {
             $conteoCat[$cat] += $score;
         }
 
-        // Evaluar Preguntas con Mayor Debilidad (Puntajes 1 o 2)
+        // Diagnóstico: Puntos Críticos (Score <= 2)
         if ($score <= 2) {
             $preguntasDebiles[] = [
                 'id'            => $pId,
@@ -116,28 +156,38 @@ try {
                 'recomendacion' => $recomendacionesPreguntas[$pId] ?? 'Atender esta área con prioridad.'
             ];
         }
+
+        // Diagnóstico: Puntos Fortes (Score >= 4)
+        if ($score >= 4) {
+            $preguntasFuertes[] = [
+                'id'        => $pId,
+                'score'     => $score,
+                'categoria' => $cat,
+                'fortaleza' => $fortalezasPreguntas[$pId] ?? 'Pilar con alto nivel de madurez institucional.'
+            ];
+        }
     }
 
-    // Clasificación semafórica por categoría (Máximo 25 pts por categoría)
+    // Clasificación Semafórica por Categoria (Máximo 25 Puntos)
     foreach ($conteoCat as $catKey => $puntos) {
         $maxCat = 25;
         $porcentaje = ($puntos / $maxCat) * 100;
 
         if ($porcentaje < 50) {
             $estado = 'CRÍTICO';
-            $color = '#ef4444'; // Rojo
-            $bg = 'rgba(239, 68, 68, 0.15)';
-            $recom = $reglasCategorias[$catKey]['recom_critica'];
+            $color  = '#ef4444'; // Rojo
+            $bg     = 'rgba(239, 68, 68, 0.15)';
+            $recom  = $reglasCategorias[$catKey]['recom_critica'];
         } elseif ($porcentaje < 80) {
             $estado = 'EN RIESGO';
-            $color = '#f59e0b'; // Amarillo / Naranja
-            $bg = 'rgba(245, 158, 11, 0.15)';
-            $recom = $reglasCategorias[$catKey]['recom_media'];
+            $color  = '#f59e0b'; // Naranja
+            $bg     = 'rgba(245, 158, 11, 0.15)';
+            $recom  = $reglasCategorias[$catKey]['recom_media'];
         } else {
             $estado = 'SÓLIDO';
-            $color = '#10b981'; // Verde
-            $bg = 'rgba(16, 185, 129, 0.15)';
-            $recom = $reglasCategorias[$catKey]['recom_excelente'];
+            $color  = '#10b981'; // Verde
+            $bg     = 'rgba(16, 185, 129, 0.15)';
+            $recom  = $reglasCategorias[$catKey]['recom_excelente'];
         }
 
         $evaluacionCategorias[$catKey] = [
@@ -145,7 +195,7 @@ try {
             'icon'          => $reglasCategorias[$catKey]['icon'],
             'puntuacion'    => $puntos,
             'maximo'        => $maxCat,
-            'porcentaje'    => round($porcentaje),
+            'porcentaje'    => (int)round($porcentaje),
             'estado'        => $estado,
             'color'         => $color,
             'bg'            => $bg,
@@ -153,30 +203,29 @@ try {
         ];
     }
 
-    // Persistencia BD mediante PDO Transaccional (Ajuste según su DB)
-    /*
-    $pdo = new PDO("mysql:host=localhost;dbname=audit_db;charset=utf8mb4", "user", "pass", [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-    ]);
-    $stmt = $pdo->prepare("INSERT INTO evaluaciones (empresa, contacto, email, total_puntos) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$empresa, $contacto, $email, $puntuacionTotal]);
-    */
-
-    // Almacenar reporte en Sesión para la vista de resultados
+    // Persistencia del Diagnóstico en Sesión Activa
     $_SESSION['diagnostico_resultado'] = [
-        'empresa'            => $empresa,
-        'contacto'           => $contacto,
-        'email'              => $email,
-        'puntuacion_total'   => $puntuacionTotal,
-        'max_posible'        => 100,
-        'eval_categorias'    => $evaluacionCategorias,
-        'preguntas_debiles'  => $preguntasDebiles,
-        'fecha'              => date('Y-m-d H:i:s')
+        'empresa'           => $empresa,
+        'contacto'          => $contacto,
+        'email'             => $email,
+        'sector'            => $sector,
+        'puntuacion_total'  => $puntuacionTotal,
+        'max_posible'       => 100,
+        'eval_categorias'   => $evaluacionCategorias,
+        'preguntas_debiles' => $preguntasDebiles,
+        'preguntas_fuertes' => $preguntasFuertes, // Contenedor de Fortalezas
+        'fecha'             => date('Y-m-d H:i:s')
     ];
+
+    // Cierre anticipado de sesión para liberar el Lock I/O
+    session_write_close();
 
     echo json_encode(['success' => true]);
 
 } catch (Throwable $e) {
-    error_log("Error Diagnóstico: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Error de procesamiento en el servidor.']);
+    // Registro interno seguro del error
+    error_log(sprintf('[Diagnostico Error] File: %s Line: %d Msg: %s', $e->getFile(), $e->getLine(), $e->getMessage()));
+
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Ocurrió un error interno durante el procesamiento del diagnóstico.']);
 }
