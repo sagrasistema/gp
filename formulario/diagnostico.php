@@ -69,20 +69,18 @@ foreach ($categorias as $cat) {
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
-   <style>
+    <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #311042 100%);
             --card-glass: rgba(255, 255, 255, 0.95);
             --card-border: rgba(255, 255, 255, 0.2);
             --text-dark: #0f172a;
-            --text-muted: #64748b;
             
-            /* Colores escala Likert */
-            --lvl-1: #ef4444; /* Rojo */
-            --lvl-2: #f97316; /* Naranja */
-            --lvl-3: #eab308; /* Amarillo */
-            --lvl-4: #84cc16; /* Verde Lima */
-            --lvl-5: #10b981; /* Verde Esmeralda */
+            --lvl-1: #ef4444;
+            --lvl-2: #f97316;
+            --lvl-3: #eab308;
+            --lvl-4: #84cc16;
+            --lvl-5: #10b981;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -94,10 +92,8 @@ foreach ($categorias as $cat) {
             color: var(--text-dark);
             min-height: 100vh;
             padding: 2rem 1rem 4rem 1rem;
-            position: relative;
         }
 
-        /* Barra de Progreso Superior */
         .progress-bar-container {
             position: fixed;
             top: 0;
@@ -115,12 +111,8 @@ foreach ($categorias as $cat) {
             box-shadow: 0 0 12px rgba(236, 72, 153, 0.8);
         }
 
-        .container {
-            max-width: 850px;
-            margin: 0 auto;
-        }
+        .container { max-width: 900px; margin: 0 auto; }
 
-        /* Hero Header */
         .header-hero {
             background: rgba(255, 255, 255, 0.07);
             backdrop-filter: blur(16px);
@@ -131,154 +123,49 @@ foreach ($categorias as $cat) {
             text-align: center;
             color: #ffffff;
             margin-bottom: 2rem;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .header-hero .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: linear-gradient(90deg, rgba(99, 102, 241, 0.3), rgba(236, 72, 153, 0.3));
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 0.4rem 1rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 1rem;
         }
 
         .header-hero h1 {
-            font-size: 2.3rem;
+            font-size: 2.2rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             margin-bottom: 0.75rem;
         }
 
-        .header-hero p {
-            color: #94a3b8;
-            font-size: 1rem;
-            max-width: 650px;
-            margin: 0 auto;
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            color: #ffffff;
+            margin: 2.5rem 0 1.5rem 0;
         }
 
-        /* Tarjetas de Formulario */
+        .category-header i { font-size: 2rem; }
+        .category-header h2 { font-size: 1.4rem; font-weight: 800; }
+
         .glass-card {
             background: var(--card-glass);
             border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 1.75rem;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .glass-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-        }
-
-        /* Inputs de Datos */
-        .section-title {
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: #1e293b;
+            padding: 1.75rem;
             margin-bottom: 1.25rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: transform 0.25s ease;
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.25rem;
-        }
+        .glass-card:hover { transform: translateY(-3px); }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
+        .question-title { font-size: 1.1rem; font-weight: 800; color: #0f172a; }
+        .question-desc { font-size: 0.92rem; color: #475569; margin: 0.5rem 0 1.25rem 0; line-height: 1.5; }
 
-        .form-group label {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #475569;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.85rem 1rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 0.95rem;
-            font-weight: 500;
-            background: #f8fafc;
-            color: #0f172a;
-            outline: none;
-            transition: all 0.25s ease;
-        }
-
-        .form-control:focus {
-            border-color: #6366f1;
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-        }
-
-        /* Preguntas Escala Likert */
-        .question-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .question-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: #ffffff;
-            flex-shrink: 0;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-        }
-
-        .question-category {
-            font-size: 0.75rem;
-            font-weight: 800;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: #64748b;
-        }
-
-        .question-title {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #0f172a;
-        }
-
-        .question-desc {
-            font-size: 0.92rem;
-            color: #475569;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-
-        /* Diseños de Botones de Escala (1-5) */
         .likert-container {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 0.6rem;
+            gap: 0.5rem;
         }
 
         .likert-option { position: relative; }
@@ -289,86 +176,47 @@ foreach ($categorias as $cat) {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 0.85rem 0.25rem;
+            padding: 0.75rem 0.2rem;
             border: 2px solid #e2e8f0;
-            border-radius: 14px;
+            border-radius: 12px;
             cursor: pointer;
             background: #f8fafc;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
             user-select: none;
         }
 
-        .likert-number {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: #334155;
-            transition: color 0.2s;
-        }
+        .likert-number { font-size: 1.1rem; font-weight: 800; color: #334155; }
+        .likert-text { font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-top: 2px; }
 
-        .likert-text {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: #94a3b8;
-            margin-top: 0.2rem;
-            text-transform: uppercase;
-        }
+        .opt-1 input:checked + .likert-tile { border-color: var(--lvl-1); background: rgba(239, 68, 68, 0.1); }
+        .opt-1 input:checked + .likert-tile .likert-number { color: var(--lvl-1); }
 
-        /* Hover & Checked Colores Personalizados */
-        .likert-tile:hover {
-            transform: translateY(-3px);
-            border-color: #cbd5e1;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
-        }
+        .opt-2 input:checked + .likert-tile { border-color: var(--lvl-2); background: rgba(249, 115, 22, 0.1); }
+        .opt-2 input:checked + .likert-tile .likert-number { color: var(--lvl-2); }
 
-        /* Nivel 1 */
-        .opt-1 input:checked + .likert-tile {
-            border-color: var(--lvl-1);
-            background: rgba(239, 68, 68, 0.1);
-        }
-        .opt-1 input:checked + .likert-tile .likert-number,
-        .opt-1 input:checked + .likert-tile .likert-text { color: var(--lvl-1); }
+        .opt-3 input:checked + .likert-tile { border-color: var(--lvl-3); background: rgba(234, 179, 8, 0.15); }
+        .opt-3 input:checked + .likert-tile .likert-number { color: #b45309; }
 
-        /* Nivel 2 */
-        .opt-2 input:checked + .likert-tile {
-            border-color: var(--lvl-2);
-            background: rgba(249, 115, 22, 0.1);
-        }
-        .opt-2 input:checked + .likert-tile .likert-number,
-        .opt-2 input:checked + .likert-tile .likert-text { color: var(--lvl-2); }
+        .opt-4 input:checked + .likert-tile { border-color: var(--lvl-4); background: rgba(132, 204, 22, 0.15); }
+        .opt-4 input:checked + .likert-tile .likert-number { color: #4d7c0f; }
 
-        /* Nivel 3 */
-        .opt-3 input:checked + .likert-tile {
-            border-color: var(--lvl-3);
-            background: rgba(234, 179, 8, 0.15);
-        }
-        .opt-3 input:checked + .likert-tile .likert-number,
-        .opt-3 input:checked + .likert-tile .likert-text { color: #b45309; }
+        .opt-5 input:checked + .likert-tile { border-color: var(--lvl-5); background: rgba(16, 185, 129, 0.15); }
+        .opt-5 input:checked + .likert-tile .likert-number { color: var(--lvl-5); }
 
-        /* Nivel 4 */
-        .opt-4 input:checked + .likert-tile {
-            border-color: var(--lvl-4);
-            background: rgba(132, 204, 22, 0.15);
-        }
-        .opt-4 input:checked + .likert-tile .likert-number,
-        .opt-4 input:checked + .likert-tile .likert-text { color: #4d7c0f; }
-
-        /* Nivel 5 */
-        .opt-5 input:checked + .likert-tile {
-            border-color: var(--lvl-5);
-            background: rgba(16, 185, 129, 0.15);
-        }
-        .opt-5 input:checked + .likert-tile .likert-number,
-        .opt-5 input:checked + .likert-tile .likert-text { color: var(--lvl-5); }
-
-        /* Botón de Envío Gradiente Neon */
-        .btn-submit-container {
-            margin-top: 2rem;
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .form-group label { font-size: 0.8rem; font-weight: 700; color: #475569; text-transform: uppercase; }
+        .form-control {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            outline: none;
         }
 
         .btn-gradient {
             width: 100%;
             background: linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #10b981 100%);
-            background-size: 200% 200%;
             color: #ffffff;
             border: none;
             padding: 1.25rem;
@@ -376,34 +224,13 @@ foreach ($categorias as $cat) {
             font-size: 1.1rem;
             font-weight: 800;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
+            margin-top: 2rem;
             box-shadow: 0 12px 25px rgba(236, 72, 153, 0.35);
-            transition: all 0.4s ease;
         }
 
-        .btn-gradient:hover {
-            background-position: right center;
-            transform: translateY(-2px);
-            box-shadow: 0 18px 35px rgba(236, 72, 153, 0.5);
-        }
-
-        .btn-gradient:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Responsividad */
         @media (max-width: 640px) {
-            body { padding: 1rem 0.5rem; }
-            .header-hero { padding: 2rem 1rem; }
-            .header-hero h1 { font-size: 1.6rem; }
-            .glass-card { padding: 1.25rem; }
-            .likert-text { font-size: 0.6rem; }
-            .likert-tile { padding: 0.6rem 0.1rem; }
+            .likert-text { display: none; }
+            .likert-tile { padding: 0.6rem 0; }
         }
     </style>
 </head>
@@ -414,13 +241,10 @@ foreach ($categorias as $cat) {
 </div>
 
 <div class="container">
-       <!-- Encabezado Hero -->
     <div class="header-hero">
-        <div class="badge">
-            <i class="ri-sparkling-fill"></i> Evaluación de Madurez
-        </div>
-        <h1>Diagnóstico de Empresa Familiar</h1>
-        <p>Identifica los fortalezas y oportunidades de mejora en la gobernanza, sucesión y gestión de tu organización en pocos minutos.</p>
+        <i class="ri-sparkling-fill"></i> Evaluación de Madurez
+          <h1>Diagnóstico de Empresa Familiar</h1>
+        <p>Evaluación integral de 20 puntos dividida en 4 ejes clave de la organización.</p>
     </div>
 
     <form id="formDiagnostico">
