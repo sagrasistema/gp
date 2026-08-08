@@ -413,9 +413,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                alert(`¡Diagnóstico Registrado Exitosamente!\n\nPuntuación Total: ${data.puntuacion_total} / ${data.max_posible} puntos.`);
-                form.reset();
-                progressBar.style.width = '0%';
+                // Redirección inmediata a la página de resultados semafórica
+                window.location.href = 'resultado.php';
             } else {
                 alert('Atención: ' + data.message);
             }
