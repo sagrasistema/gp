@@ -25,12 +25,18 @@ $reporte = $_SESSION['diagnostico_resultado'];
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #311042 100%);
-            --bg-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.035)' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 21h18M4 21V9l8-6 8 6v12M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6M9 9h.01M15 9h.01M9 13h.01M15 13h.01'/%3E%3C/svg%3E");
             --card-glass: rgba(255, 255, 255, 0.95);
             --card-border: rgba(255, 255, 255, 0.2);
             --text-dark: #0f172a;
+            --text-muted: #64748b;
+            
+            /* Colores Escala Likert */
+            --lvl-1: #ef4444;
+            --lvl-2: #f97316;
+            --lvl-3: #eab308;
+            --lvl-4: #84cc16;
+            --lvl-5: #10b981;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
