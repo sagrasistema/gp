@@ -73,7 +73,13 @@ foreach ($categorias as $cat) {
 
     <style>
         :root {
+            /* Mantenemos exactamente la paleta de colores del body */
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #311042 100%);
+            
+            /* Mosaico vectorizado vectorizado en UTF-8:
+            Combina una estructura de empresa/hogar en trazo ultra sutil (opacidad 3.5%) */
+            --bg-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.035)' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 21h18M4 21V9l8-6 8 6v12M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6M9 9h.01M15 9h.01M9 13h.01M15 13h.01'/%3E%3C/svg%3E");
+
             --card-glass: rgba(255, 255, 255, 0.95);
             --card-border: rgba(255, 255, 255, 0.2);
             --text-dark: #0f172a;
@@ -88,16 +94,21 @@ foreach ($categorias as $cat) {
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg-gradient);
-            background-attachment: fixed;
+            
+            /* Capa 1: Mosaico SVG repetido en bucle | Capa 2: Degradado lineal base */
+            background-image: var(--bg-pattern), var(--bg-gradient);
+            background-repeat: repeat, no-repeat;
+            background-position: top left, center;
+            background-size: 70px 70px, cover;
+            background-attachment: fixed, fixed;
+            
             color: var(--text-dark);
             min-height: 100vh;
             padding: 2rem 1rem 4rem 1rem;
         }
-
         /* Barra de Progreso Superior */
         .progress-bar-container {
             position: fixed;
