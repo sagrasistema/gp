@@ -87,16 +87,20 @@ foreach ($categorias as $cat) {
             --lvl-5: #10b981;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+       * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg-gradient);
-            background-attachment: fixed;
+            background-image: var(--bg-pattern), var(--bg-gradient);
+            background-repeat: repeat, no-repeat;
+            background-position: top left, center;
+            background-size: 70px 70px, cover;
+            background-attachment: fixed, fixed;
             color: var(--text-dark);
             min-height: 100vh;
             padding: 2rem 1rem 4rem 1rem;
         }
+
 
         /* Barra de Progreso Superior */
         .progress-bar-container {
