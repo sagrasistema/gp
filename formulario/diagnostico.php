@@ -285,7 +285,7 @@ foreach ($categorias as $cat) {
 
                     <div class="likert-container">
                         <?php 
-                        $escalas = [1 => 'Muy Bajo', 2 => 'Bajo', 3 => 'Medio', 4 => 'Alto', 5 => 'Excelente'];
+                        $escalas = [1 => 'M. Bajo', 2 => 'Bajo', 3 => 'Medio', 4 => 'Alto', 5 => 'Excelente'];
                         foreach ($escalas as $val => $txt): 
                         ?>
                             <div class="likert-option opt-<?= $val ?>">
