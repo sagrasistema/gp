@@ -23,33 +23,33 @@ $reporte = $_SESSION['diagnostico_resultado'];
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
     <style>
-        :root {
+         :root {
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #311042 100%);
             --card-glass: rgba(255, 255, 255, 0.95);
             --card-border: rgba(255, 255, 255, 0.2);
             --text-dark: #0f172a;
             --text-muted: #64748b;
             
-            /* Colores Escala Likert */
-            --lvl-1: #ef4444;
-            --lvl-2: #f97316;
-            --lvl-3: #eab308;
-            --lvl-4: #84cc16;
-            --lvl-5: #10b981;
+            /* Colores escala Likert */
+            --lvl-1: #ef4444; /* Rojo */
+            --lvl-2: #f97316; /* Naranja */
+            --lvl-3: #eab308; /* Amarillo */
+            --lvl-4: #84cc16; /* Verde Lima */
+            --lvl-5: #10b981; /* Verde Esmeralda */
         }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-image: var(--bg-pattern), var(--bg-gradient);
-            background-repeat: repeat, no-repeat;
-            background-position: top left, center;
-            background-size: 70px 70px, cover;
-            background-attachment: fixed, fixed;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
             color: var(--text-dark);
             min-height: 100vh;
             padding: 2rem 1rem 4rem 1rem;
+            position: relative;
         }
+
 
         .container { max-width: 900px; margin: 0 auto; }
 
