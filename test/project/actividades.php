@@ -1109,65 +1109,57 @@ $textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
 </div>
 
 <script>
-function closeNormaModal() {
-    const modal = document.getElementById('normaModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-/**
- * Procesa la persistencia vía AJAX para el campo texto_inadecuado2 en el modal de normas.
- * 
- * @param {number} pruebaId Identificador único de la prueba
- */
-function procesarGuardadoFeedbackNorma(pruebaId) {
-    const chk = document.getElementById('chkTextoInadecuado2');
-    const btn = document.getElementById('btnGuardarFeedbackNorma');
-    
-    if (!chk || !btn) {
-        console.error('Error: Elementos del DOM no encontrados.');
+    function procesarGuardadoFeedbackNorma(pruebaId) {
+    if (!pruebaId || pruebaId <= 0) {
+        alert('Error: El identificador de la prueba no es válido.');
         return;
     }
 
-    const valorInadecuado = chk.checked ? 1 : 0;
+    const checkbox = document.getElementById('chkTextoInadecuado2');
+    const btnGuardar = document.getElementById('btnGuardarFeedbackNorma');
 
-    // Bloqueo de UI para evitar doble envío
-    btn.disabled = true;
-    const textoOriginal = btn.innerHTML;
-    btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Guardando...';
+    if (!checkbox) {
+        console.error('No se encontró el elemento checkbox en el DOM.');
+        return;
+    }
+
+    // Deshabilitar botón durante el envío para evitar doble clic
+    btnGuardar.disabled = true;
+    btnGuardar.innerText = 'Guardando...';
 
     const formData = new FormData();
     formData.append('prueba_id', pruebaId);
-    formData.append('campo', 'texto_inadecuado2');
-    formData.append('valor', valorInadecuado);
+    formData.append('texto_inadecuado2', checkbox.checked ? '1' : '0');
 
-    fetch('guardar_feedback_norma.php', {
+    fetch('guardar_feedback_norma', {
         method: 'POST',
         body: formData
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
+            throw new Error(`Error en el servidor: HTTP ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
         if (data.success) {
-            closeNormaModal();
+            // Cerrar el modal al confirmar guardado exitoso
+            closeNormaModal2();
         } else {
-            alert('Error al actualizar el estado: ' + (data.message || 'Error desconocido'));
+            alert('Atención: ' + (data.error || 'No se pudo guardar la evaluación.'));
         }
     })
     .catch(error => {
-        console.error('Error en la petición AJAX:', error);
-        alert('Ocurrió un error al intentar comunicar con el servidor.');
+        console.error('Error durante la persistencia del feedback:', error);
+        alert('Error de conexión al guardar el registro.');
     })
     .finally(() => {
-        btn.disabled = false;
-        btn.innerHTML = textoOriginal;
+        // Restaurar estado del botón
+        btnGuardar.disabled = false;
+        btnGuardar.innerText = 'Guardar';
     });
 }
+
 </script>
 <!-- Modal de Instrucciones -->
  <?php 
