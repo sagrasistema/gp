@@ -1097,10 +1097,8 @@ $textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
                     Cancelar
                 </button>
                 <!-- Asegúrate de pasar el ID de la tabla audit_pruebas -->
-                <button type="button" 
-                        id="btnGuardarFeedbackNorma" 
-                        onclick="procesarGuardadoFeedbackNorma(<?= (int)$pruebaId ?>)" 
-                        class="btn btn-primary">
+               
+                  <button type="button" id="btnGuardarFeedbackNorma" onclick="procesarGuardadoFeedbackNorma(<?= $pruebaId ?>)" class="btn btn-primary" style="padding: 0.5rem 1.25rem; background:#2563eb; color:#ffffff; border:none; border-radius:6px; cursor:pointer;">
                     Guardar
                 </button>
             </div>
