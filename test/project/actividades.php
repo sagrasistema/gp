@@ -1087,7 +1087,7 @@ $textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
 
         <div style="text-align:right; margin-top:1.5rem; border-top:1px solid #e2e8f0; padding-top:1rem;">
             <button type="button" class="btn btn-primary" onclick="closeNormaModal()" style="padding: 0.5rem 1.5rem;">Cerrar</button>
-            <button type="button" id="btnGuardarFeedback" onclick="procesarGuardadoFeedback2(<?= $pruebaId ?>)" class="btn btn-primary" style="padding: 0.5rem 1.25rem; background:#2563eb; color:#ffffff; border:none; border-radius:6px; cursor:pointer;">
+            <button type="button" id="btnGuardarFeedback2" onclick="procesarGuardadoFeedback2(<?= $pruebaId ?>)" class="btn btn-primary" style="padding: 0.5rem 1.25rem; background:#2563eb; color:#ffffff; border:none; border-radius:6px; cursor:pointer;">
                     Guardar
                 </button>
 
@@ -1160,7 +1160,7 @@ function procesarGuardadoFeedback2(pruebaId) {
     }
 
     const checkbox = document.getElementById('chkTextoInadecuado');
-    const btnGuardar = document.getElementById('btnGuardarFeedback');
+    const btnGuardar = document.getElementById('btnGuardarFeedback2');
 
     if (!checkbox) {
         console.error('No se encontró el elemento checkbox en el DOM.');
