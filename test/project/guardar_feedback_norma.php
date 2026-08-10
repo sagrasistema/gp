@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 session_start();
 header('Content-Type: application/json; charset=utf-8');
-include '../main/config.php';
-// Verificación de autenticación (Ajustar según la sesión de la app)
+
+// Incluir configuración global / conexión BD
+require_once '../main/config.php';
+
+// Verificación de autenticación
 if (empty($_SESSION['usuario_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Sesión expirada o no autorizada.']);
@@ -19,6 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
+    // Resolver cuál variable de conexión PDO exporta config.php
+    /** @var PDO $db */
+    $db = $pdo ?? $conn ?? $link ?? $db ?? null;
+
+    if (!($db instanceof PDO)) {
+        throw new RuntimeException('No se encontró una conexión PDO válida ($pdo / $conn) desde config.php');
+    }
+
     // Sanitización y Validación de entradas
     $pruebaId = filter_var($_POST['prueba_id'] ?? null, FILTER_VALIDATE_INT);
     $campo    = filter_var($_POST['campo'] ?? '', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -33,16 +44,12 @@ try {
 
     $valorNormalizado = ($valor === 1) ? 1 : 0;
 
-    // Instancia de conexión PDO (Usar singleton/configuración global del proyecto)
-    // $pdo = DB::getInstance(); 
-    
-
-    // Sentencia preparada para prevenir Inyección SQL
+    // Consulta SQL Corregida (se remueve la coma previa a WHERE)
     $sql = "UPDATE audit_pruebas 
-            SET texto_inadecuado2 = :valor,
+            SET texto_inadecuado2 = :valor 
             WHERE id = :id";
 
-    $stmt = $pdo->prepare($sql);
+    $stmt = $db->prepare($sql);
     $stmt->bindValue(':valor', $valorNormalizado, PDO::PARAM_INT);
     $stmt->bindValue(':id', $pruebaId, PDO::PARAM_INT);
     
@@ -62,5 +69,5 @@ try {
 } catch (Throwable $e) {
     error_log(sprintf('[System Error] File: %s Line: %d Msg: %s', $e->getFile(), $e->getLine(), $e->getMessage()));
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Error interno en el servidor.']);
+    echo json_encode(['success' => false, 'message' => 'Error interno en el servidor: ' . $e->getMessage()]);
 }
