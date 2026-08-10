@@ -1062,8 +1062,13 @@ $letraCategoria = chr(64 + $categoriaId);
         <div style="color:#334155; line-height:1.6; max-height:400px; overflow-y:auto; font-size:0.95rem;">
             <?= !empty($metaPrueba->norma) ? nl2br(htmlspecialchars($metaPrueba->norma, ENT_QUOTES, 'UTF-8')) : '<em style="color:#64748b;">No hay una norma registrada.</em>' ?>
         </div>
+        <span style="font-weight: 500;">No me parece correcta esta redacción / contenido</span>
         <div style="text-align:right; margin-top:1.5rem; border-top:1px solid #e2e8f0; padding-top:1rem;">
             <button type="button" class="btn btn-primary" onclick="closeNormaModal()" style="padding: 0.5rem 1.5rem;">Cerrar</button>
+            <button type="button" id="btnGuardarFeedback" onclick="procesarGuardadoFeedback2(<?= $pruebaId ?>)" class="btn btn-primary" style="padding: 0.5rem 1.25rem; background:#2563eb; color:#ffffff; border:none; border-radius:6px; cursor:pointer;">
+                    Guardar
+                </button>
+
         </div>
     </div>
 </div>
@@ -1126,6 +1131,56 @@ $textoInadecuado = (bool)($metaPrueba->texto_inadecuado ?? false);
 </div>
 
 <script>
+function procesarGuardadoFeedback2(pruebaId) {
+    if (!pruebaId || pruebaId <= 0) {
+        alert('Error: El identificador de la prueba no es válido.');
+        return;
+    }
+
+    const checkbox = document.getElementById('chkTextoInadecuado');
+    const btnGuardar = document.getElementById('btnGuardarFeedback');
+
+    if (!checkbox) {
+        console.error('No se encontró el elemento checkbox en el DOM.');
+        return;
+    }
+
+    // Deshabilitar botón durante el envío para evitar doble clic
+    btnGuardar.disabled = true;
+    btnGuardar.innerText = 'Guardando...';
+
+    const formData = new FormData();
+    formData.append('prueba_id', pruebaId);
+    formData.append('texto_inadecuado2', checkbox.checked ? '1' : '0');
+
+    fetch('update_feedback.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error en el servidor: HTTP ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Cerrar el modal al confirmar guardado exitoso
+            closeNormaModal2();
+        } else {
+            alert('Atención: ' + (data.error || 'No se pudo guardar la evaluación.'));
+        }
+    })
+    .catch(error => {
+        console.error('Error durante la persistencia del feedback:', error);
+        alert('Error de conexión al guardar el registro.');
+    })
+    .finally(() => {
+        // Restaurar estado del botón
+        btnGuardar.disabled = false;
+        btnGuardar.innerText = 'Guardar';
+    });
+}
 function procesarGuardadoFeedback(pruebaId) {
     if (!pruebaId || pruebaId <= 0) {
         alert('Error: El identificador de la prueba no es válido.');
