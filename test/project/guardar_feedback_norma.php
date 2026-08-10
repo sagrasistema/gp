@@ -35,18 +35,10 @@ try {
 
     // Instancia de conexión PDO (Usar singleton/configuración global del proyecto)
     // $pdo = DB::getInstance(); 
-    $pdo = new PDO(
-        'mysql:host=localhost;dbname=audit_db;charset=utf8mb4',
-        'root',
-        '',
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-        ]
-    );
+    include '../main/config.php';
 
     // Sentencia preparada para prevenir Inyección SQL
-    $sql = "UPDATE pruebas 
+    $sql = "UPDATE audit_pruebas 
             SET texto_inadecuado2 = :valor,
                 updated_at = NOW() 
             WHERE id = :id";
