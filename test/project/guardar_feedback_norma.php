@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 session_start();
 header('Content-Type: application/json; charset=utf-8');
-
+include '../main/config.php';
 // Verificación de autenticación (Ajustar según la sesión de la app)
 if (empty($_SESSION['usuario_id'])) {
     http_response_code(401);
@@ -35,12 +35,11 @@ try {
 
     // Instancia de conexión PDO (Usar singleton/configuración global del proyecto)
     // $pdo = DB::getInstance(); 
-    include '../main/config.php';
+    
 
     // Sentencia preparada para prevenir Inyección SQL
     $sql = "UPDATE audit_pruebas 
             SET texto_inadecuado2 = :valor,
-                updated_at = NOW() 
             WHERE id = :id";
 
     $stmt = $pdo->prepare($sql);
