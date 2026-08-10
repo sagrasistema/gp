@@ -1175,7 +1175,7 @@ function procesarGuardadoFeedback2(pruebaId) {
     formData.append('prueba_id', pruebaId);
     formData.append('texto_inadecuado2', checkbox.checked ? '1' : '0');
 
-    fetch('update_feedback.php', {
+    fetch('update_feedback2.php', {
         method: 'POST',
         body: formData
     })
