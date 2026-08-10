@@ -1131,7 +1131,7 @@ $textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
     formData.append('prueba_id', pruebaId);
     formData.append('texto_inadecuado2', checkbox.checked ? '1' : '0');
 
-    fetch('guardar_feedback_norma', {
+    fetch('guardar_feedback_norma.php', {
         method: 'POST',
         body: formData
     })
