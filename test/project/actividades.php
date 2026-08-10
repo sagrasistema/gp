@@ -1097,7 +1097,11 @@ $pruebaId = (int)($metaPrueba->id ?? $pruebaId ?? 0);
                 <button type="button" class="btn btn-secondary" onclick="closeNormaModal()" style="padding: 0.5rem 1rem; background:#cbd5e1; color:#334155; border:none; border-radius:6px; cursor:pointer;">
                     Cancelar
                 </button>
-                <button type="button" id="btnGuardarFeedbackNorma" onclick="procesarGuardadoFeedbackNorma(<?= $pruebaId ?>)" class="btn btn-primary" style="padding: 0.5rem 1.25rem; background:#059669; color:#ffffff; border:none; border-radius:6px; cursor:pointer;">
+                <!-- Asegúrate de pasar el ID de la tabla audit_pruebas -->
+                <button type="button" 
+                        id="btnGuardarFeedbackNorma" 
+                        onclick="procesarGuardadoFeedbackNorma(<?= (int)$metaPrueba->id ?>)" 
+                        class="btn btn-primary">
                     Guardar
                 </button>
             </div>
@@ -1216,14 +1220,10 @@ $textoInadecuado = (bool)($metaPrueba->texto_inadecuado ?? false);
                 <button type="button" class="btn btn-secondary" onclick="closeNormaModal2()" style="padding: 0.5rem 1rem; background:#cbd5e1; color:#334155; border:none; border-radius:6px; cursor:pointer;">
                     Cancelar
                 </button>
-                <!-- Asegúrate de pasar el ID de la tabla audit_pruebas -->
-                <button type="button" 
-                        id="btnGuardarFeedbackNorma" 
-                        onclick="procesarGuardadoFeedbackNorma(<?= (int)$metaPrueba->id ?>)" 
-                        class="btn btn-primary">
+                
+                <button type="button" id="btnGuardarFeedback" onclick="procesarGuardadoFeedback(<?= $pruebaId ?>)" class="btn btn-primary" style="padding: 0.5rem 1.25rem; background:#2563eb; color:#ffffff; border:none; border-radius:6px; cursor:pointer;">
                     Guardar
                 </button>
-
             </div>
 
         </div>
