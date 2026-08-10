@@ -1052,7 +1052,7 @@ $letraCategoria = chr(64 + $categoriaId);
  
 // Al inicio de actividades.php
 // Asegura
-include 'AuditTextRenderer.php';
+
 // Extracción segura de la bandera para Normas (texto_inadecuado2)
 $textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
 $pruebaId = (int)($metaPrueba->id ?? $pruebaId ?? 0);
@@ -1074,7 +1074,7 @@ $pruebaId = (int)($metaPrueba->id ?? $pruebaId ?? 0);
 
         <!-- Cuerpo del Modal -->
         <div class="audit-container" style="max-height:60vh; overflow-y:auto; padding-right:0.5rem;">
-            <?= AuditTextRenderer::render($metaPrueba->normas ?? $metaPrueba->norma ?? null) ?>
+            <?= ($metaPrueba->normas ?? $metaPrueba->norma ?? null) ?>
         </div>
 
         <!-- Pie con Control y Acciones -->
