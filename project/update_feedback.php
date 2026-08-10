@@ -3,7 +3,7 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Cargar configuración de base de datos
+// Cargar configuración de base de datosa
 include '../main/config.php';
 
 try {
