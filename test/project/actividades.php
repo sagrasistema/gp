@@ -1052,6 +1052,7 @@ $letraCategoria = chr(64 + $categoriaId);
  
 // Al inicio de actividades.php
 // Asegura
+include 'AuditTextRenderer.php';
 // Extracción segura de la bandera para Normas (texto_inadecuado2)
 $textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
 $pruebaId = (int)($metaPrueba->id ?? $pruebaId ?? 0);
