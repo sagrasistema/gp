@@ -1144,7 +1144,7 @@ $textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
     .then(data => {
         if (data.success) {
             // Cerrar el modal al confirmar guardado exitoso
-            closeNormaModal2();
+            closeNormaModal();
         } else {
             alert('Atención: ' + (data.error || 'No se pudo guardar la evaluación.'));
         }
