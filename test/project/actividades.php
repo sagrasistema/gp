@@ -1048,6 +1048,12 @@ $letraCategoria = chr(64 + $categoriaId);
         </form>
     </div>
 </div>
+ <?php 
+ 
+// Al inicio de actividades.php
+// Asegurarse de tener el ID de la prueba disponible en el objeto $metaPrueba
+$textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
+?>
 <!-- Modal de la Norma -->
 <div id="normaModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1000; align-items:center; justify-content:center;">
     <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:650px; width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid var(--border-color);">
@@ -1062,7 +1068,23 @@ $letraCategoria = chr(64 + $categoriaId);
         <div style="color:#334155; line-height:1.6; max-height:400px; overflow-y:auto; font-size:0.95rem;">
             <?= !empty($metaPrueba->norma) ? nl2br(htmlspecialchars($metaPrueba->norma, ENT_QUOTES, 'UTF-8')) : '<em style="color:#64748b;">No hay una norma registrada.</em>' ?>
         </div>
-        <span style="font-weight: 500;">No me parece correcta esta redacción / contenido</span>
+        
+        <!-- Pie con Control y Acciones -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; border-top:1px solid #e2e8f0; padding-top:1rem;">
+            
+            <!-- Checkbox de estado (Sin evento onchange automático) -->
+            <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; color:#475569; cursor:pointer; user-select:none;">
+                <input 
+                    type="checkbox" 
+                    id="chkTextoInadecuado" 
+                    value="1" 
+                    <?= $textoInadecuado2 ? 'checked' : '' ?>
+                    style="width:1.1rem; height:1.1rem; accent-color:#ef4444; cursor:pointer;"
+                >
+                <span style="font-weight: 500;">No me parece correcta esta redacción / contenido</span>
+            </label>
+
+
         <div style="text-align:right; margin-top:1.5rem; border-top:1px solid #e2e8f0; padding-top:1rem;">
             <button type="button" class="btn btn-primary" onclick="closeNormaModal()" style="padding: 0.5rem 1.5rem;">Cerrar</button>
             <button type="button" id="btnGuardarFeedback" onclick="procesarGuardadoFeedback2(<?= $pruebaId ?>)" class="btn btn-primary" style="padding: 0.5rem 1.25rem; background:#2563eb; color:#ffffff; border:none; border-radius:6px; cursor:pointer;">
