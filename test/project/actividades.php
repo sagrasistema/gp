@@ -1055,7 +1055,6 @@ $letraCategoria = chr(64 + $categoriaId);
 
 // Extracción segura de la bandera para Normas (texto_inadecuado2)
 $textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
-$pruebaId = (int)($metaPrueba->id ?? $pruebaId ?? 0);
 ?>
 
 <!-- Modal de Normas (normaModal) -->
@@ -1100,7 +1099,7 @@ $pruebaId = (int)($metaPrueba->id ?? $pruebaId ?? 0);
                 <!-- Asegúrate de pasar el ID de la tabla audit_pruebas -->
                 <button type="button" 
                         id="btnGuardarFeedbackNorma" 
-                        onclick="procesarGuardadoFeedbackNorma(<?= (int)$metaPrueba->id ?>)" 
+                        onclick="procesarGuardadoFeedbackNorma(<?= (int)$pruebaId ?>)" 
                         class="btn btn-primary">
                     Guardar
                 </button>
