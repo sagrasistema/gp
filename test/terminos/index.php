@@ -137,7 +137,7 @@ include '../main/layout_header.php';
         
         <button onclick="openModal()" class="btn btn-primary" data-tooltip="Crear Registro">
             <i class="ri-add-line"></i> 
-        </buttonss>
+        </button>
         
         <a href="../index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
             <i class="ri-close-circle-line"></i> 
