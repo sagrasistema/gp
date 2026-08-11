@@ -47,9 +47,9 @@ include '../main/layout_header.php';
             <i class="ri-book-open-line"></i> 
         </a>
 
-        <!--<a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Registro">
+        <a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Registro">
             <i class="ri-add-line"></i>
-        </a>-->
+        </a>
 
         <a href="../index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
             <i class="ri-close-circle-line"></i> 
@@ -75,7 +75,7 @@ include '../main/layout_header.php';
                     $query = "SELECT p.id AS proyectoId, c.name AS clientName, p.nombre AS proyectoNombre, p.fecha_inicio, p.statusId, p.ver_id 
                               FROM proyectos p
                               INNER JOIN clientes c ON p.cliente_id = c.id
-                              WHERE p.ver_id != 0
+                              WHERE p.ver_id != 2
                               ORDER BY p.id DESC";
                               
                     $stmt = $pdo->query($query);

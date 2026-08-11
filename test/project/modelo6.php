@@ -238,10 +238,10 @@ $valNivelSud = $resolveValue(
 
     <!-- Botón de Envío -->
     <div style="text-align: right; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
-        <?php if (!$isClosed): ?>
+        
         <button type="submit" style="background: #2563eb; color: white; border: none; padding: 0.65rem 1.75rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
             Guardar Avance Completo (Modelo 6)
         </button>
-        <?php endif; ?> 
+        
     </div>
 </div>

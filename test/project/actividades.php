@@ -836,7 +836,7 @@ $letraCategoria = chr(64 + $categoriaId);
         </script>
 
         <!-- CAJA DE ESTATUS GENERAL DE LA PRUEBA -->
-        <?php if (!$isClosed): ?>
+        
             <div style="background: #ffffff; border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; margin-top: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
                 <div>
                     <h4 style="margin: 0 0 0.25rem 0; font-size: 1rem; color: #1e293b;">Estatus General de la Prueba</h4>
@@ -858,7 +858,7 @@ $letraCategoria = chr(64 + $categoriaId);
                     <button type="submit" class="btn btn-primary" style="padding:0.75rem 2.5rem;"><i class="ri-save-3-line"></i> Guardar Todo</button>
                 </div>
             </div>
-        <?php endif; ?> 
+        
     </form>
 
     <!-- Formularios ocultos individuales para eliminar registros de indicadores -->
