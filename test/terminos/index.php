@@ -86,7 +86,7 @@ try {
         SELECT tc.*, c.name AS clientName, c.rif AS clientRif
         FROM terminos_condiciones tc
         INNER JOIN clientes c ON tc.cliente_id = c.id
-        WHERE tc.ver_id != 0
+        WHERE tc.ver_id != 2
         ORDER BY tc.id DESC
     ");
     $stmtList->execute();
@@ -135,9 +135,9 @@ include '../main/layout_header.php';
             <i class="ri-book-open-line"></i> 
         </a>
         
-        <!--<button onclick="openModal()" class="btn btn-primary" data-tooltip="Crear Registro">
+        <button onclick="openModal()" class="btn btn-primary" data-tooltip="Crear Registro">
             <i class="ri-add-line"></i> 
-        </buttonss>-->
+        </buttonss>
         
         <a href="../index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
             <i class="ri-close-circle-line"></i> 

@@ -494,11 +494,11 @@ include '../main/h.php';
 
                 <!-- BOTÓN GUARDAR -->
                 <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
-                    <?php if (!$isClosed): ?>
+                    
                             <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
                                 <i class="ri-save-line"></i> Guardar Esquema Detallado
                             </button>
-                    <?php endif; ?>  
+                    
                     
                 </div>
 
