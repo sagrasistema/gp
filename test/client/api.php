@@ -59,7 +59,7 @@ switch ($method) {
             }
 
             // CASO B: Listado general excluyendo registros ocultos (ver_id = 0)
-            $stmt = $pdo->query("SELECT * FROM clientes WHERE ver_id != 0 ORDER BY id DESC");
+            $stmt = $pdo->query("SELECT * FROM clientes WHERE ver_id != 2 ORDER BY id DESC");
             $results = $stmt->fetchAll();
             
             $cleanedResults = array_map('sanitizeRow', $results);
