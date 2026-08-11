@@ -48,9 +48,9 @@ include '../main/layout_header.php';
             <i class="ri-book-open-line"></i> 
         </a>
 
-        <!--<a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Registro">
+        <a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Registro">
             <i class="ri-add-line"></i>
-        </a>-->
+        </a>
 
         <a href="../index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
             <i class="ri-close-circle-line"></i> 
@@ -85,7 +85,7 @@ include '../main/layout_header.php';
                             FROM ac a
                             INNER JOIN clientes c ON a.clientId = c.id
                             INNER JOIN ac_types t ON a.typeId = t.typeId
-                            WHERE a.ver_id != 0
+                            WHERE a.ver_id != 2
                             ORDER BY a.acId DESC";
 
                     $stmt = $pdo->query($query);
