@@ -5,20 +5,18 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 1. Validar autenticación
+// 1. Validar autenticación ANTES de imprimir cualquier HTML
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../login.php');
     exit;
 }
 
-// Includes de estructura y BD
-include '../main/h.php';
-include '../main/config.php';
+// Conexión a la base de datos necesaria para la transacción
+require_once '../main/config.php';
 
 $mensajeError = '';
-$mensajeExito = '';
 
-// 2. Procesar formulario vía POST
+// 2. Procesar formulario POST e iniciar redirección de inmediato
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $serviceName = trim($_POST['serviceName'] ?? '');
 
@@ -30,6 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([':serviceName' => $serviceName]);
 
             $_SESSION['flash_success'] = 'Servicio creado exitosamente.';
+            
+            // Limpiamos cualquier búfer activo antes de enviar el header
+            if (ob_get_length()) {
+                ob_clean();
+            }
+
             header('Location: index.php');
             exit;
         } catch (PDOException $e) {
@@ -38,6 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+// 3. Carga de componentes de la vista SOLO si NO hubo redirección POST exitosa
+include '../main/h.php';
 ?>
 
 <link rel="stylesheet" href="../main/layout.css">
