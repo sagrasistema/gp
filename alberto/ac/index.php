@@ -1,0 +1,142 @@
+<?php
+declare(strict_types=1);
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. Validar autenticación de usuario
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../login.php');
+    exit;
+}
+
+$pageTitle = "Aceptación y Continuidad";
+include '../main/h.php'; 
+include '../main/config.php'; 
+?>
+
+<link rel="stylesheet" href="../main/layout.css">
+
+<?php
+// Configuración para que el componente apunte a las carpetas correctas desde v/ac/
+$customLogoPath = '../main/logo.png';
+$customHomePath = '../index.php';
+$customAcPath   = 'index.php';
+$currentTab     = 'aceptacion'; // Marca "Aceptación" activo en el sidebar
+
+include '../main/layout_header.php';
+?>
+
+<div class="view-container">
+    <div class="view-header">
+        <h1 class="page-main-title">
+            <i class="ri-shield-check-line"></i> Aceptación y Continuidad
+        </h1>
+    </div>
+
+    <div class="table-actions-container">
+        <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+            <i class="ri-arrow-go-back-line"></i> 
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+            <i class="ri-screenshot-2-line"></i>
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
+            <i class="ri-book-open-line"></i> 
+        </a>
+
+        <a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Registro">
+            <i class="ri-add-line"></i>
+        </a>
+
+        <a href="../index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+            <i class="ri-close-circle-line"></i> 
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th style="width: 35%;">Cliente / Empresa</th>
+                    <th style="width: 15%;">Tipo de Evaluación</th>
+                    <th style="width: 15%;">Fecha Creación</th>
+                    <th style="width: 15%;">Nivel de Riesgo</th>
+                    <th style="width: 10%; text-align: center;">Acciones</th>
+                    <th style="width: 10%;">Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                try {
+                    // Consulta filtrando por ver_id para preservar el statusId de negocio (ej. 2 para registros cerrados)
+                    $query = "SELECT 
+                                a.acId, 
+                                a.riskScore, 
+                                a.riskLevel, 
+                                a.statusId,
+                                a.ver_id,
+                                a.created_at, 
+                                c.name AS clientName, 
+                                t.typeName 
+                            FROM ac a
+                            INNER JOIN clientes c ON a.clientId = c.id
+                            INNER JOIN ac_types t ON a.typeId = t.typeId
+                            WHERE a.ver_id != 2
+                            ORDER BY a.acId DESC";
+
+                    $stmt = $pdo->query($query);
+                    $evaluaciones = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+                    if (!empty($evaluaciones)) {
+                        foreach ($evaluaciones as $ac) {
+                            $clientName = htmlspecialchars($ac->clientName, ENT_QUOTES, 'UTF-8');
+                            $typeName   = htmlspecialchars($ac->typeName, ENT_QUOTES, 'UTF-8');
+                            $riskLevel  = htmlspecialchars((string)($ac->riskLevel ?? 'Sin Evaluar'), ENT_QUOTES, 'UTF-8');
+                            $fecha      = date('d/m/Y', strtotime($ac->created_at));
+                            
+                            // Mapeo dinámico según statusId operativo
+                            $statusId   = (int)($ac->statusId ?? 1);
+                            $isClosed   = ($statusId === 2);
+
+                            $iconClass  = $isClosed ? 'ri-lock-fill' : 'ri-lock-unlock-line';
+                            $iconColor  = $isClosed ? '#0f172a' : '#16a34a'; // Negro para cerrado, Verde para en proceso
+                            $tooltip    = $isClosed ? 'Cerrado' : 'En proceso';
+
+                            echo "<tr>";
+                            echo "<td><strong>{$clientName}</strong></td>";
+                            echo "<td>{$typeName}</td>";
+                            echo "<td>{$fecha}</td>";
+                            echo "<td style='font-weight: 600; color: #64748b;'> {$riskLevel} </td>";
+                            echo "<td style='text-align: center;'>
+                                    <a href='responder.php?acId={$ac->acId}' class='btn btn-secondary' style='background: #08855b; color: #ffffff; padding: 0.4rem 0.8rem; font-size: 0.85rem;'>
+                                        <i class='ri-pencil-fill'></i> Consultar
+                                    </a>
+                                  </td>";
+                            echo "<td style='text-align: center; vertical-align: middle;'>
+                                    <span title='{$tooltip}' style='cursor: help; display: inline-flex; align-items: center;'>
+                                        <i class='{$iconClass}' style='font-size: 1.25rem; color: {$iconColor};'></i>
+                                    </span>
+                                  </td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='6' style='text-align: center; color: #64748b; padding: 3rem;'>No se han encontrado evaluaciones.</td></tr>";
+                    }
+                } catch (PDOException $e) {
+                    error_log("Error en v/ac/index.php: " . $e->getMessage());
+                    echo "<tr><td colspan='6' style='text-align: center; color: red; padding: 2rem;'>Error al cargar los datos del servidor.</td></tr>";
+                }
+                ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<?php 
+include '../main/layout_footer.php'; 
+include '../main/footer.php'; 
+?>
