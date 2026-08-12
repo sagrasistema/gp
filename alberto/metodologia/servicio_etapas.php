@@ -134,16 +134,16 @@ include '../main/layout_header.php';
     <!-- NAVEGACIÓN ENTRE LAS 4 ETAPAS ESTÁNDAR -->
     <div class="project-stages-bar">
         <a href="servicio_etapas.php?serviceId=<?= $serviceId ?>&etapa=1" class="stage-btn <?= $etapaActiva === 1 ? 'active' : '' ?>">
-            <i class="ri-calendar-check-line"></i> 1. Planificación[cite: 2]
+            <i class="ri-calendar-check-line"></i> 1. Planificación
         </a>
         <a href="servicio_etapas.php?serviceId=<?= $serviceId ?>&etapa=2" class="stage-btn <?= $etapaActiva === 2 ? 'active' : '' ?>">
-            <i class="ri-compass-3-line"></i> 2. Estrategia[cite: 2]
+            <i class="ri-compass-3-line"></i> 2. Estrategia
         </a>
         <a href="servicio_etapas.php?serviceId=<?= $serviceId ?>&etapa=3" class="stage-btn <?= $etapaActiva === 3 ? 'active' : '' ?>">
-            <i class="ri-play-circle-line"></i> 3. Ejecución[cite: 2]
+            <i class="ri-play-circle-line"></i> 3. Ejecución
         </a>
         <a href="servicio_etapas.php?serviceId=<?= $serviceId ?>&etapa=4" class="stage-btn <?= $etapaActiva === 4 ? 'active' : '' ?>">
-            <i class="ri-flag-line"></i> 4. Conclusión[cite: 2]
+            <i class="ri-flag-line"></i> 4. Conclusión
         </a>
     </div>
 
