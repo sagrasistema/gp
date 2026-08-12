@@ -27,11 +27,11 @@ if (!$categoriaId) {
 $mensajeError = '';
 $mensajeExito = '';
 
-// 2. PROCESAR ACCIONES POST (Antes de imprimir cualquier HTML)
+// 2. PROCESAR ACCIONES POST (Antes de imprimir HTML)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action_type'] ?? '';
 
-    // Actualizar nombre de la categoría
+    // A. Actualizar nombre de la categoría
     if ($action === 'actualizar_categoria') {
         $nuevoNombre = trim($_POST['nombre_categoria'] ?? '');
 
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmtUp = $pdo->prepare("UPDATE audit_categorias SET nombre = :nombre WHERE id = :id");
                 $stmtUp->execute([':nombre' => $nuevoNombre, ':id' => $categoriaId]);
-                $mensajeExito = 'Categoría actualizada correctamente.';
+                $mensajeExito = 'Nombre de la categoría actualizado correctamente.';
             } catch (PDOException $e) {
                 error_log("Error al actualizar categoría: " . $e->getMessage());
                 $mensajeError = 'No se pudo actualizar el nombre de la categoría.';
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Agregar nueva prueba a esta categoría
+    // B. Agregar nueva prueba
     if ($action === 'crear_prueba') {
         $nombrePrueba = trim($_POST['nombre_prueba'] ?? '');
         $informacion  = trim($_POST['informacion'] ?? '');
@@ -69,18 +69,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':info'   => $informacion,
                     ':norma'  => $norma
                 ]);
-                $mensajeExito = 'Prueba de auditoría agregada con éxito.';
+                $mensajeExito = 'Prueba de auditoría registrada con éxito.';
             } catch (PDOException $e) {
                 error_log("Error al crear prueba: " . $e->getMessage());
                 $mensajeError = 'Error al guardar la prueba en la base de datos.';
             }
         }
     }
+
+    // C. Editar / Actualizar textos de una Prueba
+    if ($action === 'actualizar_prueba') {
+        $pruebaId     = filter_input(INPUT_POST, 'prueba_id', FILTER_VALIDATE_INT);
+        $nombrePrueba = trim($_POST['nombre_prueba'] ?? '');
+        $informacion  = trim($_POST['informacion'] ?? '');
+        $norma        = trim($_POST['norma'] ?? '');
+
+        if (!$pruebaId || empty($nombrePrueba)) {
+            $mensajeError = 'Datos insuficientes para actualizar la prueba.';
+        } else {
+            try {
+                $stmtUpPru = $pdo->prepare("
+                    UPDATE audit_pruebas 
+                    SET nombre = :nombre, informacion = :info, norma = :norma 
+                    WHERE id = :id AND categoria_id = :cat_id
+                ");
+                $stmtUpPru->execute([
+                    ':nombre' => $nombrePrueba,
+                    ':info'   => $informacion,
+                    ':norma'  => $norma,
+                    ':id'     => $pruebaId,
+                    ':cat_id' => $categoriaId
+                ]);
+                $mensajeExito = 'Datos de la prueba actualizados correctamente.';
+            } catch (PDOException $e) {
+                error_log("Error al actualizar prueba: " . $e->getMessage());
+                $mensajeError = 'No se pudieron actualizar los datos de la prueba.';
+            }
+        }
+    }
+
+    // D. Eliminar Prueba
+    if ($action === 'eliminar_prueba') {
+        $pruebaId = filter_input(INPUT_POST, 'prueba_id', FILTER_VALIDATE_INT);
+
+        if ($pruebaId) {
+            try {
+                $stmtDel = $pdo->prepare("DELETE FROM audit_pruebas WHERE id = :id AND categoria_id = :cat_id");
+                $stmtDel->execute([':id' => $pruebaId, ':cat_id' => $categoriaId]);
+                $mensajeExito = 'Prueba eliminada con éxito.';
+            } catch (PDOException $e) {
+                error_log("Error al eliminar prueba: " . $e->getMessage());
+                $mensajeError = 'No se pudo eliminar la prueba seleccionada.';
+            }
+        }
+    }
 }
 
-// 3. CONSULTAR DATOS (Categoría + Lista de Pruebas)
+// 3. CONSULTAR DATOS (Categoría + Pruebas)
 try {
-    // Obtener datos de la categoría
     $stmtCat = $pdo->prepare("SELECT * FROM audit_categorias WHERE id = :id");
     $stmtCat->execute([':id' => $categoriaId]);
     $categoria = $stmtCat->fetch(PDO::FETCH_OBJ);
@@ -90,13 +136,12 @@ try {
         exit;
     }
 
-    // Obtener pruebas vinculadas a esta categoría
     $stmtPru = $pdo->prepare("SELECT * FROM audit_pruebas WHERE categoria_id = :cat_id ORDER BY id ASC");
     $stmtPru->execute([':cat_id' => $categoriaId]);
     $pruebas = $stmtPru->fetchAll(PDO::FETCH_OBJ);
 
 } catch (PDOException $e) {
-    error_log("Error al consultar datos de la categoría/pruebas: " . $e->getMessage());
+    error_log("Error al consultar datos de categoría/pruebas: " . $e->getMessage());
     $categoria = null;
     $pruebas   = [];
 }
@@ -159,9 +204,9 @@ include '../main/layout_header.php';
         </form>
     </div>
 
-    <!-- SECCIÓN 2: AGREGAR NUEVA PRUEBA -->
+    <!-- SECCIÓN 2: REGISTRAR NUEVA PRUEBA -->
     <div style="background: #ffffff; padding: 1.5rem; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 1.5rem;">
-        <h3 style="margin-top: 0; color: #1e293b; font-size: 1.1rem; margin-bottom: 1rem;">+ Registrar Nueva Prueba de Auditoría</h3>
+        <h3 style="margin-top: 0; color: #1e293b; font-size: 1.1rem; margin-bottom: 1rem;">+ Registrar Nueva Prueba</h3>
         <form action="editar_categoria.php?id=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" method="POST">
             <input type="hidden" name="action_type" value="crear_prueba">
             
@@ -172,7 +217,7 @@ include '../main/layout_header.php';
                 </div>
                 <div>
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Información / Instrucciones</label>
-                    <input type="text" name="informacion" placeholder="Detalles u objetivos..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                    <input type="text" name="informacion" placeholder="Instrucciones del procedimiento..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
                 </div>
                 <div>
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Norma / Referencia</label>
@@ -181,48 +226,68 @@ include '../main/layout_header.php';
             </div>
 
             <button type="submit" class="btn btn-primary" style="background: #08855b; border: none; padding: 0.6rem 1.25rem; font-weight: 600; cursor: pointer; border-radius: 6px; color: #fff;">
-                <i class="ri-add-line"></i> Guardar Prueba
+                <i class="ri-add-line"></i> Guardar Nueva Prueba
             </button>
         </form>
     </div>
 
-    <!-- SECCIÓN 3: TABLA CONSULTAR PRUEBAS -->
+    <!-- SECCIÓN 3: GESTIÓN Y EDICIÓN DE PRUEBAS EXISTENTES -->
     <div class="table-container">
-        <h3 style="margin: 0 0 1rem 0; color: #1e293b; font-size: 1.1rem;">Pruebas Registradas</h3>
-        <table class="custom-table">
-            <thead>
-                <tr>
-                    <th style="width: 10%;">ID</th>
-                    <th style="width: 30%;">Nombre de la Prueba</th>
-                    <th style="width: 35%;">Información / Instrucciones</th>
-                    <th style="width: 15%;">Norma</th>
-                    <th style="width: 10%; text-align: center;">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($pruebas)): ?>
-                    <?php foreach ($pruebas as $pru): ?>
-                        <tr>
-                            <td><strong>#<?= (int)$pru->id ?></strong></td>
-                            <td><strong><?= htmlspecialchars($pru->nombre, ENT_QUOTES, 'UTF-8') ?></strong></td>
-                            <td><?= htmlspecialchars($pru->informacion ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; border: 1px solid #cbd5e1;"><?= htmlspecialchars($pru->norma ?? 'General', ENT_QUOTES, 'UTF-8') ?></span></td>
-                            <td style="text-align: center;">
-                                <a href="editar_prueba.php?id=<?= (int)$pru->id ?>&categoriaId=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; background: #08855b; color: #ffffff; text-decoration: none; border-radius: 4px; font-size: 0.8rem; font-weight: 600;" data-tooltip="Gestionar Actividades">
+        <h3 style="margin: 0 0 1rem 0; color: #1e293b; font-size: 1.1rem;">Pruebas Configurada(s)</h3>
+        
+        <?php if (!empty($pruebas)): ?>
+            <?php foreach ($pruebas as $pru): ?>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    
+                    <!-- FORMULARIO DE EDICIÓN DE CADA PRUEBA -->
+                    <form action="editar_categoria.php?id=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" method="POST">
+                        <input type="hidden" name="action_type" value="actualizar_prueba">
+                        <input type="hidden" name="prueba_id" value="<?= (int)$pru->id ?>">
+
+                        <div style="display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 10px; margin-bottom: 12px;">
+                            <div>
+                                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Nombre de la Prueba</label>
+                                <input type="text" name="nombre_prueba" value="<?= htmlspecialchars($pru->nombre, ENT_QUOTES, 'UTF-8') ?>" required style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: 600; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Instrucciones / Texto de Información</label>
+                                <input type="text" name="informacion" value="<?= htmlspecialchars($pru->informacion ?? '', ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Norma APLICABLE</label>
+                                <input type="text" name="norma" value="<?= htmlspecialchars($pru->norma ?? '', ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; pt: 10px; padding-top: 10px;">
+                            <div style="display: flex; gap: 8px;">
+                                <button type="submit" class="btn btn-primary" style="background: #0284c7; border: none; padding: 0.45rem 1rem; font-size: 0.85rem; border-radius: 4px; cursor: pointer; color: #fff; font-weight: 600;">
+                                    <i class="ri-save-line"></i> Guardar Cambios
+                                </button>
+                                
+                                <a href="editar_prueba.php?id=<?= (int)$pru->id ?>&categoriaId=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" class="btn" style="background: #08855b; color: #fff; padding: 0.45rem 1rem; font-size: 0.85rem; border-radius: 4px; text-decoration: none; font-weight: 600;">
                                     <i class="ri-list-check"></i> Actividades
                                 </a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: #64748b; padding: 2.5rem;">
-                            No hay pruebas asignadas a esta categoría. Registra una nueva arriba.
-                        </td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                            </div>
+                    </form>
+
+                    <!-- ACCIÓN INDEPENDIENTE PARA ELIMINAR -->
+                    <form action="editar_categoria.php?id=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" method="POST" onsubmit="return confirm('¿Está seguro de eliminar esta prueba y sus actividades asociados?');" style="margin: 0;">
+                        <input type="hidden" name="action_type" value="eliminar_prueba">
+                        <input type="hidden" name="prueba_id" value="<?= (int)$pru->id ?>">
+                        <button type="submit" style="background: #dc2626; color: white; border: none; padding: 0.45rem 0.8rem; font-size: 0.85rem; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                            <i class="ri-delete-bin-line"></i> Eliminar
+                        </button>
+                    </form>
+
+                        </div>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div style="text-align: center; color: #64748b; padding: 2.5rem; background: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0;">
+                No hay pruebas asignadas a esta categoría. Registra una nueva prueba arriba para comenzar.
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
