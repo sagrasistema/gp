@@ -69,11 +69,11 @@ include '../main/layout_header.php';
             <tbody>
                 <?php
                 try {
-                    // Consulta mapeada a las columnas reales de audit_servicios: `Id` y `serviceName`
+                    // Consulta con relacion correcta a serviceId e Id
                     $query = "SELECT s.Id, s.serviceName,
                               COUNT(c.id) AS total_categorias
                               FROM audit_servicios s
-                              LEFT JOIN audit_categorias c ON c.servicio_id = s.Id
+                              LEFT JOIN audit_categorias c ON c.serviceId = s.Id
                               GROUP BY s.Id, s.serviceName
                               ORDER BY s.Id ASC";
                               
@@ -82,7 +82,7 @@ include '../main/layout_header.php';
                     
                     if (!empty($servicios)) {
                         foreach ($servicios as $serv) {
-                            $servicioId    = (int) $serv->Id;
+                            $servicioId     = (int) $serv->Id;
                             $nombreServicio = htmlspecialchars($serv->serviceName ?? '', ENT_QUOTES, 'UTF-8');
                             $totalCats      = (int) ($serv->total_categorias ?? 0);
 
@@ -92,8 +92,8 @@ include '../main/layout_header.php';
                             echo "<td style='text-align: center;'><span class='badge' style='background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-weight: 600;'>{$totalCats} Registradas</span></td>";
                             echo "<td style='text-align: center; white-space: nowrap;'>";
                             
-                            // Botón de configuración
-                            echo "<a href='servicio_etapas.php?servicioId={$servicioId}' class='btn btn-secondary' style='padding: 0.4rem 0.8rem; background: #08855b; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 0.8rem; font-weight: 600;' data-tooltip='Configurar Metodología'>";
+                            // Redirección con el parámetro serviceId
+                            echo "<a href='servicio_etapas.php?serviceId={$servicioId}' class='btn btn-secondary' style='padding: 0.4rem 0.8rem; background: #08855b; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 0.8rem; font-weight: 600;' data-tooltip='Configurar Metodología'>";
                             echo "<i class='ri-pencil-fill'></i> Configurar";
                             echo "</a>";
 
