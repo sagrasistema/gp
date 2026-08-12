@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // C. Editar / Actualizar textos de una Prueba
+    // C. Editar / Actualizar textos largos de una Prueba
     if ($action === 'actualizar_prueba') {
         $pruebaId     = filter_input(INPUT_POST, 'prueba_id', FILTER_VALIDATE_INT);
         $nombrePrueba = trim($_POST['nombre_prueba'] ?? '');
@@ -204,28 +204,31 @@ include '../main/layout_header.php';
         </form>
     </div>
 
-    <!-- SECCIÓN 2: REGISTRAR NUEVA PRUEBA -->
+    <!-- SECCIÓN 2: REGISTRAR NUEVA PRUEBA (CON TEXTAREAS) -->
     <div style="background: #ffffff; padding: 1.5rem; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 1.5rem;">
         <h3 style="margin-top: 0; color: #1e293b; font-size: 1.1rem; margin-bottom: 1rem;">+ Registrar Nueva Prueba</h3>
         <form action="editar_categoria.php?id=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" method="POST">
             <input type="hidden" name="action_type" value="crear_prueba">
             
-            <div style="display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 15px;">
                 <div>
-                    <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Nombre de la Prueba *</label>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #334155;">Nombre de la Prueba *</label>
                     <input type="text" name="nombre_prueba" required placeholder="Ej. Verificación de Arqueo de Caja" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
                 </div>
-                <div>
-                    <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Información / Instrucciones</label>
-                    <input type="text" name="informacion" placeholder="Instrucciones del procedimiento..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                </div>
-                <div>
-                    <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Norma / Referencia</label>
-                    <input type="text" name="norma" placeholder="Ej. NIA 500" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #334155;">Información / Instrucciones Extensas</label>
+                        <textarea name="informacion" rows="3" placeholder="Escriba las instrucciones detalladas del procedimiento..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #334155;">Norma / Referencia Extensa</label>
+                        <textarea name="norma" rows="3" placeholder="Ej. NIA 500 - Evidencia de Auditoría / Artículos aplicables..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
+                    </div>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="background: #08855b; border: none; padding: 0.6rem 1.25rem; font-weight: 600; cursor: pointer; border-radius: 6px; color: #fff;">
+            <button type="submit" class="btn btn-primary" style="background: #08855b; border: none; padding: 0.65rem 1.25rem; font-weight: 600; cursor: pointer; border-radius: 6px; color: #fff;">
                 <i class="ri-add-line"></i> Guardar Nueva Prueba
             </button>
         </form>
@@ -237,45 +240,47 @@ include '../main/layout_header.php';
         
         <?php if (!empty($pruebas)): ?>
             <?php foreach ($pruebas as $pru): ?>
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.25rem;">
                     
-                    <!-- FORMULARIO DE EDICIÓN DE CADA PRUEBA -->
                     <form action="editar_categoria.php?id=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" method="POST">
                         <input type="hidden" name="action_type" value="actualizar_prueba">
                         <input type="hidden" name="prueba_id" value="<?= (int)$pru->id ?>">
 
-                        <div style="display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 10px; margin-bottom: 12px;">
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 12px;">
                             <div>
                                 <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Nombre de la Prueba</label>
                                 <input type="text" name="nombre_prueba" value="<?= htmlspecialchars($pru->nombre, ENT_QUOTES, 'UTF-8') ?>" required style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: 600; box-sizing: border-box;">
                             </div>
-                            <div>
-                                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Instrucciones / Texto de Información</label>
-                                <input type="text" name="informacion" value="<?= htmlspecialchars($pru->informacion ?? '', ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Norma APLICABLE</label>
-                                <input type="text" name="norma" value="<?= htmlspecialchars($pru->norma ?? '', ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div>
+                                    <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Instrucciones / Texto de Información</label>
+                                    <textarea name="informacion" rows="4" style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; font-size: 0.88rem; line-height: 1.4; resize: vertical; box-sizing: border-box;"><?= htmlspecialchars($pru->informacion ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Norma APLICABLE</label>
+                                    <textarea name="norma" rows="4" style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; font-size: 0.88rem; line-height: 1.4; resize: vertical; box-sizing: border-box;"><?= htmlspecialchars($pru->norma ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                                </div>
                             </div>
                         </div>
 
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; pt: 10px; padding-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 12px;">
                             <div style="display: flex; gap: 8px;">
-                                <button type="submit" class="btn btn-primary" style="background: #0284c7; border: none; padding: 0.45rem 1rem; font-size: 0.85rem; border-radius: 4px; cursor: pointer; color: #fff; font-weight: 600;">
+                                <button type="submit" class="btn btn-primary" style="background: #0284c7; border: none; padding: 0.5rem 1.1rem; font-size: 0.85rem; border-radius: 4px; cursor: pointer; color: #fff; font-weight: 600;">
                                     <i class="ri-save-line"></i> Guardar Cambios
                                 </button>
                                 
-                                <a href="editar_prueba.php?id=<?= (int)$pru->id ?>&categoriaId=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" class="btn" style="background: #08855b; color: #fff; padding: 0.45rem 1rem; font-size: 0.85rem; border-radius: 4px; text-decoration: none; font-weight: 600;">
+                                <a href="editar_prueba.php?id=<?= (int)$pru->id ?>&categoriaId=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" class="btn" style="background: #08855b; color: #fff; padding: 0.5rem 1.1rem; font-size: 0.85rem; border-radius: 4px; text-decoration: none; font-weight: 600;">
                                     <i class="ri-list-check"></i> Actividades
                                 </a>
                             </div>
                     </form>
 
-                    <!-- ACCIÓN INDEPENDIENTE PARA ELIMINAR -->
-                    <form action="editar_categoria.php?id=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" method="POST" onsubmit="return confirm('¿Está seguro de eliminar esta prueba y sus actividades asociados?');" style="margin: 0;">
+                    <!-- ACCIÓN DE ELIMINAR -->
+                    <form action="editar_categoria.php?id=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" method="POST" onsubmit="return confirm('¿Está seguro de eliminar esta prueba y sus actividades asociadas?');" style="margin: 0;">
                         <input type="hidden" name="action_type" value="eliminar_prueba">
                         <input type="hidden" name="prueba_id" value="<?= (int)$pru->id ?>">
-                        <button type="submit" style="background: #dc2626; color: white; border: none; padding: 0.45rem 0.8rem; font-size: 0.85rem; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                        <button type="submit" style="background: #dc2626; color: white; border: none; padding: 0.5rem 0.9rem; font-size: 0.85rem; border-radius: 4px; cursor: pointer; font-weight: 600;">
                             <i class="ri-delete-bin-line"></i> Eliminar
                         </button>
                     </form>
