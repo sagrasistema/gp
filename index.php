@@ -136,7 +136,7 @@ include 'main/layout_header.php';
         
         <!-- ACCESO EXCLUSIVO PARA USUARIOS ID 1 Y 2 -->
         <?php if (isset($_SESSION['user_id']) && in_array((int)$_SESSION['user_id'], [1, 2], true)): ?>
-            <a href="clientes_status/index.php" class="module-card admin-card">
+            <a href="alberto/metodologia/index.php" class="module-card admin-card">
                 <div class="icon-box"><i class="ri-file-list-3-line"></i></div>
                 <h2>Formularios</h2>
                 <p>Módulo de gestión avanzada y control exclusivo de Formularios.</p>
