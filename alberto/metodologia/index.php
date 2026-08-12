@@ -5,182 +5,115 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// 1. Validar autenticación de usuario
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../login.php');
     exit;
 }
 
-// Carga de configuración y conexión PDO
-require_once '../main/config.php';
-
-$mensaje = '';
-$error = '';
-
-// Procesar creación de un nuevo servicio
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_POST['action_type'] === 'crear_servicio') {
-    $nombreServicio = trim($_POST['nombre'] ?? '');
-    $descripcion = trim($_POST['descripcion'] ?? '');
-
-    if (empty($nombreServicio)) {
-        $error = 'El nombre del servicio es obligatorio.';
-    } else {
-        try {
-            $pdo->beginTransaction();
-
-            $stmtIns = $pdo->prepare("
-                INSERT INTO audit_servicios (nombre, descripcion, estatus) 
-                VALUES (:nombre, :descripcion, 1)
-            ");
-            $stmtIns->execute([
-                ':nombre' => $nombreServicio,
-                ':descripcion' => $descripcion
-            ]);
-            $servicioId = (int)$pdo->lastInsertId();
-
-            // Garantizar la inserción de las 4 etapas fijas por servicio
-            $etapasEstandar = [
-                1 => 'Planificación',
-                2 => 'Estrategia',
-                3 => 'Ejecución',
-                4 => 'Conclusión'
-            ];
-
-            $stmtEtapa = $pdo->prepare("
-                INSERT INTO audit_etapas (id_enum, servicio_id, nombre) 
-                VALUES (:id_enum, :servicio_id, :nombre)
-            ");
-
-            foreach ($etapasEstandar as $orden => $nombreEtapa) {
-                $stmtEtapa->execute([
-                    ':id_enum' => $orden,
-                    ':servicio_id' => $servicioId,
-                    ':nombre' => $nombreEtapa
-                ]);
-            }
-
-            $pdo->commit();
-            $mensaje = 'Servicio configurado con éxito junto a sus 4 etapas estándar.';
-        } catch (PDOException $e) {
-            $pdo->rollBack();
-            error_log("Error al crear servicio: " . $e->getMessage());
-            $error = 'Ocurrió un error al intentar registrar el servicio.';
-        }
-    }
-}
-
-// Consultar servicios
-try {
-    $stmtServicios = $pdo->query("SELECT * FROM audit_servicios ORDER BY id ASC");
-    $servicios = $stmtServicios->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    error_log("Error al consultar servicios: " . $e->getMessage());
-    $servicios = [];
-}
-
-// Incluir el Header / Navbar de la plantilla del sistema si existe
-if (file_exists('../v/header.php')) {
-    require_once '../v/header.php';
-} elseif (file_exists('../includes/header.php')) {
-    require_once '../includes/header.php';
-} else {
+// v/metodologia/index.php
+include '../main/h.php'; 
+include '../main/config.php'; 
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Metodología - Servicios de Auditoría</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
-</head>
-<body>
-<?php } ?>
 
-<!-- CONTENIDO PRINCIPAL DE LA VISTA METODOLOGÍA -->
-<div class="main-content" style="padding: 20px;">
-    <div class="container-fluid">
-        
-        <div class="d-flex justify-content-between align-items-center mb-4" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <div>
-                <h2 style="margin: 0; color: #1e3a5f;">Metodología de Servicios</h2>
-                <p class="text-muted" style="color: #6c757d; margin: 0;">Gestión de servicios, etapas, categorías, pruebas y actividades</p>
-            </div>
-            <button type="button" class="btn btn-primary" onclick="openModalServicio()" style="padding: 10px 18px; background: #1e3a5f; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                <i class="ri-add-line"></i> + Crear Nuevo Servicio
-            </button>
-        </div>
+<link rel="stylesheet" href="../main/layout.css">
 
-        <?php if ($mensaje): ?>
-            <div class="alert alert-success" style="padding: 12px; background: #d1fae5; color: #065f46; border-radius: 6px; margin-bottom: 20px;">
-                <?= htmlspecialchars($mensaje, ENT_QUOTES, 'UTF-8') ?>
-            </div>
-        <?php endif; ?>
+<?php
+$customLogoPath = '../main/logo.png';
+$customHomePath = '../index.php';
+$customAcPath   = '../ac/index.php';
+$currentTab     = 'metodologia'; 
 
-        <?php if ($error): ?>
-            <div class="alert alert-danger" style="padding: 12px; background: #fee2e2; color: #991b1b; border-radius: 6px; margin-bottom: 20px;">
-                <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
-            </div>
-        <?php endif; ?>
+include '../main/layout_header.php';
+?>
 
-        <!-- Grilla de Servicios -->
-        <div class="row" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
-            <?php foreach ($servicios as $serv): ?>
-                <div class="card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
-                    <div>
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <h3 style="margin: 0 0 10px 0; color: #1e293b; font-size: 1.2rem;"><?= htmlspecialchars($serv['nombre'], ENT_QUOTES, 'UTF-8') ?></h3>
-                            <span class="badge" style="background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">Activo</span>
-                        </div>
-                        <p style="color: #64748b; font-size: 0.875rem; margin-bottom: 15px;">
-                            <?= htmlspecialchars($serv['descripcion'] ?: 'Sin descripción asignada.', ENT_QUOTES, 'UTF-8') ?>
-                        </p>
-                    </div>
-                    <div style="text-align: right; border-top: 1px solid #f1f5f9; padding-top: 12px; margin-top: 10px;">
-                        <a href="servicio_etapas.php?servicioId=<?= (int)$serv['id'] ?>" class="btn btn-outline-primary" style="background: transparent; color: #0284c7; border: 1px solid #0284c7; padding: 6px 14px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: inline-block;">
-                            Configurar Metodología &rarr;
-                        </a>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
+<div class="view-container">
+    <div class="view-header">
+        <h1 class="page-main-title">
+            <i class="ri-settings-4-line"></i> Configuración de Metodología de Auditoría
+        </h1>
+    </div>
+    
+    <div class="table-actions-container">
+        <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+            <i class="ri-arrow-go-back-line"></i> 
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+            <i class="ri-screenshot-2-line"></i>
+        </a>
+
+        <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
+            <i class="ri-book-open-line"></i> 
+        </a>
+
+        <a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Servicio">
+            <i class="ri-add-line"></i>
+        </a>
+
+        <a href="../index.php" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+            <i class="ri-close-circle-line"></i> 
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th style="width: 35%;">Servicio de Auditoría</th>
+                    <th style="width: 35%;">Descripción</th>
+                    <th style="width: 15%; text-align: center;">Categorías</th>
+                    <th style="width: 15%; text-align: center;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                try {
+                    // Consulta de servicios registrados con recuento de categorías asignadas
+                    $query = "SELECT s.id, s.nombre, s.descripcion, s.estatus,
+                              COUNT(c.id) AS total_categorias
+                              FROM audit_servicios s
+                              LEFT JOIN audit_categorias c ON c.servicio_id = s.id
+                              GROUP BY s.id, s.nombre, s.descripcion, s.estatus
+                              ORDER BY s.id ASC";
+                              
+                    $stmt = $pdo->query($query);
+                    $servicios = $stmt->fetchAll(PDO::FETCH_OBJ);
+                    
+                    if (!empty($servicios)) {
+                        foreach ($servicios as $serv) {
+                            $nombreServicio = htmlspecialchars($serv->nombre ?? '', ENT_QUOTES, 'UTF-8');
+                            $descripcion    = htmlspecialchars($serv->descripcion ?? 'Sin descripción', ENT_QUOTES, 'UTF-8');
+                            $totalCats      = (int)($serv->total_categorias ?? 0);
+
+                            echo "<tr>";
+                            echo "<td><strong>{$nombreServicio}</strong></td>";
+                            echo "<td>{$descripcion}</td>";
+                            echo "<td style='text-align: center;'><span class='badge' style='background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-weight: 600;'>{$totalCats} Registradas</span></td>";
+                            echo "<td style='text-align: center; white-space: nowrap;'>";
+                            
+                            // Botón para acceder a la configuración de etapas, categorías, pruebas y actividades
+                            echo "<a href='servicio_etapas.php?servicioId={$serv->id}' class='btn btn-secondary' style='padding: 0.4rem 0.8rem; background: #08855b; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 0.8rem; font-weight: 600;' data-tooltip='Configurar Metodología'>";
+                            echo "<i class='ri-pencil-fill'></i> Configurar";
+                            echo "</a>";
+
+                            echo "</td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='4' style='text-align: center; color: #64748b; padding: 3rem;'>No se han encontrado servicios de auditoría configurados.</td></tr>";
+                    }
+                } catch (PDOException $e) {
+                    error_log("Error al listar servicios de metodología: " . $e->getMessage());
+                    echo "<tr><td colspan='4' style='text-align: center; color: red; padding: 2rem;'>Error al cargar los servicios metodológicos desde el servidor.</td></tr>";
+                }
+                ?>
+            </tbody>
+        </table>
     </div>
 </div>
-
-<!-- Modal para Crear Servicio -->
-<div id="modalServicio" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center;">
-    <div style="background: #ffffff; padding: 25px; border-radius: 10px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-        <h3 style="margin-top: 0; color: #1e293b; font-size: 1.25rem;">Crear Nuevo Servicio</h3>
-        <form action="index.php" method="POST">
-            <input type="hidden" name="action_type" value="crear_servicio">
-            
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 5px; color: #334155;">Nombre del Servicio *</label>
-                <input type="text" name="nombre" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 5px; color: #334155;">Descripción</label>
-                <textarea name="descripcion" rows="3" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;"></textarea>
-            </div>
-
-            <div style="text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="closeModalServicio()" style="padding: 8px 16px; background: #e2e8f0; color: #475569; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
-                <button type="submit" style="padding: 8px 18px; background: #1e3a5f; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Guardar Servicio</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-function openModalServicio() { document.getElementById('modalServicio').style.display = 'flex'; }
-function closeModalServicio() { document.getElementById('modalServicio').style.display = 'none'; }
-</script>
 
 <?php 
-if (file_exists('../main/footer.php')) {
-    require_once '../main/footer.php';
-} elseif (file_exists('../main/footer.php')) {
-    require_once '../main/footer.php';
-} else {
-    echo '</body></html>';
-}
+include '../main/layout_footer.php'; 
+include '../main/footer.php'; 
 ?>
