@@ -5,7 +5,7 @@
  */
 include 'user.php'; 
 
-// Configuramos las rutas relativas porque estamos en la raíz del index principal
+// Configuramos las rutas relativas porque estamos en la raíz del index principsl
 $customLogoPath = 'client/logo.png';
 $customHomePath = 'index.php';
 $customAcPath   = 'ac/index.php';
