@@ -54,20 +54,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nombrePrueba = trim($_POST['nombre_prueba'] ?? '');
         $informacion  = trim($_POST['informacion'] ?? '');
         $norma        = trim($_POST['norma'] ?? '');
+        $modelo       = filter_input(INPUT_POST, 'modelo', FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1, 'max_range' => 10]
+        ]) ?: null;
 
         if (empty($nombrePrueba)) {
             $mensajeError = 'El nombre de la prueba es obligatorio.';
         } else {
             try {
                 $stmtInsPru = $pdo->prepare("
-                    INSERT INTO audit_pruebas (categoria_id, nombre, informacion, norma) 
-                    VALUES (:cat_id, :nombre, :info, :norma)
+                    INSERT INTO audit_pruebas (categoria_id, nombre, informacion, norma, modelo) 
+                    VALUES (:cat_id, :nombre, :info, :norma, :modelo)
                 ");
                 $stmtInsPru->execute([
                     ':cat_id' => $categoriaId,
                     ':nombre' => $nombrePrueba,
                     ':info'   => $informacion,
-                    ':norma'  => $norma
+                    ':norma'  => $norma,
+                    ':modelo' => $modelo
                 ]);
                 $mensajeExito = 'Prueba de auditoría registrada con éxito.';
             } catch (PDOException $e) {
@@ -77,12 +81,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // C. Editar / Actualizar textos de una Prueba
+    // C. Editar / Actualizar una Prueba (Incluye el Modelo)
     if ($action === 'actualizar_prueba') {
         $pruebaId     = filter_input(INPUT_POST, 'prueba_id', FILTER_VALIDATE_INT);
         $nombrePrueba = trim($_POST['nombre_prueba'] ?? '');
         $informacion  = trim($_POST['informacion'] ?? '');
         $norma        = trim($_POST['norma'] ?? '');
+        $modelo       = filter_input(INPUT_POST, 'modelo', FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1, 'max_range' => 10]
+        ]) ?: null;
 
         if (!$pruebaId || empty($nombrePrueba)) {
             $mensajeError = 'Datos insuficientes para actualizar la prueba.';
@@ -90,13 +97,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmtUpPru = $pdo->prepare("
                     UPDATE audit_pruebas 
-                    SET nombre = :nombre, informacion = :info, norma = :norma 
+                    SET nombre = :nombre, informacion = :info, norma = :norma, modelo = :modelo 
                     WHERE id = :id AND categoria_id = :cat_id
                 ");
                 $stmtUpPru->execute([
                     ':nombre' => $nombrePrueba,
                     ':info'   => $informacion,
                     ':norma'  => $norma,
+                    ':modelo' => $modelo,
                     ':id'     => $pruebaId,
                     ':cat_id' => $categoriaId
                 ]);
@@ -125,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// 3. CONSULTAR DATOS (Categoría + Pruebas)
+// 3. CONSULTAR DATOS (Categoría + Pruebas con campo modelo)
 try {
     $stmtCat = $pdo->prepare("SELECT * FROM audit_categorias WHERE id = :id");
     $stmtCat->execute([':id' => $categoriaId]);
@@ -136,7 +144,7 @@ try {
         exit;
     }
 
-    $stmtPru = $pdo->prepare("SELECT * FROM audit_pruebas WHERE categoria_id = :cat_id ORDER BY id ASC");
+    $stmtPru = $pdo->prepare("SELECT id, categoria_id, nombre, informacion, norma, modelo FROM audit_pruebas WHERE categoria_id = :cat_id ORDER BY id ASC");
     $stmtPru->execute([':cat_id' => $categoriaId]);
     $pruebas = $stmtPru->fetchAll(PDO::FETCH_OBJ);
 
@@ -215,16 +223,27 @@ include '../main/layout_header.php';
         </form>
     </div>
 
-    <!-- SECCIÓN 2: REGISTRAR NUEVA PRUEBA -->
+    <!-- SECCIÓN 2: REGISTRAR NUEVA PRUEBA (CON SELECT DE MODELO) -->
     <div style="background: #ffffff; padding: 1.5rem; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 1.5rem;">
         <h3 style="margin-top: 0; color: #1e293b; font-size: 1.1rem; margin-bottom: 1rem;">+ Registrar Nueva Prueba</h3>
         <form action="editar_categoria.php?id=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" method="POST">
             <input type="hidden" name="action_type" value="crear_prueba">
             
             <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 15px;">
-                <div>
-                    <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #334155;">Nombre de la Prueba *</label>
-                    <input type="text" name="nombre_prueba" required placeholder="Ej. Verificación de Arqueo de Caja" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #334155;">Nombre de la Prueba *</label>
+                        <input type="text" name="nombre_prueba" required placeholder="Ej. Verificación de Arqueo de Caja" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #334155;">Modelo Especial</label>
+                        <select name="modelo" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff; box-sizing: border-box;">
+                            <option value="">-- Sin Modelo --</option>
+                            <?php for ($m = 1; $m <= 10; $m++): ?>
+                                <option value="<?= $m ?>">Modelo <?= $m ?></option>
+                            <?php endfor; ?>
+                        </select>
+                    </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
@@ -258,9 +277,22 @@ include '../main/layout_header.php';
                         <input type="hidden" name="prueba_id" value="<?= (int)$pru->id ?>">
 
                         <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 12px;">
-                            <div>
-                                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Nombre de la Prueba</label>
-                                <input type="text" name="nombre_prueba" value="<?= htmlspecialchars($pru->nombre, ENT_QUOTES, 'UTF-8') ?>" required style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: 600; box-sizing: border-box;">
+                            <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 12px;">
+                                <div>
+                                    <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Nombre de la Prueba</label>
+                                    <input type="text" name="nombre_prueba" value="<?= htmlspecialchars($pru->nombre, ENT_QUOTES, 'UTF-8') ?>" required style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: 600; box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Modelo Especial</label>
+                                    <select name="modelo" style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff; font-weight: 600; box-sizing: border-box;">
+                                        <option value="">-- Sin Modelo --</option>
+                                        <?php for ($m = 1; $m <= 10; $m++): ?>
+                                            <option value="<?= $m ?>" <?= ((int)($pru->modelo ?? 0) === $m) ? 'selected' : '' ?>>
+                                                Modelo <?= $m ?>
+                                            </option>
+                                        <?php endfor; ?>
+                                    </select>
+                                </div>
                             </div>
 
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
@@ -317,10 +349,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const dynamicTextareas = document.querySelectorAll('textarea.auto-expand');
 
     dynamicTextareas.forEach((textarea) => {
-        // Ajuste al cargar la pantalla
+        // Ajuste inicial al cargar
         autoExpandTextarea(textarea);
 
-        // Ajuste en tiempo real al escribir/pegar
+        // Ajuste en tiempo real al tipear/pegar
         textarea.addEventListener('input', () => {
             autoExpandTextarea(textarea);
         });
