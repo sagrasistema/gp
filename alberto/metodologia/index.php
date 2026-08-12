@@ -60,8 +60,8 @@ include '../main/layout_header.php';
         <table class="custom-table">
             <thead>
                 <tr>
-                    <th style="width: 35%;">Servicio de Auditoría</th>
-                    <th style="width: 35%;">Descripción</th>
+                    <th style="width: 10%;">ID</th>
+                    <th style="width: 60%;">Servicio de Auditoría</th>
                     <th style="width: 15%; text-align: center;">Categorías</th>
                     <th style="width: 15%; text-align: center;">Acciones</th>
                 </tr>
@@ -69,31 +69,31 @@ include '../main/layout_header.php';
             <tbody>
                 <?php
                 try {
-                    // Consulta de servicios registrados con recuento de categorías asignadas
-                    $query = "SELECT s.id, s.nombre, s.descripcion, s.estatus,
+                    // Consulta mapeada a las columnas reales de audit_servicios: `Id` y `serviceName`
+                    $query = "SELECT s.Id, s.serviceName,
                               COUNT(c.id) AS total_categorias
                               FROM audit_servicios s
-                              LEFT JOIN audit_categorias c ON c.servicio_id = s.id
-                              GROUP BY s.id, s.nombre, s.descripcion, s.estatus
-                              ORDER BY s.id ASC";
+                              LEFT JOIN audit_categorias c ON c.servicio_id = s.Id
+                              GROUP BY s.Id, s.serviceName
+                              ORDER BY s.Id ASC";
                               
                     $stmt = $pdo->query($query);
                     $servicios = $stmt->fetchAll(PDO::FETCH_OBJ);
                     
                     if (!empty($servicios)) {
                         foreach ($servicios as $serv) {
-                            $nombreServicio = htmlspecialchars($serv->nombre ?? '', ENT_QUOTES, 'UTF-8');
-                            $descripcion    = htmlspecialchars($serv->descripcion ?? 'Sin descripción', ENT_QUOTES, 'UTF-8');
-                            $totalCats      = (int)($serv->total_categorias ?? 0);
+                            $servicioId    = (int) $serv->Id;
+                            $nombreServicio = htmlspecialchars($serv->serviceName ?? '', ENT_QUOTES, 'UTF-8');
+                            $totalCats      = (int) ($serv->total_categorias ?? 0);
 
                             echo "<tr>";
+                            echo "<td><strong>#{$servicioId}</strong></td>";
                             echo "<td><strong>{$nombreServicio}</strong></td>";
-                            echo "<td>{$descripcion}</td>";
                             echo "<td style='text-align: center;'><span class='badge' style='background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-weight: 600;'>{$totalCats} Registradas</span></td>";
                             echo "<td style='text-align: center; white-space: nowrap;'>";
                             
-                            // Botón para acceder a la configuración de etapas, categorías, pruebas y actividades
-                            echo "<a href='servicio_etapas.php?servicioId={$serv->id}' class='btn btn-secondary' style='padding: 0.4rem 0.8rem; background: #08855b; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 0.8rem; font-weight: 600;' data-tooltip='Configurar Metodología'>";
+                            // Botón de configuración
+                            echo "<a href='servicio_etapas.php?servicioId={$servicioId}' class='btn btn-secondary' style='padding: 0.4rem 0.8rem; background: #08855b; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 0.8rem; font-weight: 600;' data-tooltip='Configurar Metodología'>";
                             echo "<i class='ri-pencil-fill'></i> Configurar";
                             echo "</a>";
 
