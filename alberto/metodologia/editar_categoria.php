@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // C. Editar / Actualizar textos largos de una Prueba
+    // C. Editar / Actualizar textos de una Prueba
     if ($action === 'actualizar_prueba') {
         $pruebaId     = filter_input(INPUT_POST, 'prueba_id', FILTER_VALIDATE_INT);
         $nombrePrueba = trim($_POST['nombre_prueba'] ?? '');
@@ -152,6 +152,17 @@ include '../main/h.php';
 
 <link rel="stylesheet" href="../main/layout.css">
 
+<style>
+    /* Estilos para el Auto-Expand de los Textareas */
+    textarea.auto-expand {
+        overflow-y: hidden;
+        resize: none;
+        box-sizing: border-box;
+        transition: height 0.05s ease-out;
+        min-height: 80px;
+    }
+</style>
+
 <?php
 $customLogoPath = '../main/logo.png';
 $customHomePath = '../index.php';
@@ -204,7 +215,7 @@ include '../main/layout_header.php';
         </form>
     </div>
 
-    <!-- SECCIÓN 2: REGISTRAR NUEVA PRUEBA (CON TEXTAREAS) -->
+    <!-- SECCIÓN 2: REGISTRAR NUEVA PRUEBA -->
     <div style="background: #ffffff; padding: 1.5rem; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 1.5rem;">
         <h3 style="margin-top: 0; color: #1e293b; font-size: 1.1rem; margin-bottom: 1rem;">+ Registrar Nueva Prueba</h3>
         <form action="editar_categoria.php?id=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" method="POST">
@@ -219,11 +230,11 @@ include '../main/layout_header.php';
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div>
                         <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #334155;">Información / Instrucciones Extensas</label>
-                        <textarea name="informacion" rows="3" placeholder="Escriba las instrucciones detalladas del procedimiento..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
+                        <textarea name="informacion" class="auto-expand" placeholder="Escriba las instrucciones detalladas..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; font-size: 0.9rem;"></textarea>
                     </div>
                     <div>
                         <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #334155;">Norma / Referencia Extensa</label>
-                        <textarea name="norma" rows="3" placeholder="Ej. NIA 500 - Evidencia de Auditoría / Artículos aplicables..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
+                        <textarea name="norma" class="auto-expand" placeholder="Ej. NIA 500 - Evidencia de Auditoría..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; font-size: 0.9rem;"></textarea>
                     </div>
                 </div>
             </div>
@@ -255,11 +266,11 @@ include '../main/layout_header.php';
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                                 <div>
                                     <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Instrucciones / Texto de Información</label>
-                                    <textarea name="informacion" rows="4" style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; font-size: 0.88rem; line-height: 1.4; resize: vertical; box-sizing: border-box;"><?= htmlspecialchars($pru->informacion ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                                    <textarea name="informacion" class="auto-expand" style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; font-size: 0.88rem; line-height: 1.4;"><?= htmlspecialchars($pru->informacion ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                                 </div>
                                 <div>
                                     <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Norma APLICABLE</label>
-                                    <textarea name="norma" rows="4" style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; font-size: 0.88rem; line-height: 1.4; resize: vertical; box-sizing: border-box;"><?= htmlspecialchars($pru->norma ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                                    <textarea name="norma" class="auto-expand" style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; font-size: 0.88rem; line-height: 1.4;"><?= htmlspecialchars($pru->norma ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                                 </div>
                             </div>
                         </div>
@@ -295,6 +306,27 @@ include '../main/layout_header.php';
         <?php endif; ?>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const autoExpandTextarea = (element) => {
+        element.style.height = 'auto';
+        element.style.height = `${element.scrollHeight}px`;
+    };
+
+    const dynamicTextareas = document.querySelectorAll('textarea.auto-expand');
+
+    dynamicTextareas.forEach((textarea) => {
+        // Ajuste al cargar la pantalla
+        autoExpandTextarea(textarea);
+
+        // Ajuste en tiempo real al escribir/pegar
+        textarea.addEventListener('input', () => {
+            autoExpandTextarea(textarea);
+        });
+    });
+});
+</script>
 
 <?php
 include '../main/layout_footer.php';
