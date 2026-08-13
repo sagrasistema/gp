@@ -338,43 +338,6 @@ $letraCategoria = chr(64 + $categoriaId);
         <i class="ri-flag-line"></i>4. Conclusión
     </a>
 </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-        <h1 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
-            <i class="ri-dashboard-line" style="color: var(--accent);"></i>Etapa 1 Planificación
-        </h1>
-
-        <div style="display: flex; align-items: center; gap: 0.25rem; margin-left: auto;">
-            <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
-                <i class="ri-arrow-go-back-line"></i> 
-            </a>
-            <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
-                <i class="ri-screenshot-2-line"></i>
-            </a>
-            <a href="#" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
-                <i class="ri-add-line"></i>
-            </a>
-            
-            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte de avance" onclick="return false;">
-                <i class="ri-file-edit-line"></i> 
-            </a>
-            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte de debilidades" onclick="return false;">
-                <i class="ri-flag-line"></i>
-            </a>
-            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte de Horas" onclick="return false;">
-                <i class="ri-time-line"></i> 
-            </a>
-            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte de asientos" onclick="return false;">
-                <i class="ri-money-dollar-circle-line"></i>
-            </a>
-            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte general">
-                <i class="ri-layout-grid-line"></i> 
-            </a>
-            
-            <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Cancelar (Atrás)">
-                <i class="ri-close-circle-line"></i> 
-            </a>
-        </div>
-    </div>
 
 
     <!-- Cabecera de Metadatos del Proyecto Compacta -->
@@ -473,7 +436,44 @@ $letraCategoria = chr(64 + $categoriaId);
         </div>
     </div>
 <!-- Bloque de Progreso General de Pruebas -->
-    
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h1 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
+            <i class="ri-dashboard-line" style="color: var(--accent);"></i> Etapa <?= htmlspecialchars($etapaId, ENT_QUOTES, 'UTF-8') ?>
+        </h1>
+
+        <div style="display: flex; align-items: center; gap: 0.25rem; margin-left: auto;">
+            <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+                <i class="ri-arrow-go-back-line"></i> 
+            </a>
+            <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+                <i class="ri-screenshot-2-line"></i>
+            </a>
+            <a href="#" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
+                <i class="ri-add-line"></i>
+            </a>
+            
+            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte de avance" onclick="return false;">
+                <i class="ri-file-edit-line"></i> 
+            </a>
+            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte de debilidades" onclick="return false;">
+                <i class="ri-flag-line"></i>
+            </a>
+            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte de Horas" onclick="return false;">
+                <i class="ri-time-line"></i> 
+            </a>
+            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte de asientos" onclick="return false;">
+                <i class="ri-money-dollar-circle-line"></i>
+            </a>
+            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte general">
+                <i class="ri-layout-grid-line"></i> 
+            </a>
+            
+            <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Cancelar (Atrás)">
+                <i class="ri-close-circle-line"></i> 
+            </a>
+        </div>
+    </div>
+
     <!-- Bloque de Progreso General de Pruebas Compacto -->
     <div class="pruebas-progress-container" style="margin-bottom: 0.75rem; background: #ffffff; padding: 0.6rem 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
