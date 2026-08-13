@@ -4,7 +4,7 @@ declare(strict_types=1);
 // Carga de partidas analíticas agrupadas exclusivamente para la vista
 $analiticaItems = ['activo' => [], 'pasivo' => [], 'patrimonio' => []];
 
-if ((int)$pruebaId === 128 && isset($pdo, $proyectoId)) {
+if ((int)$pruebaId === 11 && isset($pdo, $proyectoId)) {
     try {
         $stmtAnalitica = $pdo->prepare("
             SELECT id, proyecto_id, prueba_id, tipo, tipo_rubro, saldo_actual, saldo_anterior, observaciones 
