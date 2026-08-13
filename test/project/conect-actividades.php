@@ -51,7 +51,7 @@ try {
 // 2. Cargar metadatos de la Prueba y su Modelo desde la BD
 try {
     $stmtPrueba = $pdo->prepare("
-        SELECT p.nombre, p.norma, p.informacion, p.texto_inadecuado, p.texto_inadecuado2, p.modelo c.nombre AS catNombre 
+        SELECT p.nombre, p.norma, p.informacion, p.texto_inadecuado, p.texto_inadecuado2, p.modelo, c.nombre AS catNombre 
         FROM audit_pruebas p 
         INNER JOIN audit_categorias c ON p.categoria_id = c.id 
         WHERE p.id = :pId
