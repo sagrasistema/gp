@@ -64,14 +64,14 @@ include '../main/layout_header.php';
                     <th style="width: 30%;">Correo Electrónico</th>
                     <th style="width: 15%;">Rol</th>
                     <th style="width: 15%; text-align: center;">Acciones</th>
-                    <th style="width: 10%; text-align: center;">Estado</th>
+                    
                 </tr>
             </thead>
             <tbody>
                 <?php
                 try {
                     // Consulta de usuarios utilizando la conexión $pdo heredada de config.php
-                    $query = "SELECT id, nombre, email, rol, activo 
+                    $query = "SELECT id, nombre_completo, username, rol
                               FROM usuarios 
                               ORDER BY id ASC";
                               
@@ -80,8 +80,8 @@ include '../main/layout_header.php';
                     
                     if (!empty($usuarios)) {
                         foreach ($usuarios as $usr) {
-                            $nombre = htmlspecialchars($usr->nombre ?? '', ENT_QUOTES, 'UTF-8');
-                            $email  = htmlspecialchars($usr->email ?? '', ENT_QUOTES, 'UTF-8');
+                            $nombre = htmlspecialchars($usr->nombre_completo ?? '', ENT_QUOTES, 'UTF-8');
+                            $email  = htmlspecialchars($usr->username ?? '', ENT_QUOTES, 'UTF-8');
                             $rol    = htmlspecialchars($usr->rol ?? 'Usuario', ENT_QUOTES, 'UTF-8');
 
                             echo "<tr>";
@@ -97,20 +97,7 @@ include '../main/layout_header.php';
 
                             echo "</td>";
                              
-                            $activo    = (int)($usr->activo ?? 1);
-                            $isActivo  = ($activo === 1);
-
-                            $iconClass = $isActivo ? 'ri-user-check-line' : 'ri-user-unfollow-line';
-                            $iconColor = $isActivo ? '#16a34a' : '#ef4444'; // Verde para activo, Rojo para inactivo
-                            $tooltip   = $isActivo ? 'Usuario Activo' : 'Usuario Inactivo';
-                        
-                            // Indicador de Estado / Tooltip con Ícono
-                            echo '<td style="text-align: center; vertical-align: middle;">';
-                            echo '    <span title="' . htmlspecialchars($tooltip, ENT_QUOTES, 'UTF-8') . '" style="cursor: help; display: inline-flex; align-items: center;">';
-                            echo '        <i class="' . htmlspecialchars($iconClass, ENT_QUOTES, 'UTF-8') . '" style="font-size: 1.25rem; color: ' . htmlspecialchars($iconColor, ENT_QUOTES, 'UTF-8') . ';"></i>';
-                            echo '    </span>';
-                            echo '</td>';
-                            echo "</tr>";
+                            
                         }
                     } else {
                         echo "<tr><td colspan='5' style='text-align: center; color: #64748b; padding: 3rem;'>No se han encontrado usuarios registrados.</td></tr>";
