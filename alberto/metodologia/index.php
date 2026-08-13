@@ -30,8 +30,24 @@ include '../main/layout_header.php';
 <div class="view-container">
     <div class="view-header">
         <h1 class="page-main-title">
-            <i class="ri-settings-4-line"></i> Configuración de Metodología de Auditoría
+            <i class="ri-settings-4-line"></i> Tipos Master data de servicios
         </h1>
+    </div>
+        <!-- Cabecera de la Prueba -->
+    <div style="background: #1e293b; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+
+        <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
+            
+            Tipos Master data de servicios
+        </span>
+
+        <!-- Renderizado Único y Limpio en la Plantilla HTML -->
+        <button type="button" onclick="openNormaModal()" style="background: #0284c7; color: #ffffff; border: none; font-size: 0.85rem; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="ri-book-line"></i> Norma 
+        </button>
+        <button type="button" onclick="openNormaModal2()" style="background: #0284c7; color: #ffffff; border: none; font-size: 0.85rem; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="ri-book-line"></i> Instruciones
+        </button>
     </div>
     
     <div class="table-actions-container">
