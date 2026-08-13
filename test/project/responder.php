@@ -186,6 +186,8 @@ include '../main/h.php';
                     $ejecucion = $pruebasEjecutadas[$pId] ?? null;
                     $estadoPrueba = strtolower($ejecucion['estado'] ?? 'en_proceso');
                     
+
+
                     if ($estadoPrueba === 'completado' || $estadoPrueba === 'cerrado') {
                         $bgColor = '#10b981';
                     } elseif ($estadoPrueba === 'revisado') {
@@ -194,6 +196,10 @@ include '../main/h.php';
                         $bgColor = '#ef4444';
                     } else {
                         $bgColor = '#64748b';
+                    }
+                    // Corrección sintáctica y evaluación de banderas binarias/booleanas
+                    if ((int)($prueba['texto_inadecuado'] ?? 0) === 1 || (int)($prueba['texto_inadecuado2'] ?? 0) === 1) {
+                        $bgColor = '#ef4444';
                     }
                     
                     $safeId = htmlspecialchars((string)$pId, ENT_QUOTES, 'UTF-8');
