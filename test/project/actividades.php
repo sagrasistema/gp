@@ -315,11 +315,10 @@ $letraCategoria = chr(64 + $categoriaId);
     flex: 1;
     min-width: 180px;
     padding: 14px 20px;
-    /* Azul corporativo base (coincidente con el navbar superior) */
     background-color: #1e3a5f; 
     border: 1px solid #2b4c7e;
     border-radius: 8px;
-    color: #ffffff; /* Texto blanco garantizado */
+    color: #ffffff;
     text-decoration: none;
     font-weight: 600;
     font-size: 13px;
@@ -334,7 +333,7 @@ $letraCategoria = chr(64 + $categoriaId);
 
 .stage-btn i {
     font-size: 16px;
-    color: #00bcd4; /* Icono en acento cian corporativo */
+    color: #00bcd4;
 }
 
 .stage-btn:hover {
@@ -343,9 +342,8 @@ $letraCategoria = chr(64 + $categoriaId);
     transform: translateY(-2px);
 }
 
-/* Estado Activo: Un tono de azul más oscuro, elegante y con borde de contraste */
 .stage-btn.active {
-    background-color: #0f1c2e; /* Azul significativamente más oscuro */
+    background-color: #0f1c2e;
     border: 2px solid #00bcd4;
     color: #ffffff;
     box-shadow: 0 4px 15px rgba(0, 188, 212, 0.25);
@@ -354,24 +352,63 @@ $letraCategoria = chr(64 + $categoriaId);
 .stage-btn.active i {
     color: #00bcd4;
 }
+
+/* Rediseño de Tablas y Metadatos */
+.meta-summary-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    margin-bottom: 1.5rem;
+}
+
+.meta-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.meta-field-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.meta-field-value {
+    color: #0f172a;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.activity-textarea:focus {
+    outline: none;
+    border-color: #0284c7 !important;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
 </style>
+
 <div class="view-container">
     <!-- Barra de Navegación Rápida por Etapas del Proyecto -->
-<div class="project-stages-bar">
-    <a href="responder.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
-        <i class="ri-calendar-check-line"></i> 1. Planificación
-    </a>
-    <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
-        <i class="ri-compass-3-line"></i> 2. Estrategia
-    </a>
-    <a href="responder3.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
-        <i class="ri-play-circle-line"></i> 3. Ejecución
-    </a>
-    <a href="responder4.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn ">
-        <i class="ri-flag-line"></i>4. Conclusión
-    </a>
-</div>
-    <div class="table-actions-container">
+    <div class="project-stages-bar">
+        <a href="responder.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
+            <i class="ri-calendar-check-line"></i> 1. Planificación
+        </a>
+        <a href="responder2.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
+            <i class="ri-compass-3-line"></i> 2. Estrategia
+        </a>
+        <a href="responder3.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
+            <i class="ri-play-circle-line"></i> 3. Ejecución
+        </a>
+        <a href="responder4.php?proyectoId=<?php echo $proyectoId; ?>" class="stage-btn">
+            <i class="ri-flag-line"></i> 4. Conclusión
+        </a>
+    </div>
+
+    <!-- Barra de Controles y Herramientas -->
+    <div class="table-actions-container" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
         <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
             <i class="ri-arrow-go-back-line"></i> 
         </a>
@@ -384,119 +421,115 @@ $letraCategoria = chr(64 + $categoriaId);
         <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
             <i class="ri-add-line"></i>
         </a>
-        <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="btn btn-primary" data-tooltip="Cancelar (Atrás)">
+        <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="btn btn-primary" data-tooltip="Cancelar (Atrás)" style="margin-left: auto;">
             <i class="ri-close-circle-line"></i> 
         </a>
     </div>
 
-    <!-- Cabecera de Metadatos del Proyecto -->
-    <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.25rem; border-radius: 12px; background: #ffffff; border: 1px solid var(--border-color);">
-        <div style="display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid #e2e8f0; padding-right: 1rem; font-size: 0.9rem;">
-            <div>
-                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Cliente / Empresa</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->clientName ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+    <!-- Cabecera de Metadatos del Proyecto - Fila 1 -->
+    <div class="meta-summary-card" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;">
+        <div class="meta-field-group" style="border-right: 1px solid #f1f5f9; padding-right: 1rem;">
+            <div class="meta-field-group">
+                <span class="meta-field-label">Cliente / Empresa</span>
+                <span class="meta-field-value"><?= htmlspecialchars($projectData->clientName ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></span>
             </div>
-            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.5rem;">
-                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Socio Líder</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->socioLider ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
-            </div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid #e2e8f0; padding-right: 1rem; padding-left: 0.5rem; font-size: 0.9rem;">
-            <div>
-                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Proyecto / Alcance</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->nombre ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
-            </div>
-            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.5rem;">
-                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Socio de Calidad</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->socioCalidad ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+            <div class="meta-field-group" style="border-top: 1px dashed #e2e8f0; padding-top: 0.6rem; margin-top: 0.6rem;">
+                <span class="meta-field-label">Socio Líder</span>
+                <span class="meta-field-value"><?= htmlspecialchars($projectData->socioLider ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></span>
             </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 0.75rem; padding-left: 0.5rem; font-size: 0.9rem;">
-            <div>
-                 <?php
-// Procesar y formatear la fecha de manera segura si existe
-                    $fechaRemisionFormateada = 'N/D';
-                    if (!empty($projectData->fechaRemision)) {
-                        try {
-                            $dateObj = new DateTime($projectData->fechaRemision);
-                            $fechaRemisionFormateada = $dateObj->format('d/m/Y'); // Cambia a 'd-m-Y' si prefieres guiones
-                        } catch (Exception $e) {
-                            // Fallback seguro por si el string de la fecha está corrupto
-                            $fechaRemisionFormateada = htmlspecialchars($projectData->fechaRemision, ENT_QUOTES, 'UTF-8');
-                        }
+        <div class="meta-field-group" style="border-right: 1px solid #f1f5f9; padding-right: 1rem;">
+            <div class="meta-field-group">
+                <span class="meta-field-label">Proyecto / Alcance</span>
+                <span class="meta-field-value"><?= htmlspecialchars($projectData->nombre ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></span>
+            </div>
+            <div class="meta-field-group" style="border-top: 1px dashed #e2e8f0; padding-top: 0.6rem; margin-top: 0.6rem;">
+                <span class="meta-field-label">Socio de Calidad</span>
+                <span class="meta-field-value"><?= htmlspecialchars($projectData->socioCalidad ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></span>
+            </div>
+        </div>
+
+        <div class="meta-field-group">
+            <div class="meta-field-group">
+                <?php
+                $fechaRemisionFormateada = 'N/D';
+                if (!empty($projectData->fechaRemision)) {
+                    try {
+                        $dateObj = new DateTime($projectData->fechaRemision);
+                        $fechaRemisionFormateada = $dateObj->format('d/m/Y');
+                    } catch (Exception $e) {
+                        $fechaRemisionFormateada = htmlspecialchars($projectData->fechaRemision, ENT_QUOTES, 'UTF-8');
                     }
-                    ?>
-                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Fecha de Revisión</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($fechaRemisionFormateada ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+                }
+                ?>
+                <span class="meta-field-label">Fecha de Revisión</span>
+                <span class="meta-field-value"><?= htmlspecialchars($fechaRemisionFormateada, ENT_QUOTES, 'UTF-8') ?></span>
             </div>
-            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.5rem;">
-                <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Gerente Encargado</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->gerente ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+            <div class="meta-field-group" style="border-top: 1px dashed #e2e8f0; padding-top: 0.6rem; margin-top: 0.6rem;">
+                <span class="meta-field-label">Gerente Encargado</span>
+                <span class="meta-field-value"><?= htmlspecialchars($projectData->gerente ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></span>
             </div>
         </div>
     </div>
 
-    <!-- Cabecera de Metadatos del Proyecto -->
-    <div class="meta-summary" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2rem; padding: 1.25rem; border-radius: 12px; background: #ffffff; border: 1px solid var(--border-color);">
-        <div style="display: flex; flex-direction: column; gap: 0.2rem; border-right: 1px solid #e2e8f0; padding-right: 0.75rem; font-size: 0.85rem;">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Realizado por:</span>
-            <strong style="color: #1e293b; font-size: 0.9rem;"><?= htmlspecialchars($projectData->gerente ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+    <!-- Cabecera de Metadatos del Proyecto - Fila 2 -->
+    <div class="meta-summary-card" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem;">
+        <div class="meta-field-group" style="border-right: 1px solid #f1f5f9; padding-right: 0.75rem;">
+            <span class="meta-field-label">Realizado por:</span>
+            <span class="meta-field-value"><?= htmlspecialchars($projectData->gerente ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.2rem; border-right: 1px solid #e2e8f0; padding-right: 0.75rem; padding-left: 0.5rem; font-size: 0.85rem;">
-             <?php
-// Procesar y formatear la fecha de manera segura si existe
-                    $fechacompletadoFormateada = 'N/D';
-                    if (!empty($projectData->completado)) {
-                        try {
-                            $dateObj = new DateTime($projectData->completado);
-                            $fechacompletadoFormateada = $dateObj->format('d/m/Y'); // Cambia a 'd-m-Y' si prefieres guiones
-                        } catch (Exception $e) {
-                            // Fallback seguro por si el string de la fecha está corrupto
-                            $fechacompletadoFormateada = htmlspecialchars($projectData->completado, ENT_QUOTES, 'UTF-8');
-                        }
-                    }
-                    ?>
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Fecha</span>
-            <strong style="color: #1e293b; font-size: 0.9rem;"><?= htmlspecialchars($fechacompletadoFormateada ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+        <div class="meta-field-group" style="border-right: 1px solid #f1f5f9; padding-right: 0.75rem;">
+            <?php
+            $fechacompletadoFormateada = 'N/D';
+            if (!empty($projectData->completado)) {
+                try {
+                    $dateObj = new DateTime($projectData->completado);
+                    $fechacompletadoFormateada = $dateObj->format('d/m/Y');
+                } catch (Exception $e) {
+                    $fechacompletadoFormateada = htmlspecialchars($projectData->completado, ENT_QUOTES, 'UTF-8');
+                }
+            }
+            ?>
+            <span class="meta-field-label">Fecha</span>
+            <span class="meta-field-value"><?= htmlspecialchars($fechacompletadoFormateada, ENT_QUOTES, 'UTF-8') ?></span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.2rem; border-right: 1px solid #e2e8f0; padding-right: 0.75rem; padding-left: 0.5rem; font-size: 0.85rem;">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Revisado</span>
-            <strong style="color: #1e293b; font-size: 0.9rem;"><?= htmlspecialchars($projectData->socioLider ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+        <div class="meta-field-group" style="border-right: 1px solid #f1f5f9; padding-right: 0.75rem;">
+            <span class="meta-field-label">Revisado</span>
+            <span class="meta-field-value"><?= htmlspecialchars($projectData->socioLider ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.2rem; border-right: 1px solid #e2e8f0; padding-right: 0.75rem; padding-left: 0.5rem; font-size: 0.85rem;">
-           <?php
-// Procesar y formatear la fecha de manera segura si existe
-                    $fecharevisadoFormateada = 'N/D';
-                    if (!empty($projectData->revisado)) {
-                        try {
-                            $dateObj = new DateTime($projectData->revisado);
-                            $fecharevisadoFormateada = $dateObj->format('d/m/Y'); // Cambia a 'd-m-Y' si prefieres guiones
-                        } catch (Exception $e) {
-                            // Fallback seguro por si el string de la fecha está corrupto
-                            $fecharevisadoFormateada = htmlspecialchars($projectData->revisado, ENT_QUOTES, 'UTF-8');
-                        }
-                    }
-                    ?>
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Fecha</span>
-            <strong style="color: #1e293b; font-size: 0.9rem;"><?= htmlspecialchars($fecharevisadoFormateada ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+        <div class="meta-field-group" style="border-right: 1px solid #f1f5f9; padding-right: 0.75rem;">
+            <?php
+            $fecharevisadoFormateada = 'N/D';
+            if (!empty($projectData->revisado)) {
+                try {
+                    $dateObj = new DateTime($projectData->revisado);
+                    $fecharevisadoFormateada = $dateObj->format('d/m/Y');
+                } catch (Exception $e) {
+                    $fecharevisadoFormateada = htmlspecialchars($projectData->revisado, ENT_QUOTES, 'UTF-8');
+                }
+            }
+            ?>
+            <span class="meta-field-label">Fecha</span>
+            <span class="meta-field-value"><?= htmlspecialchars($fecharevisadoFormateada, ENT_QUOTES, 'UTF-8') ?></span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.2rem; padding-left: 0.5rem; font-size: 0.85rem;">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Estatus</span>
-            <strong style="color: #1e293b; font-size: 0.9rem; text-transform: capitalize;"><?= str_replace('_', ' ', $estadoActualPrueba) ?></strong>
+        <div class="meta-field-group">
+            <span class="meta-field-label">Estatus</span>
+            <span class="meta-field-value" style="text-transform: capitalize; color: #0284c7;">
+                <?= str_replace('_', ' ', $estadoActualPrueba) ?>
+            </span>
         </div>
     </div>
-<!-- Bloque de Progreso General de Pruebas -->
-    <div class="pruebas-progress-container" style="margin-bottom: 2rem; background: #ffffff; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.0rem;">
-            <h4 style="margin: 0; font-size: 0.95rem; color: #1e293b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.025em;">
-                Pruebas
+
+    <!-- Bloque de Progreso General de Pruebas -->
+    <div class="pruebas-progress-container" style="margin-bottom: 1.5rem; background: #ffffff; padding: 1.25rem; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
+            <h4 style="margin: 0; font-size: 0.875rem; color: #334155; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                Listado Secuencial de Pruebas
             </h4>
-         
         </div>
 
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
             <?php if (!empty($pruebasList)): ?>
                 <?php 
                 $globalIndex = 1;
@@ -514,7 +547,6 @@ $letraCategoria = chr(64 + $categoriaId);
                     } else {
                         $bgColor = '#64748b';
                     }
-                    // Corrección sintáctica y evaluación de banderas binarias/booleanas
                     if ((int)($prueba['texto_inadecuado'] ?? 0) === 1 || (int)($prueba['texto_inadecuado2'] ?? 0) === 1) {
                         $bgColor = '#ef4444';
                     }
@@ -524,9 +556,9 @@ $letraCategoria = chr(64 + $categoriaId);
                 ?>
                     <a href="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $safeId ?>" 
                        title="Nº <?= $globalIndex ?>: <?= $safeNombrePrueba ?> | Categoría: <?= $safeCat ?> | Estado: <?= ucfirst($estadoPrueba) ?>"
-                       style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; background-color: <?= $bgColor ?>; color: #ffffff; font-weight: 700; border-radius: 8px; font-size: 0.875rem; text-decoration: none; transition: transform 0.15s ease, opacity 0.15s ease;"
-                       onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)';"
-                       onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)';">
+                       style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background-color: <?= $bgColor ?>; color: #ffffff; font-weight: 700; border-radius: 6px; font-size: 0.85rem; text-decoration: none; transition: transform 0.15s ease, box-shadow 0.15s ease;"
+                       onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1)';"
+                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                         <?= $globalIndex ?>
                     </a>
                 <?php 
@@ -539,22 +571,20 @@ $letraCategoria = chr(64 + $categoriaId);
                 </p>
             <?php endif; ?>
         </div>
-
     </div>
-    <!-- Cabecera de la Prueba -->
-    <div style="background: #1e293b; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-        <span style="font-size: 0.75rem; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
+
+    <!-- Cabecera de la Prueba Actual -->
+    <div style="background: linear-gradient(135deg, #1e3a5f 0%, #0f1c2e 100%); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);">
+        <span style="font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.2rem;">
             Etapa <?= htmlspecialchars($etapaId, ENT_QUOTES, 'UTF-8') ?>
         </span>
-        <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
-            
+        <span style="font-size: 0.8rem; font-weight: 700; color: #00bcd4; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.5rem;">
             <?= htmlspecialchars($metaPrueba->catNombre, ENT_QUOTES, 'UTF-8') ?>
-        </span><?php
-        // Sanitizar y asegurar que el ID sea numérico
+        </span>
+        <?php
         $pruebaId = (int) ($pruebaId ?? 0);
         $nombrePrueba = $metaPrueba->nombre ?? '';
 
-        // Definir el prefijo a renderizar mediante match (PHP 8.0+) o fallback predeterminado
         $prefijoOrdinal = match ($pruebaId) {
             113 => '20',
             123 => '21',
@@ -562,48 +592,46 @@ $letraCategoria = chr(64 + $categoriaId);
         };
         ?>
 
-        <!-- Renderizado Único y Limpio en la Plantilla HTML -->
-        <h2 style="margin: 0 0 1rem 0; font-size: 1.35rem; color: #ffffff; font-weight: 700; line-height: 1.4;">
+        <h2 style="margin: 0 0 1.25rem 0; font-size: 1.25rem; color: #ffffff; font-weight: 600; line-height: 1.4;">
             <?php if ($prefijoOrdinal !== ''): ?>
-                <?= htmlspecialchars($prefijoOrdinal, ENT_QUOTES, 'UTF-8') ?>
+                <?= htmlspecialchars($prefijoOrdinal, ENT_QUOTES, 'UTF-8') ?>. 
             <?php endif; ?>
             <?= htmlspecialchars($nombrePrueba, ENT_QUOTES, 'UTF-8') ?>
         </h2>
-        <button type="button" onclick="openNormaModal()" style="background: #0284c7; color: #ffffff; border: none; font-size: 0.85rem; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
-            <i class="ri-book-line"></i> Norma 
-        </button>
-        <button type="button" onclick="openNormaModal2()" style="background: #0284c7; color: #ffffff; border: none; font-size: 0.85rem; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
-            <i class="ri-book-line"></i> Instruciones
-        </button>
+        
+        <div style="display: flex; gap: 0.75rem;">
+            <button type="button" onclick="openNormaModal()" style="background: #0284c7; color: #ffffff; border: none; font-size: 0.8rem; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: background 0.2s ease;">
+                <i class="ri-book-line"></i> Norma 
+            </button>
+            <button type="button" onclick="openNormaModal2()" style="background: #0369a1; color: #ffffff; border: none; font-size: 0.8rem; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: background 0.2s ease;">
+                <i class="ri-book-open-line"></i> Instrucciones
+            </button>
+        </div>
     </div>
 
     <?php if (isset($_GET['success'])): ?>
-        <div class="alert-success" style="padding:1rem; background:#d1fae5; color:#065f46; border-radius:8px; margin-bottom:1.5rem;">
-            <i class="ri-checkbox-circle-fill"></i> Operación ejecutada con éxito.
+        <div class="alert-success" style="padding: 0.85rem 1rem; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; border-radius: 8px; margin-bottom: 1.25rem; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="ri-checkbox-circle-fill" style="font-size: 1.1rem; color: #10b981;"></i> Operación ejecutada con éxito.
         </div>
     <?php endif; ?>
 
     <!-- FORMULARIO PRINCIPAL DE ACTIVIDADES -->
-    <!-- FORMULARIO PRINCIPAL DE ACTIVIDADES -->
-
-
-
     <form action="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $pruebaId ?>" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="action_type" value="save_all">
         
         <?php foreach ($listaActividades as $act): ?>
-            <div class="card-actividad activity-row" style="background:#ffffff; border: 1px solid var(--border-color); padding:1.5rem; border-radius:8px; margin-bottom:1.25rem;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:1rem; gap:1rem;">
-                    <div style="font-size:1rem; color:#334155; line-height:1.4;">
-                        <strong>Actividad <?= $act->orden ?>:</strong> <?= $act->descripcion; ?>
+            <div class="card-actividad activity-row" style="background: #ffffff; border: 1px solid #e2e8f0; padding: 1.25rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.01);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.85rem; gap: 1rem; align-items: flex-start;">
+                    <div style="font-size: 0.925rem; color: #1e293b; line-height: 1.5; font-weight: 500;">
+                        <strong style="color: #0f172a;">Actividad <?= $act->orden ?>:</strong> <?= $act->descripcion; ?>
                     </div>
                     <div class="activity-checkbox-container">
-                        <label style="font-weight:700; font-size:0.85rem; color:#475569; display:flex; align-items:center; gap:0.25rem; cursor:pointer;">
-                            <input type="checkbox" name="actividades_data[<?= $act->id ?>][completado]" value="1" <?= $act->is_ok ? 'checked' : '' ?>> Realizado
+                        <label style="font-weight: 600; font-size: 0.825rem; color: #475569; display: flex; align-items: center; gap: 0.35rem; cursor: pointer; background: #f8fafc; padding: 0.3rem 0.6rem; border-radius: 4px; border: 1px solid #cbd5e1;">
+                            <input type="checkbox" name="actividades_data[<?= $act->id ?>][completado]" value="1" <?= $act->is_ok ? 'checked' : '' ?> style="accent-color: #0284c7;"> Realizado
                         </label>
                     </div>
                 </div>
-                <textarea class="comment-input auto-expand" name="actividades_data[<?= $act->id ?>][contenido]" class="activity-textarea" placeholder="Escriba aquí los hallazgos, papeles de trabajo o evidencias analizadas..." rows="4" style="width:100%; padding:0.75rem; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit; resize:vertical;"><?= htmlspecialchars($act->respuesta, ENT_QUOTES, 'UTF-8') ?></textarea>
+                <textarea class="comment-input auto-expand activity-textarea" name="actividades_data[<?= $act->id ?>][contenido]" placeholder="Escriba aquí los hallazgos, papeles de trabajo o evidencias analizadas..." rows="3" style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #cbd5e1; font-family: inherit; resize: vertical; font-size: 0.875rem; color: #334155; transition: border-color 0.2s ease, box-shadow 0.2s ease;"><?= htmlspecialchars($act->respuesta, ENT_QUOTES, 'UTF-8') ?></textarea>
             </div>
         <?php endforeach; ?>
 
@@ -628,37 +656,34 @@ $letraCategoria = chr(64 + $categoriaId);
                     }
                 }
 
-                // Evaluar al cargar la página
                 updateCheckboxVisibility();
-
-                // Evaluar en tiempo real al escribir
                 textarea.addEventListener('input', updateCheckboxVisibility);
             });
         });
         </script>
 
-        <!-- INCLUSIÓN AUTOMÁTICA DE LA REVISIÓN ANALÍTICA SÓLO PARA LA PRUEBA 11 -->
+        <!-- INCLUSIÓN AUTOMÁTICA DE LA REVISIÓN ANALÍTICA -->
         <?php 
-        // Dentro del bucle o renderizador de actividades en actividades.php
-        // Evaluamos la variable del modelo que trajimos de la BD
             if ((int)$modeloPrueba === 6) {
                 include 'modelo6.php';
-                }
+            }
             if ((int)$modeloPrueba === 5) {
                 include 'modelo5.php';
-                }
+            }
             if ((int)$pruebaId === 11) {
                 include 'prueba11.php';
             } elseif ((int)$pruebaId === 16) {
                 include 'prueba16.php';
-            } elseif  ((int)$pruebaId === 23) {
+            } elseif ((int)$pruebaId === 23) {
                 include 'prueba23.php';
             }
         ?>
 
         <!-- SECCIÓN DE ACORDEONES POR CADA INDICADOR (CI, CG, SC, AA) -->
-        <div style="margin: 2.5rem 0 1.5rem 0;">
-            <h3 style="font-size: 1.1rem; color: #1e293b; font-weight: 700; margin-bottom: 1rem;">Indicadores y Puntos de Control</h3>
+        <div style="margin: 2rem 0 1.5rem 0;">
+            <h3 style="font-size: 1rem; color: #0f172a; font-weight: 700; margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.025em;">
+                Indicadores y Puntos de Control
+            </h3>
             
             <?php 
             $indicadoresMeta = [
@@ -671,18 +696,18 @@ $letraCategoria = chr(64 + $categoriaId);
             foreach ($indicadoresMeta as $key => $meta):
                 $items = $detallesPorTipo[$key] ?? [];
             ?>
-                <div class="accordion-item" style="margin-bottom: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: #ffffff;">
-                    <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 1rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid <?= $meta['color'] ?>;">
-                        <span style="color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="ri-file-list-3-line" style="color: <?= $meta['color'] ?>;"></i> <?= $meta['nombre'] ?> 
-                            <span style="font-size: 0.75rem; background: #e2e8f0; color: #334155; padding: 0.15rem 0.5rem; border-radius: 9999px;"><?= count($items) ?> registros</span>
+                <div class="accordion-item" style="margin-bottom: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #ffffff;">
+                    <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f8fafc; padding: 0.85rem 1.1rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid <?= $meta['color'] ?>;">
+                        <span style="color: #1e293b; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                            <i class="ri-file-list-3-line" style="color: <?= $meta['color'] ?>; font-size: 1.1rem;"></i> <?= $meta['nombre'] ?> 
+                            <span style="font-size: 0.725rem; background: #e2e8f0; color: #334155; padding: 0.1rem 0.5rem; border-radius: 9999px; font-weight: 700;"><?= count($items) ?></span>
                         </span>
-                        <i class="ri-arrow-down-s-line"></i>
+                        <i class="ri-arrow-down-s-line" style="color: #64748b;"></i>
                     </div>
 
-                    <div class="accordion-content" style="display: none; padding: 1.25rem; background: #ffffff;">
+                    <div class="accordion-content" style="display: none; padding: 1.25rem; background: #ffffff; border-top: 1px solid #f1f5f9;">
                         <div style="margin-bottom: 1rem;">
-                            <button type="button" class="btn btn-primary" onclick="openIndicatorModal('<?= $key ?>')" style="padding: 0.4rem 0.85rem; font-size: 0.85rem; background: <?= $meta['color'] ?>; border-color: <?= $meta['color'] ?>;">
+                            <button type="button" class="btn btn-primary" onclick="openIndicatorModal('<?= $key ?>')" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; background: <?= $meta['color'] ?>; border-color: <?= $meta['color'] ?>; border-radius: 6px;">
                                 <i class="ri-add-line"></i> Punto de control
                             </button>
                         </div>
@@ -690,24 +715,24 @@ $letraCategoria = chr(64 + $categoriaId);
                         <div style="overflow-x: auto;">
                             <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
                                 <thead>
-                                    <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569;">
-                                        <th style="padding: 0.75rem;">Rubro</th>
-                                        <th style="padding: 0.75rem;">Título</th>
-                                        <th style="padding: 0.75rem;">Descripción</th>
-                                        <th style="padding: 0.75rem;">Recomendación del Asunto</th>
-                                        <th style="padding: 0.75rem; text-align: center;">Acción</th>
+                                    <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0; color: #475569; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                        <th style="padding: 0.6rem 0.75rem;">Rubro</th>
+                                        <th style="padding: 0.6rem 0.75rem;">Título</th>
+                                        <th style="padding: 0.6rem 0.75rem;">Descripción</th>
+                                        <th style="padding: 0.6rem 0.75rem;">Recomendación del Asunto</th>
+                                        <th style="padding: 0.6rem 0.75rem; text-align: center;">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php if (!empty($items)): ?>
                                         <?php foreach ($items as $item): ?>
-                                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                            <tr style="border-bottom: 1px solid #f8fafc;">
                                                 <td style="padding: 0.75rem; font-weight: 600; color: #334155;"><?= htmlspecialchars($item->rubro ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
-                                                <td style="padding: 0.75rem; font-weight: 600; color: #1e293b;"><?= htmlspecialchars($item->titulo, ENT_QUOTES, 'UTF-8') ?></td>
+                                                <td style="padding: 0.75rem; font-weight: 600; color: #0f172a;"><?= htmlspecialchars($item->titulo, ENT_QUOTES, 'UTF-8') ?></td>
                                                 <td style="padding: 0.75rem; color: #475569;"><?= nl2br(htmlspecialchars($item->descripcion, ENT_QUOTES, 'UTF-8')) ?></td>
                                                 <td style="padding: 0.75rem; color: #475569;"><?= nl2br(htmlspecialchars($item->recomendacion ?? '-', ENT_QUOTES, 'UTF-8')) ?></td>
                                                 <td style="padding: 0.75rem; text-align: center;">
-                                                    <button type="submit" form="deleteForm_<?= $item->id ?>" class="btn" style="background: #fee2e2; color: #dc2626; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;" title="Eliminar">
+                                                    <button type="submit" form="deleteForm_<?= $item->id ?>" class="btn" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;" title="Eliminar">
                                                         <i class="ri-delete-bin-line"></i>
                                                     </button>
                                                 </td>
@@ -715,7 +740,7 @@ $letraCategoria = chr(64 + $categoriaId);
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="5" style="padding: 1rem; text-align: center; color: #64748b; font-style: italic;">No hay registros agregados en este indicador.</td>
+                                            <td colspan="5" style="padding: 1rem; text-align: center; color: #94a3b8; font-style: italic;">No hay registros agregados en este indicador.</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -727,48 +752,43 @@ $letraCategoria = chr(64 + $categoriaId);
         </div>
 
         <!-- CAJA DE COMENTARIOS SOCIOS -->
-        <div class="accordion-socios" style="margin-top: 2rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <div class="accordion-header" onclick="toggleAcordeonSocios(this)" style="padding: 1rem 1.25rem; background: #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0; font-weight: 600; color: #1e293b;">
-                <span><i class="ri-shield-user-line" style="margin-right: 8px; color: #2563eb;"></i> Observaciones de Socios (Líder y Calidad)</span>
-                <i class="ri-arrow-down-s-line" style="transition: transform 0.3s ease;"></i>
+        <div class="accordion-socios" style="margin-top: 1.5rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.01);">
+            <div class="accordion-header" onclick="toggleAcordeonSocios(this)" style="padding: 0.85rem 1.1rem; background: #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0; font-weight: 600; color: #0f172a; font-size: 0.875rem;">
+                <span><i class="ri-shield-user-line" style="margin-right: 6px; color: #0284c7;"></i> Observaciones de Socios (Líder y Calidad)</span>
+                <i class="ri-arrow-down-s-line" style="transition: transform 0.3s ease; color: #64748b;"></i>
             </div>
             
-            <div class="accordion-body" style="display: none; padding: 1.5rem; border-top: 1px solid #e2e8f0;">
-                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+            <div class="accordion-body" style="display: none; padding: 1.25rem; border-top: 1px solid #e2e8f0;">
+                <div style="display: flex; gap: 1.25rem; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 280px;">
-                        <label for="observacion_socio_lider" style="display: block; font-weight: 500; font-size: 0.9rem; color: #334155; margin-bottom: 0.5rem;">
+                        <label for="observacion_socio_lider" style="display: block; font-weight: 600; font-size: 0.825rem; color: #475569; margin-bottom: 0.4rem;">
                             Observaciones del Socio Líder
                         </label>
-                        <textarea name="observacion_socio_lider" id="observacion_socio_lider" rows="5" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; resize: vertical;"><?= htmlspecialchars($obsSocioLider ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                        <textarea name="observacion_socio_lider" id="observacion_socio_lider" rows="4" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.875rem; resize: vertical; color: #334155;"><?= htmlspecialchars($obsSocioLider ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                     </div>
 
                     <div style="flex: 1; min-width: 280px;">
-                        <label for="observacion_socio_calidad" style="display: block; font-weight: 500; font-size: 0.9rem; color: #334155; margin-bottom: 0.5rem;">
+                        <label for="observacion_socio_calidad" style="display: block; font-weight: 600; font-size: 0.825rem; color: #475569; margin-bottom: 0.4rem;">
                             Observaciones del Socio de Calidad
                         </label>
-                        <textarea name="observacion_socio_calidad" id="observacion_socio_calidad" rows="5" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; resize: vertical;"><?= htmlspecialchars($obsSocioCalidad ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                        <textarea name="observacion_socio_calidad" id="observacion_socio_calidad" rows="4" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.875rem; resize: vertical; color: #334155;"><?= htmlspecialchars($obsSocioCalidad ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                     </div>
                 </div>
             </div>
         </div>
-<!-- SECCIÓN ADJUNTO ÚNICO DE LA PRUEBA (UI REDISEÑADA) -->
-        <div style="margin-top: 2rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-            
-            <!-- Título de la Sección -->
-            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.95rem; color: #1e293b; margin-bottom: 0.85rem;">
-                <i class="ri-attachment-2" style="color: #0284c7; font-size: 1.25rem;"></i> Documento Adjunto de la Prueba
+
+        <!-- SECCIÓN ADJUNTO ÚNICO DE LA PRUEBA (UI REDISEÑADA) -->
+        <div style="margin-top: 1.5rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem; box-shadow: 0 1px 2px rgba(0,0,0,0.01);">
+            <label style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.875rem; color: #0f172a; margin-bottom: 0.75rem;">
+                <i class="ri-attachment-2" style="color: #0284c7; font-size: 1.1rem;"></i> Documento Adjunto de la Prueba
             </label>
             
-            <!-- Área Personalizada para Cargar Archivo -->
             <div style="display: flex; align-items: center; gap: 0.85rem; background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 0.85rem 1.1rem; border-radius: 8px; flex-wrap: wrap;">
-                
-                <!-- Botón Visual Personalizado (Trigger del File Input) -->
                 <label for="documento_prueba" 
-                       style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; background-color: #0284c7; color: #ffffff; font-weight: 600; font-size: 0.85rem; padding: 0.5rem 1.1rem; border-radius: 6px; margin: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.2s ease;">
-                    <i class="ri-upload-cloud-2-line" style="font-size: 1.1rem;"></i> Seleccionar archivo
+                       style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; background-color: #0284c7; color: #ffffff; font-weight: 600; font-size: 0.8rem; padding: 0.45rem 1rem; border-radius: 6px; margin: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.2s ease;">
+                    <i class="ri-upload-cloud-2-line" style="font-size: 1rem;"></i> Seleccionar archivo
                 </label>
                 
-                <!-- Input Oculto Real -->
                 <input type="file" 
                        name="documento_prueba" 
                        id="documento_prueba" 
@@ -776,21 +796,19 @@ $letraCategoria = chr(64 + $categoriaId);
                        style="display: none;" 
                        onchange="actualizarNombreArchivo(this)">
                 
-                <!-- Feedback visual del archivo nuevo seleccionado -->
-                <span id="texto_archivo_nuevo" style="font-size: 0.85rem; color: #64748b; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px;">
+                <span id="texto_archivo_nuevo" style="font-size: 0.825rem; color: #64748b; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px;">
                     Ningún archivo nuevo seleccionado
                 </span>
             </div>
 
-            <small style="display: block; color: #94a3b8; font-size: 0.775rem; margin-top: 0.5rem; margin-left: 0.2rem;">
+            <small style="display: block; color: #94a3b8; font-size: 0.75rem; margin-top: 0.4rem; margin-left: 0.2rem;">
                 <i class="ri-information-line"></i> Formatos permitidos: PDF, Word, Excel, Imágenes, ZIP, RAR (Tamaño máximo: 10MB).
             </small>
 
-            <!-- Previsualización / Descarga del Documento Guardado en Servidor -->
             <?php if (!empty($archivoRutaPrueba)): ?>
-                <div style="margin-top: 1rem; padding: 0.75rem 1rem; background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
-                    <span style="font-size: 0.85rem; color: #0369a1; display: flex; align-items: center; gap: 0.4rem;">
-                        <i class="ri-file-text-line" style="font-size: 1.1rem; color: #0284c7;"></i>
+                <div style="margin-top: 0.85rem; padding: 0.6rem 0.85rem; background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                    <span style="font-size: 0.825rem; color: #0369a1; display: flex; align-items: center; gap: 0.4rem;">
+                        <i class="ri-file-text-line" style="font-size: 1rem; color: #0284c7;"></i>
                         <strong>Documento actual:</strong> 
                         <span style="color: #0c4a6e; font-weight: 600;"><?= htmlspecialchars((string)$archivoNombrePrueba, ENT_QUOTES, 'UTF-8') ?></span>
                         <small style="color: #0369a1;">(<?= round(((int)($archivoPesoPrueba ?? 0)) / 1024, 1) ?> KB)</small>
@@ -799,14 +817,13 @@ $letraCategoria = chr(64 + $categoriaId);
                     <a href="../<?= htmlspecialchars((string)$archivoRutaPrueba, ENT_QUOTES, 'UTF-8') ?>" 
                        target="_blank" 
                        class="btn btn-sm" 
-                       style="background-color: #e0f2fe; color: #0369a1; font-weight: 600; font-size: 0.8rem; padding: 0.35rem 0.85rem; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; transition: background-color 0.2s ease;">
+                       style="background-color: #e0f2fe; color: #0369a1; font-weight: 600; font-size: 0.775rem; padding: 0.3rem 0.75rem; text-decoration: none; border-radius: 4px; display: inline-flex; align-items: center; gap: 0.35rem; transition: background-color 0.2s ease;">
                         <i class="ri-download-2-line"></i> Descargar Documento
                     </a>
                 </div>
             <?php endif; ?>
         </div>
 
-        <!-- Script Vanilla JS para cambiar el texto en tiempo real al seleccionar un archivo -->
         <script>
         function actualizarNombreArchivo(input) {
             const labelTexto = document.getElementById('texto_archivo_nuevo');
@@ -822,9 +839,7 @@ $letraCategoria = chr(64 + $categoriaId);
                 labelTexto.style.fontStyle = 'italic';
             }
         }
-        </script>
 
-        <script>
         function toggleAcordeonSocios(header) {
             const body = header.nextElementSibling;
             const icon = header.querySelector('.ri-arrow-down-s-line');
@@ -838,30 +853,29 @@ $letraCategoria = chr(64 + $categoriaId);
         }
         </script>
 
-        <!-- CAJA DE ESTATUS GENERAL DE LA PRUEBA -->
-        
-            <div style="background: #ffffff; border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; margin-top: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                <div>
-                    <h4 style="margin: 0 0 0.25rem 0; font-size: 1rem; color: #1e293b;">Estatus General de la Prueba</h4>
-                    <p style="margin: 0; font-size: 0.85rem; color: #64748b;">El estatus se actualizará al guardar todo el formulario.</p>
-                </div>
+        <!-- CAJA DE ESTATUS GENERAL DE LA PRUEBA Y BOTONES ACCIÓN -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 1.25rem; border-radius: 10px; margin-top: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div>
+                <h4 style="margin: 0 0 0.2rem 0; font-size: 0.925rem; color: #0f172a; font-weight: 700;">Estatus General de la Prueba</h4>
+                <p style="margin: 0; font-size: 0.8rem; color: #64748b;">El estatus se actualizará al guardar todo el formulario.</p>
+            </div>
 
-                <div>
-                    <select name="estado_prueba" class="status-select" style="padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.9rem; border: 1px solid #cbd5e1; font-weight: 600; background: #f8fafc;">
-                        <option value="en_proceso" <?= $estadoActualPrueba === 'en_proceso' ? 'selected' : '' ?>>⏳ En proceso</option>
-                        <option value="completado" <?= $estadoActualPrueba === 'completado' ? 'selected' : '' ?>>✅ Completado</option>
-                        <option value="por_corregir_lider" <?= $estadoActualPrueba === 'por_corregir_lider' ? 'selected' : '' ?>>⚠️ Por Corregir Lider</option>
-                        <option value="por_corregir_riesgo" <?= $estadoActualPrueba === 'por_corregir_riesgo' ? 'selected' : '' ?>>🚨 Por Corregir Riesgo</option>
-                        <option value="revisado" <?= $estadoActualPrueba === 'revisado' ? 'selected' : '' ?>>🔹 Revisado</option>
-                        <option value="cerrado" <?= $estadoActualPrueba === 'cerrado' ? 'selected' : '' ?>>🔒 Cerrado</option>
-                    </select>
-                </div>
-                <div>
-                    <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="btn btn-secondary">Volver al Panel</a>
-                    <button type="submit" class="btn btn-primary" style="padding:0.75rem 2.5rem;"><i class="ri-save-3-line"></i> Guardar Todo</button>
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <select name="estado_prueba" class="status-select" style="padding: 0.55rem 0.85rem; border-radius: 6px; font-size: 0.85rem; border: 1px solid #cbd5e1; font-weight: 600; background: #f8fafc; color: #0f172a;">
+                    <option value="en_proceso" <?= $estadoActualPrueba === 'en_proceso' ? 'selected' : '' ?>>⏳ En proceso</option>
+                    <option value="completado" <?= $estadoActualPrueba === 'completado' ? 'selected' : '' ?>>✅ Completado</option>
+                    <option value="por_corregir_lider" <?= $estadoActualPrueba === 'por_corregir_lider' ? 'selected' : '' ?>>⚠️ Por Corregir Lider</option>
+                    <option value="por_corregir_riesgo" <?= $estadoActualPrueba === 'por_corregir_riesgo' ? 'selected' : '' ?>>🚨 Por Corregir Riesgo</option>
+                    <option value="revisado" <?= $estadoActualPrueba === 'revisado' ? 'selected' : '' ?>>🔹 Revisado</option>
+                    <option value="cerrado" <?= $estadoActualPrueba === 'cerrado' ? 'selected' : '' ?>>🔒 Cerrado</option>
+                </select>
+
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="btn btn-secondary" style="padding: 0.55rem 1.25rem; font-size: 0.85rem; border-radius: 6px;">Volver al Panel</a>
+                    <button type="submit" class="btn btn-primary" style="padding: 0.55rem 1.75rem; font-size: 0.85rem; border-radius: 6px; font-weight: 600;"><i class="ri-save-3-line"></i> Guardar Todo</button>
                 </div>
             </div>
-        
+        </div>
     </form>
 
     <!-- Formularios ocultos individuales para eliminar registros de indicadores -->
@@ -875,9 +889,9 @@ $letraCategoria = chr(64 + $categoriaId);
 
 <!-- MODAL PARA AGREGAR PUNTO DE CONTROL DE INDICADOR -->
 <div id="indicatorModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1100; align-items:center; justify-content:center;">
-    <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:650px; width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid var(--border-color);">
+    <div style="background:#ffffff; padding:1.75rem; border-radius:10px; max-width:600px; width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid #e2e8f0;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:0.75rem;">
-            <h3 id="modalIndicatorTitle" style="margin:0; color:#1e293b; font-size:1.15rem; display:flex; align-items:center; gap:0.5rem;">
+            <h3 id="modalIndicatorTitle" style="margin:0; color:#0f172a; font-size:1.1rem; display:flex; align-items:center; gap:0.5rem; font-weight: 700;">
                 <i class="ri-add-box-line" style="color:var(--accent);"></i> Nuevo Punto de Control
             </h3>
             <button type="button" onclick="closeIndicatorModal()" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748b;">
@@ -889,33 +903,34 @@ $letraCategoria = chr(64 + $categoriaId);
             <input type="hidden" name="action_type" value="add_indicador_detalle">
             <input type="hidden" id="modalTipoIndicador" name="tipo_indicador" value="">
 
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Rubro</label>
-                <input type="text" name="rubro" placeholder="Ej. Activo Corriente, Cuentas por Cobrar..." style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+            <div style="margin-bottom: 0.85rem;">
+                <label style="display: block; font-size: 0.825rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Rubro</label>
+                <input type="text" name="rubro" placeholder="Ej. Activo Corriente, Cuentas por Cobrar..." style="width: 100%; padding: 0.55rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.875rem;">
             </div>
 
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Título del Asunto / Hallazgo *</label>
-                <input type="text" name="titulo" required placeholder="Título resumido..." style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+            <div style="margin-bottom: 0.85rem;">
+                <label style="display: block; font-size: 0.825rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Título del Asunto / Hallazgo *</label>
+                <input type="text" name="titulo" required placeholder="Título resumido..." style="width: 100%; padding: 0.55rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.875rem;">
             </div>
 
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Descripción *</label>
-                <textarea name="descripcion" required rows="3" placeholder="Descripción detallada de la debilidad o hallazgo..." style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem; font-family: inherit; resize: vertical;"></textarea>
+            <div style="margin-bottom: 0.85rem;">
+                <label style="display: block; font-size: 0.825rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Descripción *</label>
+                <textarea name="descripcion" required rows="3" placeholder="Descripción detallada de la debilidad o hallazgo..." style="width: 100%; padding: 0.55rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.875rem; font-family: inherit; resize: vertical;"></textarea>
             </div>
 
-            <div style="margin-bottom: 1.5rem;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Recomendación del Asunto</label>
-                <textarea name="recomendacion" rows="3" placeholder="Recomendación sugerida..." style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem; font-family: inherit; resize: vertical;"></textarea>
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display: block; font-size: 0.825rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Recomendación del Asunto</label>
+                <textarea name="recomendacion" rows="3" placeholder="Recomendación sugerida..." style="width: 100%; padding: 0.55rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.875rem; font-family: inherit; resize: vertical;"></textarea>
             </div>
 
-            <div style="text-align:right; border-top:1px solid #e2e8f0; padding-top:1rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
-                <button type="button" class="btn btn-secondary" onclick="closeIndicatorModal()" style="padding: 0.5rem 1.25rem;">Cancelar</button>
-                <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.5rem;">Guardar Registro</button>
+            <div style="text-align:right; border-top:1px solid #e2e8f0; padding-top:0.85rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeIndicatorModal()" style="padding: 0.45rem 1.1rem; font-size: 0.85rem; border-radius: 6px;">Cancelar</button>
+                <button type="submit" class="btn btn-primary" style="padding: 0.45rem 1.25rem; font-size: 0.85rem; border-radius: 6px; font-weight: 600;">Guardar Registro</button>
             </div>
         </form>
     </div>
 </div>
+
 <?php if ((int)$pruebaId === 11): ?>
     <!-- Formularios ocultos para eliminar filas analíticas -->
     <?php foreach (array_merge($analiticaItems['activo'], $analiticaItems['pasivo'], $analiticaItems['patrimonio']) as $it): ?>
@@ -927,50 +942,46 @@ $letraCategoria = chr(64 + $categoriaId);
 
     <!-- Modal para Agregar Partida Analítica -->
     <div id="analiticaModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 1150; align-items: center; justify-content: center;">
-        <div style="background: #ffffff; padding: 2rem; border-radius: 12px; max-width: 550px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+        <div style="background: #ffffff; padding: 1.75rem; border-radius: 10px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid #e2e8f0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem;">
-                <h3 id="modalAnaliticaTitle" style="margin: 0; color: #1e293b; font-size: 1.1rem;">Agregar Partida</h3>
+                <h3 id="modalAnaliticaTitle" style="margin: 0; color: #0f172a; font-size: 1.05rem; font-weight: 700;">Agregar Partida</h3>
                 <button type="button" onclick="closeAnaliticaModal()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #64748b;"><i class="ri-close-line"></i></button>
             </div>
             
             <form action="guardar_analitica.php?proyectoId=<?= (int)$proyectoId ?>&pruebaId=11" method="POST">
-                <!-- Campos ocultos y inputs del modffal -->
                 <input type="hidden" name="action_type" value="add_analitica_item">
                 <input type="hidden" name="tipo" id="modal_tipo_input">
 
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Tipo / Rubro (Ej. Efectivo, Cuentas por Cobrar...)</label>
-                    <input type="text" name="tipo_rubro" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                <div style="margin-bottom: 0.85rem;">
+                    <label style="display: block; font-size: 0.825rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Tipo / Rubro (Ej. Efectivo, Cuentas por Cobrar...)</label>
+                    <input type="text" name="tipo_rubro" required style="width: 100%; padding: 0.55rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.875rem;">
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
                     <div>
-                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Saldo Actual</label>
-                        <input type="number" step="0.01" name="saldo_actual" value="0.00" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                        <label style="display: block; font-size: 0.825rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Saldo Actual</label>
+                        <input type="number" step="0.01" name="saldo_actual" value="0.00" required style="width: 100%; padding: 0.55rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.875rem;">
                     </div>
                     <div>
-                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Saldo Anterior</label>
-                        <input type="number" step="0.01" name="saldo_anterior" value="0.00" required style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                        <label style="display: block; font-size: 0.825rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Saldo Anterior</label>
+                        <input type="number" step="0.01" name="saldo_anterior" value="0.00" required style="width: 100%; padding: 0.55rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.875rem;">
                     </div>
                 </div>
 
-                <div style="margin-bottom: 1.5rem;">
-                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Observaciones (ID de referencia)</label>
-                    <input type="text" name="observaciones" placeholder="Ej. 6, 7..." style="width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                <div style="margin-bottom: 1.25rem;">
+                    <label style="display: block; font-size: 0.825rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem;">Observaciones (ID de referencia)</label>
+                    <input type="text" name="observaciones" placeholder="Ej. 6, 7..." style="width: 100%; padding: 0.55rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.875rem;">
                 </div>
 
-                <div style="text-align: right; display: flex; justify-content: flex-end; gap: 0.75rem;">
-                    <button type="button" class="btn btn-secondary" onclick="closeAnaliticaModal()" style="padding: 0.5rem 1rem;">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.25rem;">Guardar Partida</button>
+                <div style="text-align: right; display: flex; justify-content: flex-end; gap: 0.5rem; border-top: 1px solid #e2e8f0; padding-top: 0.85rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeAnaliticaModal()" style="padding: 0.45rem 1rem; font-size: 0.85rem; border-radius: 6px;">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" style="padding: 0.45rem 1.15rem; font-size: 0.85rem; border-radius: 6px; font-weight: 600;">Guardar Partida</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-    /**
-     * Abre el modal de analítica y configura dinámicamente el tipo de partida.
-     */
     function openAnaliticaModal(tipo) {
         const modal = document.getElementById('analiticaModal');
         const tipoInput = document.getElementById('modal_tipo_input');
@@ -984,9 +995,6 @@ $letraCategoria = chr(64 + $categoriaId);
         }
     }
 
-    /**
-     * Cierra el modal de analítica.
-     */
     function closeAnaliticaModal() {
         const modal = document.getElementById('analiticaModal');
         if (modal) {
@@ -994,7 +1002,6 @@ $letraCategoria = chr(64 + $categoriaId);
         }
     }
 
-    // Cierre al hacer clic fuera del contenido del modal
     window.addEventListener('click', function(event) {
         const modal = document.getElementById('analiticaModal');
         if (event.target === modal) {
@@ -1003,30 +1010,29 @@ $letraCategoria = chr(64 + $categoriaId);
     });
     </script>
 <?php endif; ?>
-<!-- 2. MODAL COLOCADO FUERA DEL FLUJO DE FORMULARIOS PADRES (AISLADO ABAJO) -->
-<div id="modalRiesgo" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
-    <div style="background-color: #ffffff; border: 1px solid #cbd5e1; width: 95%; max-width: 1200px; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+
+<!-- MODAL RIESGO -->
+<div id="modalRiesgo" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background-color: #ffffff; border: 1px solid #cbd5e1; width: 95%; max-width: 1100px; border-radius: 10px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
         
-        <!-- Cabecera del Modal (Azul Navbar) -->
-        <div style="background-color: #1e3a5f; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="color: #ffffff; font-size: 16px; margin: 0; font-weight: 600;">Agregar &gt; Riesgo</h3>
-            <button type="button" onclick="closeModalRiesgo()" style="background: transparent; border: none; color: #ffffff; font-size: 20px; cursor: pointer;"><i class="ri-close-line"></i></button>
+        <div style="background-color: #1e3a5f; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="color: #ffffff; font-size: 0.95rem; margin: 0; font-weight: 600; display: flex; align-items: center; gap: 0.4rem;">
+                <i class="ri-add-line" style="color: #00bcd4;"></i> Agregar Riesgo
+            </h3>
+            <button type="button" onclick="closeModalRiesgo()" style="background: transparent; border: none; color: #ffffff; font-size: 1.25rem; cursor: pointer;"><i class="ri-close-line"></i></button>
         </div>
 
-        <!-- Formulario Independiente del Modal -->
-        <!-- Formulario Independiente del Modal apuntando a su propio script -->
-        <form id="formRiesgo23" style="padding: 30px; max-height: 80vh; overflow-y: auto;">
-        <input type="hidden" name="proyecto_id" value="<?php echo htmlspecialchars((string)$proyectoId, ENT_QUOTES, 'UTF-8'); ?>">
+        <form id="formRiesgo23" style="padding: 20px; max-height: 80vh; overflow-y: auto;">
+            <input type="hidden" name="proyecto_id" value="<?php echo htmlspecialchars((string)$proyectoId, ENT_QUOTES, 'UTF-8'); ?>">
 
-            <!-- Caja Interna Clara para Selects -->
-            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 25px;">
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 18px;">
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
                     <?php foreach ($catalogosRiesgo as $nameKey => $opciones): ?>
                         <div class="form-group" style="display: flex; flex-direction: column;">
-                            <label style="font-size: 11px; text-transform: uppercase; color: #334155; margin-bottom: 8px; font-weight: 700; letter-spacing: 0.5px;">
+                            <label style="font-size: 0.7rem; text-transform: uppercase; color: #475569; margin-bottom: 6px; font-weight: 700; letter-spacing: 0.05em;">
                                 <?php echo ucwords(str_replace('_', ' ', $nameKey)); ?>
                             </label>
-                            <select name="<?php echo $nameKey; ?>" class="form-control" style="width: 100%; background-color: #ffffff; border: 1px solid #cbd5e1; color: #0f172a; padding: 10px 12px; border-radius: 6px; font-size: 13px;" required>
+                            <select name="<?php echo $nameKey; ?>" class="form-control" style="width: 100%; background-color: #ffffff; border: 1px solid #cbd5e1; color: #0f172a; padding: 8px 10px; border-radius: 6px; font-size: 0.825rem;" required>
                                 <option value="">-- Seleccione --</option>
                                 <?php foreach ($opciones as $opt): ?>
                                     <option value="<?php echo htmlspecialchars($opt, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($opt, ENT_QUOTES, 'UTF-8'); ?></option>
@@ -1037,36 +1043,29 @@ $letraCategoria = chr(64 + $categoriaId);
                 </div>
             </div>
 
-            <!-- Caja Contenedora Inferior (Checkbox y Botón Guardar) -->
-            <div style="background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <input type="checkbox" id="acuerdo_informacion" name="acuerdo_informacion" value="1" required style="width: 18px; height: 18px; accent-color: #1e3a5f; cursor: pointer;">
-                    <label for="acuerdo_informacion" style="color: #334155; font-size: 13px; font-weight: 600; cursor: pointer;">Estoy de acuerdo con la información suministrada!</label>
+            <div style="background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="acuerdo_informacion" name="acuerdo_informacion" value="1" required style="width: 16px; height: 16px; accent-color: #1e3a5f; cursor: pointer;">
+                    <label for="acuerdo_informacion" style="color: #334155; font-size: 0.825rem; font-weight: 600; cursor: pointer;">Estoy de acuerdo con la información suministrada!</label>
                 </div>
 
-                <button type="button" id="btnGuardarRiesgo23" class="btn" style="background-color: #1e3a5f; color: #ffffff; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                <button type="button" id="btnGuardarRiesgo23" class="btn" style="background-color: #1e3a5f; color: #ffffff; border: none; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
                     <i class="ri-save-line"></i> Guardar
                 </button>
             </div>
         </form>
     </div>
 </div>
- <?php 
- 
-// Al inicio de actividades.php
-// Asegura
 
-// Extracción segura de la bandera para Normas (texto_inadecuado2)
+<?php 
 $textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
 ?>
 
 <!-- Modal de Normas (normaModal) -->
 <div id="normaModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1000; align-items:center; justify-content:center;">
-    <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:900px; width:92%; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid #e2e8f0; margin:auto;">
-        
-        <!-- Cabecera -->
+    <div style="background:#ffffff; padding:1.75rem; border-radius:10px; max-width:850px; width:92%; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid #e2e8f0; margin:auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:0.75rem;">
-            <h3 style="margin:0; color:#1e293b; font-size:1.15rem; display:flex; align-items:center; gap:0.5rem;">
+            <h3 style="margin:0; color:#0f172a; font-size:1.05rem; display:flex; align-items:center; gap:0.5rem; font-weight: 700;">
                 <i class="ri-scales-3-line" style="color:#059669;"></i> Normas y Regulaciones
             </h3>
             <button type="button" onclick="closeNormaModal()" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748b;">
@@ -1074,45 +1073,36 @@ $textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
             </button>
         </div>
 
-        <!-- Cuerpo del Modal -->
-        <div class="audit-container" style="max-height:60vh; overflow-y:auto; padding-right:0.5rem;">
+        <div class="audit-container" style="max-height:60vh; overflow-y:auto; padding-right:0.5rem; font-size:0.875rem; color:#334155; line-height:1.6;">
             <?= ($metaPrueba->normas ?? $metaPrueba->norma ?? null) ?>
         </div>
 
-        <!-- Pie con Control y Acciones -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; border-top:1px solid #e2e8f0; padding-top:1rem;">
-            
-            <!-- Checkbox de estado para texto_inadecuado2 -->
-            <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; color:#475569; cursor:pointer; user-select:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem; border-top:1px solid #e2e8f0; padding-top:0.85rem;">
+            <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.825rem; color:#475569; cursor:pointer; user-select:none;">
                 <input 
                     type="checkbox" 
                     id="chkTextoInadecuado2" 
                     value="1" 
                     <?= $textoInadecuado2 ? 'checked' : '' ?>
-                    style="width:1.1rem; height:1.1rem; accent-color:#ef4444; cursor:pointer;"
+                    style="width:1rem; height:1rem; accent-color:#ef4444; cursor:pointer;"
                 >
                 <span style="font-weight: 500;">No me parece correcta esta redacción / contenido</span>
             </label>
 
-            <!-- Acciones Explícitas -->
             <div style="display:flex; gap:0.5rem;">
-                <button type="button" class="btn btn-secondary" onclick="closeNormaModal()" style="padding: 0.5rem 1rem; background:#cbd5e1; color:#334155; border:none; border-radius:6px; cursor:pointer;">
+                <button type="button" class="btn btn-secondary" onclick="closeNormaModal()" style="padding: 0.45rem 1rem; font-size: 0.825rem; background:#cbd5e1; color:#334155; border:none; border-radius:6px; cursor:pointer;">
                     Cancelar
                 </button>
-                <!-- Asegúrate de pasar el ID de la tabla audit_pruebas -->
-               
-                  <button type="button" id="btnGuardarFeedbackNorma" onclick="procesarGuardadoFeedbackNorma(<?= $pruebaId ?>)" class="btn btn-primary" style="padding: 0.5rem 1.25rem; background:#2563eb; color:#ffffff; border:none; border-radius:6px; cursor:pointer;">
+                <button type="button" id="btnGuardarFeedbackNorma" onclick="procesarGuardadoFeedbackNorma(<?= $pruebaId ?>)" class="btn btn-primary" style="padding: 0.45rem 1.15rem; font-size: 0.825rem; background:#0284c7; color:#ffffff; border:none; border-radius:6px; cursor:pointer; font-weight: 600;">
                     Guardar
                 </button>
             </div>
-
         </div>
-
     </div>
 </div>
 
 <script>
-    function procesarGuardadoFeedbackNorma(pruebaId) {
+function procesarGuardadoFeedbackNorma(pruebaId) {
     if (!pruebaId || pruebaId <= 0) {
         alert('Error: El identificador de la prueba no es válido.');
         return;
@@ -1126,7 +1116,6 @@ $textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
         return;
     }
 
-    // Deshabilitar botón durante el envío para evitar doble clic
     btnGuardar.disabled = true;
     btnGuardar.innerText = 'Guardando...';
 
@@ -1146,7 +1135,6 @@ $textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
     })
     .then(data => {
         if (data.success) {
-            // Cerrar el modal al confirmar guardado exitoso
             closeNormaModal();
         } else {
             alert('Atención: ' + (data.error || 'No se pudo guardar la evaluación.'));
@@ -1157,74 +1145,58 @@ $textoInadecuado2 = (bool)($metaPrueba->texto_inadecuado2 ?? false);
         alert('Error de conexión al guardar el registro.');
     })
     .finally(() => {
-        // Restaurar estado del botón
         btnGuardar.disabled = false;
         btnGuardar.innerText = 'Guardar';
     });
 }
-
 </script>
-<!-- Modal de Instrucciones -->
- <?php 
- 
-// Al inicio de actividades.php
 
+<!-- Modal de Instrucciones -->
+<?php 
 include 'AuditTextRenderer.php';
-// Asegurarse de tener el ID de la prueba disponible en el objeto $metaPrueba
 $textoInadecuado = (bool)($metaPrueba->texto_inadecuado ?? false);
 ?>
 
 <div id="normaModal2" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1000; align-items:center; justify-content:center;">
-    <div style="background:#ffffff; padding:2rem; border-radius:12px; max-width:900px; width:92%; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid #e2e8f0; margin:auto;">
-        
-        <!-- Cabecera -->
+    <div style="background:#ffffff; padding:1.75rem; border-radius:10px; max-width:850px; width:92%; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid #e2e8f0; margin:auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:0.75rem;">
-            <h3 style="margin:0; color:#1e293b; font-size:1.15rem; display:flex; align-items:center; gap:0.5rem;">
-                <i class="ri-book-2-line" style="color:#3b82f6;"></i> Instrucciones
+            <h3 style="margin:0; color:#0f172a; font-size:1.05rem; display:flex; align-items:center; gap:0.5rem; font-weight: 700;">
+                <i class="ri-book-2-line" style="color:#0284c7;"></i> Instrucciones
             </h3>
             <button type="button" onclick="closeNormaModal2()" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748b;">
                 <i class="ri-close-line"></i>
             </button>
         </div>
 
-        <!-- Cuerpo del Modal -->
-        <div class="audit-container" style="max-height:60vh; overflow-y:auto; padding-right:0.5rem;">
+        <div class="audit-container" style="max-height:60vh; overflow-y:auto; padding-right:0.5rem; font-size:0.875rem; color:#334155; line-height:1.6;">
             <?= AuditTextRenderer::render($metaPrueba->informacion ?? null) ?>
         </div>
 
-        <!-- Pie con Control y Acciones -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; border-top:1px solid #e2e8f0; padding-top:1rem;">
-            
-            <!-- Checkbox de estado (Sin evento onchange automático) -->
-            <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; color:#475569; cursor:pointer; user-select:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem; border-top:1px solid #e2e8f0; padding-top:0.85rem;">
+            <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.825rem; color:#475569; cursor:pointer; user-select:none;">
                 <input 
                     type="checkbox" 
                     id="chkTextoInadecuado" 
                     value="1" 
                     <?= $textoInadecuado ? 'checked' : '' ?>
-                    style="width:1.1rem; height:1.1rem; accent-color:#ef4444; cursor:pointer;"
+                    style="width:1rem; height:1rem; accent-color:#ef4444; cursor:pointer;"
                 >
                 <span style="font-weight: 500;">No me parece correcta esta redacción / contenido</span>
             </label>
 
-            <!-- Acciones Explícitas -->
             <div style="display:flex; gap:0.5rem;">
-                <button type="button" class="btn btn-secondary" onclick="closeNormaModal2()" style="padding: 0.5rem 1rem; background:#cbd5e1; color:#334155; border:none; border-radius:6px; cursor:pointer;">
+                <button type="button" class="btn btn-secondary" onclick="closeNormaModal2()" style="padding: 0.45rem 1rem; font-size: 0.825rem; background:#cbd5e1; color:#334155; border:none; border-radius:6px; cursor:pointer;">
                     Cancelar
                 </button>
-                
-                <button type="button" id="btnGuardarFeedback" onclick="procesarGuardadoFeedback(<?= $pruebaId ?>)" class="btn btn-primary" style="padding: 0.5rem 1.25rem; background:#2563eb; color:#ffffff; border:none; border-radius:6px; cursor:pointer;">
+                <button type="button" id="btnGuardarFeedback" onclick="procesarGuardadoFeedback(<?= $pruebaId ?>)" class="btn btn-primary" style="padding: 0.45rem 1.15rem; font-size: 0.825rem; background:#0284c7; color:#ffffff; border:none; border-radius:6px; cursor:pointer; font-weight: 600;">
                     Guardar
                 </button>
             </div>
-
         </div>
-
     </div>
 </div>
 
 <script>
-
 function procesarGuardadoFeedback(pruebaId) {
     if (!pruebaId || pruebaId <= 0) {
         alert('Error: El identificador de la prueba no es válido.');
@@ -1239,7 +1211,6 @@ function procesarGuardadoFeedback(pruebaId) {
         return;
     }
 
-    // Deshabilitar botón durante el envío para evitar doble clic
     btnGuardar.disabled = true;
     btnGuardar.innerText = 'Guardando...';
 
@@ -1259,7 +1230,6 @@ function procesarGuardadoFeedback(pruebaId) {
     })
     .then(data => {
         if (data.success) {
-            // Cerrar el modal al confirmar guardado exitoso
             closeNormaModal2();
         } else {
             alert('Atención: ' + (data.error || 'No se pudo guardar la evaluación.'));
@@ -1270,7 +1240,6 @@ function procesarGuardadoFeedback(pruebaId) {
         alert('Error de conexión al guardar el registro.');
     })
     .finally(() => {
-        // Restaurar estado del botón
         btnGuardar.disabled = false;
         btnGuardar.innerText = 'Guardar';
     });
