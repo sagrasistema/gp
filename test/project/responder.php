@@ -198,7 +198,7 @@ include '../main/h.php';
                         $bgColor = '#64748b';
                     }
                     // Corrección sintáctica y evaluación de banderas binarias/booleanas
-                    if ((int)($prueba['texto_inadecuado'] ?? 0) === 1 || (int)($prueba['texto_inadecuado2'] ?? 0) === 1) {
+                    if ((int)($prueba['texto_inadecuado'] ?? 0) === 1 ) {
                         $bgColor = '#ef4444';
                     }
                     // Corrección sintáctica y evaluación de banderas binarias/booleanas
