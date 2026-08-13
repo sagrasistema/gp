@@ -1,10 +1,19 @@
 <?php
 declare(strict_types=1);
 
-// Carga de partidas analíticas agrupadas exclusivamente para la vista
-$analiticaItems = ['activo' => [], 'pasivo' => [], 'patrimonio' => []];
+// 1. Estructura base para agrupar partidas analíticas por categoría
+$analiticaItems = [
+    'activo'     => [],
+    'pasivo'     => [],
+    'patrimonio' => []
+];
 
-if ((int)$pruebaId === 11 && isset($pdo, $proyectoId)) {
+// Asignación/cast seguro de variables de entrada
+$pruebaId   = isset($pruebaId) ? (int)$pruebaId : 0;
+$proyectoId = isset($proyectoId) ? (int)$proyectoId : 0;
+
+// 2. Carga de datos para la Prueba ID 11 (Revisión Analítica)
+if ($pruebaId === 11 && isset($pdo) && $proyectoId > 0) {
     try {
         $stmtAnalitica = $pdo->prepare("
             SELECT id, proyecto_id, prueba_id, tipo, tipo_rubro, saldo_actual, saldo_anterior, observaciones 
@@ -12,14 +21,18 @@ if ((int)$pruebaId === 11 && isset($pdo, $proyectoId)) {
             WHERE proyecto_id = :proj AND prueba_id = :pr 
             ORDER BY id ASC
         ");
+        
         $stmtAnalitica->execute([
             ':proj' => $proyectoId,
             ':pr'   => $pruebaId
         ]);
 
         while ($row = $stmtAnalitica->fetch(PDO::FETCH_OBJ)) {
-            if (isset($analiticaItems[$row->tipo])) {
-                $analiticaItems[$row->tipo][] = $row;
+            // Normalizar el índice por si la BD guarda tipos en mayúsculas/minúsculas
+            $tipoKey = strtolower(trim((string)$row->tipo));
+            
+            if (array_key_exists($tipoKey, $analiticaItems)) {
+                $analiticaItems[$tipoKey][] = $row;
             }
         }
     } catch (PDOException $e) {
@@ -27,7 +40,8 @@ if ((int)$pruebaId === 11 && isset($pdo, $proyectoId)) {
     }
 }
 
-if ((int)$pruebaId === 128):
+// 3. Renderizado de la vista únicamente para la Prueba 11
+if ($pruebaId === 128):
 ?>
 <div style="margin-top: 2.5rem; margin-bottom: 1.5rem;">
     <h3 style="font-size: 1.1rem; color: #1e293b; font-weight: 700; margin-bottom: 1rem;">Módulos Financieros Especiales</h3>
@@ -73,18 +87,19 @@ if ((int)$pruebaId === 128):
                         $totPatCur = 0.0; $totPatAnt = 0.0;
 
                         foreach (['activo', 'pasivo', 'patrimonio'] as $cat):
-                            $itemsSec = $analiticaItems[$cat];
-                            $subCur = 0.0; $subAnt = 0.0;
+                            $itemsSec = $analiticaItems[$cat] ?? [];
+                            $subCur = 0.0; 
+                            $subAnt = 0.0;
                         ?>
                             <tr style="background: #f1f5f9; font-weight: bold; color: #1e293b;">
                                 <td colspan="8" style="padding: 0.5rem 0.75rem; text-transform: uppercase;"><?= ucfirst($cat) ?></td>
                             </tr>
                             <?php if (!empty($itemsSec)): ?>
                                 <?php foreach ($itemsSec as $item): 
-                                    $sActual = (float)$item->saldo_actual;
+                                    $sActual   = (float)$item->saldo_actual;
                                     $sAnterior = (float)$item->saldo_anterior;
-                                    $varBs = $sActual - $sAnterior;
-                                    $varPorc = ($sAnterior != 0.0) ? ($varBs / $sAnterior) * 100 : 0.0;
+                                    $varBs     = $sActual - $sAnterior;
+                                    $varPorc   = ($sAnterior != 0.0) ? ($varBs / $sAnterior) * 100 : 0.0;
                                     
                                     if ($cat === 'activo') { $totActCur += $sActual; $totActAnt += $sAnterior; }
                                     if ($cat === 'pasivo') { $totPasCur += $sActual; $totPasAnt += $sAnterior; }
