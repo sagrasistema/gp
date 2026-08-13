@@ -40,7 +40,7 @@ include '../main/h.php';
 
 <div class="view-container">
     <?php
-    // Capturar y validar el ID del proyecto desde la URL de forma segura
+    // Capturar y validar el ID del proyecto desde la URL de forma segurass
     $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
     ?>
 
