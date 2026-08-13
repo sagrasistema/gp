@@ -15,7 +15,7 @@ if (!isset($_SESSION['user_id'])) {
 include '../main/h.php'; 
 include '../main/config.php'; 
 
-// Sanitizar y validar ID de usuario objetivo
+// Sanitizar y validar ID de usuario objetivo desde GET
 $usuarioIdTarget = filter_input(INPUT_GET, 'usuario_id', FILTER_VALIDATE_INT) ?? 0;
 
 if ($usuarioIdTarget <= 0) {
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmtModulos = $pdo->query("SELECT id FROM modulos WHERE activo = 1");
         $modulosActivos = $stmtModulos->fetchAll(PDO::FETCH_COLUMN);
 
-        // Consulta UPSERT: inserta o actualiza si ya existe el par (usuario_id, modulo_id)
+        // Consulta UPSERT en la tabla usuario_permisos
         $sqlUpsert = "
             INSERT INTO usuario_permisos 
                 (usuario_id, modulo_id, puede_ver, puede_crear, puede_editar, puede_eliminar)
@@ -92,8 +92,8 @@ $usuarioTarget = null;
 $matrizPermisos = [];
 
 try {
-    // A. Obtener datos del usuario
-    $stmtUser = $pdo->prepare("SELECT id, nombre, email, rol FROM usuarios WHERE id = :id LIMIT 1");
+    // A. Obtener datos del usuario ajustados al esquema real de la tabla usuarios
+    $stmtUser = $pdo->prepare("SELECT id, username, nombre_completo, rol FROM usuarios WHERE id = :id LIMIT 1");
     $stmtUser->execute([':id' => $usuarioIdTarget]);
     $usuarioTarget = $stmtUser->fetch(PDO::FETCH_OBJ);
 
@@ -138,7 +138,6 @@ $currentTab     = 'usuarios';
 
 <link rel="stylesheet" href="../main/layout.css">
 <style>
-    /* Estilos para casillas de verificación de permisos */
     .permission-checkbox {
         width: 18px;
         height: 18px;
@@ -205,20 +204,20 @@ $currentTab     = 'usuarios';
         </div>
     <?php endif; ?>
 
-    <!-- Ficha Informativa del Usuario Objetivo -->
+    <!-- Ficha Informativa con Nombres de Campos Corregidos -->
     <div class="user-info-card">
         <div>
             <span style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Usuario:</span>
-            <strong style="color: #1e293b; margin-left: 0.25rem;"><?= htmlspecialchars($usuarioTarget->nombre ?? '', ENT_QUOTES, 'UTF-8') ?></strong>
+            <strong style="color: #1e293b; margin-left: 0.25rem;"><?= htmlspecialchars($usuarioTarget->nombre_completo ?? '', ENT_QUOTES, 'UTF-8') ?></strong>
         </div>
         <div>
-            <span style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Correo:</span>
-            <span style="color: #1e293b; margin-left: 0.25rem;"><?= htmlspecialchars($usuarioTarget->email ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+            <span style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Username:</span>
+            <span style="color: #1e293b; margin-left: 0.25rem;"><?= htmlspecialchars($usuarioTarget->username ?? '', ENT_QUOTES, 'UTF-8') ?></span>
         </div>
         <div>
             <span style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Rol Actual:</span>
             <span class="badge" style="background: #e2e8f0; color: #334155; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.75rem;">
-                <?= htmlspecialchars($usuarioTarget->rol ?? 'Usuario', ENT_QUOTES, 'UTF-8') ?>
+                <?= htmlspecialchars(trim($usuarioTarget->rol ?? 'auditor'), ENT_QUOTES, 'UTF-8') ?>
             </span>
         </div>
     </div>
@@ -248,7 +247,6 @@ $currentTab     = 'usuarios';
                                     <?php endif; ?>
                                 </td>
                                 
-                                <!-- Permiso Ver -->
                                 <td style="text-align: center; vertical-align: middle;">
                                     <input type="checkbox" 
                                            name="permisos[<?= $mId ?>][ver]" 
@@ -257,7 +255,6 @@ $currentTab     = 'usuarios';
                                            <?= (int)$m->puede_ver === 1 ? 'checked' : '' ?>>
                                 </td>
 
-                                <!-- Permiso Crear -->
                                 <td style="text-align: center; vertical-align: middle;">
                                     <input type="checkbox" 
                                            name="permisos[<?= $mId ?>][crear]" 
@@ -266,7 +263,6 @@ $currentTab     = 'usuarios';
                                            <?= (int)$m->puede_crear === 1 ? 'checked' : '' ?>>
                                 </td>
 
-                                <!-- Permiso Editar -->
                                 <td style="text-align: center; vertical-align: middle;">
                                     <input type="checkbox" 
                                            name="permisos[<?= $mId ?>][editar]" 
@@ -275,7 +271,6 @@ $currentTab     = 'usuarios';
                                            <?= (int)$m->puede_editar === 1 ? 'checked' : '' ?>>
                                 </td>
 
-                                <!-- Permiso Eliminar -->
                                 <td style="text-align: center; vertical-align: middle;">
                                     <input type="checkbox" 
                                            name="permisos[<?= $mId ?>][eliminar]" 
@@ -296,7 +291,6 @@ $currentTab     = 'usuarios';
             </table>
         </div>
 
-        <!-- Botón para Guardar Cambios -->
         <div style="margin-top: 1rem; text-align: right;">
             <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.5rem; background: #08855b; border-color: #08855b; font-weight: 600; cursor: pointer;">
                 <i class="ri-save-3-line"></i> Guardar Permisos
