@@ -447,7 +447,7 @@ $letraCategoria = chr(64 + $categoriaId);
          
         </div>
 
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        <div style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
             <?php if (!empty($pruebasList)): ?>
                 <?php 
                 $globalIndex = 1;
@@ -455,7 +455,7 @@ $letraCategoria = chr(64 + $categoriaId);
                     $pId = $prueba['id'];
                     $ejecucion = $pruebasEjecutadas[$pId] ?? null;
                     $estadoPrueba = strtolower($ejecucion['estado'] ?? 'en_proceso');
-                    
+
                     if ($estadoPrueba === 'completado' || $estadoPrueba === 'cerrado') {
                         $bgColor = '#10b981';
                     } elseif ($estadoPrueba === 'revisado') {
@@ -465,18 +465,19 @@ $letraCategoria = chr(64 + $categoriaId);
                     } else {
                         $bgColor = '#64748b';
                     }
-                    // Corrección sintáctica y evaluación de banderas binarias/booleanas
+
                     if ((int)($prueba['texto_inadecuado'] ?? 0) === 1 || (int)($prueba['texto_inadecuado2'] ?? 0) === 1) {
                         $bgColor = '#ef4444';
                     }
+
                     $safeId = htmlspecialchars((string)$pId, ENT_QUOTES, 'UTF-8');
                     $safeCat = htmlspecialchars($prueba['categoria_nombre'] ?? '', ENT_QUOTES, 'UTF-8');
                     $safeNombrePrueba = htmlspecialchars($prueba['nombre'] ?? '', ENT_QUOTES, 'UTF-8');
                 ?>
                     <a href="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $safeId ?>" 
                        title="Nº <?= $globalIndex ?>: <?= $safeNombrePrueba ?> | Categoría: <?= $safeCat ?> | Estado: <?= ucfirst($estadoPrueba) ?>"
-                       style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; background-color: <?= $bgColor ?>; color: #ffffff; font-weight: 700; border-radius: 8px; font-size: 0.875rem; text-decoration: none; transition: transform 0.15s ease, opacity 0.15s ease;"
-                       onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)';"
+                       style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; background-color: <?= $bgColor ?>; color: #ffffff; font-weight: 700; border-radius: 6px; font-size: 0.75rem; text-decoration: none; transition: transform 0.15s ease, opacity 0.15s ease;"
+                       onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)';"
                        onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)';">
                         <?= $globalIndex ?>
                     </a>
@@ -485,7 +486,7 @@ $letraCategoria = chr(64 + $categoriaId);
                 endforeach; 
                 ?>
             <?php else: ?>
-                <p style="color: #64748b; font-size: 0.875rem; margin: 0; font-style: italic;">
+                <p style="color: #64748b; font-size: 0.75rem; margin: 0; font-style: italic;">
                     No hay pruebas configuradas en la fase de planificación.
                 </p>
             <?php endif; ?>
