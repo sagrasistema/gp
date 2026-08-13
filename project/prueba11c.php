@@ -13,7 +13,7 @@ $pruebaId   = isset($pruebaId) ? (int)$pruebaId : 0;
 $proyectoId = isset($proyectoId) ? (int)$proyectoId : 0;
 
 // 2. Carga de datos para la Prueba ID 11 (Revisión Analítica)
-if ($pruebaId === 11 && isset($pdo) && $proyectoId > 0) {
+if ($pruebaId === 128 && isset($pdo) && $proyectoId > 0) {
     try {
         $stmtAnalitica = $pdo->prepare("
             SELECT id, proyecto_id, prueba_id, tipo, tipo_rubro, saldo_actual, saldo_anterior, observaciones 
