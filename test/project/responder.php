@@ -211,7 +211,7 @@ include '../main/h.php';
                        style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; background-color: <?= $bgColor ?>; color: #ffffff; font-weight: 700; border-radius: 8px; font-size: 0.875rem; text-decoration: none; transition: transform 0.15s ease, opacity 0.15s ease;"
                        onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)';"
                        onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)';">
-                        <?= $pId  ?>
+                        <?= $globalIndex ?>
                     </a>
                 <?php 
                     $globalIndex++;

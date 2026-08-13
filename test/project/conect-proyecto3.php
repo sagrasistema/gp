@@ -76,7 +76,7 @@ try {
 }
 
 // -------------------------------------------------------------------------
-// 3. CARGAR LISTA DE PRUEBAS SELECCIONADAS DE LA FRECUENCIA ACTIVA (ETAPA 3)
+// 3. CARGAR LISTA DE PRUEBAS SELECCIONADAS DE LA FRECUENCIA ACTIVA (ETAPA 3)ss
 // -------------------------------------------------------------------------
 try {
     $stmtList = $pdo->prepare("
