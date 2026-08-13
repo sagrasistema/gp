@@ -17,7 +17,7 @@ include '../main/h.php';
 ?>
 <link rel="stylesheet" href="../main/layout.css">
 <style>
-    <style>
+    
     /* Estilos globales compactos */
     .view-container { padding: 0.5rem; }
     .prueba-row-container { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.75rem; border-bottom: 1px solid var(--border-color); background: #ffffff; gap: 0.5rem; }
@@ -34,7 +34,7 @@ include '../main/h.php';
     .stage-btn:hover { background-color: #2b4c7e; border-color: #00bcd4; }
     .stage-btn.active { background-color: #0f1c2e; border: 1.5px solid #00bcd4; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 188, 212, 0.2); }
     .stage-btn.active i { color: #00bcd4; }
-</style>
+
 </style>
 
 <?php include '../main/layout_header.php'; ?>
