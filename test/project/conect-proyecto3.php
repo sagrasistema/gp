@@ -80,7 +80,7 @@ try {
 // -------------------------------------------------------------------------
 try {
     $stmtList = $pdo->prepare("
-        SELECT p.id, p.nombre, p.orden, c.nombre as categoria_nombre 
+        SELECT p.id, p.nombre, p.orden, p.texto_inadecuado, p.texto_inadecuado2, c.nombre as categoria_nombre 
         FROM audit_pruebas p
         INNER JOIN audit_categorias c ON p.categoria_id = c.id
         INNER JOIN proyecto_pruebas_ejecucion pe ON pe.prueba_id = p.id
