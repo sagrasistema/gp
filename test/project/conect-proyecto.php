@@ -46,29 +46,22 @@ try {
     $pruebasEjecutadas = [];
 }
 
-
 // 3. Cargar lista completa de pruebas para la Fase de Planificación (Etapa 1) con sus categorías
 try {
     $stmtList = $pdo->prepare("
-        SELECT 
-            p.id, 
-            p.nombre, 
-            p.orden, 
-            p.texto_inadecuado, 
-            p.texto_inadecuado2,
-            c.nombre AS categoria_nombre
+        SELECT p.id, p.nombre, p.orden, p.texto_inadecuado, p.texto_inadecuado2, c.nombre as categoria_nombre
         FROM audit_pruebas p
         INNER JOIN audit_categorias c ON p.categoria_id = c.id
         WHERE c.etapa_id = 1
         ORDER BY p.id ASC
     ");
-    
-    $stmtList->execute([':etapa_id' => 1]);
+    $stmtList->execute();
     $pruebasList = $stmtList->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log("Error al cargar listado de pruebas: " . $e->getMessage());
     $pruebasList = [];
 }
+// 3. Cargar lista completa de pruebas para la Fase de Planificación (Etapa 1) con sus categorías
 
 // 4. Cargar métricas de progreso de actividades por prueba para este proyecto
 try {
