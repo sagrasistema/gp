@@ -199,7 +199,7 @@ if ($frecuenciaNum <= 0) {
     }
 
     // -------------------------------------------------------------------------
-    // 3. CARGAR LISTA DE PRUEBAS SELECCIONADAS DE LA FRECUENCIA ACTIVA (ETAPA 3)
+    // 3. CARGAR LISTA DE PRUEBAS SELECCIONADAS DE LA FRECUENCIA ACTIVA (ETAPA 3)sss
     // -------------------------------------------------------------------------
     try {
         $stmtList = $pdo->prepare("
