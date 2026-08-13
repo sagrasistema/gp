@@ -338,6 +338,10 @@ $letraCategoria = chr(64 + $categoriaId);
         <i class="ri-flag-line"></i>4. Conclusión
     </a>
 </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h1 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
+            <i class="ri-dashboard-line" style="color: var(--accent);"></i>Etapa 1 Planificación
+        </h1>
 
         <div style="display: flex; align-items: center; gap: 0.25rem; margin-left: auto;">
             <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
@@ -370,6 +374,7 @@ $letraCategoria = chr(64 + $categoriaId);
                 <i class="ri-close-circle-line"></i> 
             </a>
         </div>
+    </div>
 
 
     <!-- Cabecera de Metadatos del Proyecto Compacta -->
