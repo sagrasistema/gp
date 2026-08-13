@@ -514,7 +514,10 @@ $letraCategoria = chr(64 + $categoriaId);
                     } else {
                         $bgColor = '#64748b';
                     }
-                    
+                    // Corrección sintáctica y evaluación de banderas binarias/booleanas
+                    if ((int)($prueba['texto_inadecuado'] ?? 0) === 1 || (int)($prueba['texto_inadecuado2'] ?? 0) === 1) {
+                        $bgColor = '#ef4444';
+                    }
                     $safeId = htmlspecialchars((string)$pId, ENT_QUOTES, 'UTF-8');
                     $safeCat = htmlspecialchars($prueba['categoria_nombre'] ?? '', ENT_QUOTES, 'UTF-8');
                     $safeNombrePrueba = htmlspecialchars($prueba['nombre'] ?? '', ENT_QUOTES, 'UTF-8');
