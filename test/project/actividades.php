@@ -438,7 +438,7 @@ $letraCategoria = chr(64 + $categoriaId);
 <!-- Bloque de Progreso General de Pruebas -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
         <h1 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
-            <i class="ri-dashboard-line" style="color: var(--accent);"></i> Etapa <?= htmlspecialchars($etapaId, ENT_QUOTES, 'UTF-8') ?>
+            <i class="ri-dashboard-line" style="color: var(--accent);"></i> Etapa <?= htmlspecialchars($etapaId, ENT_QUOTES, 'UTF-8') ?> - <?= htmlspecialchars($metaPrueba->catNombre, ENT_QUOTES, 'UTF-8') ?>
         </h1>
 
         <div style="display: flex; align-items: center; gap: 0.25rem; margin-left: auto;">
@@ -531,9 +531,7 @@ $letraCategoria = chr(64 + $categoriaId);
     </div>
     <!-- Cabecera de la Prueba -->
     <div style="background: #1e293b; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-        <span style="font-size: 0.75rem; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
-            Etapa <?= htmlspecialchars($etapaId, ENT_QUOTES, 'UTF-8') ?>
-        </span>
+       
         <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">
             
             <?= htmlspecialchars($metaPrueba->catNombre, ENT_QUOTES, 'UTF-8') ?>
