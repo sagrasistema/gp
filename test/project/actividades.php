@@ -339,6 +339,37 @@ $letraCategoria = chr(64 + $categoriaId);
     </a>
 </div>
 
+        <div style="display: flex; align-items: center; gap: 0.25rem; margin-left: auto;">
+            <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+                <i class="ri-arrow-go-back-line"></i> 
+            </a>
+            <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+                <i class="ri-screenshot-2-line"></i>
+            </a>
+            <a href="#" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
+                <i class="ri-add-line"></i>
+            </a>
+            
+            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte de avance" onclick="return false;">
+                <i class="ri-file-edit-line"></i> 
+            </a>
+            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte de debilidades" onclick="return false;">
+                <i class="ri-flag-line"></i>
+            </a>
+            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte de Horas" onclick="return false;">
+                <i class="ri-time-line"></i> 
+            </a>
+            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte de asientos" onclick="return false;">
+                <i class="ri-money-dollar-circle-line"></i>
+            </a>
+            <a href="#" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Reporte general">
+                <i class="ri-layout-grid-line"></i> 
+            </a>
+            
+            <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Cancelar (Atrás)">
+                <i class="ri-close-circle-line"></i> 
+            </a>
+        </div>
 
 
     <!-- Cabecera de Metadatos del Proyecto Compacta -->
