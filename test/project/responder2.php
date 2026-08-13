@@ -17,12 +17,24 @@ include '../main/h.php';
 ?>
 <link rel="stylesheet" href="../main/layout.css">
 <style>
-    .prueba-row-container { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); background: #ffffff; gap: 1rem; }
-    .prueba-title { font-size: 0.95rem; font-weight: 600; color: #334155; flex-grow: 1; }
-    .prueba-actions { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end; }
-    .indicator-chk { display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; font-weight: 700; border: 1px solid #cbd5e1; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; }
-    .status-select { padding: 0.4rem; border-radius: 6px; font-size: 0.85rem; border: 1px solid #cbd5e1; font-weight: 600; }
-    .badge-progress { font-size: 0.75rem; background: #f1f5f9; color: #475569; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: 600; white-space: nowrap; }
+    <style>
+    /* Estilos globales compactos */
+    .view-container { padding: 0.5rem; }
+    .prueba-row-container { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.75rem; border-bottom: 1px solid var(--border-color); background: #ffffff; gap: 0.5rem; }
+    .prueba-title { font-size: 0.8rem; font-weight: 600; color: #334155; flex-grow: 1; }
+    .prueba-actions { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end; }
+    .indicator-chk { display: flex; align-items: center; gap: 0.2rem; font-size: 0.7rem; font-weight: 700; border: 1px solid #cbd5e1; padding: 0.15rem 0.35rem; border-radius: 4px; cursor: pointer; }
+    .status-select { padding: 0.25rem; border-radius: 4px; font-size: 0.75rem; border: 1px solid #cbd5e1; font-weight: 600; }
+    .badge-progress { font-size: 0.7rem; background: #f1f5f9; color: #475569; padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 600; white-space: nowrap; }
+    
+    /* Barra de Navegación Compacta */
+    .project-stages-bar { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
+    .stage-btn { flex: 1; min-width: 130px; padding: 6px 12px; background-color: #1e3a5f; border: 1px solid #2b4c7e; border-radius: 6px; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 11px; letter-spacing: 0.3px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease-in-out; text-transform: uppercase; }
+    .stage-btn i { font-size: 13px; color: #00bcd4; }
+    .stage-btn:hover { background-color: #2b4c7e; border-color: #00bcd4; }
+    .stage-btn.active { background-color: #0f1c2e; border: 1.5px solid #00bcd4; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 188, 212, 0.2); }
+    .stage-btn.active i { color: #00bcd4; }
+</style>
 </style>
 
 <?php include '../main/layout_header.php'; ?>
