@@ -294,7 +294,39 @@ include '../main/h.php';
                 $hayPruebasVisibles = true;
                 $letraCat = chr(65 + ($catIndex % 26));
                 $catIndex++;
-        ?>
+                
+    // Precargar en una sola consulta las aserciones de la tabla audit_modelo_6_detalles
+    $asercionesPruebas = [];
+
+    if (isset($pdo) && $pdo instanceof PDO && $proyectoId > 0) {
+        try {
+            $stmtAser = $pdo->prepare("
+                SELECT 
+                    prueba_id,
+                    aser_c, aser_a, aser_eo, aser_co, aser_ro, aser_va, aser_pd
+                FROM audit_modelo_6_detalles
+                WHERE proyecto_id = :proyecto_id
+            ");
+            
+            $stmtAser->execute([':proyecto_id' => $proyectoId]);
+            
+            while ($row = $stmtAser->fetch(PDO::FETCH_ASSOC)) {
+                $asercionesPruebas[(int) $row['prueba_id']] = [
+                    'C'   => (int) ($row['aser_c'] ?? 0) === 1,
+                    'A'   => (int) ($row['aser_a'] ?? 0) === 1,
+                    'E/O' => (int) ($row['aser_eo'] ?? 0) === 1,
+                    'CO'  => (int) ($row['aser_co'] ?? 0) === 1,
+                    'RO'  => (int) ($row['aser_ro'] ?? 0) === 1,
+                    'VA'  => (int) ($row['aser_va'] ?? 0) === 1,
+                    'PD'  => (int) ($row['aser_pd'] ?? 0) === 1,
+                ];
+            }
+        } catch (PDOException $e) {
+            error_log('[Error Carga Aserciones Modelo 6] ' . $e->getMessage());
+            $asercionesPruebas = [];
+        }
+    }
+    ?>
             <div class="accordion-item" style="margin-bottom: 0.4rem; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
                 <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 0.5rem 0.75rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
                     <span><?= $letraCat ?>. <?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
@@ -332,6 +364,31 @@ include '../main/h.php';
                                     </span>
                                 </div>
                             </div>
+                            <!-- Renderizado dinámico de Aserciones marcadas en Modelo 6 -->
+                                <div style="margin-top: 0.25rem; display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap;">
+                                    <span style="font-size: 0.65rem; color: #64748b; font-weight: 600;">Aserciones:</span>
+                                    <?php 
+                                    $tieneAserciones = false;
+                                    foreach ($aserList as $sigla => $isMarcada): 
+                                        if ($isMarcada):
+                                            $tieneAserciones = true;
+                                    ?>
+                                        <span style="font-size: 0.62rem; font-weight: 700; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 0.05rem 0.3rem; border-radius: 3px;" title="Aserción Seleccionada: <?= $sigla; ?>">
+                                            <?= htmlspecialchars($sigla, ENT_QUOTES, 'UTF-8'); ?>
+                                        </span>
+                                    <?php 
+                                        endif;
+                                    endforeach; 
+
+                                    if (!$tieneAserciones): 
+                                    ?>
+                                        <span style="font-size: 0.65rem; color: #94a3b8; font-style: italic;">Sin aserciones marcadas</span>
+                                    <?php endif; ?>
+
+                                    <span style="margin-left: 0.4rem;" class="badge-progress">
+                                        <i class="ri-checkbox-circle-line"></i> Actividades: <?= $completadasAct ?> / <?= $totalAct ?>
+                                    </span>
+                                </div>
                             
                             <div class="prueba-actions">
                                 <div style="display: flex; align-items: center; gap: 0.2rem;">
