@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Validar autenticación de usuario
+// Validar autenticación de usuarioe
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../login.php');
     exit;
