@@ -19,7 +19,7 @@ require_once 'conect-proyecto3.php';
 $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?: 0;
 $frecuenciaNum = filter_input(INPUT_GET, 'frecuencia', FILTER_VALIDATE_INT) ?: 1;
 
-// 2. INICIALIZACIÓN DE VARIABLES PARA LA VISTA (Evita Undefined Variable errors)
+// 2. INICIALIZACIÓN PREVENTIVA DE VARIABLES
 $pageTitle = "Panel de Control de Auditoría";
 $projectData = $projectData ?? (object)[
     'clientName' => 'N/D',
@@ -40,10 +40,13 @@ $progresoActividades = $progresoActividades ?? [];
 $asercionesPruebas = [];
 $categoriesWithTests = [];
 
-// 3. CAPA DE CONSULTA A BASE DE DATOS MEDIANTE PDO (PREPARED STATEMENTS)
+// Lista estándar de las 7 aserciones
+$todasAserciones = ['C', 'A', 'E/O', 'CO', 'RO', 'VA', 'PD'];
+
+// 3. CONSULTA Y PROCESAMIENTO PDO
 if ($proyectoId > 0 && isset($pdo) && $pdo instanceof PDO) {
     try {
-        // Cargar Aserciones Modelo 6
+        // Cargar Aserciones del Modelo 6 por cada prueba
         $stmtAser = $pdo->prepare("
             SELECT 
                 prueba_id,
@@ -65,7 +68,7 @@ if ($proyectoId > 0 && isset($pdo) && $pdo instanceof PDO) {
             ];
         }
 
-        // Cargar Categorías y Pruebas filtradas por Frecuencia
+        // Cargar Categorías y sus Pruebas para la Frecuencia seleccionada
         $stmtCat = $pdo->prepare("SELECT * FROM audit_categorias WHERE etapa_id = 3 ORDER BY orden ASC");
         $stmtCat->execute();
         $categories = $stmtCat->fetchAll(PDO::FETCH_OBJ);
@@ -88,9 +91,24 @@ if ($proyectoId > 0 && isset($pdo) && $pdo instanceof PDO) {
             $pruebas = $stmtP->fetchAll(PDO::FETCH_OBJ);
 
             if (!empty($pruebas)) {
+                // Lógica de Agregación Booleana (OR) de Aserciones para el Cintillo de la Categoría
+                $catAserciones = array_fill_keys($todasAserciones, false);
+
+                foreach ($pruebas as $p) {
+                    $pId = (int)$p->id;
+                    if (isset($asercionesPruebas[$pId])) {
+                        foreach ($todasAserciones as $sigla) {
+                            if (!empty($asercionesPruebas[$pId][$sigla])) {
+                                $catAserciones[$sigla] = true;
+                            }
+                        }
+                    }
+                }
+
                 $categoriesWithTests[] = [
-                    'category' => $cat,
-                    'pruebas'  => $pruebas
+                    'category'      => $cat,
+                    'pruebas'       => $pruebas,
+                    'catAserciones' => $catAserciones
                 ];
             }
         }
@@ -99,7 +117,7 @@ if ($proyectoId > 0 && isset($pdo) && $pdo instanceof PDO) {
     }
 }
 
-// Inclusión del Header HTML
+// Inclusión del Header principal
 include '../main/h.php';
 ?>
 <link rel="stylesheet" href="../main/layout.css">
@@ -115,13 +133,18 @@ include '../main/h.php';
     .stage-btn:hover { background-color: #2b4c7e; border-color: #00bcd4; }
     .stage-btn.active { background-color: #0f1c2e; border: 1.5px solid #00bcd4; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 188, 212, 0.2); }
     .stage-btn.active i { color: #00bcd4; }
+    
+    /* Badges de Aserciones en Cintillo de Categoría */
+    .cat-aser-badge { font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid; }
+    .cat-aser-active { background: #0284c7; color: #ffffff; border-color: #0369a1; }
+    .cat-aser-inactive { background: #e2e8f0; color: #94a3b8; border-color: #cbd5e1; opacity: 0.65; }
 </style>
 
 <?php include '../main/layout_header.php'; ?>
 
 <div class="view-container">
 
-    <!-- Barra de Navegación Rápida por Etapas -->
+    <!-- Navegación de Etapas -->
     <div class="project-stages-bar">
         <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="stage-btn">
             <i class="ri-calendar-check-line"></i>1. Planificación
@@ -139,11 +162,11 @@ include '../main/h.php';
 
     <?php if (isset($_GET['success'])): ?>
         <div class="alert-success" style="padding:0.5rem 0.75rem; background:#d1fae5; color:#065f46; border-radius:6px; margin-bottom:0.75rem; font-size:0.8rem;">
-            <i class="ri-checkbox-circle-fill"></i> Parámetros e indicadores de prueba sincronizados correctamente.
+            <i class="ri-checkbox-circle-fill"></i> Operación realizada correctamente.
         </div>
     <?php endif; ?>
 
-    <!-- Cabecera de Metadatos del Proyecto -->
+    <!-- Resumen de Metadatos del Proyecto -->
     <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 0.75rem; padding: 0.6rem 0.8rem; border-radius: 8px; background: #ffffff; border: 1px solid var(--border-color);">
         <div style="display: flex; flex-direction: column; gap: 0.3rem; border-right: 1px solid #e2e8f0; padding-right: 0.5rem; font-size: 0.8rem;">
             <div>
@@ -190,7 +213,7 @@ include '../main/h.php';
         </div>
     </div>
 
-    <!-- Controles y Título -->
+    <!-- Controles Superiores -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
         <h1 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
             <i class="ri-dashboard-line" style="color: var(--accent);"></i>Etapa 3 Ejecución
@@ -227,7 +250,7 @@ include '../main/h.php';
         </div>
     </div>
 
-    <!-- Bloque de Progreso General -->
+    <!-- Panel de Progreso General -->
     <div class="pruebas-progress-container" style="margin-bottom: 0.75rem; background: #ffffff; padding: 0.6rem 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
             <h4 style="margin: 0; font-size: 0.8rem; color: #1e293b; font-weight: 700; text-transform: uppercase;">
@@ -281,7 +304,7 @@ include '../main/h.php';
             <?php endif; ?>
         </div>
 
-        <!-- Barras de Progreso -->
+        <!-- Barras Estadísticas de Progreso -->
         <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(12, 1fr); gap: 0.5rem;">
             <div style="grid-column: span 6; background: #ffffff; padding: 0.4rem; border-radius: 4px; border: 1px solid #f1f5f9;">
                 <div style="display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 600; color: #475569; margin-bottom: 0.25rem;">
@@ -305,7 +328,7 @@ include '../main/h.php';
         </div>
     </div>
 
-    <!-- Acordeones (Categorías y Pruebas) -->
+    <!-- Acordeón de Categorías y Pruebas -->
     <div class="accordion-container">
         <?php
         $catIndex = 0;
@@ -315,15 +338,34 @@ include '../main/h.php';
             foreach ($categoriesWithTests as $item):
                 $cat = $item['category'];
                 $pruebas = $item['pruebas'];
+                $catAserciones = $item['catAserciones'];
                 $letraCat = chr(65 + ($catIndex % 26));
                 $catIndex++;
         ?>
             <div class="accordion-item" style="margin-bottom: 0.4rem; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
-                <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 0.5rem 0.75rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                    <span><?= $letraCat ?>. <?= htmlspecialchars((string)$cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
-                    <i class="ri-arrow-down-s-line"></i>
+                
+                <!-- CINTILLO / ENCABEZADO DE LA CATEGORÍA CON LAS 7 ASERCIONES -->
+                <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 0.5rem 0.75rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span><?= $letraCat ?>. <?= htmlspecialchars((string)$cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
+                    </div>
+
+                    <!-- Renderizado de Aserciones Unificadas de la Categoría -->
+                    <div style="display: flex; align-items: center; gap: 0.2rem;" onclick="event.stopPropagation();">
+                        <span style="font-size: 0.65rem; color: #475569; font-weight: 600; margin-right: 0.2rem;">Aserciones:</span>
+                        <?php foreach ($todasAserciones as $sigla): ?>
+                            <?php $isActiva = !empty($catAserciones[$sigla]); ?>
+                            <span class="cat-aser-badge <?= $isActiva ? 'cat-aser-active' : 'cat-aser-inactive' ?>" 
+                                  title="<?= $isActiva ? "Aserción $sigla marcada en pruebas de esta categoría" : "Aserción $sigla inactiva" ?>">
+                                <?= $sigla ?>
+                            </span>
+                        <?php endforeach; ?>
+                        <i class="ri-arrow-down-s-line" style="margin-left: 0.5rem; font-size: 1rem; color: #64748b;"></i>
+                    </div>
                 </div>
                 
+                <!-- LISTADO INTERNO DE PRUEBAS -->
                 <div class="accordion-content" style="display: none; background: #ffffff;">
                     <?php foreach ($pruebas as $pr): 
                         $saved = $pruebasEjecutadas[$pr->id] ?? null;
@@ -357,23 +399,23 @@ include '../main/h.php';
                                     </span>
                                 </div>
 
-                                <!-- Renderizado Dinámico de Aserciones -->
+                                <!-- Aserciones específicas de la prueba individual -->
                                 <div style="margin-top: 0.25rem; display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap;">
-                                    <span style="font-size: 0.65rem; color: #64748b; font-weight: 600;">Aserciones:</span>
+                                    <span style="font-size: 0.65rem; color: #64748b; font-weight: 600;">Aserciones Prueba:</span>
                                     <?php 
-                                    $tieneAserciones = false;
+                                    $tieneAsercionesPrueba = false;
                                     foreach ($aserList as $sigla => $isMarcada): 
                                         if ($isMarcada):
-                                            $tieneAserciones = true;
+                                            $tieneAsercionesPrueba = true;
                                     ?>
-                                        <span style="font-size: 0.62rem; font-weight: 700; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 0.05rem 0.3rem; border-radius: 3px;" title="Aserción Seleccionada: <?= $sigla; ?>">
+                                        <span style="font-size: 0.62rem; font-weight: 700; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 0.05rem 0.3rem; border-radius: 3px;">
                                             <?= htmlspecialchars($sigla, ENT_QUOTES, 'UTF-8'); ?>
                                         </span>
                                     <?php 
                                         endif;
                                     endforeach; 
 
-                                    if (!$tieneAserciones): 
+                                    if (!$tieneAsercionesPrueba): 
                                     ?>
                                         <span style="font-size: 0.65rem; color: #94a3b8; font-style: italic;">Sin aserciones marcadas</span>
                                     <?php endif; ?>
