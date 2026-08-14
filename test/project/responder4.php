@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 
 // v/proyectos/responder.php
 include '../main/config.php';
-include 'conect-proyecto2.php';
+include 'conect-proyecto4.php';
 
 $pageTitle = "Panel de Control de Auditoría";
 include '../main/h.php';
