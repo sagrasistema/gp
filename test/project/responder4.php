@@ -231,28 +231,54 @@ include '../main/h.php';
             </div>
         </div>
     </div>
-
-    <!-- Acordeones Compactos -->
+<!-- Acordeones Compactos con Indicadores Agregados -->
     <div class="accordion-container">
         <?php
-        $stmtCat = $pdo->prepare("SELECT * FROM audit_categorias WHERE etapa_id = 4 ORDER BY orden ASC");
-        $stmtCat->execute();
-        $categories = $stmtCat->fetchAll(PDO::FETCH_OBJ);
+        try {
+            $stmtCat = $pdo->prepare("SELECT id, nombre FROM audit_categorias WHERE etapa_id = 4 ORDER BY orden ASC");
+            $stmtCat->execute();
+            $categories = $stmtCat->fetchAll(PDO::FETCH_OBJ);
 
-        $catIndex = 0;
-        $pruebaIndex = 1;
+            $catIndex = 0;
+            $pruebaIndex = 1;
 
-        foreach ($categories as $cat):
-            $letraCat = chr(65 + ($catIndex % 26));
-            $catIndex++;
+            foreach ($categories as $cat):
+                $letraCat = chr(65 + ($catIndex % 26));
+                $catIndex++;
 
-            $stmtP = $pdo->prepare("SELECT * FROM audit_pruebas WHERE categoria_id = :catId ORDER BY orden ASC");
-            $stmtP->execute([':catId' => $cat->id]);
-            $pruebas = $stmtP->fetchAll(PDO::FETCH_OBJ);
+                // Consultar pruebas de la categoría actual
+                $stmtP = $pdo->prepare("SELECT id, nombre FROM audit_pruebas WHERE categoria_id = :catId ORDER BY orden ASC");
+                $stmtP->execute([':catId' => $cat->id]);
+                $pruebas = $stmtP->fetchAll(PDO::FETCH_OBJ);
+
+                // Evaluar la presencia de indicadores a nivel de categoría
+                $catHasCI = false;
+                $catHasCG = false;
+                $catHasSC = false;
+                $catHasAA = false;
+
+                foreach ($pruebas as $prCheck) {
+                    $savedCheck = $pruebasEjecutadas[$prCheck->id] ?? [];
+                    if (!empty($savedCheck['indicador_ci'])) { $catHasCI = true; }
+                    if (!empty($savedCheck['indicador_cg'])) { $catHasCG = true; }
+                    if (!empty($savedCheck['indicador_sc'])) { $catHasSC = true; }
+                    if (!empty($savedCheck['indicador_aa'])) { $catHasAA = true; }
+                }
         ?>
-            <div class="accordion-item" style="margin-bottom: 0.4rem; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
+            <div class="accordion-item" style="margin-bottom: 0.4rem; border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; overflow: hidden;">
                 <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 0.5rem 0.75rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                    <span><?= $letraCat ?>. <?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span><?= $letraCat ?>. <?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
+                        
+                        <!-- Indicadores Agregados a Nivel de Categoría -->
+                        <div style="display: flex; align-items: center; gap: 0.2rem;" onclick="event.stopPropagation();">
+                            <span style="font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.25rem; border-radius: 3px; border: 1px solid <?= $catHasCI ? '#ca8a04' : '#cbd5e1' ?>; background: <?= $catHasCI ? '#fef9c3' : '#ffffff' ?>; color: <?= $catHasCI ? '#ca8a04' : '#94a3b8' ?>;" title="Debilidades de Control Interno en esta Categoría">CI</span>
+                            <span style="font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.25rem; border-radius: 3px; border: 1px solid <?= $catHasCG ? '#ea580c' : '#cbd5e1' ?>; background: <?= $catHasCG ? '#ffedd5' : '#ffffff' ?>; color: <?= $catHasCG ? '#ea580c' : '#94a3b8' ?>;" title="Carta de Gerencia en esta Categoría">CG</span>
+                            <span style="font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.25rem; border-radius: 3px; border: 1px solid <?= $catHasSC ? '#dc2626' : '#cbd5e1' ?>; background: <?= $catHasSC ? '#fee2e2' : '#ffffff' ?>; color: <?= $catHasSC ? '#dc2626' : '#94a3b8' ?>;" title="Situaciones Críticas en esta Categoría">SC</span>
+                            <span style="font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.25rem; border-radius: 3px; border: 1px solid <?= $catHasAA ? '#2563eb' : '#cbd5e1' ?>; background: <?= $catHasAA ? '#dbeafe' : '#ffffff' ?>; color: <?= $catHasAA ? '#2563eb' : '#94a3b8' ?>;" title="Asuntos de Auditoría en esta Categoría">AA</span>
+                        </div>
+                    </div>
+                    
                     <i class="ri-arrow-down-s-line"></i>
                 </div>
                 
@@ -262,12 +288,12 @@ include '../main/h.php';
                         $savedStatus = $saved['estado'] ?? 'en_proceso';
                         
                         $statusLabels = [
-                            'en_proceso' => '⏳ En proceso',
-                            'completado' => '✅ Completado',
-                            'por_corregir_lider' => '⚠️ Por Corregir Lider',
+                            'en_proceso'          => '⏳ En proceso',
+                            'completado'          => '✅ Completado',
+                            'por_corregir_lider'  => '⚠️ Por Corregir Lider',
                             'por_corregir_riesgo' => '🚨 Por Corregir Riesgo',
-                            'revisado' => '🔹 Revisado',
-                            'cerrado' => '🔒 Cerrado'
+                            'revisado'            => '🔹 Revisado',
+                            'cerrado'             => '🔒 Cerrado'
                         ];
                         $statusText = $statusLabels[$savedStatus] ?? '⏳ En proceso';
                         
@@ -314,8 +340,15 @@ include '../main/h.php';
                     ?>
                 </div>
             </div>
-        <?php endforeach; ?>
+        <?php 
+            endforeach; 
+        } catch (PDOException $e) {
+            error_log("Error al cargar categorias y pruebas: " . $e->getMessage());
+            echo '<div class="alert-danger" style="padding: 0.5rem; background: #fee2e2; color: #991b1b; border-radius: 4px; font-size: 0.8rem;">Ocurrió un error al cargar la información. Por favor intente más tarde.</div>';
+        }
+        ?>
     </div>
+
 </div>
 
 <?php 
