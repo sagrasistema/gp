@@ -231,7 +231,7 @@ include '../main/h.php';
             </div>
         </div>
     </div>
-<!-- Acordeones Compactos con Indicadores Agregados -->
+<!-- Acordeones Compactos con Indicadores Agregados (Alineados a la Derecha) -->
     <div class="accordion-container">
         <?php
         try {
@@ -246,7 +246,7 @@ include '../main/h.php';
                 $letraCat = chr(65 + ($catIndex % 26));
                 $catIndex++;
 
-                // Consultar pruebas de la categoría actual
+                // Consultar pruebas asociadas a la categoría actual
                 $stmtP = $pdo->prepare("SELECT id, nombre FROM audit_pruebas WHERE categoria_id = :catId ORDER BY orden ASC");
                 $stmtP->execute([':catId' => $cat->id]);
                 $pruebas = $stmtP->fetchAll(PDO::FETCH_OBJ);
@@ -267,19 +267,26 @@ include '../main/h.php';
         ?>
             <div class="accordion-item" style="margin-bottom: 0.4rem; border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; overflow: hidden;">
                 <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 0.5rem 0.75rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                    
+                    <!-- Lado Izquierdo: Nombre de la Categoría -->
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <span><?= $letraCat ?>. <?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
-                        
-                        <!-- Indicadores Agregados a Nivel de Categoría -->
+                    </div>
+
+                    <!-- Lado Derecho: Indicadores de Categoría + Icono de Acordeón -->
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <!-- Indicadores Agregados -->
                         <div style="display: flex; align-items: center; gap: 0.2rem;" onclick="event.stopPropagation();">
                             <span style="font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.25rem; border-radius: 3px; border: 1px solid <?= $catHasCI ? '#ca8a04' : '#cbd5e1' ?>; background: <?= $catHasCI ? '#fef9c3' : '#ffffff' ?>; color: <?= $catHasCI ? '#ca8a04' : '#94a3b8' ?>;" title="Debilidades de Control Interno en esta Categoría">CI</span>
                             <span style="font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.25rem; border-radius: 3px; border: 1px solid <?= $catHasCG ? '#ea580c' : '#cbd5e1' ?>; background: <?= $catHasCG ? '#ffedd5' : '#ffffff' ?>; color: <?= $catHasCG ? '#ea580c' : '#94a3b8' ?>;" title="Carta de Gerencia en esta Categoría">CG</span>
                             <span style="font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.25rem; border-radius: 3px; border: 1px solid <?= $catHasSC ? '#dc2626' : '#cbd5e1' ?>; background: <?= $catHasSC ? '#fee2e2' : '#ffffff' ?>; color: <?= $catHasSC ? '#dc2626' : '#94a3b8' ?>;" title="Situaciones Críticas en esta Categoría">SC</span>
                             <span style="font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.25rem; border-radius: 3px; border: 1px solid <?= $catHasAA ? '#2563eb' : '#cbd5e1' ?>; background: <?= $catHasAA ? '#dbeafe' : '#ffffff' ?>; color: <?= $catHasAA ? '#2563eb' : '#94a3b8' ?>;" title="Asuntos de Auditoría en esta Categoría">AA</span>
                         </div>
+
+                        <!-- Flecha Desplegable -->
+                        <i class="ri-arrow-down-s-line" style="font-size: 1rem; color: #64748b;"></i>
                     </div>
-                    
-                    <i class="ri-arrow-down-s-line"></i>
+
                 </div>
                 
                 <div class="accordion-content" style="display: none; background: #fff;">
