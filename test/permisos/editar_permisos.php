@@ -35,17 +35,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
-        // Obtener todos los módulos activos para iteración segura
+        // Obtener todos los módulos activos
         $stmtModulos = $pdo->query("SELECT id FROM modulos WHERE activo = 1");
         $modulosActivos = $stmtModulos->fetchAll(PDO::FETCH_COLUMN);
 
-        // Consulta UPSERT en la tabla usuario_permisos
+        // Consulta UPSERT con la nueva columna 'puede_acceder'
         $sqlUpsert = "
             INSERT INTO usuario_permisos 
-                (usuario_id, modulo_id, puede_ver, puede_crear, puede_editar, puede_eliminar)
+                (usuario_id, modulo_id, puede_acceder, puede_ver, puede_crear, puede_editar, puede_eliminar)
             VALUES 
-                (:usuario_id, :modulo_id, :ver, :crear, :editar, :eliminar)
+                (:usuario_id, :modulo_id, :acceder, :ver, :crear, :editar, :eliminar)
             ON DUPLICATE KEY UPDATE
+                puede_acceder = VALUES(puede_acceder),
                 puede_ver = VALUES(puede_ver),
                 puede_crear = VALUES(puede_crear),
                 puede_editar = VALUES(puede_editar),
@@ -57,7 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach ($modulosActivos as $mId) {
             $mId = (int)$mId;
 
-            // Extraer valor (1 si fue marcado en el POST, 0 si no)
+            // Extraer valores (1 si fue marcado en el POST, 0 si no)
+            $acceder  = isset($permisosPost[$mId]['acceder']) ? 1 : 0;
             $ver      = isset($permisosPost[$mId]['ver']) ? 1 : 0;
             $crear    = isset($permisosPost[$mId]['crear']) ? 1 : 0;
             $editar   = isset($permisosPost[$mId]['editar']) ? 1 : 0;
@@ -66,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmtSave->execute([
                 ':usuario_id' => $usuarioIdTarget,
                 ':modulo_id'  => $mId,
+                ':acceder'    => $acceder,
                 ':ver'        => $ver,
                 ':crear'      => $crear,
                 ':editar'     => $editar,
@@ -92,7 +95,7 @@ $usuarioTarget = null;
 $matrizPermisos = [];
 
 try {
-    // A. Obtener datos del usuario ajustados al esquema real de la tabla usuarios
+    // A. Obtener datos del usuario
     $stmtUser = $pdo->prepare("SELECT id, username, nombre_completo, rol FROM usuarios WHERE id = :id LIMIT 1");
     $stmtUser->execute([':id' => $usuarioIdTarget]);
     $usuarioTarget = $stmtUser->fetch(PDO::FETCH_OBJ);
@@ -102,12 +105,13 @@ try {
         exit;
     }
 
-    // B. Obtener módulos y permisos asignados mediante LEFT JOIN
+    // B. Obtener módulos y permisos asignados incluyendo 'puede_acceder'
     $sqlPermisos = "
         SELECT 
             m.id AS modulo_id,
             m.nombre AS modulo_nombre,
             m.descripcion AS modulo_descripcion,
+            COALESCE(up.puede_acceder, 0) AS puede_acceder,
             COALESCE(up.puede_ver, 0) AS puede_ver,
             COALESCE(up.puede_crear, 0) AS puede_crear,
             COALESCE(up.puede_editar, 0) AS puede_editar,
@@ -204,7 +208,7 @@ $currentTab     = 'usuarios';
         </div>
     <?php endif; ?>
 
-    <!-- Ficha Informativa con Nombres de Campos Corregidos -->
+    <!-- Ficha Informativa -->
     <div class="user-info-card">
         <div>
             <span style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Usuario:</span>
@@ -228,11 +232,12 @@ $currentTab     = 'usuarios';
             <table class="custom-table">
                 <thead>
                     <tr>
-                        <th style="width: 40%;">Módulo / Sección</th>
-                        <th style="width: 15%; text-align: center;">Ver</th>
-                        <th style="width: 15%; text-align: center;">Crear</th>
-                        <th style="width: 15%; text-align: center;">Editar</th>
-                        <th style="width: 15%; text-align: center;">Eliminar</th>
+                        <th style="width: 35%;">Módulo / Sección</th>
+                        <th style="width: 13%; text-align: center;">Acceder</th>
+                        <th style="width: 13%; text-align: center;">Consultar</th>
+                        <th style="width: 13%; text-align: center;">Crear</th>
+                        <th style="width: 13%; text-align: center;">Editar</th>
+                        <th style="width: 13%; text-align: center;">Eliminar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -246,7 +251,17 @@ $currentTab     = 'usuarios';
                                         <br><small style="color: #64748b; font-size: 0.75rem;"><?= htmlspecialchars($m->modulo_descripcion, ENT_QUOTES, 'UTF-8') ?></small>
                                     <?php endif; ?>
                                 </td>
+
+                                <!-- Permiso Acceder -->
+                                <td style="text-align: center; vertical-align: middle; background-color: rgba(8, 133, 91, 0.03);">
+                                    <input type="checkbox" 
+                                           name="permisos[<?= $mId ?>][acceder]" 
+                                           value="1" 
+                                           class="permission-checkbox"
+                                           <?= (int)$m->puede_acceder === 1 ? 'checked' : '' ?>>
+                                </td>
                                 
+                                <!-- Permiso Ver -->
                                 <td style="text-align: center; vertical-align: middle;">
                                     <input type="checkbox" 
                                            name="permisos[<?= $mId ?>][ver]" 
@@ -255,6 +270,7 @@ $currentTab     = 'usuarios';
                                            <?= (int)$m->puede_ver === 1 ? 'checked' : '' ?>>
                                 </td>
 
+                                <!-- Permiso Crear -->
                                 <td style="text-align: center; vertical-align: middle;">
                                     <input type="checkbox" 
                                            name="permisos[<?= $mId ?>][crear]" 
@@ -263,6 +279,7 @@ $currentTab     = 'usuarios';
                                            <?= (int)$m->puede_crear === 1 ? 'checked' : '' ?>>
                                 </td>
 
+                                <!-- Permiso Editar -->
                                 <td style="text-align: center; vertical-align: middle;">
                                     <input type="checkbox" 
                                            name="permisos[<?= $mId ?>][editar]" 
@@ -271,6 +288,7 @@ $currentTab     = 'usuarios';
                                            <?= (int)$m->puede_editar === 1 ? 'checked' : '' ?>>
                                 </td>
 
+                                <!-- Permiso Eliminar -->
                                 <td style="text-align: center; vertical-align: middle;">
                                     <input type="checkbox" 
                                            name="permisos[<?= $mId ?>][eliminar]" 
@@ -282,7 +300,7 @@ $currentTab     = 'usuarios';
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="5" style="text-align: center; color: #64748b; padding: 2rem;">
+                            <td colspan="6" style="text-align: center; color: #64748b; padding: 2rem;">
                                 No se encontraron módulos activos registrados en la base de datos.
                             </td>
                         </tr>
