@@ -34,19 +34,22 @@ include '../main/h.php';
     .stage-btn:hover { background-color: #2b4c7e; border-color: #00bcd4; }
     .stage-btn.active { background-color: #0f1c2e; border: 1.5px solid #00bcd4; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 188, 212, 0.2); }
     .stage-btn.active i { color: #00bcd4; }
+
+    /* Indicadores de Categoría */
+    .cat-indicators-container { display: flex; align-items: center; gap: 0.25rem; margin-left: auto; margin-right: 0.75rem; }
 </style>
 
 <?php include '../main/layout_header.php'; ?>
 
 <div class="view-container">
     <?php
-    // Capturar y validar el ID del proyecto desde la URL de forma segurass
+    // Capturar y validar el ID del proyecto desde la URL de forma segura
     $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
     ?>
 
     <!-- Barra de Navegación Rápida por Etapas del Proyecto -->
     <div class="project-stages-bar">
-        <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="stage-btn ">
+        <a href="responder.php?proyectoId=<?= $proyectoId ?>" class="stage-btn">
             <i class="ri-calendar-check-line"></i>1. Planificación
         </a>
         <a href="responder2.php?proyectoId=<?= $proyectoId ?>" class="stage-btn active">
@@ -104,7 +107,7 @@ include '../main/h.php';
                 }
                 ?>
                 <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Fecha de Revisión</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($fechaRemisionFormateada ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+                <strong style="color: #1e293b;"><?= htmlspecialchars($fechaRemisionFormateada, ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
             <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.25rem;">
                 <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Gerente Encargado</span><br>
@@ -249,11 +252,35 @@ include '../main/h.php';
             $stmtP = $pdo->prepare("SELECT * FROM audit_pruebas WHERE categoria_id = :catId ORDER BY orden ASC");
             $stmtP->execute([':catId' => $cat->id]);
             $pruebas = $stmtP->fetchAll(PDO::FETCH_OBJ);
+
+            // Calcular flags globales de la categoría
+            $catHasCI = false;
+            $catHasCG = false;
+            $catHasSC = false;
+            $catHasAA = false;
+
+            foreach ($pruebas as $checkPr) {
+                $savedCheck = $pruebasEjecutadas[$checkPr->id] ?? null;
+                if (!empty($savedCheck['indicador_ci'])) $catHasCI = true;
+                if (!empty($savedCheck['indicador_cg'])) $catHasCG = true;
+                if (!empty($savedCheck['indicador_sc'])) $catHasSC = true;
+                if (!empty($savedCheck['indicador_aa'])) $catHasAA = true;
+            }
         ?>
             <div class="accordion-item" style="margin-bottom: 0.4rem; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
                 <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 0.5rem 0.75rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
                     <span><?= $letraCat ?>. <?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
-                    <i class="ri-arrow-down-s-line"></i>
+                    
+                    <div style="display: flex; align-items: center;">
+                        <!-- Indicadores Consolidados a nivel de Categoría -->
+                        <div class="cat-indicators-container">
+                            <span style="font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid <?= $catHasCI ? '#ca8a04' : '#cbd5e1' ?>; background: <?= $catHasCI ? '#fef9c3' : '#ffffff' ?>; color: <?= $catHasCI ? '#ca8a04' : '#94a3b8' ?>;" title="Categoría contiene Debilidades de Control Interno (Amarillo)">CI</span>
+                            <span style="font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid <?= $catHasCG ? '#ea580c' : '#cbd5e1' ?>; background: <?= $catHasCG ? '#ffedd5' : '#ffffff' ?>; color: <?= $catHasCG ? '#ea580c' : '#94a3b8' ?>;" title="Categoría contiene Carta de Gerencia (Naranja)">CG</span>
+                            <span style="font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid <?= $catHasSC ? '#dc2626' : '#cbd5e1' ?>; background: <?= $catHasSC ? '#fee2e2' : '#ffffff' ?>; color: <?= $catHasSC ? '#dc2626' : '#94a3b8' ?>;" title="Categoría contiene Situaciones Críticas (Rojo)">SC</span>
+                            <span style="font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid <?= $catHasAA ? '#2563eb' : '#cbd5e1' ?>; background: <?= $catHasAA ? '#dbeafe' : '#ffffff' ?>; color: <?= $catHasAA ? '#2563eb' : '#94a3b8' ?>;" title="Categoría contiene Asuntos de Auditoría (Azul)">AA</span>
+                        </div>
+                        <i class="ri-arrow-down-s-line"></i>
+                    </div>
                 </div>
                 
                 <div class="accordion-content" style="display: none; background: #fff;">
