@@ -274,6 +274,7 @@ include '../main/h.php';
                     <div style="display: flex; align-items: center;">
                         <!-- Indicadores Consolidados a nivel de Categoría -->
                         <div class="cat-indicators-container">
+                            <span style="font-size: 0.65rem; color: #475569; font-weight: 600; margin-right: 0.2rem;">Indicadores:</span>
                             <span style="font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid <?= $catHasCI ? '#ca8a04' : '#cbd5e1' ?>; background: <?= $catHasCI ? '#fef9c3' : '#ffffff' ?>; color: <?= $catHasCI ? '#ca8a04' : '#94a3b8' ?>;" title="Categoría contiene Debilidades de Control Interno (Amarillo)">CI</span>
                             <span style="font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid <?= $catHasCG ? '#ea580c' : '#cbd5e1' ?>; background: <?= $catHasCG ? '#ffedd5' : '#ffffff' ?>; color: <?= $catHasCG ? '#ea580c' : '#94a3b8' ?>;" title="Categoría contiene Carta de Gerencia (Naranja)">CG</span>
                             <span style="font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid <?= $catHasSC ? '#dc2626' : '#cbd5e1' ?>; background: <?= $catHasSC ? '#fee2e2' : '#ffffff' ?>; color: <?= $catHasSC ? '#dc2626' : '#94a3b8' ?>;" title="Categoría contiene Situaciones Críticas (Rojo)">SC</span>
