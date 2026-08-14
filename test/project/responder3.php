@@ -91,7 +91,7 @@ if ($proyectoId > 0 && isset($pdo) && $pdo instanceof PDO) {
             $pruebas = $stmtP->fetchAll(PDO::FETCH_OBJ);
 
             if (!empty($pruebas)) {
-                // Lógica de Agregación Booleana (OR) de Aserciones para el Cintillo de la Categoría
+                // Lógica de Agregación Booleana (OR) de Aserciones para la Categoría
                 $catAserciones = array_fill_keys($todasAserciones, false);
 
                 foreach ($pruebas as $p) {
@@ -134,10 +134,10 @@ include '../main/h.php';
     .stage-btn.active { background-color: #0f1c2e; border: 1.5px solid #00bcd4; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 188, 212, 0.2); }
     .stage-btn.active i { color: #00bcd4; }
     
-    /* Badges de Aserciones en Cintillo de Categoría */
-    .cat-aser-badge { font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid; }
-    .cat-aser-active { background: #0284c7; color: #ffffff; border-color: #0369a1; }
-    .cat-aser-inactive { background: #e2e8f0; color: #94a3b8; border-color: #cbd5e1; opacity: 0.65; }
+    /* Badges Unificados de Aserciones (Categoría y Pruebas) */
+    .aser-badge { font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid; }
+    .aser-active { background: #0284c7; color: #ffffff; border-color: #0369a1; }
+    .aser-inactive { background: #e2e8f0; color: #94a3b8; border-color: #cbd5e1; opacity: 0.65; }
 </style>
 
 <?php include '../main/layout_header.php'; ?>
@@ -356,7 +356,7 @@ include '../main/h.php';
                         <span style="font-size: 0.65rem; color: #475569; font-weight: 600; margin-right: 0.2rem;">Aserciones:</span>
                         <?php foreach ($todasAserciones as $sigla): ?>
                             <?php $isActiva = !empty($catAserciones[$sigla]); ?>
-                            <span class="cat-aser-badge <?= $isActiva ? 'cat-aser-active' : 'cat-aser-inactive' ?>" 
+                            <span class="aser-badge <?= $isActiva ? 'aser-active' : 'aser-inactive' ?>" 
                                   title="<?= $isActiva ? "Aserción $sigla marcada en pruebas de esta categoría" : "Aserción $sigla inactiva" ?>">
                                 <?= $sigla ?>
                             </span>
@@ -398,31 +398,21 @@ include '../main/h.php';
                                         <i class="ri-checkbox-circle-line"></i> Actividades: <?= $completadasAct ?> / <?= $totalAct ?>
                                     </span>
                                 </div>
-
-                                <!-- Aserciones específicas de la prueba individual -->
-                                <div style="margin-top: 0.25rem; display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap;">
-                                    <span style="font-size: 0.65rem; color: #64748b; font-weight: 600;">Aserciones Prueba:</span>
-                                    <?php 
-                                    $tieneAsercionesPrueba = false;
-                                    foreach ($aserList as $sigla => $isMarcada): 
-                                        if ($isMarcada):
-                                            $tieneAsercionesPrueba = true;
-                                    ?>
-                                        <span style="font-size: 0.62rem; font-weight: 700; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 0.05rem 0.3rem; border-radius: 3px;">
-                                            <?= htmlspecialchars($sigla, ENT_QUOTES, 'UTF-8'); ?>
-                                        </span>
-                                    <?php 
-                                        endif;
-                                    endforeach; 
-
-                                    if (!$tieneAsercionesPrueba): 
-                                    ?>
-                                        <span style="font-size: 0.65rem; color: #94a3b8; font-style: italic;">Sin aserciones marcadas</span>
-                                    <?php endif; ?>
-                                </div>
                             </div>
 
                             <div class="prueba-actions">
+                                <!-- Aserciones Específicas de la Prueba (Mismo diseño que la categoría, pegado a la izquierda de los indicadores) -->
+                                <div style="display: flex; align-items: center; gap: 0.18rem; margin-right: 0.25rem;">
+                                    <?php foreach ($todasAserciones as $sigla): ?>
+                                        <?php $isActivaPrueba = !empty($aserList[$sigla]); ?>
+                                        <span class="aser-badge <?= $isActivaPrueba ? 'aser-active' : 'aser-inactive' ?>" 
+                                              title="<?= $isActivaPrueba ? "Aserción $sigla marcada en esta prueba" : "Aserción $sigla inactiva" ?>">
+                                            <?= $sigla ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                </div>
+
+                                <!-- Indicadores de Control Interno, Carta de Gerencia, etc. -->
                                 <div style="display: flex; align-items: center; gap: 0.2rem;">
                                     <?php 
                                     $hasCI = !empty($saved['indicador_ci']);
