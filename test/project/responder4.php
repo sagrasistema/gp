@@ -326,6 +326,7 @@ include '../main/h.php';
                                     $hasSC = !empty($saved['indicador_sc']);
                                     $hasAA = !empty($saved['indicador_aa']);
                                     ?>
+                                    <span style="font-size: 0.65rem; color: #475569; font-weight: 600; margin-right: 0.2rem;">Indicadores:</span>
                                     <span style="font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.3rem; border-radius: 3px; border: 1px solid <?= $hasCI ? '#ca8a04' : '#cbd5e1' ?>; background: <?= $hasCI ? '#fef9c3' : '#f8fafc' ?>; color: <?= $hasCI ? '#ca8a04' : '#94a3b8' ?>;" title="Debilidades de Control Interno (Amarillo)">CI</span>
                                     <span style="font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.3rem; border-radius: 3px; border: 1px solid <?= $hasCG ? '#ea580c' : '#cbd5e1' ?>; background: <?= $hasCG ? '#ffedd5' : '#f8fafc' ?>; color: <?= $hasCG ? '#ea580c' : '#94a3b8' ?>;" title="Carta de Gerencia (Naranja)">CG</span>
                                     <span style="font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.3rem; border-radius: 3px; border: 1px solid <?= $hasSC ? '#dc2626' : '#cbd5e1' ?>; background: <?= $hasSC ? '#fee2e2' : '#f8fafc' ?>; color: <?= $hasSC ? '#dc2626' : '#94a3b8' ?>;" title="Situaciones Críticas (Rojo)">SC</span>
