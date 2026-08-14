@@ -91,11 +91,19 @@ if ($proyectoId > 0 && isset($pdo) && $pdo instanceof PDO) {
             $pruebas = $stmtP->fetchAll(PDO::FETCH_OBJ);
 
             if (!empty($pruebas)) {
-                // Lógica de Agregación Booleana (OR) de Aserciones para la Categoría
+                // Lógica de Agregación Booleana (OR) de Aserciones e Indicadores para la Categoría
                 $catAserciones = array_fill_keys($todasAserciones, false);
+                $catIndicadores = [
+                    'CI' => false,
+                    'CG' => false,
+                    'SC' => false,
+                    'AA' => false
+                ];
 
                 foreach ($pruebas as $p) {
                     $pId = (int)$p->id;
+
+                    // Agregación de Aserciones
                     if (isset($asercionesPruebas[$pId])) {
                         foreach ($todasAserciones as $sigla) {
                             if (!empty($asercionesPruebas[$pId][$sigla])) {
@@ -103,12 +111,28 @@ if ($proyectoId > 0 && isset($pdo) && $pdo instanceof PDO) {
                             }
                         }
                     }
+
+                    // Agregación de Indicadores (CI, CG, SC, AA)
+                    $savedPrueba = $pruebasEjecutadas[$pId] ?? [];
+                    if (!empty($savedPrueba['indicador_ci'])) {
+                        $catIndicadores['CI'] = true;
+                    }
+                    if (!empty($savedPrueba['indicador_cg'])) {
+                        $catIndicadores['CG'] = true;
+                    }
+                    if (!empty($savedPrueba['indicador_sc'])) {
+                        $catIndicadores['SC'] = true;
+                    }
+                    if (!empty($savedPrueba['indicador_aa'])) {
+                        $catIndicadores['AA'] = true;
+                    }
                 }
 
                 $categoriesWithTests[] = [
-                    'category'      => $cat,
-                    'pruebas'       => $pruebas,
-                    'catAserciones' => $catAserciones
+                    'category'       => $cat,
+                    'pruebas'        => $pruebas,
+                    'catAserciones'  => $catAserciones,
+                    'catIndicadores' => $catIndicadores
                 ];
             }
         }
@@ -134,10 +158,18 @@ include '../main/h.php';
     .stage-btn.active { background-color: #0f1c2e; border: 1.5px solid #00bcd4; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 188, 212, 0.2); }
     .stage-btn.active i { color: #00bcd4; }
     
-    /* Badges Unificados de Aserciones (Categoría y Pruebas) */
+    /* Badges Unificados de Aserciones */
     .aser-badge { font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid; }
     .aser-active { background: #0284c7; color: #ffffff; border-color: #0369a1; }
     .aser-inactive { background: #e2e8f0; color: #94a3b8; border-color: #cbd5e1; opacity: 0.65; }
+
+    /* Badges Unificados de Indicadores */
+    .ind-badge { font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid; }
+    .ind-ci-active { background: #fef9c3; color: #ca8a04; border-color: #ca8a04; }
+    .ind-cg-active { background: #ffedd5; color: #ea580c; border-color: #ea580c; }
+    .ind-sc-active { background: #fee2e2; color: #dc2626; border-color: #dc2626; }
+    .ind-aa-active { background: #dbeafe; color: #2563eb; border-color: #2563eb; }
+    .ind-inactive { background: #f8fafc; color: #94a3b8; border-color: #cbd5e1; opacity: 0.65; }
 </style>
 
 <?php include '../main/layout_header.php'; ?>
@@ -339,29 +371,44 @@ include '../main/h.php';
                 $cat = $item['category'];
                 $pruebas = $item['pruebas'];
                 $catAserciones = $item['catAserciones'];
+                $catIndicadores = $item['catIndicadores'];
                 $letraCat = chr(65 + ($catIndex % 26));
                 $catIndex++;
         ?>
             <div class="accordion-item" style="margin-bottom: 0.4rem; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
                 
-                <!-- CINTILLO / ENCABEZADO DE LA CATEGORÍA CON LAS 7 ASERCIONES -->
+                <!-- CINTILLO DE LA CATEGORÍA (ASERCIONES E INDICADORES DE DERECHA A IZQUIERDA) -->
                 <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 0.5rem 0.75rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                     
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <span><?= $letraCat ?>. <?= htmlspecialchars((string)$cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
                     </div>
 
-                    <!-- Renderizado de Aserciones Unificadas de la Categoría -->
-                    <div style="display: flex; align-items: center; gap: 0.2rem;" onclick="event.stopPropagation();">
-                        <span style="font-size: 0.65rem; color: #475569; font-weight: 600; margin-right: 0.2rem;">Aserciones:</span>
-                        <?php foreach ($todasAserciones as $sigla): ?>
-                            <?php $isActiva = !empty($catAserciones[$sigla]); ?>
-                            <span class="aser-badge <?= $isActiva ? 'aser-active' : 'aser-inactive' ?>" 
-                                  title="<?= $isActiva ? "Aserción $sigla marcada en pruebas de esta categoría" : "Aserción $sigla inactiva" ?>">
-                                <?= $sigla ?>
-                            </span>
-                        <?php endforeach; ?>
-                        <i class="ri-arrow-down-s-line" style="margin-left: 0.5rem; font-size: 1rem; color: #64748b;"></i>
+                    <!-- Bloque de Aserciones e Indicadores alineados a la derecha -->
+                    <div style="display: flex; align-items: center; gap: 0.6rem;" onclick="event.stopPropagation();">
+                        
+                        <!-- Renderizado de Aserciones Unificadas -->
+                        <div style="display: flex; align-items: center; gap: 0.18rem;">
+                            <span style="font-size: 0.65rem; color: #475569; font-weight: 600; margin-right: 0.2rem;">Aserciones:</span>
+                            <?php foreach ($todasAserciones as $sigla): ?>
+                                <?php $isActiva = !empty($catAserciones[$sigla]); ?>
+                                <span class="aser-badge <?= $isActiva ? 'aser-active' : 'aser-inactive' ?>" 
+                                      title="<?= $isActiva ? "Aserción $sigla marcada en pruebas de esta categoría" : "Aserción $sigla inactiva" ?>">
+                                    <?= $sigla ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <!-- Renderizado de Indicadores Unificados (Ubicados a la derecha de las Aserciones, pegados a la flecha) -->
+                        <div style="display: flex; align-items: center; gap: 0.18rem;">
+                            <span style="font-size: 0.65rem; color: #475569; font-weight: 600; margin-right: 0.2rem;">Indicadores:</span>
+                            <span class="ind-badge <?= !empty($catIndicadores['CI']) ? 'ind-ci-active' : 'ind-inactive' ?>" title="Debilidades de Control Interno">CI</span>
+                            <span class="ind-badge <?= !empty($catIndicadores['CG']) ? 'ind-cg-active' : 'ind-inactive' ?>" title="Carta de Gerencia">CG</span>
+                            <span class="ind-badge <?= !empty($catIndicadores['SC']) ? 'ind-sc-active' : 'ind-inactive' ?>" title="Situaciones Críticas">SC</span>
+                            <span class="ind-badge <?= !empty($catIndicadores['AA']) ? 'ind-aa-active' : 'ind-inactive' ?>" title="Asuntos de Auditoría">AA</span>
+                        </div>
+
+                        <i class="ri-arrow-down-s-line" style="margin-left: 0.2rem; font-size: 1rem; color: #64748b;"></i>
                     </div>
                 </div>
                 
@@ -401,7 +448,7 @@ include '../main/h.php';
                             </div>
 
                             <div class="prueba-actions">
-                                <!-- Aserciones Específicas de la Prueba (Mismo diseño que la categoría, pegado a la izquierda de los indicadores) -->
+                                <!-- Aserciones Específicas de la Prueba -->
                                 <div style="display: flex; align-items: center; gap: 0.18rem; margin-right: 0.25rem;">
                                     <?php foreach ($todasAserciones as $sigla): ?>
                                         <?php $isActivaPrueba = !empty($aserList[$sigla]); ?>
@@ -412,7 +459,7 @@ include '../main/h.php';
                                     <?php endforeach; ?>
                                 </div>
 
-                                <!-- Indicadores de Control Interno, Carta de Gerencia, etc. -->
+                                <!-- Indicadores Específicos de la Prueba -->
                                 <div style="display: flex; align-items: center; gap: 0.2rem;">
                                     <?php 
                                     $hasCI = !empty($saved['indicador_ci']);
@@ -420,10 +467,10 @@ include '../main/h.php';
                                     $hasSC = !empty($saved['indicador_sc']);
                                     $hasAA = !empty($saved['indicador_aa']);
                                     ?>
-                                    <span style="font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.3rem; border-radius: 3px; border: 1px solid <?= $hasCI ? '#ca8a04' : '#cbd5e1' ?>; background: <?= $hasCI ? '#fef9c3' : '#f8fafc' ?>; color: <?= $hasCI ? '#ca8a04' : '#94a3b8' ?>;" title="Debilidades de Control Interno">CI</span>
-                                    <span style="font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.3rem; border-radius: 3px; border: 1px solid <?= $hasCG ? '#ea580c' : '#cbd5e1' ?>; background: <?= $hasCG ? '#ffedd5' : '#f8fafc' ?>; color: <?= $hasCG ? '#ea580c' : '#94a3b8' ?>;" title="Carta de Gerencia">CG</span>
-                                    <span style="font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.3rem; border-radius: 3px; border: 1px solid <?= $hasSC ? '#dc2626' : '#cbd5e1' ?>; background: <?= $hasSC ? '#fee2e2' : '#f8fafc' ?>; color: <?= $hasSC ? '#dc2626' : '#94a3b8' ?>;" title="Situaciones Críticas">SC</span>
-                                    <span style="font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.3rem; border-radius: 3px; border: 1px solid <?= $hasAA ? '#2563eb' : '#cbd5e1' ?>; background: <?= $hasAA ? '#dbeafe' : '#f8fafc' ?>; color: <?= $hasAA ? '#2563eb' : '#94a3b8' ?>;" title="Asuntos de Auditoría">AA</span>
+                                    <span class="ind-badge <?= $hasCI ? 'ind-ci-active' : 'ind-inactive' ?>" title="Debilidades de Control Interno">CI</span>
+                                    <span class="ind-badge <?= $hasCG ? 'ind-cg-active' : 'ind-inactive' ?>" title="Carta de Gerencia">CG</span>
+                                    <span class="ind-badge <?= $hasSC ? 'ind-sc-active' : 'ind-inactive' ?>" title="Situaciones Críticas">SC</span>
+                                    <span class="ind-badge <?= $hasAA ? 'ind-aa-active' : 'ind-inactive' ?>" title="Asuntos de Auditoría">AA</span>
                                 </div>
 
                                 <span style="font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.5rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155;">
