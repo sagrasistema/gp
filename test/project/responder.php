@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -10,10 +12,66 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // v/proyectos/responder.php
-include '../main/config.php';
-include 'conect-proyecto.php';
+require_once '../main/config.php';
+require_once 'conect-proyecto.php';
 
 $pageTitle = "Panel de Control de Auditoría";
+
+// 1. CAPTURA Y SANITIZACIÓN RIGUROSA DE ENTRADA ($_GET)
+$proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?: 0;
+
+// 2. INICIALIZACIÓN PREVENTIVA DE VARIABLES Y METADATOS
+$projectData = $projectData ?? (object)[
+    'clientName' => 'N/D',
+    'socioLider' => 'N/D',
+    'nombre' => 'N/D',
+    'socioCalidad' => 'N/D',
+    'fechaRemision' => '',
+    'gerente' => 'N/D'
+];
+
+$porcentajeProgreso = $porcentajeProgreso ?? 0;
+$porcentajeProgresoo = $porcentajeProgresoo ?? 0;
+$pruebasList = $pruebasList ?? [];
+$pruebasEjecutadas = $pruebasEjecutadas ?? [];
+$progresoActividades = $progresoActividades ?? [];
+
+// 3. CONSULTA DE INDICADORES AGREGADOS POR CATEGORÍA
+$indicadoresPorCategoria = [];
+
+if ($proyectoId > 0 && isset($pdo) && $pdo instanceof PDO) {
+    try {
+        $sqlIndCat = "
+            SELECT 
+                p.categoria_id,
+                MAX(CASE WHEN pe.indicador_ci = 1 THEN 1 ELSE 0 END) AS has_ci,
+                MAX(CASE WHEN pe.indicador_cg = 1 THEN 1 ELSE 0 END) AS has_cg,
+                MAX(CASE WHEN pe.indicador_sc = 1 THEN 1 ELSE 0 END) AS has_sc,
+                MAX(CASE WHEN pe.indicador_aa = 1 THEN 1 ELSE 0 END) AS has_aa
+            FROM audit_pruebas p
+            LEFT JOIN proyecto_pruebas_ejecucion pe 
+                   ON pe.prueba_id = p.id 
+                  AND pe.proyecto_id = :proyectoId
+            WHERE p.categoria_id IS NOT NULL
+            GROUP BY p.categoria_id
+        ";
+        
+        $stmtIndCat = $pdo->prepare($sqlIndCat);
+        $stmtIndCat->execute([':proyectoId' => $proyectoId]);
+        
+        while ($row = $stmtIndCat->fetch(PDO::FETCH_ASSOC)) {
+            $indicadoresPorCategoria[(int)$row['categoria_id']] = [
+                'ci' => (int)$row['has_ci'] === 1,
+                'cg' => (int)$row['has_cg'] === 1,
+                'sc' => (int)$row['has_sc'] === 1,
+                'aa' => (int)$row['has_aa'] === 1,
+            ];
+        }
+    } catch (PDOException $e) {
+        error_log('[Error PDO Indicadores Categoría] ' . $e->getMessage());
+    }
+}
+
 include '../main/h.php';
 ?>
 <link rel="stylesheet" href="../main/layout.css">
@@ -34,15 +92,19 @@ include '../main/h.php';
     .stage-btn:hover { background-color: #2b4c7e; border-color: #00bcd4; }
     .stage-btn.active { background-color: #0f1c2e; border: 1.5px solid #00bcd4; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 188, 212, 0.2); }
     .stage-btn.active i { color: #00bcd4; }
+
+    /* Badges de Indicadores para Categorías y Pruebas */
+    .ind-badge { font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid; }
+    .ind-ci-active { background: #fef9c3; color: #ca8a04; border-color: #ca8a04; }
+    .ind-cg-active { background: #ffedd5; color: #ea580c; border-color: #ea580c; }
+    .ind-sc-active { background: #fee2e2; color: #dc2626; border-color: #dc2626; }
+    .ind-aa-active { background: #dbeafe; color: #2563eb; border-color: #2563eb; }
+    .ind-inactive { background: #ffffff; color: #cbd5e1; border-color: #cbd5e1; opacity: 0.7; }
 </style>
 
 <?php include '../main/layout_header.php'; ?>
 
 <div class="view-container">
-    <?php
-    // Capturar y validar el ID del proyecto desde la URL de forma segura
-    $proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
-    ?>
 
     <!-- Barra de Navegación Rápida por Etapas del Proyecto -->
     <div class="project-stages-bar">
@@ -71,22 +133,22 @@ include '../main/h.php';
         <div style="display: flex; flex-direction: column; gap: 0.3rem; border-right: 1px solid #e2e8f0; padding-right: 0.5rem; font-size: 0.8rem;">
             <div>
                 <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Cliente / Empresa</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->clientName ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+                <strong style="color: #1e293b;"><?= htmlspecialchars((string)($projectData->clientName ?? 'N/D'), ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
             <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.25rem;">
                 <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Socio Líder</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->socioLider ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+                <strong style="color: #1e293b;"><?= htmlspecialchars((string)($projectData->socioLider ?? 'N/D'), ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 0.3rem; border-right: 1px solid #e2e8f0; padding-right: 0.5rem; padding-left: 0.25rem; font-size: 0.8rem;">
             <div>
                 <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Proyecto / Alcance</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->nombre ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+                <strong style="color: #1e293b;"><?= htmlspecialchars((string)($projectData->nombre ?? 'N/D'), ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
             <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.25rem;">
                 <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Socio de Calidad</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->socioCalidad ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+                <strong style="color: #1e293b;"><?= htmlspecialchars((string)($projectData->socioCalidad ?? 'N/D'), ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
         </div>
 
@@ -96,19 +158,19 @@ include '../main/h.php';
                 $fechaRemisionFormateada = 'N/D';
                 if (!empty($projectData->fechaRemision)) {
                     try {
-                        $dateObj = new DateTime($projectData->fechaRemision);
+                        $dateObj = new DateTime((string)$projectData->fechaRemision);
                         $fechaRemisionFormateada = $dateObj->format('d/m/Y');
                     } catch (Exception $e) {
-                        $fechaRemisionFormateada = htmlspecialchars($projectData->fechaRemision, ENT_QUOTES, 'UTF-8');
+                        $fechaRemisionFormateada = (string)$projectData->fechaRemision;
                     }
                 }
                 ?>
                 <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Fecha de Revisión</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($fechaRemisionFormateada ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+                <strong style="color: #1e293b;"><?= htmlspecialchars($fechaRemisionFormateada, ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
             <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.25rem;">
                 <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Gerente Encargado</span><br>
-                <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->gerente ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
+                <strong style="color: #1e293b;"><?= htmlspecialchars((string)($projectData->gerente ?? 'N/D'), ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
         </div>
     </div>
@@ -157,7 +219,7 @@ include '../main/h.php';
                 Progreso General de Pruebas (Fase de Planificación)
             </h4>
             <span style="font-size: 0.68rem; background-color: #f1f5f9; color: #475569; padding: 0.15rem 0.5rem; border-radius: 9999px; font-weight: 600;">
-                Total: <?= count($pruebasList ?? []) ?> Actividades / Pruebas
+                Total: <?= count($pruebasList) ?> Actividades / Pruebas
             </span>
         </div>
 
@@ -185,8 +247,8 @@ include '../main/h.php';
                     }
 
                     $safeId = htmlspecialchars((string)$pId, ENT_QUOTES, 'UTF-8');
-                    $safeCat = htmlspecialchars($prueba['categoria_nombre'] ?? '', ENT_QUOTES, 'UTF-8');
-                    $safeNombrePrueba = htmlspecialchars($prueba['nombre'] ?? '', ENT_QUOTES, 'UTF-8');
+                    $safeCat = htmlspecialchars((string)($prueba['categoria_nombre'] ?? ''), ENT_QUOTES, 'UTF-8');
+                    $safeNombrePrueba = htmlspecialchars((string)($prueba['nombre'] ?? ''), ENT_QUOTES, 'UTF-8');
                 ?>
                     <a href="actividades.php?proyectoId=<?= $proyectoId ?>&pruebaId=<?= $safeId ?>" 
                        title="Nº <?= $globalIndex ?>: <?= $safeNombrePrueba ?> | Categoría: <?= $safeCat ?> | Estado: <?= ucfirst($estadoPrueba) ?>"
@@ -212,10 +274,10 @@ include '../main/h.php';
             <div style="grid-column: span 6; background: #ffffff; padding: 0.4rem; border-radius: 4px; border: 1px solid #f1f5f9;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; font-size: 0.72rem; font-weight: 600; color: #475569;">
                     <span>Progreso Tareas Completadas</span>
-                    <span style="color: #0f172a; font-weight: 700;"><?= $porcentajeProgreso ?>%</span>
+                    <span style="color: #0f172a; font-weight: 700;"><?= (int)$porcentajeProgreso ?>%</span>
                 </div>
                 <div style="width: 100%; background-color: #e2e8f0; height: 6px; border-radius: 9999px; overflow: hidden;">
-                    <div style="width: <?= $porcentajeProgreso ?>%; background-color: #10b981; height: 100%; border-radius: 9999px; transition: width 0.4s ease;"></div>
+                    <div style="width: <?= (int)$porcentajeProgreso ?>%; background-color: #10b981; height: 100%; border-radius: 9999px; transition: width 0.4s ease;"></div>
                 </div>
             </div>
 
@@ -223,10 +285,10 @@ include '../main/h.php';
             <div style="grid-column: span 6; background: #ffffff; padding: 0.4rem; border-radius: 4px; border: 1px solid #f1f5f9;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; font-size: 0.72rem; font-weight: 600; color: #475569;">
                     <span>Progreso Tareas Revisadas</span>
-                    <span style="color: #0f172a; font-weight: 700;"><?= $porcentajeProgresoo ?>%</span>
+                    <span style="color: #0f172a; font-weight: 700;"><?= (int)$porcentajeProgresoo ?>%</span>
                 </div>
                 <div style="width: 100%; background-color: #e2e8f0; height: 6px; border-radius: 9999px; overflow: hidden;">
-                    <div style="width: <?= $porcentajeProgresoo ?>%; background-color: #3b82f6; height: 100%; border-radius: 9999px; transition: width 0.4s ease;"></div>
+                    <div style="width: <?= (int)$porcentajeProgresoo ?>%; background-color: #3b82f6; height: 100%; border-radius: 9999px; transition: width 0.4s ease;"></div>
                 </div>
             </div>
         </div>
@@ -235,9 +297,13 @@ include '../main/h.php';
     <!-- Acordeones Compactos -->
     <div class="accordion-container">
         <?php
-        $stmtCat = $pdo->prepare("SELECT * FROM audit_categorias WHERE etapa_id = 1 ORDER BY orden ASC");
-        $stmtCat->execute();
-        $categories = $stmtCat->fetchAll(PDO::FETCH_OBJ);
+        if (isset($pdo) && $pdo instanceof PDO) {
+            $stmtCat = $pdo->prepare("SELECT * FROM audit_categorias WHERE etapa_id = 1 ORDER BY orden ASC");
+            $stmtCat->execute();
+            $categories = $stmtCat->fetchAll(PDO::FETCH_OBJ);
+        } else {
+            $categories = [];
+        }
 
         $catIndex = 0;
         $pruebaIndex = 1;
@@ -246,14 +312,30 @@ include '../main/h.php';
             $letraCat = chr(65 + ($catIndex % 26));
             $catIndex++;
 
+            $catInd = $indicadoresPorCategoria[(int)$cat->id] ?? ['ci' => false, 'cg' => false, 'sc' => false, 'aa' => false];
+
             $stmtP = $pdo->prepare("SELECT * FROM audit_pruebas WHERE categoria_id = :catId ORDER BY orden ASC");
             $stmtP->execute([':catId' => $cat->id]);
             $pruebas = $stmtP->fetchAll(PDO::FETCH_OBJ);
         ?>
             <div class="accordion-item" style="margin-bottom: 0.4rem; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
-                <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 0.5rem 0.75rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                    <span><?= $letraCat ?>. <?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
-                    <i class="ri-arrow-down-s-line"></i>
+                
+                <!-- CINTILLO DE CATEGORÍA CON INDICADORES A LA DERECHA -->
+                <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 0.5rem 0.75rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    <span><?= $letraCat ?>. <?= htmlspecialchars((string)$cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
+                    
+                    <div style="display: flex; align-items: center; gap: 0.5rem;" onclick="event.stopPropagation();">
+                        <!-- Indicadores Agregados en Categoría -->
+                        <div style="display: flex; align-items: center; gap: 0.18rem;">
+                            <span style="font-size: 0.65rem; color: #475569; font-weight: 600; margin-right: 0.2rem;">Indicadores:</span>
+                            <span class="ind-badge <?= $catInd['ci'] ? 'ind-ci-active' : 'ind-inactive' ?>" title="Debilidades de Control Interno">CI</span>
+                            <span class="ind-badge <?= $catInd['cg'] ? 'ind-cg-active' : 'ind-inactive' ?>" title="Carta de Gerencia">CG</span>
+                            <span class="ind-badge <?= $catInd['sc'] ? 'ind-sc-active' : 'ind-inactive' ?>" title="Situaciones Críticas">SC</span>
+                            <span class="ind-badge <?= $catInd['aa'] ? 'ind-aa-active' : 'ind-inactive' ?>" title="Asuntos de Auditoría">AA</span>
+                        </div>
+
+                        <i class="ri-arrow-down-s-line" style="margin-left: 0.2rem; font-size: 1rem; color: #64748b;"></i>
+                    </div>
                 </div>
                 
                 <div class="accordion-content" style="display: none; background: #fff;">
@@ -277,7 +359,7 @@ include '../main/h.php';
                     ?>
                         <div class="prueba-row-container">
                             <div class="prueba-title">
-                                <?= $pruebaIndex ?>. <?= htmlspecialchars($pr->nombre, ENT_QUOTES, 'UTF-8') ?>
+                                <?= $pruebaIndex ?>. <?= htmlspecialchars((string)$pr->nombre, ENT_QUOTES, 'UTF-8') ?>
                                 <div style="margin-top: 0.15rem;">
                                     <span class="badge-progress">
                                         <i class="ri-checkbox-circle-line"></i> Actividades: <?= $completadasAct ?> / <?= $totalAct ?>
