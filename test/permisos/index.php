@@ -22,7 +22,7 @@ include '../main/config.php';
 $customLogoPath = '../main/logo.png';
 $customHomePath = '../index.php';
 $customAcPath   = '../ac/index.php';
-$currentTab     = 'usuarios'; 
+$currentTab     = 'permiso'; 
 
 include '../main/layout_header.php';
 ?>
