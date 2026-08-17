@@ -10,6 +10,89 @@ $customLogoPath = 'client/logo.png';
 $customHomePath = 'index.php';
 $customAcPath   = 'ac/index.php';
 $currentTab     = 'inicio'; // Marca "Inicio" activo en el sidebar
+
+
+declare(strict_types=1);
+
+/**
+ * Obtiene los permisos de un usuario para un módulo específico en la tabla 'usuario_permisos'.
+ * 
+ * @param PDO $pdo Instancia de conexión PDO a la base de datos.
+ * @param int $userId ID del usuario obtenido desde la sesión.
+ * @param int $moduloId ID del módulo a consultar (ej. 1).
+ * @return array Matriz asociativa con las banderas de permisos procesadas como booleanos.
+ */
+function obtenerPermisosModulo(PDO $pdo, int $userId, int $moduloId = 1): array
+{
+    // Estructura por defecto en caso de no existir registro
+    $permisosPredeterminados = [
+        'puede_acceder' => false,
+        'puede_ver'     => false,
+        'puede_crear'   => false,
+        'puede_editar'  => false,
+        'puede_eliminar' => false,
+    ];
+
+    if ($userId <= 0) {
+        return $permisosPredeterminados;
+    }
+
+    try {
+        $sql = "SELECT puede_acceder, puede_ver, puede_crear, puede_editar, puede_eliminar 
+                FROM usuario_permisos 
+                WHERE usuario_id = :usuario_id 
+                  AND modulo_id = :modulo_id 
+                LIMIT 1";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':usuario_id' => $userId,
+            ':modulo_id'  => $moduloId,
+        ]);
+
+        $registro = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$registro) {
+            return $permisosPredeterminados;
+        }
+
+        // Cast explicito a bool para garantizar la compatibilidad con PHP 8.x
+        return [
+            'puede_acceder'  => (bool)$registro['puede_acceder'],
+            'puede_ver'      => (bool)$registro['puede_ver'],
+            'puede_crear'    => (bool)$registro['puede_crear'],
+            'puede_editar'   => (bool)$registro['puede_editar'],
+            'puede_eliminar' => (bool)$registro['puede_eliminar'],
+        ];
+
+    } catch (PDOException $e) {
+        // Registrar error internamente sin exponérselo al usuario
+        error_log("Error al consultar permisos de usuario [ID: {$userId}, Modulo: {$moduloId}]: " . $e->getMessage());
+        return $permisosPredeterminados;
+    }
+}
+
+// --------------------------------------------------------------------------
+// EJEMPLO DE USO EN TU LÓGICA DE NEGOCIO
+// --------------------------------------------------------------------------
+
+// 1. Obtener y sanitizar el ID del usuario desde la sesión activa
+$userId = (int)($_SESSION['user_id'] ?? $_SESSION['id'] ?? 0);
+$moduloId = 1; // Módulo deseado
+
+// 2. Consultar permisos
+$permisosModulo1 = obtenerPermisosModulo($pdo, $userId, $moduloId);
+
+// 3. Uso directo en verificaciones
+if ($permisosModulo1['puede_acceder']) {
+    // El usuario tiene acceso al módulo 1
+    if ($permisosModulo1['puede_editar']) {
+        // Permitir acciones de edición
+    }
+} else {
+    // Acceso denegado
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -90,7 +173,7 @@ $currentTab     = 'inicio'; // Marca "Inicio" activo en el sidebar
 <body>
 
 <?php 
-// Incluimos la cabecera del layout visual después de validar la sesión
+// Incluimos la cabecera del layout visual después de validar la sesións
 include 'main/layout_header.php'; 
 ?>
 
@@ -118,12 +201,24 @@ include 'main/layout_header.php';
             <h2>Términos y Condiciones</h2>
             <p>Gestión de contratos, cláusulas legales y acuerdos de nivel de servicio.</p>
         </a>
-        
+
+
+<?php     // 3. Uso directo en verificaciones
+if ($permisosModulo1['puede_acceder']) {?>
         <a href="project/index.php" class="module-card">
             <div class="icon-box"><i class="ri-folders-line"></i></div>
             <h2>Proyecto</h2>
             <p>Planificación de flujos de trabajo, entregables y asignación de tareas.</p>
         </a>
+<?php 
+    // El usuario tiene acceso al módulo 1
+    if ($permisosModulo1['puede_editar']) {
+        // Permitir acciones de edición
+    }
+} else {
+    // Acceso denegado
+}?>
+        
 
         <!-- ACCESO EXCLUSIVO PARA USUARIOS ID 1 Y 2 -->
         <?php if (isset($_SESSION['user_id']) && in_array((int)$_SESSION['user_id'], [1, 2], true)): ?>
