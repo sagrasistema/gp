@@ -6,6 +6,7 @@ declare(strict_types=1);
  * en la primera línea, antes de cualquier etiqueta HTML o espacio.
  */
 include 'user.php'; 
+include 'main/config.php'; 
 
 // Configuramos las rutas relativas porque estamos en la raíz del index principal
 $customLogoPath = 'client/logo.png';
