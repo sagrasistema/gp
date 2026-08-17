@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * 1. El control de sesión y redirección DEBE ir obligatoriamente 
  * en la primera línea, antes de cualquier etiqueta HTML o espacio.
@@ -10,9 +12,6 @@ $customLogoPath = 'client/logo.png';
 $customHomePath = 'index.php';
 $customAcPath   = 'ac/index.php';
 $currentTab     = 'inicio'; // Marca "Inicio" activo en el sidebar
-
-
-declare(strict_types=1);
 
 /**
  * Obtiene los permisos de un usuario para un módulo específico en la tabla 'usuario_permisos'.
