@@ -17,7 +17,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $rawUserName   = $_SESSION['nombre_completo'] ?? $_SESSION['username'] ?? 'Usuario';
 $nombreUsuario = htmlspecialchars((string)$rawUserName, ENT_QUOTES, 'UTF-8');
 
-// 3. Obtención y casteo estricto del ID de Usuario
+// 3. Obtención y casteo estricto del ID de Usuariox
 $userId = (int)($_SESSION['user_id'] ?? $_SESSION['id'] ?? 0);
 
 // 4. Obtención y sanitización del Rol de Usuario
