@@ -46,6 +46,15 @@ include '../main/layout_header.php';
         <a href="#" class="btn-control-disabled" data-tooltip="Instrucciones" onclick="return false;">
             <i class="ri-book-open-line"></i> 
         </a>
+        <?php if ($permisosModulo1['puede_crear'] == 1) {?>
+            <a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Registro">
+                <i class="ri-add-line"></i>
+            </a>
+        <?php } else {?>
+            <a href="#" class="btn-control-disabled" data-tooltip="Crear Registro">
+                <i class="ri-add-line"></i>
+            </a>
+        <?php } ?>    
 
         <a href="nuevo.php" class="btn btn-primary" data-tooltip="Crear Registro">
             <i class="ri-add-line"></i>
