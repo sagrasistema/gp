@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// v/proyectos/index.php
+// v/proyectos/index.phpww
 include '../main/h.php'; 
 include '../main/config.php'; 
 ?>
