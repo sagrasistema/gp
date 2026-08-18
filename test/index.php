@@ -203,8 +203,8 @@ include 'main/layout_header.php';
         </a>
 
 
-<?php     // 3. Uso directo en verificaciones
-if ($permisosModulo1['puede_acceder']) {?>
+<?php     // 3. Uso directo en verificacioness
+if ($permisosModulo1['puede_acceder'] == 1) {?>
         <a href="project/index.php" class="module-card">
             <div class="icon-box"><i class="ri-folders-line"></i></div>
             <h2>Proyecto</h2>
