@@ -37,6 +37,14 @@ $activeTab = isset($currentTab) ? $currentTab : '';
 
 // 1. Obtener y sanitizar el nombre de usuario autenticado
 // Adapta la clave 'user_name' a la clave exacta que usas al procesar el login (ej. 'nombre', 'usuario', etc.)
+/**
+ * Obtiene los permisos de un usuario para un módulo específico en la tabla 'usuario_permisos'.
+ * 
+ * @param PDO $pdo Instancia de conexión PDO a la base de datos.
+ * @param int $userId ID del usuario obtenido desde la sesión.
+ * @param int $moduloId ID del módulo a consultar (ej. 1).
+ * @return array Matriz asociativa con las banderas de permisos procesadas como booleanos.
+ */
 function obtenerPermisosModulo(PDO $pdo, int $userId, int $moduloId = 1): array
 {
     // Estructura por defecto en caso de no existir registro
