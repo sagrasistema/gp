@@ -79,3 +79,21 @@ function obtenerPermisosModulo(PDO $pdo, int $userId, int $moduloId = 1): array
         return $permisosPredeterminados;
     }
 }
+// 1. Obtener y sanitizar el ID del usuario desde la sesión activa
+$userId = (int)($_SESSION['user_id'] ?? $_SESSION['id'] ?? 0);
+$moduloId = 1; // Módulo deseado
+$moduloId4 = 4; // Módulo deseado
+$moduloId5 = 5; // Módulo deseado
+$moduloId6 = 6; // Módulo deseado
+$moduloId7 = 7; // Módulo deseado
+
+// proyecto
+$permisosModulo1 = obtenerPermisosModulo($pdo, $userId, $moduloId);
+// Cliente
+$permisosModulo4 = obtenerPermisosModulo($pdo, $userId, $moduloId4);
+// aceptacion y continuidad
+$permisosModulo5 = obtenerPermisosModulo($pdo, $userId, $moduloId5);
+// terminos y condiciones
+$permisosModulo6 = obtenerPermisosModulo($pdo, $userId, $moduloId6);
+// permisos 
+$permisosModulo7 = obtenerPermisosModulo($pdo, $userId, $moduloId7);
