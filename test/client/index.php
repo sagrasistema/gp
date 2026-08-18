@@ -13,7 +13,8 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $pageTitle = "Control de Clientes";
-include 'header.php'; // Archivo de conexión / inicialización local de la carpeta client
+include 'header.php'; 
+include 'config.php'; // Archivo de conexión / inicialización local de la carpeta client
 ?>
 
 <link rel="stylesheet" href="../main/layout.css">
