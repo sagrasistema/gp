@@ -86,6 +86,7 @@ $moduloId4 = 4; // Módulo deseado
 $moduloId5 = 5; // Módulo deseado
 $moduloId6 = 6; // Módulo deseado
 $moduloId7 = 7; // Módulo deseado
+$moduloId8 = 8; // Módulo deseado
 
 // proyecto
 $permisosModulo1 = obtenerPermisosModulo($pdo, $userId, $moduloId);
@@ -97,3 +98,5 @@ $permisosModulo5 = obtenerPermisosModulo($pdo, $userId, $moduloId5);
 $permisosModulo6 = obtenerPermisosModulo($pdo, $userId, $moduloId6);
 // permisos 
 $permisosModulo7 = obtenerPermisosModulo($pdo, $userId, $moduloId7);
+// master data 
+$permisosModulo8 = obtenerPermisosModulo($pdo, $userId, $moduloId8);

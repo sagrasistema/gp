@@ -172,6 +172,18 @@ include 'main/layout_header.php';
                 <p>Módulo de gestión avanzada y control exclusivo de superusuarios.</p>
             </a>
         <?php endif; ?>
+<?php     // 3. Uso directo en verificacioness
+    if ($permisosModulo8['puede_acceder'] == 1) {?>
+        <?php if ($permisosModulo8['puede_ver'] == 1) {?>
+        <a href="metodologia/index.php" class="module-card">
+        <?php }else {?>
+        <a href="#" class="module-card">
+        <?php }?>
+            <div class="icon-box"><i class="ri-admin-line"></i></div>
+            <h2>Master Data</h2>
+            <p>Módulo de gestión avanzada de formularios</p>
+        </a>
+<?php } ?>
     </div>
 </div>
 
