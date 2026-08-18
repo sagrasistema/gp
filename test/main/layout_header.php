@@ -64,48 +64,101 @@ $activeTab = isset($currentTab) ? $currentTab : '';
                 <i class="ri-home-4-line"></i>
                 <span>Inicio</span>
             </a>
-            <a href="client/index.php" class="menu-item <?php echo ($activeTab === 'clientes') ? 'active' : ''; ?>">
-                <i class="ri-user-line"></i>
-                <span>Clientes</span>
-            </a>
-            <a href="ac/index.php" class="menu-item <?php echo ($activeTab === 'aceptacion') ? 'active' : ''; ?>">
-                <i class="ri-shield-check-line"></i>
-                <span>Aceptación</span>
-            </a>
-            <a href="terminos/index.php" class="menu-item <?php echo ($activeTab === 'terminos') ? 'active' : ''; ?>">
-                <i class="ri-file-text-line"></i>
-                <span>Terminos y Condiciones</span>
-            </a>
-            <a href="project/index.php" class="menu-item <?php echo ($activeTab === 'proyecto') ? 'active' : ''; ?>">
-                <i class="ri-briefcase-line"></i>
-                <span>Proyectos</span>
-            </a>
-             
-            <a href="#" class="menu-item style-disabled">
-                <i class="ri-customer-service-2-line"></i>
-                <span>Soporte IT</span>
-            </a>
+
+            <?php if ($permisosModulo4['puede_acceder'] == 1) {?>
+                <?php if ($permisosModulo4['puede_ver'] == 1) {?>
+                <a href="client/index.php" class="menu-item <?php echo ($activeTab === 'clientes') ? 'active' : ''; ?>">
+                <?php } else {?>
+                <a href="#" class="menu-item <?php echo ($activeTab === 'clientes') ? 'active' : ''; ?>">
+                <?php } ?>
+                    <i class="ri-user-line"></i>
+                    <span>Clientes</span>
+                </a>
+            <?php }?>
+            
+            <?php if ($permisosModulo5['puede_acceder'] == 1) {?>
+                <?php if ($permisosModulo5['puede_ver'] == 1) {?>
+                    <a href="ac/index.php" class="menu-item <?php echo ($activeTab === 'aceptacion') ? 'active' : ''; ?>">
+                <?php } else {?>
+                    <a href="#" class="menu-item <?php echo ($activeTab === 'aceptacion') ? 'active' : ''; ?>">
+                <?php } ?>
+                    <i class="ri-shield-check-line"></i>
+                    <span>Aceptación</span>
+                </a>
+            <?php }?>
+            
+            <?php if ($permisosModulo6['puede_acceder'] == 1) {?>
+                <?php if ($permisosModulo6['puede_ver'] == 1) {?>
+                    <a href="terminos/index.php" class="menu-item <?php echo ($activeTab === 'terminos') ? 'active' : ''; ?>">
+                <?php } else {?>
+                    <a href="#" class="menu-item <?php echo ($activeTab === 'terminos') ? 'active' : ''; ?>">
+                <?php } ?>
+                    <i class="ri-file-text-line"></i>
+                    <span>Terminos y Condiciones</span>
+                </a>
+            <?php }?>
+
+            <?php if ($permisosModulo1['puede_acceder'] == 1) {?>
+                <?php if ($permisosModulo1['puede_ver'] == 1) {?>
+                    <a href="project/index.php" class="menu-item <?php echo ($activeTab === 'proyecto') ? 'active' : ''; ?>">
+                <?php } else {?>
+                    <a href="#" class="menu-item <?php echo ($activeTab === 'proyecto') ? 'active' : ''; ?>">
+                <?php } ?>
+                    <i class="ri-briefcase-line"></i>
+                    <span>Proyectos</span>
+                </a>
+            <?php }?>
+            
+    
             <?php } else  {?>
-                  <a href="<?php echo $homePath; ?>" class="menu-item <?php echo ($activeTab === 'inicio') ? 'active' : ''; ?>">
+            <a href="<?php echo $homePath; ?>" class="menu-item <?php echo ($activeTab === 'inicio') ? 'active' : ''; ?>">
                 <i class="ri-home-4-line"></i>
                 <span>Inicio</span>
             </a>
-            <a href="../client/index.php" class="menu-item <?php echo ($activeTab === 'clientes') ? 'active' : ''; ?>">
-                <i class="ri-user-line"></i>
-                <span>Clientes</span>
-            </a>
-            <a href="../ac/index.php" class="menu-item <?php echo ($activeTab === 'aceptacion') ? 'active' : ''; ?>">
-                <i class="ri-shield-check-line"></i>
-                <span>Aceptación</span>
-            </a>
-            <a href="../terminos/index.php" class="menu-item <?php echo ($activeTab === 'terminos') ? 'active' : ''; ?>">
-                <i class="ri-file-text-line"></i>
-                <span>Terminos y Condiciones</span>
-            </a>
-            <a href="../project/index.php" class="menu-item <?php echo ($activeTab === 'proyecto') ? 'active' : ''; ?>">
-                <i class="ri-briefcase-line"></i>
-                <span>Proyectos</span>
-            </a>
+            
+            <?php if ($permisosModulo4['puede_acceder'] == 1) {?>
+                <?php if ($permisosModulo4['puede_ver'] == 1) {?>
+                <a href="../client/index.php" class="menu-item <?php echo ($activeTab === 'clientes') ? 'active' : ''; ?>">
+                <?php } else {?>
+                <a href="#" class="menu-item <?php echo ($activeTab === 'clientes') ? 'active' : ''; ?>">
+                <?php } ?>
+                    <i class="ri-user-line"></i>
+                    <span>Clientes</span>
+                </a>
+            <?php }?>
+            
+            <?php if ($permisosModulo5['puede_acceder'] == 1) {?>
+                <?php if ($permisosModulo5['puede_ver'] == 1) {?>
+                    <a href="../ac/index.php" class="menu-item <?php echo ($activeTab === 'aceptacion') ? 'active' : ''; ?>">
+                <?php } else {?>
+                    <a href="#" class="menu-item <?php echo ($activeTab === 'aceptacion') ? 'active' : ''; ?>">
+                <?php } ?>
+                    <i class="ri-shield-check-line"></i>
+                    <span>Aceptación</span>
+                </a>
+            <?php }?>
+
+            <?php if ($permisosModulo6['puede_acceder'] == 1) {?>
+                <?php if ($permisosModulo6['puede_ver'] == 1) {?>
+                    <a href="../terminos/index.php" class="menu-item <?php echo ($activeTab === 'terminos') ? 'active' : ''; ?>">
+                <?php } else {?>
+                    <a href="#" class="menu-item <?php echo ($activeTab === 'terminos') ? 'active' : ''; ?>">
+                <?php } ?>
+                    <i class="ri-file-text-line"></i>
+                    <span>Terminos y Condiciones</span>
+                </a>
+            <?php }?>
+            
+            <?php if ($permisosModulo1['puede_acceder'] == 1) {?>
+                <?php if ($permisosModulo1['puede_ver'] == 1) {?>
+                    <a href="../project/index.php" class="menu-item <?php echo ($activeTab === 'proyecto') ? 'active' : ''; ?>">
+                <?php } else {?>
+                    <a href="#" class="menu-item <?php echo ($activeTab === 'proyecto') ? 'active' : ''; ?>">
+                <?php } ?>
+                    <i class="ri-briefcase-line"></i>
+                    <span>Proyectos</span>
+                </a>
+            <?php }?>
             
             <a href="#" class="menu-item style-disabled">
                 <i class="ri-customer-service-2-line"></i>
