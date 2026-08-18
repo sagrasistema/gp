@@ -387,9 +387,14 @@ include '../main/h.php';
 
                     <div>
                         <?php if (!$isClosed): ?>
-                            <button type="submit" name="btn_generar_cuotas" value="1" class="btn-blue-icon" title="Generar / Re-calcular Cuotas">
-                                <i class="ri-save-3-fill" style="font-size: 1.25rem;"></i>
-                            </button>
+                            <?php if ($permisosModulo6['puede_editar'] == 1) {?>
+                                <button type="submit" name="btn_generar_cuotas" value="1" class="btn-blue-icon" title="Generar / Re-calcular Cuotas">
+                                    <i class="ri-save-3-fill" style="font-size: 1.25rem;"></i>
+                                </button>
+                            <?php } else {?>
+                                
+                            <?php } ?>    
+                           
                         <?php endif; ?>  
                         
                     </div>
