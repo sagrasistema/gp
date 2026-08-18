@@ -442,10 +442,17 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
 
         <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end; margin-bottom: 4rem;">
             <a href="index.php" class="btn btn-secondary">Regresar al panel</a>
-        
-            <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem;">
+        <?php     // 3. Uso directo en verificacioness
+if ($permisosModulo5['puede_editar'] == 1) {?>
+        <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem;">
                 <i class="ri-save-3-line"></i> Guardar Cuestionario Completo
             </button>
+<?php } else {?>
+    
+<?php } ?>    
+
+
+            
         
                 
             
