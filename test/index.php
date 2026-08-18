@@ -79,9 +79,23 @@ function obtenerPermisosModulo(PDO $pdo, int $userId, int $moduloId = 1): array
 // 1. Obtener y sanitizar el ID del usuario desde la sesión activa
 $userId = (int)($_SESSION['user_id'] ?? $_SESSION['id'] ?? 0);
 $moduloId = 1; // Módulo deseado
+$moduloId4 = 4; // Módulo deseado
+$moduloId5 = 5; // Módulo deseado
+$moduloId6 = 6; // Módulo deseado
+$moduloId7 = 7; // Módulo deseado
 
-// 2. Consultar permisos
+// proyecto
 $permisosModulo1 = obtenerPermisosModulo($pdo, $userId, $moduloId);
+// Cliente
+$permisosModulo4 = obtenerPermisosModulo($pdo, $userId, $moduloId4);
+// aceptacion y continuidad
+$permisosModulo5 = obtenerPermisosModulo($pdo, $userId, $moduloId5);
+// terminos y condiciones
+$permisosModulo6 = obtenerPermisosModulo($pdo, $userId, $moduloId6);
+// permisos 
+$permisosModulo7 = obtenerPermisosModulo($pdo, $userId, $moduloId7);
+
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -173,27 +187,49 @@ include 'main/layout_header.php';
     </div>
 
     <div class="modules-grid">
+
+
+<?php     // 3. Uso directo en verificacioness
+    if ($permisosModulo4['puede_acceder'] == 1) {?>
+        <?php if ($permisosModulo4['puede_ver'] == 1) {?>
         <a href="client/index.php" class="module-card">
+        <?php }else {?>
+        <a href="#" class="module-card">
+        <?php }?>
             <div class="icon-box"><i class="ri-team-line"></i></div>
             <h2>Clientes</h2>
             <p>Control, registro y fichas corporativas de clientes de la firma.</p>
         </a>
-
+<?php } ?>        
+   
+<?php     // 3. Uso directo en verificacioness
+    if ($permisosModulo5['puede_acceder'] == 1) {?>
+        <?php if ($permisosModulo5['puede_ver'] == 1) {?>
         <a href="ac/index.php" class="module-card">
+        <?php }else {?>
+        <a href="#" class="module-card">
+        <?php }?>
             <div class="icon-box"><i class="ri-shield-check-line"></i></div>
             <h2>Aceptación y Continuidad</h2>
             <p>Evaluación de riesgos, políticas internas y aprobación regulatoria.</p>
         </a>
-        
+<?php } ?>        
+   
+    
+<?php     // 3. Uso directo en verificacioness
+    if ($permisosModulo6['puede_acceder'] == 1) {?>
+        <?php if ($permisosModulo6['puede_ver'] == 1) {?>
         <a href="terminos/index.php" class="module-card">
+        <?php }else {?>
+        <a href="#" class="module-card">
+        <?php }?>
             <div class="icon-box"><i class="ri-file-list-3-line"></i></div>
             <h2>Términos y Condiciones</h2>
             <p>Gestión de contratos, cláusulas legales y acuerdos de nivel de servicio.</p>
         </a>
-
-
+<?php } ?>
 <?php     // 3. Uso directo en verificacioness
-if ($permisosModulo1['puede_acceder'] == 1) {?>
+    if ($permisosModulo1['puede_acceder'] == 1) {?>
         <?php if ($permisosModulo1['puede_ver'] == 1) {?>
         <a href="project/index.php" class="module-card">
         <?php }else {?>
@@ -203,14 +239,7 @@ if ($permisosModulo1['puede_acceder'] == 1) {?>
             <h2>Proyecto</h2>
             <p>Planificación de flujos de trabajo, entregables y asignación de tareas.</p>
         </a>
-<?php 
-    // El usuario tiene acceso al módulo 1
-    if ($permisosModulo1['puede_editar']) {
-        // Permitir acciones de edición
-    }
-} else {
-    // Acceso denegado
-}?>
+<?php } ?>
         
 
         <!-- ACCESO EXCLUSIVO PARA USUARIOS ID 1 Y 2 -->
