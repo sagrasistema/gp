@@ -175,9 +175,9 @@ include 'main/layout_header.php';
 <?php     // 3. Uso directo en verificacioness
     if ($permisosModulo8['puede_acceder'] == 1) {?>
         <?php if ($permisosModulo8['puede_ver'] == 1) {?>
-        <a href="metodologia/index.php" class="module-card">
+        <a href="metodologia/index.php" class="module-card admin-card">
         <?php }else {?>
-        <a href="#" class="module-card">
+        <a href="#" class="module-card admin-card">
         <?php }?>
             <div class="icon-box"><i class="ri-admin-line"></i></div>
             <h2>Master Data</h2>
