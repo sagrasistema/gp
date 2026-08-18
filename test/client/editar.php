@@ -10,7 +10,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 $pageTitle = "Modificar Ficha Corporativa";
-include 'header.php'; ?>
+include 'header.php'; 
+include 'config.php'; ?>
 <link rel="stylesheet" href="../main/layout.css">
 <?php
 // Configuración dinámica del Layout para la carpeta client/ (Estándar unificado)
