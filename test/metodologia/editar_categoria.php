@@ -217,9 +217,16 @@ include '../main/layout_header.php';
                 required 
                 style="flex: 1; padding: 0.65rem 1rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem;"
             >
-            <button type="submit" class="btn btn-primary" style="background-color: #0284c7; border: none; padding: 0.65rem 1.25rem; font-weight: 600; cursor: pointer; border-radius: 6px; color: #fff;">
-                <i class="ri-save-line"></i> Actualizar Categoría
-            </button>
+             <?php     // 3. Uso directo en verificacioness
+                if ($permisosModulo8['puede_editar'] == 1) {?>                   
+                   <button type="submit" class="btn btn-primary" style="background-color: #0284c7; border: none; padding: 0.65rem 1.25rem; font-weight: 600; cursor: pointer; border-radius: 6px; color: #fff;">
+                        <i class="ri-save-line"></i> Actualizar Categoría
+                    </button>
+            <?php } else {?>
+                
+            <?php } ?>    
+        
+            
         </form>
     </div>
 
@@ -257,10 +264,17 @@ include '../main/layout_header.php';
                     </div>
                 </div>
             </div>
-
-            <button type="submit" class="btn btn-primary" style="background: #08855b; border: none; padding: 0.65rem 1.25rem; font-weight: 600; cursor: pointer; border-radius: 6px; color: #fff;">
-                <i class="ri-add-line"></i> Guardar Nueva Prueba
-            </button>
+            
+            <?php     // 3. Uso directo en verificacioness
+                if ($permisosModulo8['puede_editar'] == 1) {?>                   
+               <button type="submit" class="btn btn-primary" style="background: #08855b; border: none; padding: 0.65rem 1.25rem; font-weight: 600; cursor: pointer; border-radius: 6px; color: #fff;">
+                    <i class="ri-add-line"></i> Guardar Nueva Prueba
+                </button>
+            <?php } else {?>
+                
+            <?php } ?>    
+        
+           
         </form>
     </div>
 
@@ -295,7 +309,7 @@ include '../main/layout_header.php';
                                 </div>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
                                 <div>
                                     <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px;">Instrucciones / Texto de Información</label>
                                     <textarea name="informacion" class="auto-expand" style="width: 100%; padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; font-size: 0.88rem; line-height: 1.4;"><?= htmlspecialchars($pru->informacion ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
@@ -309,9 +323,16 @@ include '../main/layout_header.php';
 
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 12px;">
                             <div style="display: flex; gap: 8px;">
-                                <button type="submit" class="btn btn-primary" style="background: #0284c7; border: none; padding: 0.5rem 1.1rem; font-size: 0.85rem; border-radius: 4px; cursor: pointer; color: #fff; font-weight: 600;">
-                                    <i class="ri-save-line"></i> Guardar Cambios
-                                </button>
+                                  
+                                <?php     // 3. Uso directo en verificacioness
+                                    if ($permisosModulo8['puede_editar'] == 1) {?>                   
+                                    <button type="submit" class="btn btn-primary" style="background: #0284c7; border: none; padding: 0.5rem 1.1rem; font-size: 0.85rem; border-radius: 4px; cursor: pointer; color: #fff; font-weight: 600;">
+                                        <i class="ri-save-line"></i> Guardar Cambios
+                                    </button>
+                                <?php } else {?>
+                                    
+                                <?php } ?>    
+                                
                                 
                                 <a href="editar_prueba.php?id=<?= (int)$pru->id ?>&categoriaId=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" class="btn" style="background: #08855b; color: #fff; padding: 0.5rem 1.1rem; font-size: 0.85rem; border-radius: 4px; text-decoration: none; font-weight: 600;">
                                     <i class="ri-list-check"></i> Actividades
@@ -323,9 +344,16 @@ include '../main/layout_header.php';
                     <form action="editar_categoria.php?id=<?= $categoriaId ?>&serviceId=<?= $serviceId ?>&etapa=<?= $etapaActiva ?>" method="POST" onsubmit="return confirm('¿Está seguro de eliminar esta prueba y sus actividades asociadas?');" style="margin: 0;">
                         <input type="hidden" name="action_type" value="eliminar_prueba">
                         <input type="hidden" name="prueba_id" value="<?= (int)$pru->id ?>">
-                        <button type="submit" style="background: #dc2626; color: white; border: none; padding: 0.5rem 0.9rem; font-size: 0.85rem; border-radius: 4px; cursor: pointer; font-weight: 600;">
-                            <i class="ri-delete-bin-line"></i> Eliminar
-                        </button>
+                        <?php     // 3. Uso directo en verificacioness
+                                    if ($permisosModulo8['puede_editar'] == 1) {?>                   
+                                    <button type="submit" style="background: #dc2626; color: white; border: none; padding: 0.5rem 0.9rem; font-size: 0.85rem; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                                        <i class="ri-delete-bin-line"></i> Eliminar
+                                    </button>
+                                <?php } else {?>
+                                    
+                                <?php } ?>    
+                                
+                       
                     </form>
 
                         </div>
