@@ -253,6 +253,7 @@ include '../main/h.php';
 
         <div style="display: flex; align-items: center; gap: 0.25rem; margin-left: auto;">
             <?php if (!$isClosed): ?>
+                <?php if ($permisosModulo1['puede_editar'] == 1) {?>
                 <a href="configurar-frecuencia3.php?proyectoId=<?= $proyectoId ?>" class="btn btn-secondary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
                     <i class="ri-calendar-event-line"></i> Frecuencias (<?= (int)$totalFrecuencias ?>)
                 </a>
@@ -260,6 +261,11 @@ include '../main/h.php';
                 <a href="seleccionar-pruebas3.php?proyectoId=<?= $proyectoId ?>&frecuencia=<?= $frecuenciaNum ?>" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; background: #2563eb; color: #ffffff;">
                     <i class="ri-checkbox-multiple-line"></i> Pruebas
                 </a>
+                
+                <?php } else {?>
+                                
+                <?php } ?>  
+               
             <?php endif; ?>
             <a href="../project/index.php" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Cancelar (Atrás)">
                 <i class="ri-close-circle-line"></i> 
