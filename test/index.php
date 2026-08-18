@@ -82,17 +82,6 @@ $moduloId = 1; // Módulo deseado
 
 // 2. Consultar permisos
 $permisosModulo1 = obtenerPermisosModulo($pdo, $userId, $moduloId);
-
-// 3. Uso directo en verificaciones
-if ($permisosModulo1['puede_acceder']) {
-    // El usuario tiene acceso al módulo 1
-    if ($permisosModulo1['puede_editar']) {
-        // Permitir acciones de edición
-    }
-} else {
-    // Acceso denegado
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -205,7 +194,11 @@ include 'main/layout_header.php';
 
 <?php     // 3. Uso directo en verificacioness
 if ($permisosModulo1['puede_acceder'] == 1) {?>
+        <?php if ($permisosModulo1['puede_ver'] == 1) {?>
         <a href="project/index.php" class="module-card">
+        <?php }else {?>
+        <a href="#" class="module-card">
+        <?php }?>
             <div class="icon-box"><i class="ri-folders-line"></i></div>
             <h2>Proyecto</h2>
             <p>Planificación de flujos de trabajo, entregables y asignación de tareas.</p>
