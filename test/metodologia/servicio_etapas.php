@@ -158,9 +158,16 @@ include '../main/layout_header.php';
                 required 
                 style="flex: 1; padding: 0.65rem 1rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;"
             >
-            <button type="submit" class="btn btn-primary" style="background: #08855b; border: none; padding: 0.65rem 1.25rem; font-weight: 600; cursor: pointer; border-radius: 6px; color: #fff;">
-                <i class="ri-add-line"></i> Agregar Categoría
-            </button>
+            <?php     // 3. Uso directo en verificacioness
+                if ($permisosModulo8['puede_editar'] == 1) {?>                   
+                    <button type="submit" class="btn btn-primary" style="background: #08855b; border: none; padding: 0.65rem 1.25rem; font-weight: 600; cursor: pointer; border-radius: 6px; color: #fff;">
+                        <i class="ri-add-line"></i> Agregar Categoría
+                    </button>
+            <?php } else {?>
+                
+            <?php } ?>    
+        
+            
         </form>
     </div>
 
