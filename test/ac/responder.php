@@ -379,13 +379,18 @@ $angle = -90 + (($clampedScore - 0) / (105 - 0)) * 180;
                             </td>
                             <!-- Dentro del foreach de filas en la Matriz de Riesgo -->
                             <td style="border: 1px solid #e2e8f0; padding: 0.6rem; text-align: center; white-space: nowrap;">
-                                <?php if (!$isClosed): ?>
+                                <?php if (!$isClosed): 
+                                    if ($permisosModulo5['puede_editar'] == 1) {?>
                                     <button type="button" onclick="editarRiesgoAC(this)" style="background: transparent; border: none; color: #0284c7; cursor: pointer; margin-right: 0.3rem;" title="Editar">
                                         <i class="ri-edit-line" style="font-size: 1.1rem;"></i>
                                     </button>
                                     <button type="button" onclick="eliminarRiesgoAC(this)" style="background: transparent; border: none; color: #ef4444; cursor: pointer;" title="Eliminar">
                                         <i class="ri-delete-bin-line" style="font-size: 1.1rem;"></i>
                                     </button>
+                                    <?php } else {?>
+                                        <span style="color: #94a3b8; font-size: 0.8rem; font-style: italic;">Bloqueado</span>
+                                    <?php } ?>
+
                                 <?php else: ?>
                                     <span style="color: #94a3b8; font-size: 0.8rem; font-style: italic;">Bloqueado</span>
                                 <?php endif; ?>
