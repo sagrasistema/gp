@@ -271,7 +271,14 @@ include '../main/layout_header.php';
 
             <div class="actions col-4">
                 <a href="index.php" class="btn btn-secondary">Cancelar</a>
-                <button type="submit" class="btn btn-primary"><i class="ri-refresh-line"></i> Actualizar Ficha Completa</button>
+                
+            <?php     // 3. Uso directo en verificacioness
+                if ($permisosModulo5['puede_editar'] == 1) {?>                   
+                    <button type="submit" class="btn btn-primary"><i class="ri-refresh-line"></i> Actualizar Ficha Completa</button>
+            <?php } else {?>
+                
+            <?php } ?>
+                
             </div>
         </form>
     </div>
