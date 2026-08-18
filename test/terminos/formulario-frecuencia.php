@@ -232,9 +232,14 @@ include '../main/h.php';
                     Cancelar
                 </a>
                 
+                <?php if ($permisosModulo6['puede_editar'] == 1) {?>
                     <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
                         <i class="ri-save-line"></i> Guardar Frecuencia
                     </button>
+                <?php } else {?>
+                    
+                <?php } ?>    
+                    
                      
                 
             </div>
