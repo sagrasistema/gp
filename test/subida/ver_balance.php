@@ -76,9 +76,9 @@ function formatearMonto(float $valor): string
                     <th>Código</th>
                     <th>Nombre</th>
                     <th>Código y Nombre</th>
-                    <!--<th>Balance Cierre</th>
+                    <th>Balance Cierre</th>
                     <th>Debe</th>
-                    <th>Haber</th>-->
+                    <th>Haber</th>
                     <th>Balance Auditado</th>
                     <th>Balande Final Ajustado</th>
                     <th>Diferencia</th>
@@ -110,7 +110,9 @@ function formatearMonto(float $valor): string
                             <td class="text-left font-bold"><?= htmlspecialchars($row['codigo']) ?></td>
                             <td class="text-left"><?= htmlspecialchars($row['nombre']) ?></td>
                             <td class="text-left"><?= htmlspecialchars((string)($row['codigo_nombre'] ?? '')) ?></td>
-                            
+                            <td class="text-right <?= $bCierre < 0 ? 'monto-negativo' : '' ?>"><?= formatearMonto($bCierre) ?></td>
+                            <td class="text-right"><?= formatearMonto($debe) ?></td>
+                            <td class="text-right"><?= formatearMonto($haber) ?></td>-->
                             <td class="text-right font-bold <?= $bAudit < 0 ? 'monto-negativo' : '' ?>"><?= formatearMonto($bAudit) ?></td>
                             <td class="text-right <?= $bAjust < 0 ? 'monto-negativo' : '' ?>"><?= formatearMonto($bAjust) ?></td>
                             <td class="text-right <?= $diferencia < 0 ? 'monto-negativo' : '' ?>"><?= formatearMonto($diferencia) ?></td>
