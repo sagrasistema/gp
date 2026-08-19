@@ -1,8 +1,5 @@
 
 <?php
-
-declare(strict_types=1);
-
 /**
  * Procesador e Importador de Archivos CSV para Actividades de Auditoría.
  *
