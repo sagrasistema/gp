@@ -9,6 +9,10 @@
  * @param string $delimitador Delimitador del CSV (por defecto ';' o ',').
  * @return array Estado del procesamiento con mensaje y cantidad de filas procesadas.
  */
+include '../main/h.php'; 
+include '../main/config.php'; 
+$actividadId = 1;
+
 function procesarEImportarCSV(PDO $pdo, int $actividadId, array $fileArray, string $delimitador = ';'): array
 {
     // 1. Validaciones previas de carga
