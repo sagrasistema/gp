@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
+// Carga de dependencias y configuración de la base de datos PDO
 require_once __DIR__ . '/../main/h.php';
 require_once __DIR__ . '/../main/config.php';
 
+/** @var PDO $pdo */
+
 /**
- * Normaliza valores contables como "(125,170)", "-", "1,047,761" a float numérico.
+ * Normaliza cualquier formato contable (ej: "(125,170)", "-", "1,047,761") a float.
  */
 function parseMontoContable(?string $valor): float
 {
@@ -26,6 +29,7 @@ function parseMontoContable(?string $valor): float
         $valor = substr($valor, 1, -1);
     }
 
+    // Remover separadores de miles
     $valor = str_replace(',', '', $valor);
     $monto = (float)$valor;
 
@@ -33,80 +37,53 @@ function parseMontoContable(?string $valor): float
 }
 
 /**
- * Inserta un registro individual de balance auditado en la base de datos.
- */
-function guardarRegistroBalance(PDO $pdo, int $actividadId, array $data): bool
-{
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    $linkAgrup     = isset($data['link_agrup']) ? trim((string)$data['link_agrup']) : null;
-    $link          = isset($data['link']) ? trim((string)$data['link']) : null;
-    $codigo        = trim((string)($data['codigo'] ?? ''));
-    $descripcion   = trim((string)($data['descripcion'] ?? ''));
-    $balanceCierre = parseMontoContable((string)($data['balance_cierre'] ?? '0'));
-    $debe          = parseMontoContable((string)($data['debe'] ?? '0'));
-    $haber         = parseMontoContable((string)($data['haber'] ?? '0'));
-
-    // Ecuación contable: Balance Auditado = Balance Cierre + Debe - Haber
-    $balanceAuditado = $balanceCierre + $debe - $haber;
-
-    if (empty($codigo) || empty($descripcion)) {
-        return false;
-    }
-
-    $sql = "INSERT INTO actividad_balance_auditado 
-                (actividad_id, link_agrup, link, codigo, descripcion, balance_cierre, debe, haber, balance_auditado)
-            VALUES 
-                (:actividad_id, :link_agrup, :link, :codigo, :descripcion, :balance_cierre, :debe, :haber, :balance_auditado)";
-
-    $stmt = $pdo->prepare($sql);
-
-    return $stmt->execute([
-        ':actividad_id'     => $actividadId,
-        ':link_agrup'      => $linkAgrup !== '' ? $linkAgrup : null,
-        ':link'            => $link !== '' ? $link : null,
-        ':codigo'          => $codigo,
-        ':descripcion'     => $descripcion,
-        ':balance_cierre'  => $balanceCierre,
-        ':debe'            => $debe,
-        ':haber'           => $haber,
-        ':balance_auditado' => $balanceAuditado,
-    ]);
-}
-
-/**
- * Procesa masivamente un archivo CSV con la hoja de trabajo.
+ * Procesa la importación del Sumario de Auditoría.
  */
 function importarSumarioCSV(PDO $pdo, int $actividadId, array $fileArray): array
 {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    if ($actividadId <= 0 || !isset($fileArray['tmp_name']) || $fileArray['error'] !== UPLOAD_ERR_OK) {
-        return ['success' => false, 'message' => 'Archivo de entrada no válido.'];
+    if (!isset($fileArray['tmp_name']) || $fileArray['error'] !== UPLOAD_ERR_OK) {
+        return ['success' => false, 'message' => 'Seleccione un archivo CSV válido para importar.'];
     }
 
-    $content = file_get_contents($fileArray['tmp_name']);
+    $tmpFilePath = $fileArray['tmp_name'];
+    $extension   = strtolower(pathinfo($fileArray['name'], PATHINFO_EXTENSION));
+
+    if ($extension !== 'csv') {
+        return ['success' => false, 'message' => 'El archivo adjunto debe ser de formato .csv'];
+    }
+
+    $content = file_get_contents($tmpFilePath);
     if ($content === false) {
-        return ['success' => false, 'message' => 'Error al leer el archivo.'];
+        return ['success' => false, 'message' => 'No se pudo leer el contenido del archivo.'];
     }
 
-    // Remover caracteres BOM o invisibles de codificación UTF-8
+    // Limpieza de caracteres invisibles BOM UTF-8
     $content = preg_replace('/^[\x00-\x1F\x7F\xEF\xBB\xBF]+/', '', $content);
-    $lines = explode("\n", str_replace(["\r\n", "\r"], "\n", trim($content)));
+    $lines   = explode("\n", str_replace(["\r\n", "\r"], "\n", trim($content)));
 
     if (count($lines) <= 1) {
-        return ['success' => false, 'message' => 'El archivo no contiene filas procesables.'];
+        return ['success' => false, 'message' => 'El archivo está vacío o no posee registros de datos.'];
     }
 
+    // Auto-detectar delimitador
     $delimitador = str_contains($lines[0], ';') ? ';' : ',';
 
     try {
         $pdo->beginTransaction();
+
+        $sql = "INSERT INTO actividad_balance_auditado 
+                    (actividad_id, link_agrup, link, codigo, descripcion, balance_cierre, debe, haber, balance_auditado)
+                VALUES 
+                    (:actividad_id, :link_agrup, :link, :codigo, :descripcion, :balance_cierre, :debe, :haber, :balance_auditado)";
+
+        $stmt = $pdo->prepare($sql);
         $procesados = 0;
 
         foreach ($lines as $index => $line) {
             $line = trim($line);
-            if (empty($line) || $index === 0) { // Salta los encabezados
+            if (empty($line) || $index === 0) { // Omitir línea de cabeceras
                 continue;
             }
 
@@ -115,28 +92,42 @@ function importarSumarioCSV(PDO $pdo, int $actividadId, array $fileArray): array
                 continue;
             }
 
-            $registro = [
-                'link_agrup'     => $row[0] ?? null,
-                'link'           => $row[1] ?? null,
-                'codigo'         => $row[2] ?? null,
-                'descripcion'    => $row[3] ?? null,
-                'balance_cierre' => $row[4] ?? '0',
-                'debe'           => $row[5] ?? '0',
-                'haber'          => $row[6] ?? '0',
-            ];
+            $codigo      = trim((string)($row[2] ?? ''));
+            $descripcion = trim((string)($row[3] ?? ''));
 
-            if (!empty($registro['codigo']) && !empty($registro['descripcion'])) {
-                guardarRegistroBalance($pdo, $actividadId, $registro);
-                $procesados++;
+            if ($codigo === '' || $descripcion === '') {
+                continue;
             }
+
+            $linkAgrup     = isset($row[0]) && trim((string)$row[0]) !== '' ? trim((string)$row[0]) : null;
+            $link          = isset($row[1]) && trim((string)$row[1]) !== '' ? trim((string)$row[1]) : null;
+            $balanceCierre = parseMontoContable((string)($row[4] ?? '0'));
+            $debe          = parseMontoContable((string)($row[5] ?? '0'));
+            $haber         = parseMontoContable((string)($row[6] ?? '0'));
+
+            // Ecuación contable del balance auditado
+            $balanceAuditado = $balanceCierre + $debe - $haber;
+
+            $stmt->execute([
+                ':actividad_id'     => $actividadId,
+                ':link_agrup'      => $linkAgrup,
+                ':link'            => $link,
+                ':codigo'          => $codigo,
+                ':descripcion'     => $descripcion,
+                ':balance_cierre'  => $balanceCierre,
+                ':debe'            => $debe,
+                ':haber'           => $haber,
+                ':balance_auditado' => $balanceAuditado,
+            ]);
+
+            $procesados++;
         }
 
         $pdo->commit();
 
         return [
             'success' => true,
-            'message' => "Se registraron {$procesados} filas correctamente.",
-            'filas'   => $procesados
+            'message' => "Se importaron exitosamente {$procesados} cuentas al sumario de la actividad #{$actividadId}."
         ];
 
     } catch (Throwable $e) {
@@ -144,27 +135,47 @@ function importarSumarioCSV(PDO $pdo, int $actividadId, array $fileArray): array
             $pdo->rollBack();
         }
 
-        error_log("Error de importación CSV: " . $e->getMessage());
+        error_log("Error en guardar_actividad.php (Actividad {$actividadId}): " . $e->getMessage());
 
         return [
             'success' => false,
-            'message' => 'Ocurrió un error al procesar la carga masiva.'
+            'message' => 'Error al procesar la base de datos: ' . $e->getMessage()
         ];
     }
 }
 
-/**
- * Consulta las cuentas pertenecientes a una actividad especificada.
- */
-function obtenerBalanceAuditado(PDO $pdo, int $actividadId): array
-{
-    $sql = "SELECT link_agrup, link, codigo, descripcion, balance_cierre, debe, haber, balance_auditado 
-            FROM actividad_balance_auditado 
-            WHERE actividad_id = :actividad_id 
-            ORDER BY id ASC";
+// --------------------------------------------------------------------------
+// CONTROLADOR DE PETICIÓN POST
+// --------------------------------------------------------------------------
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([':actividad_id' => $actividadId]);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_actividad'])) {
+    
+    // Validar y sanitizar el ID de la actividad del campo oculto
+    $actividadId = filter_input(INPUT_POST, 'actividad_id', FILTER_VALIDATE_INT);
 
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if (!$actividadId || $actividadId <= 0) {
+        die('Error: El ID de la actividad proporcionado no es válido.');
+    }
+
+    if (isset($_FILES['archivo_csv']) && $_FILES['archivo_csv']['error'] === UPLOAD_ERR_OK) {
+        $resultado = importarSumarioCSV($pdo, $actividadId, $_FILES['archivo_csv']);
+
+        if ($resultado['success']) {
+            // Redireccionar a la vista de renderizado con mensaje de éxito
+            header("Location: ver_balance.php?actividad_id={$actividadId}&msg=ok");
+            exit;
+        } else {
+            echo "<div style='color: red; padding: 15px; border: 1px solid red; background: #fef2f2; font-family: sans-serif; margin: 20px;'>";
+            echo "<strong>Error al guardar:</strong> " . htmlspecialchars($resultado['message']);
+            echo "<br><br><a href='javascript:history.back()'>Volver al formulario</a>";
+            echo "</div>";
+            exit;
+        }
+    } else {
+        echo "<div style='color: red; padding: 15px; border: 1px solid red; background: #fef2f2; font-family: sans-serif; margin: 20px;'>";
+        echo "Por favor, seleccione un archivo CSV para adjuntar antes de guardar.";
+        echo "<br><br><a href='javascript:history.back()'>Volver al formulario</a>";
+        echo "</div>";
+        exit;
+    }
 }
