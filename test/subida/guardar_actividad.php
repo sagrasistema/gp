@@ -2,75 +2,53 @@
 
 declare(strict_types=1);
 
-/**
- * Procesador e Importador de Archivos CSV para Actividades de Auditoría.
- *
- * Soporta auto-detección de delimitadores (;, ,, \t) y formateo de montos.
- */
-
-// Inclusiones de dependencias y configuración
+// Carga de configuración y encabezados
 require_once __DIR__ . '/../main/h.php'; 
 require_once __DIR__ . '/../main/config.php'; 
 
 /**
- * Detecta automáticamente el delimitador de un archivo CSV.
- */
-function detectarDelimitadorCSV(string $filePath): string
-{
-    $delimitadores = [';' => 0, ',' => 0, "\t" => 0];
-    $handle = @fopen($filePath, 'r');
-    
-    if ($handle) {
-        $primeraLined = fgets($handle, 4096) ?: '';
-        fclose($handle);
-        
-        foreach ($delimitadores as $delimitador => &$count) {
-            $count = count(str_getcsv($primeraLined, $delimitador));
-        }
-        
-        arsort($delimitadores);
-        return array_key_first($delimitadores) ?? ';';
-    }
-
-    return ';';
-}
-
-/**
- * Procesa e importa el archivo CSV a la base de datos dentro de una transacción.
+ * Función robusta para procesar e importar el CSV de Actividades.
+ *
+ * @param PDO $pdo Instancia de conexión a MySQL/MariaDB.
+ * @param int $actividadId ID de la actividad vinculada.
+ * @param array $fileArray $_FILES['archivo_csv']
+ * @return array Estado de la ejecución.
  */
 function procesarEImportarCSV(PDO $pdo, int $actividadId, array $fileArray): array
 {
-    // 1. Validaciones de entrada
+    // 1. Asegurar que PDO lance excepciones en errores SQL
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // 2. Validaciones estrictas
     if ($actividadId <= 0) {
         return ['success' => false, 'message' => 'El ID de la actividad no es válido.'];
     }
 
     if (!isset($fileArray['tmp_name']) || $fileArray['error'] !== UPLOAD_ERR_OK) {
-        return ['success' => false, 'message' => 'Error al subir el archivo o ningún archivo seleccionado.'];
-    }
-
-    $extension = strtolower(pathinfo($fileArray['name'], PATHINFO_EXTENSION));
-    if ($extension !== 'csv') {
-        return ['success' => false, 'message' => 'El archivo debe tener extensión .csv'];
+        return ['success' => false, 'message' => 'Error al subir el archivo al servidor.'];
     }
 
     $tmpFilePath = $fileArray['tmp_name'];
 
+    // 3. Lectura inicial y detección automática de delimitador (, o ;)
+    $content = file_get_contents($tmpFilePath);
+    if ($content === false) {
+        return ['success' => false, 'message' => 'No se pudo leer el archivo cargado.'];
+    }
+
+    // Remover UTF-8 BOM si existe
+    $content = preg_replace('/^[\x00-\x1F\x7F\xEF\xBB\xBF]+/', '', $content);
+    $lines = explode("\n", str_replace(["\r\n", "\r"], "\n", trim($content)));
+
+    if (count($lines) <= 1) {
+        return ['success' => false, 'message' => 'El archivo está vacío o solo contiene encabezados.'];
+    }
+
+    // Detectar si la primera línea usa coma ',' o punto y coma ';'
+    $delimitador = (str_contains($lines[0], ';')) ? ';' : ',';
+
     try {
-        // Detectar delimitador automáticamente (;, , o tab)
-        $delimitador = detectarDelimitadorCSV($tmpFilePath);
-
-        // 2. Configurar lectura streaming mediante SplFileObject
-        $file = new SplFileObject($tmpFilePath, 'r');
-        $file->setFlags(
-            SplFileObject::READ_CSV | 
-            SplFileObject::READ_AHEAD | 
-            SplFileObject::SKIP_EMPTY | 
-            SplFileObject::DROP_NEW_LINE
-        );
-        $file->setCsvControl($delimitador);
-
-        // 3. Iniciar Transacción Atómica
+        // 4. Iniciar Transacción
         $pdo->beginTransaction();
 
         $sql = "INSERT INTO actividad_datos_csv (actividad_id, codigo, descripcion, monto, observaciones) 
@@ -78,96 +56,86 @@ function procesarEImportarCSV(PDO $pdo, int $actividadId, array $fileArray): arr
         $stmt = $pdo->prepare($sql);
 
         $filasProcesadas = 0;
-        $esEncabezado = true;
 
-        foreach ($file as $row) {
-            // Ignorar filas totalmente vacías
-            if (empty($row) || $row === [null] || !is_array($row)) {
+        foreach ($lines as $index => $line) {
+            $line = trim($line);
+            if (empty($line)) {
                 continue;
             }
 
-            // Omitir la fila 1 (encabezados: codigo, descripcion, monto, observaciones)
-            if ($esEncabezado) {
-                $esEncabezado = false;
+            // Omitir encabezado (Fila 0: codigo,descripcion,monto,observaciones)
+            if ($index === 0) {
                 continue;
             }
 
-            // Mapeo según la estructura del Excel (A:0, B:1, C:2, D:3)
-            $codigo        = isset($row[0]) && trim((string)$row[0]) !== '' ? trim((string)$row[0]) : null;
-            $descripcion   = isset($row[1]) && trim((string)$row[1]) !== '' ? trim((string)$row[1]) : null;
-            $rawMonto      = isset($row[2]) ? trim((string)$row[2]) : '0';
-            $observaciones = isset($row[3]) && trim((string)$row[3]) !== '' ? trim((string)$row[3]) : null;
+            // Parsear la línea CSV usando el delimitador detectado
+            $row = str_getcsv($line, $delimitador);
 
-            // Omite la fila si está completamente limpia sin datos útiles
-            if ($codigo === null && $descripcion === null && $rawMonto === '0') {
-                continue;
-            }
+            $codigo        = isset($row[0]) && trim($row[0]) !== '' ? trim($row[0]) : null;
+            $descripcion   = isset($row[1]) && trim($row[1]) !== '' ? trim($row[1]) : null;
+            $rawMonto      = isset($row[2]) ? trim($row[2]) : '0';
+            $observaciones = isset($row[3]) && trim($row[3]) !== '' ? trim($row[3]) : null;
 
-            // Normalizar monto: convierte "65846948" o "1.250,50" a float nativo
-            if (str_contains($rawMonto, ',')) {
-                $rawMonto = str_replace('.', '', $rawMonto);
-                $rawMonto = str_replace(',', '.', $rawMonto);
-            }
-            $montoLimpio = (float)$rawMonto;
+            // Formatear monto
+            $monto = (float)str_replace(',', '.', $rawMonto);
 
-            // Inserción parametrizada
+            // Ejecutar inserción
             $stmt->execute([
                 ':actividad_id' => $actividadId,
                 ':codigo'       => $codigo,
                 ':descripcion'  => $descripcion,
-                ':monto'        => $montoLimpio,
+                ':monto'        => $monto,
                 ':observaciones'=> $observaciones,
             ]);
 
             $filasProcesadas++;
         }
 
-        // Commit si todas las inserciones fueron exitosas
+        // Confirmar guardado
         $pdo->commit();
 
         return [
             'success' => true,
-            'message' => "Se importaron exitosamente {$filasProcesadas} registros a la actividad.",
+            'message' => "¡Éxito! Se guardaron {$filasProcesadas} registros correctamente en la base de datos.",
             'filas'   => $filasProcesadas
         ];
 
+    } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        // Registra el error exacto de MySQL en el log de PHP
+        error_log("Error SQL al guardar CSV: " . $e->getMessage());
+
+        return [
+            'success' => false,
+            'message' => 'Error de Base de Datos: ' . $e->getMessage()
+        ];
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
-
-        error_log("Error crítico en importación CSV (Actividad {$actividadId}): " . $e->getMessage());
-
         return [
             'success' => false,
-            'message' => 'Error al procesar el archivo CSV. Verifique el formato e intente nuevamente.'
+            'message' => 'Error inesperado: ' . $e->getMessage()
         ];
     }
 }
 
 // --------------------------------------------------------------------------
-// DISPARADOR / PROCESAMIENTO DEL FORMULARIO
+// EJECUCIÓN DIRECTA DEL PROCESO DE CARGA
 // --------------------------------------------------------------------------
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Sanitizar ID de la actividad (desde POST o variable fallback)
-    $actividadId = filter_input(INPUT_POST, 'actividad_id', FILTER_VALIDATE_INT) ?? 1;
+    $actividadId = (int)($_POST['actividad_id'] ?? 1);
 
     if (isset($_FILES['archivo_csv'])) {
-        // Ejecutar función de importación
-        $respuesta = procesarEImportarCSV($pdo, $actividadId, $_FILES['archivo_csv']);
+        $res = procesarEImportarCSV($pdo, $actividadId, $_FILES['archivo_csv']);
 
-        // Retornar JSON si es llamada AJAX o guardar en sesión
-        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode($respuesta);
-            exit;
-        }
-
-        if ($respuesta['success']) {
-            $_SESSION['flash_message'] = $respuesta['message'];
+        if ($res['success']) {
+            echo "<div style='color: green; padding: 10px; border: 1px solid green; margin: 10px 0;'>{$res['message']}</div>";
         } else {
-            $_SESSION['flash_error'] = $respuesta['message'];
+            echo "<div style='color: red; padding: 10px; border: 1px solid red; margin: 10px 0;'>{$res['message']}</div>";
         }
     }
 }
