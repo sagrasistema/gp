@@ -50,9 +50,6 @@ function importarSumarioCSV(PDO $pdo, int $actividadId, array $fileArray): array
     $tmpFilePath = $fileArray['tmp_name'];
     $extension   = strtolower(pathinfo($fileArray['name'], PATHINFO_EXTENSION));
 
-    if ($extension !== 'csv') {
-        return ['success' => false, 'message' => 'El archivo adjunto debe ser de formato .csv'];
-    }
 
     $content = file_get_contents($tmpFilePath);
     if ($content === false) {
