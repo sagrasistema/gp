@@ -9,6 +9,7 @@ require_once __DIR__ . '/balance_service.php';
 /** @var PDO $pdo */
 
 $actividadId = filter_input(INPUT_GET, 'actividad_id', FILTER_VALIDATE_INT) ?? 1;
+$actividadId = 123;
 $cuentas = obtenerBalanceAuditado($pdo, $actividadId);
 
 /**
