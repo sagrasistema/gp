@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../main/h.php';
 require_once __DIR__ . '/../main/config.php';
-require_once __DIR__ . '/guardar_actividad.php';
+require_once __DIR__ . '/balance_service.php';
 
 /** @var PDO $pdo */
 
