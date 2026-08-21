@@ -68,10 +68,10 @@ include '../main/layout_header.php';
             <thead>
                 <tr>
                     
-                    <th style="width: 35%;">Cliente / Empresa</th>
+                    <th style="width: 25%;">Cliente / Empresa</th>
                     <th style="width: 25%;">Proyecto / Alcance</th>
                     <th style="width: 15%;">Fecha Inicio</th>
-                    <th style="width: 15%; text-align: center;">Acciones</th>
+                    <th style="width: 25%; text-align: center;">Acciones</th>
                     <th style="width: 10%;">Estado</th>
                 </tr>
             </thead>
@@ -108,9 +108,9 @@ include '../main/layout_header.php';
                             echo "</a>";
 
                             // Botón de Asignación de Equipo (proyecto_equipo.php)
-                            //echo "<a href='proyecto_equipo.php?id={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; background-color: rgba(0, 188, 212, 0.1); color: var(--accent-cian, #00bcd4); border: 1px solid var(--accent-cian, #00bcd4);' data-tooltip='Asignar Equipo'>";
-                            //echo "<i class='ri-team-line'></i>";
-                            //echo "</a>";
+                            echo "<a href='proyecto_equipo.php?id={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; background-color: rgba(0, 188, 212, 0.1); color: var(--accent-cian, #00bcd4); border: 1px solid var(--accent-cian, #00bcd4);' data-tooltip='Asignar Equipo'>";
+                            echo "<i class='ri-team-line'></i>";
+                            echo "</a>";
 
                             echo "</td>";
                              
