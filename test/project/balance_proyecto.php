@@ -217,13 +217,20 @@ foreach ($cuentas as $c) {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Balance 12 Meses - Proyecto #<?= htmlspecialchars((string)$proyectoId) ?></title>
+<link rel="stylesheet" href="../main/layout.css">
+
+<?php
+$customLogoPath = '../main/logo.png';
+$customHomePath = '../index.php';
+$customAcPath   = '../ac/index.php';
+$currentTab     = 'proyectos'; 
+
+include '../main/layout_header.php';
+?>
+
+
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 20px; color: #333; }
+        
         .card { background: #fff; border-radius: 6px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .alert-success { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
         .alert-danger { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
@@ -242,9 +249,6 @@ foreach ($cuentas as $c) {
         .text-center { text-align: center; }
         .tr-total { background-color: #e8f5e9 !important; font-weight: bold; border-top: 2px solid #2e7d32; }
     </style>
-</head>
-<body>
-
 <div class="card">
     <h2>Balance Anual (12 Meses) - Proyecto #<?= htmlspecialchars((string)$proyectoId) ?></h2>
     <a href="index.php">← Volver a Proyectos</a>
@@ -369,5 +373,7 @@ function toggleAccordion() {
 }
 </script>
 
-</body>
-</html>
+<?php 
+include '../main/layout_footer.php'; 
+include '../main/footer.php'; 
+?>
