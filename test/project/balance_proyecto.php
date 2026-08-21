@@ -197,10 +197,7 @@ $currentTab     = 'proyectos';
 
 include '../main/layout_header.php';
 ?>
-<style>
-
-<style>
-        
+<style>        
         .card { background: #fff; border-radius: 6px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .alert-success { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
         .alert-danger { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
@@ -219,9 +216,8 @@ include '../main/layout_header.php';
         .text-right { text-align: right; }
         .text-center { text-align: center; }
         .tr-total { background-color: #e8f5e9 !important; font-weight: bold; border-top: 2px solid #2e7d32; }
-    </style>
-
 </style>
+
 
 
 <div class="card">
