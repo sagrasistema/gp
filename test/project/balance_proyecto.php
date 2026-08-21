@@ -197,6 +197,31 @@ $currentTab     = 'proyectos';
 
 include '../main/layout_header.php';
 ?>
+<style>
+
+<style>
+        
+        .card { background: #fff; border-radius: 6px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .alert-success { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
+        .alert-danger { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
+        
+        /* Acordeón */
+        .accordion-btn { background-color: #2e7d32; color: white; cursor: pointer; padding: 14px; width: 100%; text-align: left; border: none; outline: none; transition: 0.3s; font-size: 15px; font-weight: bold; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .accordion-btn:hover { background-color: #1b5e20; }
+        .accordion-content { padding: 0 18px; display: none; background-color: white; overflow: hidden; border: 1px solid #ddd; border-top: none; margin-top: -2px; border-radius: 0 0 4px 4px; }
+        
+        /* Tabla */
+        .table-responsive { overflow-x: auto; margin-top: 15px; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; white-space: nowrap; }
+        th { background: #2e7d32; color: #fff; padding: 8px; border: 1px solid #1b5e20; }
+        td { padding: 6px; border: 1px solid #e0e0e0; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .tr-total { background-color: #e8f5e9 !important; font-weight: bold; border-top: 2px solid #2e7d32; }
+    </style>
+
+</style>
 
 
 <div class="card">
