@@ -221,8 +221,28 @@ include '../main/layout_header.php';
 
 
 <div class="card">
-    <h2>Gestión de Balance de Proyecto #<?= htmlspecialchars((string)$proyectoId) ?></h2>
-    <a href="index.php">← Volver a Proyectos</a>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h1 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
+            <i class="ri-dashboard-line" style="color: var(--accent);"></i>Gestión de Balance de Proyecto #<?= htmlspecialchars((string)$proyectoId) ?>
+        </h1>
+
+        <div style="display: flex; align-items: center; gap: 0.25rem; margin-left: auto;">
+            <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
+                <i class="ri-arrow-go-back-line"></i> 
+            </a>
+            <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
+                <i class="ri-screenshot-2-line"></i>
+            </a>
+            <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
+                <i class="ri-add-line"></i>
+            </a>
+            <a href="../project/index.php" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Cancelar (Atrás)">
+                <i class="ri-close-circle-line"></i> 
+            </a>
+            </a>
+        </div>
+    </div>
     <hr>
 
     <?php if ($mensaje): ?><div class="alert-success"><?= htmlspecialchars($mensaje) ?></div><?php endif; ?>
