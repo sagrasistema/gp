@@ -112,9 +112,9 @@ include '../main/layout_header.php';
                             echo "<i class='ri-team-line'></i>";
                             echo "</a>";
 
-                            echo '<a href="balance_proyecto.php?proyecto_id=<?= $proyecto['id'] ?>" class="btn btn-sm btn-success">'
-                            echo '<i class="ri-file-excel-2-line"></i>'
-                            echo '</a>'
+                            echo '<a href="balance_proyecto.php?proyecto_id=<?= $proyecto['id'] ?>" class="btn btn-sm btn-success">';
+                            echo '<i class="ri-file-excel-2-line"></i>';
+                            echo '</a>';
 
                             echo "</td>";
                              
