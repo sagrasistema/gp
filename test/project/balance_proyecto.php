@@ -9,10 +9,7 @@ require_once __DIR__ . '/SimpleXLSX.php';
 use Shuchkin\SimpleXLSX;
 
 /** @var PDO $pdo */
-
-$proyectoId = filter_input(INPUT_GET, 'proyecto_id', FILTER_VALIDATE_INT) 
-    ?? filter_input(INPUT_POST, 'proyecto_id', FILTER_VALIDATE_INT);
-
+$proyecto_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$proyectoId || $proyectoId <= 0) {
     die('Error: ID de proyecto no válido.');
 }
