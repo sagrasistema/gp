@@ -111,11 +111,11 @@ include '../main/layout_header.php';
                             echo "<a href='proyecto_equipo.php?id={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; background-color: rgba(0, 188, 212, 0.1); color: var(--accent-cian, #00bcd4); border: 1px solid var(--accent-cian, #00bcd4);' data-tooltip='Asignar Equipo'>";
                             echo "<i class='ri-team-line'></i>";
                             echo "</a>";
-
-                            echo '<a href="balance_proyecto.php?proyecto_id=<?= $proyecto['id'] ?>" class="btn btn-sm btn-success">';
-                            echo '<i class="ri-file-excel-2-line"></i>';
-                            echo '</a>';
-
+                            
+                            echo "<a href='balance_proyecto.php?id={$proj->proyectoId}' class='btn btn-secondary' style='padding: 0.4rem 0.6rem; font-size: 0.8rem; background-color: rgba(0, 188, 212, 0.1); color: var(--accent-cian, #00bcd4); border: 1px solid var(--accent-cian, #00bcd4);' data-tooltip='Asignar Equipo'>";
+                            echo "<i class='ri-team-line'></i>";
+                            echo "</a>";
+                            
                             echo "</td>";
                              
                             $statusId  = (int)($proj->statusId ?? 1);
