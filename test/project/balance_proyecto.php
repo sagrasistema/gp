@@ -9,14 +9,14 @@ require_once __DIR__ . '/SimpleXLSX.php';
 use Shuchkin\SimpleXLSX;
 
 /** @var PDO $pdo */
-$proyectoId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+$proyectoId = filter_input(INPUT_GET, 'proyecto_id', FILTER_VALIDATE_INT) 
+    ?? filter_input(INPUT_POST, 'proyecto_id', FILTER_VALIDATE_INT);
+
 if (!$proyectoId || $proyectoId <= 0) {
     die('Error: ID de proyecto no válido.');
 }
 
-/**
- * Normaliza valores contables provenientes de Excel.
- */
 function parseMontoContable(mixed $valor): float
 {
     if ($valor === null) {
@@ -43,9 +43,6 @@ function parseMontoContable(mixed $valor): float
     return $esNegativo ? -$monto : $monto;
 }
 
-/**
- * Formatea montos estilo libro contable.
- */
 function formatearMonto(float $valor): string
 {
     if (abs($valor) < 0.001) {
@@ -58,7 +55,7 @@ function formatearMonto(float $valor): string
 }
 
 // --------------------------------------------------------------------------
-// PROCESAMIENTO DEL FORMULARIO POST (CARGA EXCEL)
+// PROCESAMIENTO DEL FORMULARIO POST (CARGA EXCEL DE 12 MESES)
 // --------------------------------------------------------------------------
 $mensaje = null;
 $error = null;
@@ -82,18 +79,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cargar_balance'])) {
                     try {
                         $pdo->beginTransaction();
 
-                        // Limpiar balance previo del proyecto
                         $deleteStmt = $pdo->prepare("DELETE FROM actividad_balance_auditado WHERE proyecto_id = :proyecto_id");
                         $deleteStmt->execute([':proyecto_id' => $proyectoId]);
+
+                        // Construcción dinámica de columnas de consulta INSERT
+                        $columnasMeses = [];
+                        $paramsMeses = [];
+                        for ($m = 1; $m <= 12; $m++) {
+                            $columnasMeses[] = "debe_m{$m}, haber_m{$m}, ajuste_m{$m}";
+                            $paramsMeses[]   = ":debe_m{$m}, :haber_m{$m}, :ajuste_m{$m}";
+                        }
+
+                        $strColsMeses   = implode(', ', $columnasMeses);
+                        $strParamsMeses = implode(', ', $paramsMeses);
 
                         $sql = "INSERT INTO actividad_balance_auditado 
                                     (proyecto_id, actividad_id, link_eeff_1, rubro_eeff_1, link_eeff_2, rubro_eeff_notas, 
                                      link_centro_costo, tipo_partida, codigo, nombre, codigo_nombre, 
-                                     balance_cierre, debe, haber, balance_auditado, balance_final_ajustado, diferencia)
+                                     {$strColsMeses}, balance_cierre, total_debe, total_haber, total_ajuste, balance_auditado)
                                 VALUES 
                                     (:proyecto_id, :actividad_id, :link_eeff_1, :rubro_eeff_1, :link_eeff_2, :rubro_eeff_notas, 
                                      :link_centro_costo, :tipo_partida, :codigo, :nombre, :codigo_nombre, 
-                                     :balance_cierre, :debe, :haber, :balance_auditado, :balance_final_ajustado, :diferencia)";
+                                     {$strParamsMeses}, :balance_cierre, :total_debe, :total_haber, :total_ajuste, :balance_auditado)";
 
                         $stmt = $pdo->prepare($sql);
                         $procesados = 0;
@@ -110,42 +117,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cargar_balance'])) {
                                 continue;
                             }
 
-                            $balanceCierre   = parseMontoContable($row[9] ?? 0);
-                            $debe            = parseMontoContable($row[10] ?? 0);
-                            $haber           = parseMontoContable($row[11] ?? 0);
-                            $balanceAuditado = parseMontoContable($row[12] ?? 0);
-                            $balFinalAjust   = parseMontoContable($row[13] ?? 0);
-                            $diferencia      = parseMontoContable($row[14] ?? 0);
+                            $params = [
+                                ':proyecto_id'       => $proyectoId,
+                                ':actividad_id'     => 0,
+                                ':link_eeff_1'       => isset($row[0]) && trim((string)$row[0]) !== '' ? trim((string)$row[0]) : null,
+                                ':rubro_eeff_1'      => isset($row[1]) && trim((string)$row[1]) !== '' ? trim((string)$row[1]) : null,
+                                ':link_eeff_2'       => isset($row[2]) && trim((string)$row[2]) !== '' ? trim((string)$row[2]) : null,
+                                ':rubro_eeff_notas'  => isset($row[3]) && trim((string)$row[3]) !== '' ? trim((string)$row[3]) : null,
+                                ':link_centro_costo' => isset($row[4]) && trim((string)$row[4]) !== '' ? trim((string)$row[4]) : null,
+                                ':tipo_partida'      => isset($row[5]) && trim((string)$row[5]) !== '' ? trim((string)$row[5]) : null,
+                                ':codigo'            => $codigo,
+                                ':nombre'            => $nombre,
+                                ':codigo_nombre'     => isset($row[8]) && trim((string)$row[8]) !== '' ? trim((string)$row[8]) : null,
+                            ];
 
-                            if ($balanceAuditado === 0.0 && ($balanceCierre != 0.0 || $debe != 0.0 || $haber != 0.0)) {
-                                $balanceAuditado = $balanceCierre + $debe - $haber;
+                            // Lectura cíclica de los 12 meses desde la columna J (índice 9)
+                            $colOffset = 9;
+                            $sumDebeAnual = 0.0;
+                            $sumHaberAnual = 0.0;
+                            $sumAjusteAnual = 0.0;
+
+                            for ($m = 1; $m <= 12; $m++) {
+                                $d = parseMontoContable($row[$colOffset] ?? 0);
+                                $h = parseMontoContable($row[$colOffset + 1] ?? 0);
+                                $a = parseMontoContable($row[$colOffset + 2] ?? 0);
+
+                                $params[":debe_m{$m}"]   = $d;
+                                $params[":haber_m{$m}"]  = $h;
+                                $params[":ajuste_m{$m}"] = $a;
+
+                                $sumDebeAnual   += $d;
+                                $sumHaberAnual  += $h;
+                                $sumAjusteAnual += $a;
+
+                                $colOffset += 3; // Salta al siguiente mes
                             }
 
-                            $stmt->execute([
-                                ':proyecto_id'            => $proyectoId,
-                                ':actividad_id'          => 0, // Por defecto al proyecto
-                                ':link_eeff_1'            => isset($row[0]) && trim((string)$row[0]) !== '' ? trim((string)$row[0]) : null,
-                                ':rubro_eeff_1'           => isset($row[1]) && trim((string)$row[1]) !== '' ? trim((string)$row[1]) : null,
-                                ':link_eeff_2'            => isset($row[2]) && trim((string)$row[2]) !== '' ? trim((string)$row[2]) : null,
-                                ':rubro_eeff_notas'       => isset($row[3]) && trim((string)$row[3]) !== '' ? trim((string)$row[3]) : null,
-                                ':link_centro_costo'      => isset($row[4]) && trim((string)$row[4]) !== '' ? trim((string)$row[4]) : null,
-                                ':tipo_partida'           => isset($row[5]) && trim((string)$row[5]) !== '' ? trim((string)$row[5]) : null,
-                                ':codigo'                 => $codigo,
-                                ':nombre'                 => $nombre,
-                                ':codigo_nombre'          => isset($row[8]) && trim((string)$row[8]) !== '' ? trim((string)$row[8]) : null,
-                                ':balance_cierre'         => $balanceCierre,
-                                ':debe'                   => $debe,
-                                ':haber'                  => $haber,
-                                ':balance_auditado'       => $balanceAuditado,
-                                ':balance_final_ajustado' => $balFinalAjust,
-                                ':diferencia'             => $diferencia,
-                            ]);
+                            $balanceCierre   = parseMontoContable($row[$colOffset] ?? 0);
+                            $balanceAuditado = $balanceCierre + $sumDebeAnual - $sumHaberAnual + $sumAjusteAnual;
 
+                            $params[':balance_cierre']   = $balanceCierre;
+                            $params[':total_debe']       = $sumDebeAnual;
+                            $params[':total_haber']      = $sumHaberAnual;
+                            $params[':total_ajuste']     = $sumAjusteAnual;
+                            $params[':balance_auditado'] = $balanceAuditado;
+
+                            $stmt->execute($params);
                             $procesados++;
                         }
 
                         $pdo->commit();
-                        $mensaje = "Se cargaron exitosamente {$procesados} registros al balance del proyecto.";
+                        $mensaje = "Se cargó exitosamente el balance de 12 meses ({$procesados} registros).";
                     } catch (Throwable $e) {
                         if ($pdo->inTransaction()) {
                             $pdo->rollBack();
@@ -161,107 +183,89 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cargar_balance'])) {
 }
 
 // --------------------------------------------------------------------------
-// CONSULTA DE REGISTROS Y TOTALIZACIÓN
+// CONSULTA Y TOTALIZACIÓN ANUAL
 // --------------------------------------------------------------------------
 $stmt = $pdo->prepare("SELECT * FROM actividad_balance_auditado WHERE proyecto_id = :proyecto_id ORDER BY id ASC");
 $stmt->execute([':proyecto_id' => $proyectoId]);
 $cuentas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Acumuladores de Totales
-$totales = [
-    'balance_cierre'         => 0.0,
-    'debe'                   => 0.0,
-    'haber'                  => 0.0,
-    'balance_auditado'       => 0.0,
-    'balance_final_ajustado' => 0.0,
-    'diferencia'             => 0.0,
+// Inicializar acumuladores dinámicos
+$totalesMeses = [];
+for ($m = 1; $m <= 12; $m++) {
+    $totalesMeses[$m] = ['debe' => 0.0, 'haber' => 0.0, 'ajuste' => 0.0];
+}
+
+$totalesConsolidados = [
+    'cierre'   => 0.0,
+    'debe'     => 0.0,
+    'haber'    => 0.0,
+    'ajuste'   => 0.0,
+    'auditado' => 0.0,
 ];
 
 foreach ($cuentas as $c) {
-    $totales['balance_cierre']         += (float)$c['balance_cierre'];
-    $totales['debe']                   += (float)$c['debe'];
-    $totales['haber']                  += (float)$c['haber'];
-    $totales['balance_auditado']       += (float)$c['balance_auditado'];
-    $totales['balance_final_ajustado'] += (float)$c['balance_final_ajustado'];
-    $totales['diferencia']             += (float)$c['diferencia'];
+    for ($m = 1; $m <= 12; $m++) {
+        $totalesMeses[$m]['debe']   += (float)$c["debe_m{$m}"];
+        $totalesMeses[$m]['haber']  += (float)$c["haber_m{$m}"];
+        $totalesMeses[$m]['ajuste'] += (float)$c["ajuste_m{$m}"];
+    }
+    $totalesConsolidados['cierre']   += (float)$c['balance_cierre'];
+    $totalesConsolidados['debe']     += (float)$c['total_debe'];
+    $totalesConsolidados['haber']    += (float)$c['total_haber'];
+    $totalesConsolidados['ajuste']   += (float)$c['total_ajuste'];
+    $totalesConsolidados['auditado'] += (float)$c['balance_auditado'];
 }
 ?>
 
-<link rel="stylesheet" href="../main/layout.css">
-
-<?php
-$customLogoPath = '../main/logo.png';
-$customHomePath = '../index.php';
-$customAcPath   = '../ac/index.php';
-$currentTab     = 'proyectos'; 
-
-include '../main/layout_header.php';
-?>
-<style>        
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Balance 12 Meses - Proyecto #<?= htmlspecialchars((string)$proyectoId) ?></title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 20px; color: #333; }
         .card { background: #fff; border-radius: 6px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .alert-success { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
         .alert-danger { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
         
-        /* Acordeón */
         .accordion-btn { background-color: #2e7d32; color: white; cursor: pointer; padding: 14px; width: 100%; text-align: left; border: none; outline: none; transition: 0.3s; font-size: 15px; font-weight: bold; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
         .accordion-btn:hover { background-color: #1b5e20; }
-        .accordion-content { padding: 0 18px; display: none; background-color: white; overflow: hidden; border: 1px solid #ddd; border-top: none; margin-top: -2px; border-radius: 0 0 4px 4px; }
+        .accordion-content { padding: 0; display: none; background-color: white; overflow: hidden; border: 1px solid #ddd; border-top: none; margin-top: -2px; border-radius: 0 0 4px 4px; }
         
-        /* Tabla */
-        .table-responsive { overflow-x: auto; margin-top: 15px; margin-bottom: 15px; }
+        .table-responsive { overflow-x: auto; max-width: 100%; }
         table { width: 100%; border-collapse: collapse; font-size: 11px; white-space: nowrap; }
-        th { background: #2e7d32; color: #fff; padding: 8px; border: 1px solid #1b5e20; }
-        td { padding: 6px; border: 1px solid #e0e0e0; }
+        th { background: #2e7d32; color: #fff; padding: 6px; border: 1px solid #1b5e20; text-align: center; }
+        th.mes-header { background: #1b5e20; border-bottom: 2px solid #0a3d0e; }
+        td { padding: 5px; border: 1px solid #e0e0e0; }
         tr:nth-child(even) { background-color: #f9f9f9; }
         .text-right { text-align: right; }
         .text-center { text-align: center; }
         .tr-total { background-color: #e8f5e9 !important; font-weight: bold; border-top: 2px solid #2e7d32; }
-</style>
-
-
+    </style>
+</head>
+<body>
 
 <div class="card">
-
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-        <h1 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
-            <i class="ri-dashboard-line" style="color: var(--accent);"></i>Gestión de Balance de Proyecto #<?= htmlspecialchars((string)$proyectoId) ?>
-        </h1>
-
-        <div style="display: flex; align-items: center; gap: 0.25rem; margin-left: auto;">
-            <a href="#" class="btn-control-disabled" data-tooltip="Atrás" onclick="return false;">
-                <i class="ri-arrow-go-back-line"></i> 
-            </a>
-            <a href="#" class="btn-control-disabled" data-tooltip="Capturar Pantalla" onclick="return false;">
-                <i class="ri-screenshot-2-line"></i>
-            </a>
-            <a href="nuevo.php" class="btn-control-disabled" data-tooltip="Crear Registro" onclick="return false;">
-                <i class="ri-add-line"></i>
-            </a>
-            <a href="../project/index.php" class="btn btn-primary" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;" data-tooltip="Cancelar (Atrás)">
-                <i class="ri-close-circle-line"></i> 
-            </a>
-            </a>
-        </div>
-    </div>
+    <h2>Balance Anual (12 Meses) - Proyecto #<?= htmlspecialchars((string)$proyectoId) ?></h2>
+    <a href="index.php">← Volver a Proyectos</a>
     <hr>
 
     <?php if ($mensaje): ?><div class="alert-success"><?= htmlspecialchars($mensaje) ?></div><?php endif; ?>
     <?php if ($error): ?><div class="alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
-    <!-- Formulario de Carga -->
-    <form action="" method="POST" enctype="multipart/form-data" style="margin-bottom: 20px;">
+    <form action="" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="proyecto_id" value="<?= htmlspecialchars((string)$proyectoId) ?>">
-        <label for="archivo_excel"><strong>Cargar/Actualizar Balance (.xlsx):</strong></label><br><br>
+        <label for="archivo_excel"><strong>Cargar Archivo Excel de 12 Meses (.xlsx):</strong></label><br><br>
         <input type="file" name="archivo_excel" id="archivo_excel" accept=".xlsx" required>
         <button type="submit" name="cargar_balance" style="padding: 6px 15px; background: #0284c7; color: white; border: none; border-radius: 4px; cursor: pointer;">
-            Procesar e Importar
+            Procesar Balance Anual
         </button>
     </form>
 </div>
 
-<!-- Acordeón con Tabla Desplegable -->
+<!-- Acordeón Desplegable -->
 <button class="accordion-btn" onclick="toggleAccordion()">
-    <span><i class="ri-table-line"></i> Ver Tabla de Balance Cargado (<?= count($cuentas) ?> filas)</span>
+    <span><i class="ri-table-line"></i> Desplegar Tabla de Balance Anual (<?= count($cuentas) ?> Cuentas)</span>
     <span id="acc-icon">▼</span>
 </button>
 
@@ -269,27 +273,39 @@ include '../main/layout_header.php';
     <div class="table-responsive">
         <table>
             <thead>
+                <!-- Fila Superior de Encabezados Agrupados -->
                 <tr>
-                    <th>Link EEFF</th>
-                    <th>Rubro EEFF</th>
-                    <th>Link EEFF 2</th>
-                    <th>Rubro y Notas</th>
-                    <th>Centro Costo</th>
-                    <th>Tipo Partida</th>
-                    <th>Código</th>
-                    <th>Nombre</th>
-                    <th>Código y Nombre</th>
-                    <th>Balance Cierre</th>
-                    <th>Debe</th>
-                    <th>Haber</th>
-                    <th>Balance Auditado</th>
-                    <th>Balance Final Ajustado</th>
-                    <th>Diferencia</th>
+                    <th rowspan="2">Link EEFF</th>
+                    <th rowspan="2">Rubro EEFF</th>
+                    <th rowspan="2">Link 2</th>
+                    <th rowspan="2">Rubro y Notas</th>
+                    <th rowspan="2">Centro Costo</th>
+                    <th rowspan="2">Tipo</th>
+                    <th rowspan="2">Código</th>
+                    <th rowspan="2">Nombre</th>
+                    <th rowspan="2">Código y Nombre</th>
+                    <?php for ($m = 1; $m <= 12; $m++): ?>
+                        <th colspan="3" class="mes-header">MES <?= $m ?></th>
+                    <?php endfor; ?>
+                    <th colspan="5" class="mes-header" style="background:#0f172a;">CONSOLIDADO ANUAL</th>
+                </tr>
+                <!-- Fila Inferior con Sub-columnas -->
+                <tr>
+                    <?php for ($m = 1; $m <= 12; $m++): ?>
+                        <th>Debe</th>
+                        <th>Haber</th>
+                        <th>Ajuste</th>
+                    <?php endfor; ?>
+                    <th style="background:#1e293b;">B. Cierre</th>
+                    <th style="background:#1e293b;">Tot. Debe</th>
+                    <th style="background:#1e293b;">Tot. Haber</th>
+                    <th style="background:#1e293b;">Tot. Ajuste</th>
+                    <th style="background:#1e293b;">B. Auditado</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($cuentas)): ?>
-                    <tr><td colspan="15" class="text-center">No hay datos de balance registrados para este proyecto.</td></tr>
+                    <tr><td colspan="49" class="text-center" style="padding:20px;">No se registran datos para este proyecto.</td></tr>
                 <?php else: ?>
                     <?php foreach ($cuentas as $row): ?>
                         <tr>
@@ -302,24 +318,36 @@ include '../main/layout_header.php';
                             <td><strong><?= htmlspecialchars($row['codigo']) ?></strong></td>
                             <td><?= htmlspecialchars($row['nombre']) ?></td>
                             <td><?= htmlspecialchars((string)$row['codigo_nombre']) ?></td>
+
+                            <!-- 12 Meses de Transacciones -->
+                            <?php for ($m = 1; $m <= 12; $m++): ?>
+                                <td class="text-right"><?= formatearMonto((float)$row["debe_m{$m}"]) ?></td>
+                                <td class="text-right"><?= formatearMonto((float)$row["haber_m{$m}"]) ?></td>
+                                <td class="text-right"><?= formatearMonto((float)$row["ajuste_m{$m}"]) ?></td>
+                            <?php endfor; ?>
+
+                            <!-- Totales de la Cuenta -->
                             <td class="text-right"><?= formatearMonto((float)$row['balance_cierre']) ?></td>
-                            <td class="text-right"><?= formatearMonto((float)$row['debe']) ?></td>
-                            <td class="text-right"><?= formatearMonto((float)$row['haber']) ?></td>
+                            <td class="text-right"><?= formatearMonto((float)$row['total_debe']) ?></td>
+                            <td class="text-right"><?= formatearMonto((float)$row['total_haber']) ?></td>
+                            <td class="text-right"><?= formatearMonto((float)$row['total_ajuste']) ?></td>
                             <td class="text-right"><strong><?= formatearMonto((float)$row['balance_auditado']) ?></strong></td>
-                            <td class="text-right"><?= formatearMonto((float)$row['balance_final_ajustado']) ?></td>
-                            <td class="text-right"><?= formatearMonto((float)$row['diferencia']) ?></td>
                         </tr>
                     <?php endforeach; ?>
-                    
-                    <!-- Fila de Totalización -->
+
+                    <!-- Fila Final de Totales Acumulados -->
                     <tr class="tr-total">
                         <td colspan="9" class="text-right">TOTALES GENERALES:</td>
-                        <td class="text-right"><?= formatearMonto($totales['balance_cierre']) ?></td>
-                        <td class="text-right"><?= formatearMonto($totales['debe']) ?></td>
-                        <td class="text-right"><?= formatearMonto($totales['haber']) ?></td>
-                        <td class="text-right"><?= formatearMonto($totales['balance_auditado']) ?></td>
-                        <td class="text-right"><?= formatearMonto($totales['balance_final_ajustado']) ?></td>
-                        <td class="text-right"><?= formatearMonto($totales['diferencia']) ?></td>
+                        <?php for ($m = 1; $m <= 12; $m++): ?>
+                            <td class="text-right"><?= formatearMonto($totalesMeses[$m]['debe']) ?></td>
+                            <td class="text-right"><?= formatearMonto($totalesMeses[$m]['haber']) ?></td>
+                            <td class="text-right"><?= formatearMonto($totalesMeses[$m]['ajuste']) ?></td>
+                        <?php endfor; ?>
+                        <td class="text-right"><?= formatearMonto($totalesConsolidados['cierre']) ?></td>
+                        <td class="text-right"><?= formatearMonto($totalesConsolidados['debe']) ?></td>
+                        <td class="text-right"><?= formatearMonto($totalesConsolidados['haber']) ?></td>
+                        <td class="text-right"><?= formatearMonto($totalesConsolidados['ajuste']) ?></td>
+                        <td class="text-right"><?= formatearMonto($totalesConsolidados['auditado']) ?></td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -341,7 +369,5 @@ function toggleAccordion() {
 }
 </script>
 
-<?php 
-include '../main/layout_footer.php'; 
-include '../main/footer.php'; 
-?>
+</body>
+</html>
