@@ -229,12 +229,6 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
         </div>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------>
 <!-- ===================================================================== -->
-<?php
-// Supongamos que recuperas la frecuencia activa desde los datos guardados o parámetro (mínimo 1, máximo 12)
-$frecuenciaCantidad =3
-?>
-
-
 <div class="card card-custom mb-3" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
         <h5 style="font-size: 0.9rem; font-weight: 700; color: #1e3a5f; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
@@ -437,6 +431,77 @@ document.addEventListener('DOMContentLoaded', function() {
 
     actualizarVisibilidadFrecuencias();
 });
+
+// Cambiar visualmente de Etapa (Navegación Rápida)
+function switchEtapa(etapaId, btnElement) {
+    document.querySelectorAll('.stage-btn').forEach(btn => btn.classList.remove('active'));
+    btnElement.classList.add('active');
+
+    document.querySelectorAll('.etapa-content-block').forEach(block => block.style.display = 'none');
+    const activeBlock = document.getElementById('etapa_block_' + etapaId);
+    if (activeBlock) {
+        activeBlock.style.display = 'block';
+    }
+}
+
+// Control del Acordeón por Categorías
+function toggleAccordion(headerElement) {
+    const content = headerElement.nextElementSibling;
+    const icon = headerElement.querySelector('.ri-arrow-down-s-line, .ri-arrow-up-s-line');
+
+    if (content.style.display === "none" || content.style.display === "") {
+        content.style.display = "block";
+        if (icon) {
+            icon.classList.remove('ri-arrow-down-s-line');
+            icon.classList.add('ri-arrow-up-s-line');
+        }
+    } else {
+        content.style.display = "none";
+        if (icon) {
+            icon.classList.remove('ri-arrow-up-s-line');
+            icon.classList.add('ri-arrow-down-s-line');
+        }
+    }
+}
+
+// Recalcular Subtotales de Categorías y Total General del Proyecto (Horas Base * Frecuencia)
+function recalcularTotalHorasGlobal() {
+    let horasBaseAcumuladas = 0;
+    const frecInput = document.getElementById('frecuencia_cantidad');
+    const frecuencia = parseFloat(frecInput ? frecInput.value : 1) || 1;
+
+    document.querySelectorAll('.accordion-item').forEach(item => {
+        let catSubtotal = 0;
+        item.querySelectorAll('.prueba-row-container').forEach(row => {
+            const chk = row.querySelector('.chk-prueba');
+            const inputHrs = row.querySelector('.input-horas-prueba');
+
+            if (chk && chk.checked && inputHrs) {
+                const hrs = parseFloat(inputHrs.value) || 0;
+                catSubtotal += hrs;
+            }
+        });
+
+        // Actualizar Subtotal Categoría
+        const badgeCat = item.querySelector('.cat-subtotal-span');
+        if (badgeCat) {
+            badgeCat.textContent = catSubtotal.toFixed(2) + ' hrs';
+        }
+
+        horasBaseAcumuladas += catSubtotal;
+    });
+
+    const totalCalculado = horasBaseAcumuladas * frecuencia;
+    
+    // Actualizar indicador superior y campo de propuesta
+    document.getElementById('lbl_total_horas_proyecto').textContent = totalCalculado.toFixed(2);
+    const inputHorasPropuesta = document.getElementById('horas_contempladas');
+    if (inputHorasPropuesta && (!inputHorasPropuesta.value || inputHorasPropuesta.value == '0.00')) {
+        inputHorasPropuesta.value = totalCalculado.toFixed(2);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', recalcularTotalHorasGlobal);
 </script>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------>
         <!-- 4. SECCIÓN CARTA DE CONTRATACIÓN Y PRESUPUESTO PROYECTO -->
