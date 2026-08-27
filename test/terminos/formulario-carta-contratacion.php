@@ -126,8 +126,25 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
         color: #334155;
         font-weight: 600;
     }
-</style>
 
+    /* Estilos extraídos del módulo de Proyectos */
+    .view-container { padding: 0.5rem; }
+    .prueba-row-container { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.75rem; border-bottom: 1px solid var(--border-color); background: #ffffff; gap: 0.5rem; }
+    .prueba-title { font-size: 0.8rem; font-weight: 600; color: #334155; flex-grow: 1; display: flex; align-items: center; gap: 0.5rem; }
+    .prueba-actions { display: flex; align-items: center; gap: 0.4rem; justify-content: flex-end; }
+    
+    /* Barra de Navegación por Etapas */
+    .project-stages-bar { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
+    .stage-btn { flex: 1; min-width: 130px; padding: 6px 12px; background-color: #1e3a5f; border: 1px solid #2b4c7e; border-radius: 6px; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 11px; letter-spacing: 0.3px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease-in-out; text-transform: uppercase; cursor: pointer; }
+    .stage-btn i { font-size: 13px; color: #00bcd4; }
+    .stage-btn:hover { background-color: #2b4c7e; border-color: #00bcd4; }
+    .stage-btn.active { background-color: #0f1c2e; border: 1.5px solid #00bcd4; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 188, 212, 0.2); }
+    .stage-btn.active i { color: #00bcd4; }
+
+    .input-horas-prueba { width: 75px; padding: 0.2rem 0.4rem; font-size: 0.78rem; font-weight: 700; border: 1px solid #cbd5e1; border-radius: 4px; text-align: right; color: #0f172a; }
+    .input-horas-prueba:focus { border-color: #00bcd4; outline: none; box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.2); }
+    .badge-subtotal-cat { font-size: 0.68rem; background: #e0f2fe; color: #0369a1; padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 700; border: 1px solid #bae6fd; }
+</style>
 <div class="view-container">
     <!-- CABECERA -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
