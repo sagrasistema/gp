@@ -1,222 +1,436 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once 'f-carta.php';
 
-// Validar autenticación de usuario
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../login.php');
-    exit;
-}
-
-// Configuración y Conexión Backend
-include '../main/config.php';
-include 'conect-proyecto2.php';
-
-$pageTitle = "Presupuesto de Horas y Selección de Pruebas";
+$pageTitle = "Carta de Contratación y Presupuestación";
 include '../main/h.php';
-
-// Capturar parámetros requeridos
-$proyectoId = filter_input(INPUT_GET, 'proyectoId', FILTER_VALIDATE_INT) ?? 0;
-$etapaFiltro = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?? 1; // Default: Etapa 1 Planificación
-
-// Consultar lista de etapas disponibles
-$stmtEtapas = $pdo->prepare("SELECT * FROM audit_etapas ORDER BY id ASC");
-$stmtEtapas->execute();
-$etapasList = $stmtEtapas->fetchAll(PDO::FETCH_OBJ);
 ?>
-
 <link rel="stylesheet" href="../main/layout.css">
-<style>
-    /* Estilos globales compactos */
-    .view-container { padding: 0.5rem; }
-    .prueba-row-container { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.75rem; border-bottom: 1px solid var(--border-color); background: #ffffff; gap: 0.5rem; }
-    .prueba-title { font-size: 0.8rem; font-weight: 600; color: #334155; flex-grow: 1; }
-    .prueba-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end; }
-    .status-select { padding: 0.25rem; border-radius: 4px; font-size: 0.75rem; border: 1px solid #cbd5e1; font-weight: 600; }
-    .badge-hours { font-size: 0.7rem; background: #e0f2fe; color: #0369a1; padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 700; white-space: nowrap; border: 1px solid #bae6fd; }
-
-    /* Barra de Navegación por Etapas */
-    .project-stages-bar { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
-    .stage-btn { flex: 1; min-width: 130px; padding: 6px 12px; background-color: #1e3a5f; border: 1px solid #2b4c7e; border-radius: 6px; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 11px; letter-spacing: 0.3px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease-in-out; text-transform: uppercase; }
-    .stage-btn i { font-size: 13px; color: #00bcd4; }
-    .stage-btn:hover { background-color: #2b4c7e; border-color: #00bcd4; }
-    .stage-btn.active { background-color: #0f1c2e; border: 1.5px solid #00bcd4; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 188, 212, 0.2); }
-    .stage-btn.active i { color: #00bcd4; }
-
-    /* Indicadores y Controles */
-    .cat-indicators-container { display: flex; align-items: center; gap: 0.25rem; margin-left: auto; margin-right: 0.75rem; }
-    .input-horas { width: 70px; padding: 0.2rem 0.4rem; font-size: 0.75rem; font-weight: 700; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px; color: #0f172a; }
-    .input-horas:focus { border-color: #00bcd4; outline: none; box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.2); }
-</style>
-
 <?php include '../main/layout_header.php'; ?>
 
+<style>
+    .card-panel {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    .card-panel-header {
+        background: #5b7083;
+        color: #ffffff;
+        padding: 0.65rem 1rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .card-panel-body {
+        padding: 1.25rem;
+    }
+    .file-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 1px solid #cbd5e1;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .btn-attach {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #f8fafc;
+        color: #2563eb;
+        cursor: pointer;
+    }
+    .btn-action-view {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #2563eb;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+    .file-custom-label {
+        font-size: 0.875rem;
+        color: #64748b;
+        cursor: pointer;
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .form-control-line {
+        width: 100%;
+        border: none;
+        border-bottom: 1px solid #cbd5e1;
+        padding: 0.4rem 0;
+        font-size: 0.9rem;
+        outline: none;
+        background: transparent;
+    }
+    .form-control-line:focus {
+        border-bottom-color: #2563eb;
+    }
+    .table-custom {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.5rem;
+    }
+    .table-custom th, .table-custom td {
+        border: 1px solid #cbd5e1;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    .table-custom th {
+        background: #f1f5f9;
+        color: #334155;
+        font-weight: 600;
+    }
+</style>
+
 <div class="view-container">
-    <form id="formHorasPruebas" action="guardar_horas.php" method="POST">
-        <input type="hidden" name="proyectoId" value="<?= $proyectoId ?>">
-        <input type="hidden" name="etapaId" value="<?= $etapaFiltro ?>">
-
-        <!-- Barra de Navegación Rápida por Etapas -->
-        <div class="project-stages-bar">
-            <?php foreach ($etapasList as $etapa): 
-                $isActive = ($etapa->id == $etapaFiltro) ? 'active' : '';
-            ?>
-                <a href="carta_seleccion_horas.php?proyectoId=<?= $proyectoId ?>&etapa=<?= $etapa->id ?>" class="stage-btn <?= $isActive ?>">
-                    <i class="ri-checkbox-multiple-line"></i><?= htmlspecialchars($etapa->id . '. ' . $etapa->nombre, ENT_QUOTES, 'UTF-8') ?>
-                </a>
-            <?php endforeach; ?>
-        </div>
-
-        <!-- Cabecera de Resumen Metodológico del Proyecto -->
-        <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 0.75rem; padding: 0.6rem 0.8rem; border-radius: 8px; background: #ffffff; border: 1px solid var(--border-color);">
-            <div style="display: flex; flex-direction: column; gap: 0.3rem; border-right: 1px solid #e2e8f0; padding-right: 0.5rem; font-size: 0.8rem;">
-                <div>
-                    <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Cliente / Empresa</span><br>
-                    <strong style="color: #1e293b;"><?= htmlspecialchars($projectData->clientName ?? 'N/D', ENT_QUOTES, 'UTF-8') ?></strong>
-                </div>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 0.3rem; border-right: 1px solid #e2e8f0; padding-right: 0.5rem; padding-left: 0.25rem; font-size: 0.8rem;">
-                <div>
-                    <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Frecuencia Acordada</span><br>
-                    <strong style="color: #0284c7;"><?= htmlspecialchars($projectData->frecuencia ?? '1', ENT_QUOTES, 'UTF-8') ?> Revisión(es) al año</strong>
-                </div>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 0.3rem; padding-left: 0.25rem; font-size: 0.8rem;">
-                <div>
-                    <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Total Horas Presupuestadas</span><br>
-                    <strong id="totalHorasGlobal" style="color: #059669; font-size: 0.95rem;"><?= number_format($totalHorasEtapa ?? 0, 2) ?> hrs</strong>
-                </div>
-            </div>
-        </div>
-
-        <!-- Barra de Título y Controles -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-            <h1 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
-                <i class="ri-time-line" style="color: var(--accent);"></i>Selección de Pruebas y Asignación de Horas
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+            <h1 style="font-size: 1.4rem; font-weight: 700; color: #0f172a; margin: 0;">
+                Carta de Contratación y Presupuestación de Horas
             </h1>
+            <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.875rem;">
+                Cliente: <strong><?= htmlspecialchars($headerData->clientName, ENT_QUOTES, 'UTF-8') ?></strong>
+            </p>
+        </div>
+        <a href="responder-terminos.php?id=<?= $terminoId ?>" class="btn btn-secondary" style="padding: 0.5rem 1rem; text-decoration: none; background: #e2e8f0; color: #334155; border-radius: 6px; font-weight: 600;">
+            <i class="ri-arrow-left-line"></i> Volver a Actividades
+        </a>
+    </div>
 
-            <div style="display: flex; align-items: center; gap: 0.25rem; margin-left: auto;">
-                <button type="submit" class="btn btn-primary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: #0284c7; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: 600;">
-                    <i class="ri-save-3-line"></i> Guardar Presupuesto
-                </button>
+    <?php if (isset($errorMessage)): ?>
+        <div style="padding: 1rem; background: #fee2e2; color: #991b1b; border-radius: 8px; margin-bottom: 1.5rem;">
+            <i class="ri-error-warning-fill"></i> <?= htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') ?>
+        </div>
+    <?php endif; ?>
+
+    <form method="POST" action="formulario-carta-contratacion.php?terminoId=<?= $terminoId ?>" enctype="multipart/form-data">
+        <input type="hidden" name="action_save_carta" value="1">
+        <input type="hidden" name="termino_id" value="<?= $terminoId ?>">
+
+        <!-- 1. DEFINICIÓN DE PARÁMETROS: FRECUENCIA Y PERIODOS -->
+        <div class="card-panel">
+            <div class="card-panel-header"><i class="ri-calendar-2-line"></i> 1. Definición de Parámetros de Frecuencia</div>
+            <div class="card-panel-body">
+                <div style="display: grid; grid-template-columns: 200px 1fr; gap: 1.5rem; align-items: start;">
+                    <div>
+                        <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight: 600;">
+                            Frecuencia (1 a 12):
+                        </label>
+                        <select name="frecuencia_cantidad" id="frecuencia_cantidad" class="form-control-line" onchange="renderTablaPeriodos(); recalcularTotales();" style="font-weight: 700; color: #2563eb;">
+                            <?php for ($f = 1; $f <= 12; $f++): ?>
+                                <option value="<?= $f ?>" <?= $f === $frecuenciaCantidadVal ? 'selected' : '' ?>><?= $f ?> <?= $f === 1 ? 'Revisión' : 'Revisiones' ?></option>
+                            <?php endfor; ?>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight: 600;">
+                            Periodos de Revisión:
+                        </label>
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th style="width: 120px;">Frecuencia</th>
+                                    <th>Periodo Exacto / Descripción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="container_periodos">
+                                <!-- Render JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Acordeones por Categoría de la Etapa Seleccionada -->
-        <div class="accordion-container">
-            <?php
-            // Consultar categorías pertencientes a la etapa activa
-            $stmtCat = $pdo->prepare("SELECT * FROM audit_categorias WHERE etapa_id = :etapaId ORDER BY orden ASC");
-            $stmtCat->execute([':etapaId' => $etapaFiltro]);
-            $categories = $stmtCat->fetchAll(PDO::FETCH_OBJ);
+        <!-- 2. CARGA DE BALANCE PRELIMINAR -->
+        <div class="card-panel">
+            <div class="card-panel-header"><i class="ri-file-excel-2-line"></i> 2. Carga de Balance Preliminar</div>
+            <div class="card-panel-body">
+                <div class="file-input-wrapper" style="border-bottom: none; margin-bottom: 0;">
+                    <label for="input_balance_preliminar" class="btn-attach" title="Cargar Balance Preliminar">
+                        <i class="ri-upload-2-line" style="font-size: 1.2rem;"></i>
+                    </label>
+                    <input type="file" id="input_balance_preliminar" name="balance_preliminar" accept=".xls,.xlsx,.pdf" style="display: none;" onchange="updateFileName(this, 'label_balance_preliminar')">
+                    <span id="label_balance_preliminar" class="file-custom-label" onclick="document.getElementById('input_balance_preliminar').click();">
+                        <?= !empty($balancePreliminarVal) ? '📊 ' . basename($balancePreliminarVal) : 'Adjuntar Balance Preliminar para detección de Rubros (.xlsx, .xls, .pdf)' ?>
+                    </span>
+                    <?php if (!empty($balancePreliminarVal)): ?>
+                        <a href="../<?= htmlspecialchars($balancePreliminarVal, ENT_QUOTES, 'UTF-8') ?>" target="_blank" class="btn-action-view">
+                            <i class="ri-external-link-line"></i> Ver Archivo
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
 
-            $catIndex = 0;
-            $pruebaIndex = 1;
+        <!-- 3. SELECCIÓN DE PRUEBAS Y CÁLCULO DE HORAS -->
+        <div class="card-panel">
+            <div class="card-panel-header"><i class="ri-list-check"></i> 3. Selección de Pruebas y Presupuestación de Horas</div>
+            <div class="card-panel-body">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;">Sel.</th>
+                            <th style="width: 200px;">Rubro Detectado</th>
+                            <th>Prueba Metodológica</th>
+                            <th style="width: 130px; text-align: right;">Horas Base</th>
+                            <th style="width: 140px; text-align: right;">Horas x Frecuencia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($catalogoPruebas)): ?>
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #64748b;">No se han detectado rubros. Cargue el balance preliminar.</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php 
+                            foreach ($catalogoPruebas as $prueba): 
+                                $pId = (int)$prueba['id'];
+                                $configGuardada = array_filter($pruebasConfiguradasVal, fn($i) => (int)$i['prueba_id'] === $pId);
+                                $isSelected = !empty($configGuardada);
+                                $itemSaved = reset($configGuardada);
+                                $hrsBase = $isSelected ? (float)$itemSaved['horas_base'] : (float)($prueba['horas_base'] ?? 0);
+                            ?>
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <input type="checkbox" name="pruebas_seleccionadas[]" value="<?= $pId ?>" <?= $isSelected ? 'checked' : '' ?> onchange="recalcularTotales();">
+                                    </td>
+                                    <td><strong><?= htmlspecialchars($prueba['rubro'], ENT_QUOTES, 'UTF-8') ?></strong></td>
+                                    <td><?= htmlspecialchars($prueba['codigo_prueba'] . ' - ' . $prueba['nombre_prueba'], ENT_QUOTES, 'UTF-8') ?></td>
+                                    <td>
+                                        <input type="text" name="horas_prueba[<?= $pId ?>]" class="form-control-line hora-base-input" data-pid="<?= $pId ?>" value="<?= formatMontoVe($hrsBase) ?>" style="text-align: right;" onblur="formatInputVe(this); recalcularTotales();">
+                                    </td>
+                                    <td style="text-align: right; font-weight: 700; color: #1e293b;" id="total_frecuencia_<?= $pId ?>">
+                                        0,00
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-            foreach ($categories as $cat):
-                $letraCat = chr(65 + ($catIndex % 26));
-                $catIndex++;
+        <!-- 4. SECCIÓN CARTA DE CONTRATACIÓN Y PRESUPUESTO PROYECTO -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <!-- COLUMNA IZQUIERDA: CARTA DE CONTRATACIÓN -->
+            <div class="card-panel">
+                <div class="card-panel-header">Carta de Contratación</div>
+                <div class="card-panel-body">
+                    <div class="file-input-wrapper">
+                        <label for="input_carta" class="btn-attach" title="Adjuntar Archivo PDF">
+                            <i class="ri-attachment-line" style="font-size: 1.2rem;"></i>
+                        </label>
+                        <input type="file" id="input_carta" name="archivo_carta" accept=".pdf,application/pdf" style="display: none;" onchange="updateFileName(this, 'label_carta')">
+                        <span id="label_carta" class="file-custom-label" onclick="document.getElementById('input_carta').click();">
+                            <?= !empty($archivoCartaVal) ? '📄 ' . basename($archivoCartaVal) : 'Adjuntar o cambiar Carta de Contratación (Sólo PDF)' ?>
+                        </span>
 
-                // Consultar pruebas asignables
-                $stmtP = $pdo->prepare("SELECT * FROM audit_pruebas WHERE categoria_id = :catId ORDER BY orden ASC");
-                $stmtP->execute([':catId' => $cat->id]);
-                $pruebas = $stmtP->fetchAll(PDO::FETCH_OBJ);
-            ?>
-                <div class="accordion-item" style="margin-bottom: 0.4rem; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
-                    <div class="accordion-header" onclick="toggleAccordion(this)" style="background: #f1f5f9; padding: 0.5rem 0.75rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                        <span><?= $letraCat ?>. <?= htmlspecialchars($cat->nombre, ENT_QUOTES, 'UTF-8') ?></span>
+                        <?php if (!empty($archivoCartaVal)): ?>
+                            <a href="../<?= htmlspecialchars($archivoCartaVal, ENT_QUOTES, 'UTF-8') ?>" target="_blank" class="btn-action-view">
+                                <i class="ri-external-link-line"></i> Ver PDF
+                            </a>
+                        <?php endif; ?>
+                    </div>
 
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span class="badge-hours" id="subtotal-cat-<?= $cat->id ?>">0.00 hrs</span>
-                            <i class="ri-arrow-down-s-line"></i>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.25rem;">Fecha Solicitud de la Carta:</label>
+                            <input type="date" name="fecha_solicitud" class="form-control-line" value="<?= htmlspecialchars($fechaSolicitudVal, ENT_QUOTES, 'UTF-8') ?>">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.25rem;">Recibida:</label>
+                            <input type="date" name="fecha_recibida" class="form-control-line" value="<?= htmlspecialchars($fechaRecibidaVal, ENT_QUOTES, 'UTF-8') ?>">
                         </div>
                     </div>
 
-                    <div class="accordion-content" style="display: none; background: #fff;">
-                        <?php foreach ($pruebas as $pr): 
-                            $pruebaConfig = $pruebasAsignadas[$pr->id] ?? null;
-                            $isSelected = !empty($pruebaConfig['seleccionada']);
-                            $horasAsignadas = $pruebaConfig['horas'] ?? 0;
-                        ?>
-                            <div class="prueba-row-container">
-                                <div style="display: flex; align-items: center; gap: 0.5rem; flex-grow: 1;">
-                                    <input type="checkbox" name="pruebas[<?= $pr->id ?>][selected]" value="1" <?= $isSelected ? 'checked' : '' ?> onchange="calcularSubtotales()" style="cursor: pointer; width: 16px; height: 16px;">
-                                    <div class="prueba-title">
-                                        <?= $pruebaIndex ?>. <?= htmlspecialchars($pr->nombre, ENT_QUOTES, 'UTF-8') ?>
-                                    </div>
-                                </div>
-
-                                <div class="prueba-actions">
-                                    <label style="font-size: 0.72rem; font-weight: 600; color: #475569;">Horas Estimadas:</label>
-                                    <input type="number" step="0.5" min="0" name="pruebas[<?= $pr->id ?>][horas]" value="<?= $horasAsignadas ?>" class="input-horas" oninput="calcularSubtotales()">
-                                </div>
-                            </div>
-                        <?php 
-                            $pruebaIndex++; 
-                        endforeach; 
-                        ?>
+                    <div style="margin-top: 2rem;">
+                        <span style="font-size: 0.875rem; color: #334155; font-weight: 500;">¿Los términos del contrato fueron aprobados?</span>
+                        <div style="display: flex; gap: 1.5rem; margin-top: 0.5rem; align-items: center;">
+                            <label style="font-size: 0.875rem; color: #475569; display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                                <input type="radio" name="terminos_aprobados" value="no" <?= $terminosAprobadosVal === 'no' ? 'checked' : '' ?>> No
+                            </label>
+                            <label style="font-size: 0.875rem; color: #475569; display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                                <input type="radio" name="terminos_aprobados" value="si" <?= $terminosAprobadosVal === 'si' ? 'checked' : '' ?>> Sí
+                            </label>
+                        </div>
                     </div>
                 </div>
-            <?php endforeach; ?>
+            </div>
+
+            <!-- COLUMNA DERECHA: PRESUPUESTO Y TOTALIZACIÓN -->
+            <div class="card-panel">
+                <div class="card-panel-header">Presupuesto del Proyecto</div>
+                <div class="card-panel-body">
+                    <div class="file-input-wrapper">
+                        <label for="input_presupuesto" class="btn-attach" title="Adjuntar Excel de Presupuesto">
+                            <i class="ri-attachment-line" style="font-size: 1.2rem;"></i>
+                        </label>
+                        <input type="file" id="input_presupuesto" name="archivo_presupuesto" accept=".xls,.xlsx" style="display: none;" onchange="updateFileName(this, 'label_presupuesto')">
+                        <span id="label_presupuesto" class="file-custom-label" onclick="document.getElementById('input_presupuesto').click();">
+                            <?= !empty($archivoPresupuestoVal) ? '📊 ' . basename($archivoPresupuestoVal) : 'Adjuntar Presupuesto del Proyecto (Sólo Excel)' ?>
+                        </span>
+
+                        <?php if (!empty($archivoPresupuestoVal)): ?>
+                            <a href="../<?= htmlspecialchars($archivoPresupuestoVal, ENT_QUOTES, 'UTF-8') ?>" download class="btn-action-view">
+                                <i class="ri-download-line"></i> Descargar Excel
+                            </a>
+                        <?php endif; ?>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; color: #475569; margin-bottom: 0.25rem;">Total Horas Presupuestadas</label>
+                            <input type="text" id="horas_contempladas" name="horas_contempladas" class="form-control-line" style="text-align: right; font-weight: 700; color: #2563eb;" value="<?= htmlspecialchars(formatMontoVe($horasContempladasVal), ENT_QUOTES, 'UTF-8') ?>" readonly>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; color: #475569; margin-bottom: 0.25rem;">Monto Total Propuesta</label>
+                            <input type="text" name="monto_propuesta" class="form-control-line" style="text-align: right;" value="<?= htmlspecialchars(formatMontoVe($montoPropuestaVal), ENT_QUOTES, 'UTF-8') ?>" placeholder="0,00" onblur="formatInputVe(this)">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; color: #475569; margin-bottom: 0.25rem;">Moneda</label>
+                            <select name="moneda" class="form-control-line">
+                                <?php foreach ($monedasSoportadas as $m): ?>
+                                    <option value="<?= $m ?>" <?= $m === $monedaVal ? 'selected' : '' ?>><?= $m ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OBSERVACIONES -->
+        <div class="card-panel">
+            <div class="card-panel-header" style="background: #f1f5f9; color: #334155; border-bottom: 1px solid #cbd5e1;">
+                <i class="ri-list-check-2" style="color: #16a34a;"></i> Observaciones durante la negociación
+            </div>
+            <div class="card-panel-body" style="padding: 0;">
+                <textarea name="observaciones" rows="3" placeholder="Ingrese las observaciones..." style="width: 100%; border: none; padding: 1rem; font-size: 0.9rem; outline: none; background: #fafafa;"><?= htmlspecialchars($observacionesVal, ENT_QUOTES, 'UTF-8') ?></textarea>
+            </div>
+        </div>
+
+        <!-- SITUACIÓN IMPORTANTE -->
+        <div style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+            <input type="checkbox" id="situacion_importante" name="situacion_importante" value="1" <?= $situacionImportanteVal === 1 ? 'checked' : '' ?> style="width: 18px; height: 18px; cursor: pointer;">
+            <label for="situacion_importante" style="font-size: 0.875rem; color: #334155; cursor: pointer;">
+                Haga click en el recuadro si considera haber hallado una <strong>"Situación Importante"</strong>
+            </label>
+        </div>
+
+        <!-- BOTONES -->
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
+            <a href="responder-terminos.php?id=<?= $terminoId ?>" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; background: #e2e8f0; color: #334155; border-radius: 6px; text-decoration: none; font-weight: 600;">
+                Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="ri-save-line"></i> Guardar Cambios
+            </button>
         </div>
     </form>
 </div>
 
 <script>
-function toggleAccordion(element) {
-    const content = element.nextElementSibling;
-    const icon = element.querySelector('.ri-arrow-down-s-line, .ri-arrow-up-s-line');
-    
-    if (content.style.display === "none" || content.style.display === "") {
-        content.style.display = "block";
-        if(icon) {
-            icon.classList.remove('ri-arrow-down-s-line');
-            icon.classList.add('ri-arrow-up-s-line');
-        }
-    } else {
-        content.style.display = "none";
-        if(icon) {
-            icon.classList.remove('ri-arrow-up-s-line');
-            icon.classList.add('ri-arrow-down-s-line');
-        }
+const periodosGuardados = <?= json_encode($periodosVal, JSON_UNESCAPED_UNICODE) ?>;
+
+function renderTablaPeriodos() {
+    const cantidad = parseInt(document.getElementById('frecuencia_cantidad').value) || 1;
+    const container = document.getElementById('container_periodos');
+    container.innerHTML = '';
+
+    for (let i = 1; i <= cantidad; i++) {
+        const val = periodosGuardados[i] ? periodosGuardados[i] : '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-weight: 600; color: #475569;">Frecuencia ${i}</td>
+            <td>
+                <input type="text" name="periodos[${i}]" value="${val}" placeholder="Ej: Q${i} 2026 / Mes ${i}" required class="form-control-line">
+            </td>
+        `;
+        container.appendChild(tr);
     }
 }
 
-function calcularSubtotales() {
-    let totalGeneral = 0;
-    
-    document.querySelectorAll('.accordion-item').forEach(item => {
-        let subtotalCat = 0;
-        item.querySelectorAll('.prueba-row-container').forEach(row => {
-            const chk = row.querySelector('input[type="checkbox"]');
-            const inputHoras = row.querySelector('.input-horas');
-            
-            if (chk && chk.checked && inputHoras) {
-                const hrs = parseFloat(inputHoras.value) || 0;
-                subtotalCat += hrs;
-            }
-        });
-        
-        const badgeCat = item.querySelector('.badge-hours');
-        if (badgeCat) {
-            badgeCat.textContent = subtotalCat.toFixed(2) + ' hrs';
+function parseMontoJs(str) {
+    if (!str) return 0;
+    return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
+}
+
+function formatMontoJs(num) {
+    return num.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function recalcularTotales() {
+    const frecuencia = parseInt(document.getElementById('frecuencia_cantidad').value) || 1;
+    let totalHorasProyecto = 0;
+
+    const inputs = document.querySelectorAll('.hora-base-input');
+    inputs.forEach(input => {
+        const pId = input.getAttribute('data-pid');
+        const checkbox = document.querySelector(`input[name="pruebas_seleccionadas[]"][value="${pId}"]`);
+        const totalTd = document.getElementById(`total_frecuencia_${pId}`);
+
+        if (checkbox && checkbox.checked) {
+            const hBase = parseMontoJs(input.value);
+            const subtotal = hBase * frecuencia;
+            totalHorasProyecto += subtotal;
+            if (totalTd) totalTd.textContent = formatMontoJs(subtotal);
+        } else {
+            if (totalTd) totalTd.textContent = '0,00';
         }
-        
-        totalGeneral += subtotalCat;
     });
-    
-    const labelTotal = document.getElementById('totalHorasGlobal');
-    if (labelTotal) {
-        labelTotal.textContent = totalGeneral.toFixed(2) + ' hrs';
+
+    document.getElementById('horas_contempladas').value = formatMontoJs(totalHorasProyecto);
+}
+
+function updateFileName(input, labelId) {
+    const label = document.getElementById(labelId);
+    if (input.files && input.files.length > 0) {
+        label.textContent = "📄 " + input.files[0].name;
+        label.style.color = "#0f172a";
+        label.style.fontWeight = "600";
     }
 }
 
-document.addEventListener('DOMContentLoaded', calcularSubtotales);
+function formatInputVe(input) {
+    let val = input.value.trim();
+    if (!val) return;
+    if (val.includes('.') && !val.includes(',')) val = val.replace('.', ',');
+    let parts = val.split(',');
+    let integerPart = parts[0].replace(/\D/g, '');
+    let decimalPart = parts[1] ? parts[1].replace(/\D/g, '').slice(0, 2) : '00';
+    if (decimalPart.length === 1) decimalPart += '0';
+    if (integerPart === '') integerPart = '0';
+    integerPart = parseInt(integerPart, 10).toLocaleString('de-DE');
+    input.value = integerPart + ',' + decimalPart;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderTablaPeriodos();
+    recalcularTotales();
+});
 </script>
 
 <?php 
-include 'js-proyectos.php';
 include '../main/layout_footer.php'; 
 include '../main/footer.php'; 
 ?>
