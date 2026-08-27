@@ -234,7 +234,7 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
         <div class="card card-custom mb-3" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                 <h5 style="font-size: 0.9rem; font-weight: 700; color: #1e3a5f; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
-                    <i class="ri-list-check-2" style="color: #00bcd4;"></i> 2. Selección Metodológica de Pruebas y Estimación de Horas
+                    <i class="ri-list-check-2" style="color: #00bcd4;"></i> 3. Selección Metodológica de Pruebas y Estimación de Horas
                 </h5>
                 <div style="font-size: 0.8rem; font-weight: 700; background: #f0fdf4; color: #166534; padding: 0.25rem 0.6rem; border-radius: 6px; border: 1px solid #bbf7d0;">
                     Total Horas Proyecto: <span id="lbl_total_horas_proyecto">0.00</span> hrs
