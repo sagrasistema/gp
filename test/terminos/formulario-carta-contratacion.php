@@ -231,53 +231,9 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
 <!-- ===================================================================== -->
 <?php
 // Supongamos que recuperas la frecuencia activa desde los datos guardados o parámetro (mínimo 1, máximo 12)
-$frecuenciaCantidad = 3
+$frecuenciaCantidad =3
 ?>
 
-<style>
-/* Estilos para alinear horizontalmente los campos de frecuencia por prueba */
-.prueba-row-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.4rem 0.6rem;
-    border-bottom: 1px solid #f1f5f9;
-    gap: 1rem;
-}
-.prueba-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.82rem;
-    color: #334155;
-    flex: 1;
-}
-.prueba-actions-frecuencias {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    flex-wrap: nowrap;
-}
-.frec-input-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.frec-input-group label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: #64748b;
-    margin-bottom: 2px;
-}
-.input-horas-frec {
-    width: 55px;
-    padding: 0.15rem 0.3rem;
-    font-size: 0.78rem;
-    border: 1px solid #cbd5e1;
-    border-radius: 4px;
-    text-align: center;
-}
-</style>
 
 <div class="card card-custom mb-3" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
