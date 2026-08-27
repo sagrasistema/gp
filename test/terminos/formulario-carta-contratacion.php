@@ -172,10 +172,15 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
         <input type="hidden" name="termino_id" value="<?= $terminoId ?>">
 
         <!-- 1. DEFINICIÓN DE PARÁMETROS: FRECUENCIA Y PERIODOS -->
-        <div class="card-panel">
+<!-- CONTENEDOR DE 12 COLUMNAS EN UNA SOLA LÍNEA -->
+<div class="row g-3 mb-3">
+
+    <!-- 1. DEFINICIÓN DE PARÁMETROS: FRECUENCIA Y PERIODOS (6 COLUMNAS) -->
+    <div class="col-md-6">
+        <div class="card-panel" style="height: 100%;">
             <div class="card-panel-header"><i class="ri-calendar-2-line"></i> 1. Definición de Parámetros de Frecuencia</div>
             <div class="card-panel-body">
-                <div style="display: grid; grid-template-columns: 200px 1fr; gap: 1.5rem; align-items: start;">
+                <div style="display: grid; grid-template-columns: 160px 1fr; gap: 1rem; align-items: start;">
                     <div>
                         <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight: 600;">
                             Frecuencia (1 a 12):
@@ -194,7 +199,7 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
                         <table class="table-custom">
                             <thead>
                                 <tr>
-                                    <th style="width: 120px;">Frecuencia</th>
+                                    <th style="width: 100px;">Frecuencia</th>
                                     <th>Periodo Exacto / Descripción</th>
                                 </tr>
                             </thead>
@@ -206,12 +211,14 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- 2. CARGA DE BALANCE PRELIMINAR -->
-        <div class="card-panel">
+    <!-- 2. CARGA DE BALANCE PRELIMINAR (6 COLUMNAS) -->
+    <div class="col-md-6">
+        <div class="card-panel" style="height: 100%;">
             <div class="card-panel-header"><i class="ri-file-excel-2-line"></i> 2. Carga de Balance Preliminar</div>
-            <div class="card-panel-body">
-                <div class="file-input-wrapper" style="border-bottom: none; margin-bottom: 0;">
+            <div class="card-panel-body" style="display: flex; align-items: center; min-height: 120px;">
+                <div class="file-input-wrapper" style="border-bottom: none; margin-bottom: 0; width: 100%;">
                     <label for="input_balance_preliminar" class="btn-attach" title="Cargar Balance Preliminar">
                         <i class="ri-upload-2-line" style="font-size: 1.2rem;"></i>
                     </label>
@@ -227,6 +234,9 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
                 </div>
             </div>
         </div>
+    </div>
+
+</div>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------>
 <!-- ===================================================================== -->
         <!-- BLOQUE 2: VISTA SELECCIÓN DE PRUEBAS Y HORAS (VISUAL DE PROYECTO)     -->
