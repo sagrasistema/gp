@@ -53,18 +53,43 @@ $stmtStatus->execute([':id' => $terminoId]);
 $isClosed = ((int)$stmtStatus->fetchColumn() === 2);
 
 // -------------------------------------------------------------------------
-// 2. CONSULTAR PRUEBAS DISPONIBLES EN BASE DE DATOS (API/HELPER)
+// 2. CONSULTAR PRUEBAS DISPONIBLES EN BASE DE DATOS (Adaptado a pruebas_metodologicas)
 // -------------------------------------------------------------------------
 function obtenerPruebasPorRubros(PDO $pdo, array $rubrosDetectados): array
 {
+    // Mapeo adaptado a las columnas reales de la tabla 'pruebas_metodologicas':
+    // - id: Identificador único de la prueba
+    // - categoria_id: Representa la categoría/rubro
+    // - nombre: Nombre de la prueba metodológica
+    // - norma: Norma aplicable (opcional)
+    // - informacion: Detalle/procedimiento de la prueba
+    
     if (empty($rubrosDetectados)) {
-        // Si no hay rubros detectados, retorna catálogo completo como fallback
-        $stmt = $pdo->query("SELECT id, rubro, codigo_prueba, nombre_prueba, horas_base FROM pruebas_metodologicas WHERE activo = 1");
+        $stmt = $pdo->query("
+            SELECT 
+                id, 
+                categoria_id AS rubro, 
+                id AS codigo_prueba, 
+                nombre AS nombre_prueba, 
+                informacion 
+            FROM pruebas_metodologicas 
+            ORDER BY orden ASC
+        ");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     $inQuery = implode(',', array_fill(0, count($rubrosDetectados), '?'));
-    $stmt = $pdo->prepare("SELECT id, rubro, codigo_prueba, nombre_prueba, horas_base FROM pruebas_metodologicas WHERE rubro IN ($inQuery) AND activo = 1");
+    $stmt = $pdo->prepare("
+        SELECT 
+            id, 
+            categoria_id AS rubro, 
+            id AS codigo_prueba, 
+            nombre AS nombre_prueba, 
+            informacion 
+        FROM pruebas_metodologicas 
+        WHERE categoria_id IN ($inQuery) 
+        ORDER BY orden ASC
+    ");
     $stmt->execute($rubrosDetectados);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
@@ -98,8 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_carta']))
     }
 
     // Pruebas Seleccionadas y sus Horas asignadas
-    $pruebasSeleccionadas = $_POST['pruebas_seleccionadas'] ?? []; // Array de IDs de prueba
-    $horasPorPrueba       = $_POST['horas_prueba'] ?? []; // Array asociativo [prueba_id => horas]
+    $pruebasSeleccionadas = $_POST['pruebas_seleccionadas'] ?? [];
+    $horasPorPrueba       = $_POST['horas_prueba'] ?? [];
     $pruebasConfiguradas  = [];
 
     if (is_array($pruebasSeleccionadas)) {
@@ -109,12 +134,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_carta']))
             $pruebasConfiguradas[] = [
                 'prueba_id'  => $pId,
                 'horas_base' => $hrs,
-                'horas_totales_frecuencia' => $hrs * $frecuenciaCantidad // Sumatoria/Impacto de Frecuencia
+                'horas_totales_frecuencia' => $hrs * $frecuenciaCantidad
             ];
         }
     }
 
-    // Cargar datos previos para mantener archivos si no se actualizan
+    // Cargar datos previos para mantener archivos
     $stmtPrev = $pdo->prepare("SELECT datos_json FROM terminos_condiciones_items WHERE termino_id = :termino_id AND item_key = :item_key");
     $stmtPrev->execute([':termino_id' => $terminoId, ':item_key' => $itemKey]);
     $prevJson = $stmtPrev->fetchColumn();
@@ -152,8 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_carta']))
         $newFileName = 'bal_preliminar_' . $terminoId . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
         if (move_uploaded_file($_FILES['balance_preliminar']['tmp_name'], $uploadBaseDir . $newFileName)) {
             $balancePreliminarPath = 'uploads/terminos/' . $newFileName;
-            // Simulador de extracción/detección de rubros del balance cargado
-            $rubrosDetectados = ['Efectivo y Equivalentes', 'Cuentas por Cobrar', 'Inventario', 'Propiedad Planta y Equipo', 'Cuentas por Pagar'];
+            $rubrosDetectados = [1, 2, 3, 4, 5]; // Mapeo dinámico de IDs de categorías
         }
     }
 
@@ -233,7 +257,7 @@ $savedData = ($itemData && !empty($itemData->datos_json)) ? json_decode($itemDat
 $frecuenciaCantidadVal  = (int)($savedData['frecuencia_cantidad'] ?? 1);
 $periodosVal            = $savedData['periodos'] ?? [];
 $balancePreliminarVal   = (string)($savedData['balance_preliminar'] ?? '');
-$rubrosDetectadosVal    = $savedData['rubros_detectados'] ?? ['Efectivo y Equivalentes', 'Cuentas por Cobrar', 'Inventario', 'Propiedad Planta y Equipo', 'Cuentas por Pagar'];
+$rubrosDetectadosVal    = $savedData['rubros_detectados'] ?? [];
 $pruebasConfiguradasVal = $savedData['pruebas_configuradas'] ?? [];
 
 $archivoCartaVal        = (string)($savedData['archivo_carta'] ?? '');
@@ -249,5 +273,5 @@ $situacionImportanteVal  = (int)($savedData['situacion_importante'] ?? 0);
 
 $monedasSoportadas = ['USD', 'BS', 'EUR'];
 
-// Cargar catálogo de pruebas según rubros detectados
+// Cargar catálogo de pruebas según la nueva estructura de datos
 $catalogoPruebas = obtenerPruebasPorRubros($pdo, $rubrosDetectadosVal);
