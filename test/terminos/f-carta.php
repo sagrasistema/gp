@@ -1,11 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 1. Validar autenticación de usuario
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../login.php');
     exit;
@@ -16,13 +16,8 @@ require_once '../main/config.php';
 /** @var PDO $pdo */
 
 // -------------------------------------------------------------------------
-// HELPERS DE FORMATO Y SANITIZACIÓN NUMÉRICA
+// HELPERS NUMÉRICOS Y FORMATO VENEZOLANO
 // -------------------------------------------------------------------------
-
-/**
- * Convierte una cadena con formato numérico venezolano (ej. "1.234,56") 
- * a un float estándar de PHP/SQL (1234.56).
- */
 function parseMontoVe(?string $valor): float
 {
     if ($valor === null || trim($valor) === '') {
@@ -30,159 +25,149 @@ function parseMontoVe(?string $valor): float
     }
     $limpio = str_replace('.', '', trim($valor));
     $limpio = str_replace(',', '.', $limpio);
-
     return (float)$limpio;
 }
 
-/**
- * Formatea un float/cadena a formato numérico venezolano (ej. 1234.56 -> "1.234,56").
- */
 function formatMontoVe(float|string $valor): string
 {
-    $num = (float)$valor;
-    return number_format($num, 2, ',', '.');
+    return number_format((float)$valor, 2, ',', '.');
 }
 
 // -------------------------------------------------------------------------
-// 2. SANITIZACIÓN Y VALIDACIÓN DE PARÁMETROS ENTRANTES
+// 1. VALIDACIÓN DE PARÁMETROS MAESTROS
 // -------------------------------------------------------------------------
 $terminoId = filter_input(INPUT_GET, 'terminoId', FILTER_VALIDATE_INT)
     ?: filter_input(INPUT_POST, 'termino_id', FILTER_VALIDATE_INT);
 
 if (!$terminoId || $terminoId <= 0) {
     http_response_code(400);
-    die("Error: Identificador de Términos y Condiciones no especificado o inválido.");
+    die("Error: Identificador de Términos y Condiciones no especificado.");
 }
 
 $itemKey = 'carta_contratacion';
 $uploadBaseDir = __DIR__ . '/../uploads/terminos/';
 
-// -------------------------------------------------------------------------
-// 3. CARGAR DATOS EXISTENTES DE LA BASE DE DATOS
-// -------------------------------------------------------------------------
-try {
-    $stmtStatus = $pdo->prepare("SELECT statusId FROM terminos_condiciones WHERE id = :id");
-    $stmtStatus->execute([':id' => $terminoId]);
-    $isClosed = ((int)$stmtStatus->fetchColumn() === 2);
+// Verificar estado máster
+$stmtStatus = $pdo->prepare("SELECT statusId FROM terminos_condiciones WHERE id = :id");
+$stmtStatus->execute([':id' => $terminoId]);
+$isClosed = ((int)$stmtStatus->fetchColumn() === 2);
 
-    $stmtHeader = $pdo->prepare("
-        SELECT tc.*, c.name AS clientName 
-        FROM terminos_condiciones tc 
-        INNER JOIN clientes c ON tc.cliente_id = c.id 
-        WHERE tc.id = :id
-    ");
-    $stmtHeader->execute([':id' => $terminoId]);
-    $headerData = $stmtHeader->fetch(PDO::FETCH_OBJ);
-
-    if (!$headerData) {
-        http_response_code(404);
-        die("Error: El registro de Términos y Condiciones no existe.");
+// -------------------------------------------------------------------------
+// 2. CONSULTAR PRUEBAS DISPONIBLES EN BASE DE DATOS (API/HELPER)
+// -------------------------------------------------------------------------
+function obtenerPruebasPorRubros(PDO $pdo, array $rubrosDetectados): array
+{
+    if (empty($rubrosDetectados)) {
+        // Si no hay rubros detectados, retorna catálogo completo como fallback
+        $stmt = $pdo->query("SELECT id, rubro, codigo_prueba, nombre_prueba, horas_base FROM pruebas_metodologicas WHERE activo = 1");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    $stmtItem = $pdo->prepare("
-        SELECT * 
-        FROM terminos_condiciones_items 
-        WHERE termino_id = :termino_id AND item_key = :item_key
-    ");
-    $stmtItem->execute([
-        ':termino_id' => $terminoId,
-        ':item_key'   => $itemKey
-    ]);
-    $itemData = $stmtItem->fetch(PDO::FETCH_OBJ);
-
-    $savedData = [];
-    if ($itemData && !empty($itemData->datos_json)) {
-        $savedData = json_decode($itemData->datos_json, true) ?: [];
-    }
-
-} catch (PDOException $e) {
-    error_log("Error al cargar carta de contratación: " . $e->getMessage());
-    die("Error crítico al consultar la base de datos.");
+    $inQuery = implode(',', array_fill(0, count($rubrosDetectados), '?'));
+    $stmt = $pdo->prepare("SELECT id, rubro, codigo_prueba, nombre_prueba, horas_base FROM pruebas_metodologicas WHERE rubro IN ($inQuery) AND activo = 1");
+    $stmt->execute($rubrosDetectados);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // -------------------------------------------------------------------------
-// 4. PROCESAR GUARDADO DEL FORMULARIO (POST)
+// 3. PROCESAR GUARDADO DEL FORMULARIO (POST)
 // -------------------------------------------------------------------------
-$errorMessage = null;
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_carta'])) {
-    
+
+    $frecuenciaCantidad = filter_input(INPUT_POST, 'frecuencia_cantidad', FILTER_VALIDATE_INT) ?: 1;
     $fechaSolicitud      = filter_input(INPUT_POST, 'fecha_solicitud', FILTER_DEFAULT) ?? '';
     $fechaRecibida       = filter_input(INPUT_POST, 'fecha_recibida', FILTER_DEFAULT) ?? '';
     $terminosAprobados   = filter_input(INPUT_POST, 'terminos_aprobados', FILTER_DEFAULT) ?? 'no';
     
     $rawHoras            = filter_input(INPUT_POST, 'horas_contempladas', FILTER_DEFAULT);
     $rawMonto            = filter_input(INPUT_POST, 'monto_propuesta', FILTER_DEFAULT);
-    $horasContempladas   = parseMontoVe(is_string($rawHoras) ? $rawHoras : '');
-    $montoPropuesta      = parseMontoVe(is_string($rawMonto) ? $rawMonto : '');
+    $horasContempladas   = parseMontoVe(is_string($rawHoras) ? $rawHoras : '0');
+    $montoPropuesta      = parseMontoVe(is_string($rawMonto) ? $rawMonto : '0');
 
     $moneda              = filter_input(INPUT_POST, 'moneda', FILTER_DEFAULT) ?? 'USD';
     $observaciones       = filter_input(INPUT_POST, 'observaciones', FILTER_DEFAULT) ?? '';
     $situacionImportante = isset($_POST['situacion_importante']) ? 1 : 0;
 
-    $archivoCartaPath       = $savedData['archivo_carta'] ?? '';
-    $archivoPresupuestoPath = $savedData['archivo_presupuesto'] ?? '';
+    // Periodos por frecuencia
+    $rawPeriodos = $_POST['periodos'] ?? [];
+    $periodos    = [];
+    if (is_array($rawPeriodos)) {
+        foreach ($rawPeriodos as $idx => $val) {
+            $periodos[(int)$idx] = htmlspecialchars(trim((string)$val), ENT_QUOTES, 'UTF-8');
+        }
+    }
+
+    // Pruebas Seleccionadas y sus Horas asignadas
+    $pruebasSeleccionadas = $_POST['pruebas_seleccionadas'] ?? []; // Array de IDs de prueba
+    $horasPorPrueba       = $_POST['horas_prueba'] ?? []; // Array asociativo [prueba_id => horas]
+    $pruebasConfiguradas  = [];
+
+    if (is_array($pruebasSeleccionadas)) {
+        foreach ($pruebasSeleccionadas as $pruebaId) {
+            $pId = (int)$pruebaId;
+            $hrs = isset($horasPorPrueba[$pId]) ? parseMontoVe((string)$horasPorPrueba[$pId]) : 0.0;
+            $pruebasConfiguradas[] = [
+                'prueba_id'  => $pId,
+                'horas_base' => $hrs,
+                'horas_totales_frecuencia' => $hrs * $frecuenciaCantidad // Sumatoria/Impacto de Frecuencia
+            ];
+        }
+    }
+
+    // Cargar datos previos para mantener archivos si no se actualizan
+    $stmtPrev = $pdo->prepare("SELECT datos_json FROM terminos_condiciones_items WHERE termino_id = :termino_id AND item_key = :item_key");
+    $stmtPrev->execute([':termino_id' => $terminoId, ':item_key' => $itemKey]);
+    $prevJson = $stmtPrev->fetchColumn();
+    $prevData = $prevJson ? json_decode($prevJson, true) : [];
+
+    $archivoCartaPath       = $prevData['archivo_carta'] ?? '';
+    $archivoPresupuestoPath = $prevData['archivo_presupuesto'] ?? '';
+    $balancePreliminarPath  = $prevData['balance_preliminar'] ?? '';
+    $rubrosDetectados       = $prevData['rubros_detectados'] ?? [];
 
     if (!is_dir($uploadBaseDir) && !mkdir($uploadBaseDir, 0755, true) && !is_dir($uploadBaseDir)) {
         $errorMessage = "No se pudo crear el directorio de almacenamiento.";
     }
 
-    // A) PROCESAR CARTA DE CONTRATACIÓN (PDF)
-    if (!$errorMessage && isset($_FILES['archivo_carta']) && $_FILES['archivo_carta']['error'] === UPLOAD_ERR_OK) {
-        $fileTmp   = $_FILES['archivo_carta']['tmp_name'];
-        $fileName  = $_FILES['archivo_carta']['name'];
-        $fileExt   = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-        $finfo     = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType  = finfo_file($finfo, $fileTmp);
-        finfo_close($finfo);
-
-        if ($fileExt !== 'pdf' || $mimeType !== 'application/pdf') {
-            $errorMessage = "La Carta de Contratación debe ser un archivo PDF válido.";
-        } else {
-            $newFileName = 'carta_' . $terminoId . '_' . bin2hex(random_bytes(8)) . '.pdf';
-            $targetPath  = $uploadBaseDir . $newFileName;
-            if (move_uploaded_file($fileTmp, $targetPath)) {
-                $archivoCartaPath = 'uploads/terminos/' . $newFileName;
-            } else {
-                $errorMessage = "Error al guardar el archivo PDF en el servidor.";
-            }
+    // A) CARTA DE CONTRATACIÓN (PDF)
+    if (!isset($errorMessage) && isset($_FILES['archivo_carta']) && $_FILES['archivo_carta']['error'] === UPLOAD_ERR_OK) {
+        $newFileName = 'carta_' . $terminoId . '_' . bin2hex(random_bytes(8)) . '.pdf';
+        if (move_uploaded_file($_FILES['archivo_carta']['tmp_name'], $uploadBaseDir . $newFileName)) {
+            $archivoCartaPath = 'uploads/terminos/' . $newFileName;
         }
     }
 
-    // B) PROCESAR PRESUPUESTO DEL PROYECTO (EXCEL)
-    if (!$errorMessage && isset($_FILES['archivo_presupuesto']) && $_FILES['archivo_presupuesto']['error'] === UPLOAD_ERR_OK) {
-        $fileTmp   = $_FILES['archivo_presupuesto']['tmp_name'];
-        $fileName  = $_FILES['archivo_presupuesto']['name'];
-        $fileExt   = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-        $finfo     = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType  = finfo_file($finfo, $fileTmp);
-        finfo_close($finfo);
-
-        $allowedExcelMimes = [
-            'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/octet-stream'
-        ];
-
-        if (!in_array($fileExt, ['xls', 'xlsx'], true) || !in_array($mimeType, $allowedExcelMimes, true)) {
-            $errorMessage = "El presupuesto debe ser un archivo de Excel (.xls o .xlsx) válido.";
-        } else {
-            $newFileName = 'presupuesto_' . $terminoId . '_' . bin2hex(random_bytes(8)) . '.' . $fileExt;
-            $targetPath  = $uploadBaseDir . $newFileName;
-            if (move_uploaded_file($fileTmp, $targetPath)) {
-                $archivoPresupuestoPath = 'uploads/terminos/' . $newFileName;
-            } else {
-                $errorMessage = "Error al guardar el archivo de Excel en el servidor.";
-            }
+    // B) PRESUPUESTO EXCEL
+    if (!isset($errorMessage) && isset($_FILES['archivo_presupuesto']) && $_FILES['archivo_presupuesto']['error'] === UPLOAD_ERR_OK) {
+        $ext = strtolower(pathinfo($_FILES['archivo_presupuesto']['name'], PATHINFO_EXTENSION));
+        $newFileName = 'presupuesto_' . $terminoId . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
+        if (move_uploaded_file($_FILES['archivo_presupuesto']['tmp_name'], $uploadBaseDir . $newFileName)) {
+            $archivoPresupuestoPath = 'uploads/terminos/' . $newFileName;
         }
     }
 
-    // ACTUALIZACIÓN DE BD CON TRANSACCIÓN
-    if (!$errorMessage) {
+    // C) BALANCE PRELIMINAR (EXCEL / PDF)
+    if (!isset($errorMessage) && isset($_FILES['balance_preliminar']) && $_FILES['balance_preliminar']['error'] === UPLOAD_ERR_OK) {
+        $ext = strtolower(pathinfo($_FILES['balance_preliminar']['name'], PATHINFO_EXTENSION));
+        $newFileName = 'bal_preliminar_' . $terminoId . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
+        if (move_uploaded_file($_FILES['balance_preliminar']['tmp_name'], $uploadBaseDir . $newFileName)) {
+            $balancePreliminarPath = 'uploads/terminos/' . $newFileName;
+            // Simulador de extracción/detección de rubros del balance cargado
+            $rubrosDetectados = ['Efectivo y Equivalentes', 'Cuentas por Cobrar', 'Inventario', 'Propiedad Planta y Equipo', 'Cuentas por Pagar'];
+        }
+    }
+
+    // PERSISTENCIA EN BD
+    if (!isset($errorMessage)) {
         try {
             $pdo->beginTransaction();
 
             $payloadJson = json_encode([
+                'frecuencia_cantidad'  => $frecuenciaCantidad,
+                'periodos'             => $periodos,
+                'balance_preliminar'   => $balancePreliminarPath,
+                'rubros_detectados'    => $rubrosDetectados,
+                'pruebas_configuradas' => $pruebasConfiguradas,
                 'archivo_carta'        => $archivoCartaPath,
                 'fecha_solicitud'      => trim((string)$fechaSolicitud),
                 'fecha_recibida'       => trim((string)$fechaRecibida),
@@ -198,8 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_carta']))
 
             $stmtUpdateItem = $pdo->prepare("
                 UPDATE terminos_condiciones_items 
-                SET datos_json = :datos_json,
-                    estado = 'completado'
+                SET datos_json = :datos_json, estado = 'completado'
                 WHERE termino_id = :termino_id AND item_key = :item_key
             ");
             $stmtUpdateItem->execute([
@@ -208,23 +192,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_carta']))
                 ':item_key'    => $itemKey
             ]);
 
-            $stmtCheckPending = $pdo->prepare("
-                SELECT COUNT(*) 
-                FROM terminos_condiciones_items 
-                WHERE termino_id = :termino_id AND estado != 'completado'
-            ");
+            $stmtCheckPending = $pdo->prepare("SELECT COUNT(*) FROM terminos_condiciones_items WHERE termino_id = :termino_id AND estado != 'completado'");
             $stmtCheckPending->execute([':termino_id' => $terminoId]);
             $pendingCount = (int)$stmtCheckPending->fetchColumn();
 
-            $nuevoEstadoGlobal = ($pendingCount === 0) ? 'completado' : 'en_proceso';
-
-            $stmtUpdateMaster = $pdo->prepare("
-                UPDATE terminos_condiciones 
-                SET estado = :estado 
-                WHERE id = :id
-            ");
+            $stmtUpdateMaster = $pdo->prepare("UPDATE terminos_condiciones SET estado = :estado WHERE id = :id");
             $stmtUpdateMaster->execute([
-                ':estado' => $nuevoEstadoGlobal,
+                ':estado' => ($pendingCount === 0) ? 'completado' : 'en_proceso',
                 ':id'     => $terminoId
             ]);
 
@@ -238,21 +212,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_carta']))
                 $pdo->rollBack();
             }
             error_log("Error al guardar carta de contratación: " . $e->getMessage());
-            $errorMessage = "Error interno al procesar el formulario.";
+            $errorMessage = "Error interno al procesar los datos.";
         }
     }
 }
 
-// Prepara las variables necesarias para ser consumidas por la vista
-$archivoCartaVal       = (string)($savedData['archivo_carta'] ?? '');
-$fechaSolicitudVal      = (string)($savedData['fecha_solicitud'] ?? '');
-$fechaRecibidaVal       = (string)($savedData['fecha_recibida'] ?? '');
-$terminosAprobadosVal   = (string)($savedData['terminos_aprobados'] ?? 'no');
-$archivoPresupuestoVal = (string)($savedData['archivo_presupuesto'] ?? '');
-$horasContempladasVal   = (string)($savedData['horas_contempladas'] ?? '0.00');
-$montoPropuestaVal      = (string)($savedData['monto_propuesta'] ?? '0.00');
-$monedaVal              = (string)($savedData['moneda'] ?? 'USD');
-$observacionesVal       = (string)($savedData['observaciones'] ?? '');
-$situacionImportanteVal = (int)($savedData['situacion_importante'] ?? 0);
+// -------------------------------------------------------------------------
+// 4. PREPARACIÓN DE DATOS PARA LA VISTA
+// -------------------------------------------------------------------------
+$stmtHeader = $pdo->prepare("SELECT tc.*, c.name AS clientName FROM terminos_condiciones tc INNER JOIN clientes c ON tc.cliente_id = c.id WHERE tc.id = :id");
+$stmtHeader->execute([':id' => $terminoId]);
+$headerData = $stmtHeader->fetch(PDO::FETCH_OBJ);
+
+$stmtItem = $pdo->prepare("SELECT * FROM terminos_condiciones_items WHERE termino_id = :termino_id AND item_key = :item_key");
+$stmtItem->execute([':termino_id' => $terminoId, ':item_key' => $itemKey]);
+$itemData = $stmtItem->fetch(PDO::FETCH_OBJ);
+
+$savedData = ($itemData && !empty($itemData->datos_json)) ? json_decode($itemData->datos_json, true) : [];
+
+$frecuenciaCantidadVal  = (int)($savedData['frecuencia_cantidad'] ?? 1);
+$periodosVal            = $savedData['periodos'] ?? [];
+$balancePreliminarVal   = (string)($savedData['balance_preliminar'] ?? '');
+$rubrosDetectadosVal    = $savedData['rubros_detectados'] ?? ['Efectivo y Equivalentes', 'Cuentas por Cobrar', 'Inventario', 'Propiedad Planta y Equipo', 'Cuentas por Pagar'];
+$pruebasConfiguradasVal = $savedData['pruebas_configuradas'] ?? [];
+
+$archivoCartaVal        = (string)($savedData['archivo_carta'] ?? '');
+$fechaSolicitudVal       = (string)($savedData['fecha_solicitud'] ?? '');
+$fechaRecibidaVal        = (string)($savedData['fecha_recibida'] ?? '');
+$terminosAprobadosVal    = (string)($savedData['terminos_aprobados'] ?? 'no');
+$archivoPresupuestoVal  = (string)($savedData['archivo_presupuesto'] ?? '');
+$horasContempladasVal    = (string)($savedData['horas_contempladas'] ?? '0.00');
+$montoPropuestaVal       = (string)($savedData['monto_propuesta'] ?? '0.00');
+$monedaVal               = (string)($savedData['moneda'] ?? 'USD');
+$observacionesVal        = (string)($savedData['observaciones'] ?? '');
+$situacionImportanteVal  = (int)($savedData['situacion_importante'] ?? 0);
 
 $monedasSoportadas = ['USD', 'BS', 'EUR'];
+
+// Cargar catálogo de pruebas según rubros detectados
+$catalogoPruebas = obtenerPruebasPorRubros($pdo, $rubrosDetectadosVal);
