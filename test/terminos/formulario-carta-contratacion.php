@@ -231,8 +231,7 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
 <!-- ===================================================================== -->
 <?php
 // Supongamos que recuperas la frecuencia activa desde los datos guardados o parámetro (mínimo 1, máximo 12)
-$frecuenciaCantidad = isset($savedData['frecuencia_cantidad']) ? (int)$savedData['frecuencia_cantidad'] : 1;
-if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
+$frecuenciaCantidad = 3
 ?>
 
 <style>
