@@ -171,7 +171,7 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
         <input type="hidden" name="action_save_carta" value="1">
         <input type="hidden" name="termino_id" value="<?= $terminoId ?>">
 
-        <!-- 1. DEFINICIÓN DE PARÁMETROS: FRECUENCIA Y PERIODOS -->
+        <!-- 1. DEFINICIÓN DE PARÁMETROS: FRECUENCIA eeY PERIODOS -->
 <!-- CONTENEDOR DE 12 COLUMNAS EN UNA SOLA LÍNEA -->
 <div class="row g-3 mb-3">
 
