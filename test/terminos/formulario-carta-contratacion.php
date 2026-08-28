@@ -484,8 +484,19 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------>
 <!-- ===================================================================== -->
+Aquí tienes la solución completa con las modificaciones solicitadas:
+
+1. **Ocultamiento de Checkboxes:** En las etapas 1, 2 y 4 no se renderiza el checkbox; sus pruebas se consideran obligatorias y siempre se computan sus horas. Además, se envía automáticamente un `<input type="hidden">` con el ID de la prueba para asegurar su envío por `POST`.
+2. **Tabla de Totales por Etapa:** Se colocó una tabla con diseño moderno y minimalista justo debajo de la sección de pruebas. Muestra las horas acumuladas por cada etapa y calcula el **Total del Proyecto** en tiempo real.
+3. **JS Corregido:** Se actualizaron los selectores en el script para soportar tanto las pruebas opcionales con checkbox (Etapa 3 / Ejecución) como las obligatorias sin checkbox.
+
+---
+
+### Código Completo (PHP / HTML / JS)
+
+```php
 <?php
-// Supongamos que recuperas la frecuencia activa desde los datos guardados o parámetro (mínimo 1, máximo 12)
+// Frecuencia activa (mínimo 1, máximo 12)
 $frecuenciaCantidad = isset($savedData['frecuencia_cantidad']) ? (int)$savedData['frecuencia_cantidad'] : 1;
 if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
 ?>
@@ -508,10 +519,9 @@ if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
     font-size: 0.8rem;
     color: #334155;
     flex: 1;
-    min-width: 200px; /* Asegura espacio para la descripción de la prueba */
+    min-width: 200px;
 }
 
-/* Contenedor horizontal ultra compacto para las frecuencias */
 .prueba-actions-frecuencias {
     display: flex;
     flex-direction: row;
@@ -520,7 +530,6 @@ if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
     flex-wrap: nowrap;
 }
 
-/* Bloque individual vertical (Etiqueta sobre Input) pero dispuesto horizontalmente */
 .frec-input-group {
     display: flex;
     flex-direction: column;
@@ -537,7 +546,6 @@ if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
     text-transform: uppercase;
 }
 
-/* Inputs reducidos para permitir hasta 12 frecuencias en línea horizontal */
 .input-horas-frec {
     width: 38px;
     height: 24px;
@@ -554,24 +562,55 @@ if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
     outline: none;
     box-shadow: 0 0 0 1px rgba(0, 188, 212, 0.3);
 }
+
+/* Estilos de la Tabla Resumen de Totales por Etapa */
+.tabla-resumen-totales {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.82rem;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+.tabla-resumen-totales th {
+    background: #1e3a5f;
+    color: #ffffff;
+    padding: 0.5rem 0.75rem;
+    font-weight: 600;
+    text-align: left;
+}
+
+.tabla-resumen-totales td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    color: #334155;
+}
+
+.tabla-resumen-totales tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.tabla-resumen-totales tr.total-row {
+    background: #f0fdf4;
+    font-weight: 700;
+    color: #166534;
+}
+
+.tabla-resumen-totales tr.total-row td {
+    border-top: 2px solid #bbf7d0;
+    font-size: 0.88rem;
+}
 </style>
 
 <div class="card card-custom mb-3" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem;">
-    <div style="">
-
-        <div class="card-panel-header"><i class="ri-calendar-2-line"></i> 3. Selección Metodológica de Pruebas y Estimación de Horas</div>
-        
-        <!--<h5 style="font-size: 0.9rem; font-weight: 700; color: #1e3a5f; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
-            <i class="ri-list-check-2" style="color: #00bcd4;"></i> 3. Selección Metodológica de Pruebas y Estimación de Horas
-        </h5>
-
-        <div style="font-size: 0.8rem; font-weight: 700; background: #f0fdf4; color: #166534; padding: 0.25rem 0.6rem; border-radius: 6px; border: 1px solid #bbf7d0;">
-            Total Horas Proyecto: <span id="lbl_total_horas_proyecto">0.00</span> hrs
-        </div>-->
+    <div class="card-panel-header">
+        <i class="ri-calendar-2-line"></i> 3. Selección Metodológica de Pruebas y Estimación de Horas
     </div>
 
     <!-- Navegación por Etapas de Auditoría -->
-    <div class="project-stages-bar">
+    <div class="project-stages-bar" style="margin-bottom: 0.75rem;">
         <?php foreach ($etapas as $index => $et): ?>
             <button type="button" class="stage-btn <?= ($et->id == $etapaActiva) ? 'active' : '' ?>" onclick="switchEtapa(<?= $et->id ?>, this)">
                 <i class="ri-compass-3-line"></i><?= ($index + 1) ?>. <?= htmlspecialchars($et->nombre, ENT_QUOTES, 'UTF-8') ?>
@@ -580,11 +619,14 @@ if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
     </div>
 
     <!-- Contenedores de Acordeones por Etapa -->
-    <?php foreach ($etapas as $et): ?>
-        <div class="etapa-content-block" id="etapa_block_<?= $et->id ?>" style="display: <?= ($et->id == $etapaActiva) ? 'block' : 'none' ?>;">
+    <?php foreach ($etapas as $indexEtapa => $et): 
+        $numEtapa = $indexEtapa + 1;
+        // Solo la Etapa 3 (o no 1, 2, 4) lleva checkboxes de selección opcional
+        $esEtapaObligatoria = in_array($numEtapa, [1, 2, 4]);
+    ?>
+        <div class="etapa-content-block" id="etapa_block_<?= $et->id ?>" data-etapa-id="<?= $et->id ?>" style="display: <?= ($et->id == $etapaActiva) ? 'block' : 'none' ?>;">
             <div class="accordion-container">
                 <?php
-                // Consultar Categorías pertenecientes a la etapa
                 $stmtCat = $pdo->prepare("SELECT * FROM audit_categorias WHERE etapa_id = :etapaId ORDER BY orden ASC");
                 $stmtCat->execute([':etapaId' => $et->id]);
                 $categories = $stmtCat->fetchAll(PDO::FETCH_OBJ);
@@ -614,13 +656,20 @@ if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
                                 $isChecked = isset($horasAsignadasMap[$pr->id]);
                                 $esEjecucion = (mb_strtolower($et->nombre, 'UTF-8') === 'ejecución' || strpos(mb_strtolower($et->nombre, 'UTF-8'), 'ejecuc') !== false);
                             ?>
-                                <div class="prueba-row-container">
+                                <div class="prueba-row-container" data-obligatoria="<?= $esEtapaObligatoria ? 'true' : 'false' ?>">
                                     <div class="prueba-title">
-                                        <input type="checkbox" name="pruebas_seleccionadas[]" value="<?= $pr->id ?>" class="chk-prueba" <?= $isChecked ? 'checked' : '' ?> onchange="recalcularTotalHorasGlobal()" style="cursor: pointer; width: 14px; height: 14px;">
+                                        <?php if ($esEtapaObligatoria): ?>
+                                            <!-- Sin Checkbox para Etapas 1, 2 y 4 -->
+                                            <input type="hidden" name="pruebas_seleccionadas[]" value="<?= $pr->id ?>">
+                                            <i class="ri-checkbox-blank-circle-fill" style="font-size: 0.4rem; color: #00bcd4; margin-right: 0.2rem;"></i>
+                                        <?php else: ?>
+                                            <!-- Checkbox habilitado para Etapa 3 -->
+                                            <input type="checkbox" name="pruebas_seleccionadas[]" value="<?= $pr->id ?>" class="chk-prueba" <?= $isChecked ? 'checked' : '' ?> onchange="recalcularTotalHorasGlobal()" style="cursor: pointer; width: 14px; height: 14px;">
+                                        <?php endif; ?>
                                         <span><?= $pruebaNum ?>. <?= htmlspecialchars($pr->nombre, ENT_QUOTES, 'UTF-8') ?></span>
                                     </div>
 
-                                    <!-- Disposición horizontal de las frecuencias -->
+                                    <!-- Frecuencias / Horas -->
                                     <div class="prueba-actions-frecuencias">
                                         <?php if ($esEjecucion): ?>
                                             <?php for ($f = 1; $f <= 12; $f++): 
@@ -649,12 +698,43 @@ if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
             </div>
         </div>
     <?php endforeach; ?>
+
+    <!-- TABLA DE TOTALES DE HORAS POR ETAPA -->
+    <div style="margin-top: 1.25rem;">
+        <label style="font-size: 0.85rem; font-weight: 700; color: #1e3a5f; display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.4rem;">
+            <i class="ri-table-line" style="color: #00bcd4;"></i> Resumen de Horas por Etapa de Auditoría
+        </label>
+        <table class="tabla-resumen-totales">
+            <thead>
+                <tr>
+                    <th>Etapa</th>
+                    <th style="width: 150px; text-align: right;">Horas Totales</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($etapas as $index => $et): ?>
+                    <tr>
+                        <td><strong><?= ($index + 1) ?>.</strong> <?= htmlspecialchars($et->nombre, ENT_QUOTES, 'UTF-8') ?></td>
+                        <td style="text-align: right; font-weight: 600;">
+                            <span id="lbl_total_etapa_<?= $et->id ?>">0.00</span> hrs
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                <tr class="total-row">
+                    <td>TOTAL GENERAL PROYECTO</td>
+                    <td style="text-align: right;">
+                        <span id="lbl_total_horas_proyecto">0.00</span> hrs
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- BLOQUE CARTA, PRESUPUESTO Y DETALLES ECONÓMICOS -->
 <div class="card card-custom mb-3" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem;">
     <h5 style="font-size: 0.9rem; font-weight: 700; color: #1e3a5f; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.35rem;">
-        <i class="ri-money-dollar-circle-line" style="color: #2563eb;"></i> 3. Propuesta Económica y Firmas
+        <i class="ri-money-dollar-circle-line" style="color: #2563eb;"></i> 4. Propuesta Económica y Firmas
     </h5>
     
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; font-size: 0.8rem; margin-bottom: 0.5rem;">
@@ -689,7 +769,7 @@ if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
 </div>
 
 <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
-    <button type="submit" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.82rem; background: #00bcd4; border: none; font-weight: 700;">
+    <button type="submit" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.82rem; background: #00bcd4; border: none; font-weight: 700; border-radius: 5px; cursor: pointer;">
         <i class="ri-save-3-line"></i> Guardar Carta de Contratación
     </button>
 </div>
@@ -709,51 +789,62 @@ function actualizarVisibilidadFrecuencias() {
 }
 
 function recalcularTotalHorasGlobal() {
-    let horasBaseAcumuladas = 0;
+    let totalProyectoAcumulado = 0;
 
-    document.querySelectorAll('.accordion-item').forEach(item => {
-        let catSubtotal = 0;
+    document.querySelectorAll('.etapa-content-block').forEach(etapaBlock => {
+        const etapaId = etapaBlock.getAttribute('data-etapa-id');
+        let totalHorasEtapa = 0;
 
-        item.querySelectorAll('.prueba-row-container').forEach(row => {
-            const chk = row.querySelector('.chk-prueba');
-            if (chk && chk.checked) {
-                const inputsHrs = row.querySelectorAll('.input-horas-prueba');
-                inputsHrs.forEach(input => {
-                    const parentGroup = input.closest('.frec-input-group');
-                    if (!parentGroup || parentGroup.style.display !== 'none') {
-                        const hrs = parseFloat(input.value) || 0;
-                        catSubtotal += hrs;
-                    }
-                });
+        etapaBlock.querySelectorAll('.accordion-item').forEach(item => {
+            let catSubtotal = 0;
+
+            item.querySelectorAll('.prueba-row-container').forEach(row => {
+                const isObligatoria = row.getAttribute('data-obligatoria') === 'true';
+                const chk = row.querySelector('.chk-prueba');
+                
+                // Procesar si es obligatoria O si tiene el checkbox marcado
+                if (isObligatoria || (chk && chk.checked)) {
+                    const inputsHrs = row.querySelectorAll('.input-horas-prueba');
+                    inputsHrs.forEach(input => {
+                        const parentGroup = input.closest('.frec-input-group');
+                        if (!parentGroup || parentGroup.style.display !== 'none') {
+                            const hrs = parseFloat(input.value) || 0;
+                            catSubtotal += hrs;
+                        }
+                    });
+                }
+            });
+
+            // Actualizar Subtotal Categoría
+            const badgeCat = item.querySelector('.cat-subtotal-span');
+            if (badgeCat) {
+                badgeCat.textContent = catSubtotal.toFixed(2) + ' hrs';
             }
+
+            totalHorasEtapa += catSubtotal;
         });
 
-        const badgeCat = item.querySelector('.cat-subtotal-span');
-        if (badgeCat) {
-            badgeCat.textContent = catSubtotal.toFixed(2) + ' hrs';
+        // Actualizar Total por Etapa en la Tabla Resumen
+        const lblEtapa = document.getElementById('lbl_total_etapa_' + etapaId);
+        if (lblEtapa) {
+            lblEtapa.textContent = totalHorasEtapa.toFixed(2);
         }
 
-        horasBaseAcumuladas += catSubtotal;
+        totalProyectoAcumulado += totalHorasEtapa;
     });
 
-    document.getElementById('lbl_total_horas_proyecto').textContent = horasBaseAcumuladas.toFixed(2);
+    // Actualizar indicador general y campo de la propuesta
+    const lblTotalProyecto = document.getElementById('lbl_total_horas_proyecto');
+    if (lblTotalProyecto) {
+        lblTotalProyecto.textContent = totalProyectoAcumulado.toFixed(2);
+    }
+    
     const inputHorasPropuesta = document.getElementById('horas_contempladas');
     if (inputHorasPropuesta) {
-        inputHorasPropuesta.value = horasBaseAcumuladas.toFixed(2);
+        inputHorasPropuesta.value = totalProyectoAcumulado.toFixed(2);
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const frecInput = document.getElementById('frecuencia_cantidad') || document.getElementById('frecuenciaValor');
-    if (frecInput) {
-        frecInput.addEventListener('change', actualizarVisibilidadFrecuencias);
-        frecInput.addEventListener('input', actualizarVisibilidadFrecuencias);
-    }
-
-    actualizarVisibilidadFrecuencias();
-});
-
-// Cambiar visualmente de Etapa (Navegación Rápida)
 function switchEtapa(etapaId, btnElement) {
     document.querySelectorAll('.stage-btn').forEach(btn => btn.classList.remove('active'));
     btnElement.classList.add('active');
@@ -765,7 +856,6 @@ function switchEtapa(etapaId, btnElement) {
     }
 }
 
-// Control del Acordeón por Categorías
 function toggleAccordion(headerElement) {
     const content = headerElement.nextElementSibling;
     const icon = headerElement.querySelector('.ri-arrow-down-s-line, .ri-arrow-up-s-line');
@@ -785,45 +875,18 @@ function toggleAccordion(headerElement) {
     }
 }
 
-// Recalcular Subtotales de Categorías y Total General del Proyecto (Horas Base * Frecuencia)
-function recalcularTotalHorasGlobal() {
-    let horasBaseAcumuladas = 0;
-    const frecInput = document.getElementById('frecuencia_cantidad');
-    const frecuencia = parseFloat(frecInput ? frecInput.value : 1) || 1;
-
-    document.querySelectorAll('.accordion-item').forEach(item => {
-        let catSubtotal = 0;
-        item.querySelectorAll('.prueba-row-container').forEach(row => {
-            const chk = row.querySelector('.chk-prueba');
-            const inputHrs = row.querySelector('.input-horas-prueba');
-
-            if (chk && chk.checked && inputHrs) {
-                const hrs = parseFloat(inputHrs.value) || 0;
-                catSubtotal += hrs;
-            }
-        });
-
-        // Actualizar Subtotal Categoría
-        const badgeCat = item.querySelector('.cat-subtotal-span');
-        if (badgeCat) {
-            badgeCat.textContent = catSubtotal.toFixed(2) + ' hrs';
-        }
-
-        horasBaseAcumuladas += catSubtotal;
-    });
-
-    const totalCalculado = horasBaseAcumuladas * frecuencia;
-    
-    // Actualizar indicador superior y campo de propuesta
-    document.getElementById('lbl_total_horas_proyecto').textContent = totalCalculado.toFixed(2);
-    const inputHorasPropuesta = document.getElementById('horas_contempladas');
-    if (inputHorasPropuesta && (!inputHorasPropuesta.value || inputHorasPropuesta.value == '0.00')) {
-        inputHorasPropuesta.value = totalCalculado.toFixed(2);
+document.addEventListener('DOMContentLoaded', function() {
+    const frecInput = document.getElementById('frecuencia_cantidad') || document.getElementById('frecuenciaValor');
+    if (frecInput) {
+        frecInput.addEventListener('change', actualizarVisibilidadFrecuencias);
+        frecInput.addEventListener('input', actualizarVisibilidadFrecuencias);
     }
-}
 
-document.addEventListener('DOMContentLoaded', recalcularTotalHorasGlobal);
+    actualizarVisibilidadFrecuencias();
+});
 </script>
+
+```
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------>
         <!-- 4. SECCIÓN CARTA DE CONTRATACIÓN Y PRESUPUESTO PROYECTO -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
