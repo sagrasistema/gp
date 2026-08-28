@@ -265,44 +265,236 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
         <input type="hidden" name="action_save_carta" value="1">
         <input type="hidden" name="termino_id" value="<?= $terminoId ?>">
 
-
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-        <!-- 1. DEFINICIÓN DE PARÁMETROS: FRECUENCIA Y PERIODOS -->
-        <div class="card-panel">
-            <div class="card-panel-header"><i class="ri-calendar-2-line"></i> 1. Definición de Parámetros de Frecuencia</div>
-            <div class="card-panel-body">
-                <div style="display: grid; grid-template-columns: 200px 1fr; gap: 1.5rem; align-items: start;">
-                    <div>
-                        <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight: 600;">
-                            Frecuencia (1 a 12):
-                        </label>
-                        <select name="frecuencia_cantidad" id="frecuencia_cantidad" class="form-control-line" onchange="renderTablaPeriodos(); recalcularTotales();" style="font-weight: 700; color: #2563eb;">
-                            <?php for ($f = 1; $f <= 12; $f++): ?>
-                                <option value="<?= $f ?>" <?= $f === $frecuenciaCantidadVal ? 'selected' : '' ?>><?= $f ?> <?= $f === 1 ? 'Revisión' : 'Revisiones' ?></option>
-                            <?php endfor; ?>
-                        </select>
-                    </div>
 
-                    <div>
-                        <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight: 600;">
-                            Periodos de Revisión:
-                        </label>
-                        <table class="table-custom">
-                            <thead>
-                                <tr>
-                                    <th style="width: 120px;">Frecuencia</th>
-                                    <th>Periodo Exacto / Descripción</th>
-                                </tr>
-                            </thead>
-                            <tbody id="container_periodos">
-                                <!-- Render JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+
+<!-- 1. DEFINICIÓN DE PARÁMETROS: FRECUENCIA Y PERIODOS -->
+<?php
+// Datos de ejemplo o datos recuperados de tu BD ($savedData)
+$frecuenciaCantidadVal = isset($savedData['frecuencia_cantidad']) ? (int)$savedData['frecuencia_cantidad'] : 1;
+$periodosGuardados = isset($savedData['periodos']) ? $savedData['periodos'] : []; // Array de periodos guardados
+?>
+
+<style>
+/* Estilos para el Modal de Frecuencias */
+.modal-frecuencias-backdrop {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(3px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+.modal-frecuencias-content {
+    background: #ffffff;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 580px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    animation: fadeInModal 0.2s ease-out;
+}
+@keyframes fadeInModal {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.modal-frecuencias-header {
+    background: #1e3a5f;
+    color: #ffffff;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.modal-frecuencias-body {
+    padding: 1rem;
+    max-height: 65vh;
+    overflow-y: auto;
+}
+.modal-frecuencias-footer {
+    padding: 0.75rem 1rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+.frec-grid-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.6rem;
+}
+.frec-badge-tag {
+    background: #e0f2fe;
+    color: #0369a1;
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.35rem;
+    text-align: center;
+    border-radius: 4px;
+    border: 1px solid #bae6fd;
+}
+</style>
+
+<!-- BLOQUE 1: DEFINICIÓN DE PARÁMETROS DE FRECUENCIA -->
+<div class="card-panel" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+    <div class="card-panel-header" style="font-size: 0.9rem; font-weight: 700; color: #1e3a5f; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+        <i class="ri-calendar-2-line" style="color: #00bcd4;"></i> 1. Definición de Parámetros de Frecuencia
+    </div>
+    <div class="card-panel-body">
+        <div style="display: grid; grid-template-columns: 220px 1fr; gap: 1.5rem; align-items: start;">
+            
+            <!-- Selector de Frecuencia -->
+            <div>
+                <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight: 600;">
+                    Frecuencia (1 a 12):
+                </label>
+                <select name="frecuencia_cantidad" id="frecuencia_cantidad" class="form-control-line" onchange="abrirModalFrecuencias()" style="width: 100%; padding: 0.4rem; font-weight: 700; color: #2563eb; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    <?php for ($f = 1; $f <= 12; $f++): ?>
+                        <option value="<?= $f ?>" <?= $f === $frecuenciaCantidadVal ? 'selected' : '' ?>>
+                            <?= $f ?> <?= $f === 1 ? 'Revisión (Anual)' : 'Revisiones' ?>
+                        </option>
+                    <?php endfor; ?>
+                </select>
+                
+                <button type="button" onclick="abrirModalFrecuencias()" class="btn" style="margin-top: 0.5rem; width: 100%; font-size: 0.75rem; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 5px; padding: 0.3rem; font-weight: 600; cursor: pointer;">
+                    <i class="ri-edit-line"></i> Configurar Periodos
+                </button>
+            </div>
+
+            <!-- Tabla Resumen de Periodos -->
+            <div>
+                <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight: 600;">
+                    Periodos de Revisión Configurados:
+                </label>
+                <table class="table-custom" style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
+                    <thead>
+                        <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left;">
+                            <th style="width: 100px; padding: 0.4rem;">Frecuencia</th>
+                            <th style="padding: 0.4rem;">Periodo Exacto / Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="container_periodos_resumen">
+                        <!-- Se llena vía JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EMERGENTE DE FRECUENCIAS -->
+<div id="modalFrecuencias" class="modal-frecuencias-backdrop">
+    <div class="modal-frecuencias-content">
+        <div class="modal-frecuencias-header">
+            <h6 style="margin: 0; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem;">
+                <i class="ri-calendar-event-line"></i> Definir Periodos de Frecuencia
+            </h6>
+            <button type="button" onclick="cerrarModalFrecuencias()" style="background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer;">&times;</button>
+        </div>
+        
+        <div class="modal-frecuencias-body">
+            <p style="font-size: 0.78rem; color: #64748b; margin-top: 0; margin-bottom: 0.75rem;">
+                Especifique la fecha corte o descripción del periodo correspondiente a cada revisión (ej. <i>Enero - Marzo 2026</i> o <i>Al 31/03/2026</i>).
+            </p>
+            <div id="modal_inputs_container">
+                <!-- Inputs dinámicos inyectados por JS -->
             </div>
         </div>
 
+        <div class="modal-frecuencias-footer">
+            <button type="button" onclick="cerrarModalFrecuencias()" class="btn" style="padding: 0.35rem 0.8rem; font-size: 0.8rem; background: #e2e8f0; color: #475569; border: none; border-radius: 5px; font-weight: 600; cursor: pointer;">
+                Cancelar
+            </button>
+            <button type="button" onclick="guardarPeriodosModal()" class="btn" style="padding: 0.35rem 0.9rem; font-size: 0.8rem; background: #00bcd4; color: #fff; border: none; border-radius: 5px; font-weight: 700; cursor: pointer;">
+                <i class="ri-check-line"></i> Guardar Periodos
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Objeto en memoria para mantener las descripciones de los periodos
+let periodosData = <?= json_encode($periodosGuardados) ?> || {};
+
+// Abre el Modal y construye los campos según la frecuencia seleccionada
+function abrirModalFrecuencias() {
+    const cant = parseInt(document.getElementById('frecuencia_cantidad').value) || 1;
+    const container = document.getElementById('modal_inputs_container');
+    container.innerHTML = '';
+
+    for (let f = 1; f <= cant; f++) {
+        const valActual = periodosData['frec_' + f] || '';
+        
+        const row = document.createElement('div');
+        row.className = 'frec-grid-row';
+        row.innerHTML = `
+            <div class="frec-badge-tag">Frecuencia ${f}</div>
+            <input type="text" 
+                   id="input_modal_frec_${f}" 
+                   class="form-control" 
+                   style="width: 100%; padding: 0.35rem 0.5rem; font-size: 0.8rem; border: 1px solid #cbd5e1; border-radius: 4px;" 
+                   placeholder="Ej: Trimestre ${f} / Al 31-03-2026" 
+                   value="${valActual}">
+        `;
+        container.appendChild(row);
+    }
+
+    document.getElementById('modalFrecuencias').style.display = 'flex';
+}
+
+function cerrarModalFrecuencias() {
+    document.getElementById('modalFrecuencias').style.display = 'none';
+}
+
+// Guarda lo ingresado en el Modal, actualiza la vista resumen y sincroniza con el resto de la interfaz
+function guardarPeriodosModal() {
+    const cant = parseInt(document.getElementById('frecuencia_cantidad').value) || 1;
+    const tbodyResumen = document.getElementById('container_periodos_resumen');
+    tbodyResumen.innerHTML = '';
+
+    for (let f = 1; f <= cant; f++) {
+        const inputElem = document.getElementById('input_modal_frec_' + f);
+        const valor = inputElem ? inputElem.value.trim() : '';
+        
+        // Guardar en variable global JS
+        periodosData['frec_' + f] = valor;
+
+        // Renderizar en la Tabla Resumen (con inputs hidden para el POST del formulario)
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid #f1f5f9';
+        tr.innerHTML = `
+            <td style="padding: 0.35rem; font-weight: 700; color: #0369a1;">Frecuencia ${f}</td>
+            <td style="padding: 0.35rem; color: #334155;">
+                ${valor || '<em style="color:#94a3b8;">Sin especificar</em>'}
+                <input type="hidden" name="periodos_descripcion[${f}]" value="${valor}">
+            </td>
+        `;
+        tbodyResumen.appendChild(tr);
+    }
+
+    cerrarModalFrecuencias();
+
+    // Sincronizar visibilidad de columnas de frecuencias en las pruebas de la Etapa 3 (si la función existe)
+    if (typeof actualizarVisibilidadFrecuencias === 'function') {
+        actualizarVisibilidadFrecuencias();
+    }
+    if (typeof recalcularTotales === 'function') {
+        recalcularTotales();
+    }
+}
+
+// Inicializar la tabla resumen al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    guardarPeriodosModal();
+});
+</script>
+<!----------------------------------------------------------------------------------------------->
         <!-- 2. CARGA DE BALANCE PRELIMINAR -->
         <div class="card-panel">
             <div class="card-panel-header"><i class="ri-file-excel-2-line"></i> 2. Carga de Balance Preliminar</div>
@@ -398,7 +590,7 @@ if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
 }
 </style>
 
-<div class="card card-custom mb-1" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem;">
+<div class="card card-custom mb-3" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
 
         <div class="card-panel-header"><i class="ri-calendar-2-line"></i> 3. Selección Metodológica de Pruebas y Estimación de Horas</div>
