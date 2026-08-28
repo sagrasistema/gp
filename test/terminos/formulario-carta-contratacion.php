@@ -171,6 +171,8 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
         <input type="hidden" name="action_save_carta" value="1">
         <input type="hidden" name="termino_id" value="<?= $terminoId ?>">
 
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
         <!-- 1. DEFINICIÓN DE PARÁMETROS: FRECUENCIA Y PERIODOS -->
         <div class="card-panel">
             <div class="card-panel-header"><i class="ri-calendar-2-line"></i> 1. Definición de Parámetros de Frecuencia</div>
@@ -227,6 +229,7 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
                 </div>
             </div>
         </div>
+    </div>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------>
 <!-- ===================================================================== -->
 <?php
