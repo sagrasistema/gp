@@ -229,10 +229,78 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
         </div>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------>
 <!-- ===================================================================== -->
- <?php
+<?php
 // Supongamos que recuperas la frecuencia activa desde los datos guardados o parámetro (mínimo 1, máximo 12)
-$frecuenciaCantidad = 2
+$frecuenciaCantidad = isset($savedData['frecuencia_cantidad']) ? (int)$savedData['frecuencia_cantidad'] : 1;
+if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
 ?>
+
+<style>
+/* Layout principal horizontal para cada fila de prueba */
+.prueba-row-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    gap: 0.5rem;
+}
+
+.prueba-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: #334155;
+    flex: 1;
+    min-width: 200px; /* Asegura espacio para la descripción de la prueba */
+}
+
+/* Contenedor horizontal ultra compacto para las frecuencias */
+.prueba-actions-frecuencias {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: nowrap;
+}
+
+/* Bloque individual vertical (Etiqueta sobre Input) pero dispuesto horizontalmente */
+.frec-input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.frec-input-group label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 1px;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+/* Inputs reducidos para permitir hasta 12 frecuencias en línea horizontal */
+.input-horas-frec {
+    width: 38px;
+    height: 24px;
+    padding: 0.1rem 0.2rem;
+    font-size: 0.72rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    text-align: center;
+    background-color: #ffffff;
+}
+
+.input-horas-frec:focus {
+    border-color: #00bcd4;
+    outline: none;
+    box-shadow: 0 0 0 1px rgba(0, 188, 212, 0.3);
+}
+</style>
+
 <div class="card card-custom mb-3" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
         <h5 style="font-size: 0.9rem; font-weight: 700; color: #1e3a5f; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
@@ -285,18 +353,17 @@ $frecuenciaCantidad = 2
                             $pruebaNum = 1;
                             foreach ($pruebas as $pr): 
                                 $isChecked = isset($horasAsignadasMap[$pr->id]);
-                                // Determinar si la etapa actual es la de "Ejecución"
                                 $esEjecucion = (mb_strtolower($et->nombre, 'UTF-8') === 'ejecución' || strpos(mb_strtolower($et->nombre, 'UTF-8'), 'ejecuc') !== false);
                             ?>
                                 <div class="prueba-row-container">
                                     <div class="prueba-title">
-                                        <input type="checkbox" name="pruebas_seleccionadas[]" value="<?= $pr->id ?>" class="chk-prueba" <?= $isChecked ? 'checked' : '' ?> onchange="recalcularTotalHorasGlobal()" style="cursor: pointer; width: 15px; height: 15px;">
+                                        <input type="checkbox" name="pruebas_seleccionadas[]" value="<?= $pr->id ?>" class="chk-prueba" <?= $isChecked ? 'checked' : '' ?> onchange="recalcularTotalHorasGlobal()" style="cursor: pointer; width: 14px; height: 14px;">
                                         <span><?= $pruebaNum ?>. <?= htmlspecialchars($pr->nombre, ENT_QUOTES, 'UTF-8') ?></span>
                                     </div>
 
+                                    <!-- Disposición horizontal de las frecuencias -->
                                     <div class="prueba-actions-frecuencias">
                                         <?php if ($esEjecucion): ?>
-                                            <!-- Renderizar 12 campos posibles para la Etapa de Ejecución -->
                                             <?php for ($f = 1; $f <= 12; $f++): 
                                                 $valFrec = $horasAsignadasMap[$pr->id]['frec_'.$f] ?? 0;
                                             ?>
@@ -306,10 +373,9 @@ $frecuenciaCantidad = 2
                                                 </div>
                                             <?php endfor; ?>
                                         <?php else: ?>
-                                            <!-- Para el resto de etapas se mantiene el campo estándar de Horas Base -->
                                             <div class="frec-input-group">
-                                                <label>Horas Base</label>
-                                                <input type="number" step="0.5" min="0" name="horas_prueba[<?= $pr->id ?>]" value="<?= $horasAsignadasMap[$pr->id] ?? 0 ?>" class="input-horas-prueba" oninput="recalcularTotalHorasGlobal()">
+                                                <label>Base</label>
+                                                <input type="number" step="0.5" min="0" name="horas_prueba[<?= $pr->id ?>]" value="<?= $horasAsignadasMap[$pr->id] ?? 0 ?>" class="input-horas-prueba input-horas-frec" style="width: 50px;" oninput="recalcularTotalHorasGlobal()">
                                             </div>
                                         <?php endif; ?>
                                     </div>
@@ -326,7 +392,7 @@ $frecuenciaCantidad = 2
     <?php endforeach; ?>
 </div>
 
-<!-- BLOQUE 3: CARTA, PRESUPUESTO Y DETALLES ECONÓMICOS -->
+<!-- BLOQUE CARTA, PRESUPUESTO Y DETALLES ECONÓMICOS -->
 <div class="card card-custom mb-3" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem;">
     <h5 style="font-size: 0.9rem; font-weight: 700; color: #1e3a5f; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.35rem;">
         <i class="ri-money-dollar-circle-line" style="color: #2563eb;"></i> 3. Propuesta Económica y Firmas
@@ -363,7 +429,6 @@ $frecuenciaCantidad = 2
     </div>
 </div>
 
-<!-- Botón Guardar -->
 <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
     <button type="submit" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.82rem; background: #00bcd4; border: none; font-weight: 700;">
         <i class="ri-save-3-line"></i> Guardar Carta de Contratación
@@ -371,7 +436,6 @@ $frecuenciaCantidad = 2
 </div>
 
 <script>
-// Ajusta la visibilidad de los inputs de frecuencia en la etapa de ejecución
 function actualizarVisibilidadFrecuencias() {
     const frecInput = document.getElementById('frecuencia_cantidad') || document.getElementById('frecuenciaValor');
     const frecuencia = parseInt(frecInput ? frecInput.value : 1) || 1;
@@ -385,7 +449,6 @@ function actualizarVisibilidadFrecuencias() {
     recalcularTotalHorasGlobal();
 }
 
-// Recalcular Subtotales de Categorías y Total General del Proyecto
 function recalcularTotalHorasGlobal() {
     let horasBaseAcumuladas = 0;
 
@@ -395,10 +458,8 @@ function recalcularTotalHorasGlobal() {
         item.querySelectorAll('.prueba-row-container').forEach(row => {
             const chk = row.querySelector('.chk-prueba');
             if (chk && chk.checked) {
-                // Suma todas las horas de los inputs visibles dentro de la prueba
                 const inputsHrs = row.querySelectorAll('.input-horas-prueba');
                 inputsHrs.forEach(input => {
-                    // Solo sumar si el contenedor padre es visible (para ignorar frecuencias ocultas)
                     const parentGroup = input.closest('.frec-input-group');
                     if (!parentGroup || parentGroup.style.display !== 'none') {
                         const hrs = parseFloat(input.value) || 0;
@@ -408,7 +469,6 @@ function recalcularTotalHorasGlobal() {
             }
         });
 
-        // Actualizar Subtotal Categoría
         const badgeCat = item.querySelector('.cat-subtotal-span');
         if (badgeCat) {
             badgeCat.textContent = catSubtotal.toFixed(2) + ' hrs';
@@ -417,7 +477,6 @@ function recalcularTotalHorasGlobal() {
         horasBaseAcumuladas += catSubtotal;
     });
 
-    // Actualizar indicador superior y campo de propuesta
     document.getElementById('lbl_total_horas_proyecto').textContent = horasBaseAcumuladas.toFixed(2);
     const inputHorasPropuesta = document.getElementById('horas_contempladas');
     if (inputHorasPropuesta) {
@@ -426,7 +485,6 @@ function recalcularTotalHorasGlobal() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Escuchar el cambio en el selector principal de frecuencias del Bloque 1
     const frecInput = document.getElementById('frecuencia_cantidad') || document.getElementById('frecuenciaValor');
     if (frecInput) {
         frecInput.addEventListener('change', actualizarVisibilidadFrecuencias);
@@ -435,77 +493,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     actualizarVisibilidadFrecuencias();
 });
-
-// Cambiar visualmente de Etapa (Navegación Rápida)
-function switchEtapa(etapaId, btnElement) {
-    document.querySelectorAll('.stage-btn').forEach(btn => btn.classList.remove('active'));
-    btnElement.classList.add('active');
-
-    document.querySelectorAll('.etapa-content-block').forEach(block => block.style.display = 'none');
-    const activeBlock = document.getElementById('etapa_block_' + etapaId);
-    if (activeBlock) {
-        activeBlock.style.display = 'block';
-    }
-}
-
-// Control del Acordeón por Categorías
-function toggleAccordion(headerElement) {
-    const content = headerElement.nextElementSibling;
-    const icon = headerElement.querySelector('.ri-arrow-down-s-line, .ri-arrow-up-s-line');
-
-    if (content.style.display === "none" || content.style.display === "") {
-        content.style.display = "block";
-        if (icon) {
-            icon.classList.remove('ri-arrow-down-s-line');
-            icon.classList.add('ri-arrow-up-s-line');
-        }
-    } else {
-        content.style.display = "none";
-        if (icon) {
-            icon.classList.remove('ri-arrow-up-s-line');
-            icon.classList.add('ri-arrow-down-s-line');
-        }
-    }
-}
-
-// Recalcular Subtotales de Categorías y Total General del Proyecto (Horas Base * Frecuencia)
-function recalcularTotalHorasGlobal() {
-    let horasBaseAcumuladas = 0;
-    const frecInput = document.getElementById('frecuencia_cantidad');
-    const frecuencia = parseFloat(frecInput ? frecInput.value : 1) || 1;
-
-    document.querySelectorAll('.accordion-item').forEach(item => {
-        let catSubtotal = 0;
-        item.querySelectorAll('.prueba-row-container').forEach(row => {
-            const chk = row.querySelector('.chk-prueba');
-            const inputHrs = row.querySelector('.input-horas-prueba');
-
-            if (chk && chk.checked && inputHrs) {
-                const hrs = parseFloat(inputHrs.value) || 0;
-                catSubtotal += hrs;
-            }
-        });
-
-        // Actualizar Subtotal Categoría
-        const badgeCat = item.querySelector('.cat-subtotal-span');
-        if (badgeCat) {
-            badgeCat.textContent = catSubtotal.toFixed(2) + ' hrs';
-        }
-
-        horasBaseAcumuladas += catSubtotal;
-    });
-
-    const totalCalculado = horasBaseAcumuladas * frecuencia;
-    
-    // Actualizar indicador superior y campo de propuesta
-    document.getElementById('lbl_total_horas_proyecto').textContent = totalCalculado.toFixed(2);
-    const inputHorasPropuesta = document.getElementById('horas_contempladas');
-    if (inputHorasPropuesta && (!inputHorasPropuesta.value || inputHorasPropuesta.value == '0.00')) {
-        inputHorasPropuesta.value = totalCalculado.toFixed(2);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', recalcularTotalHorasGlobal);
 </script>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------>
         <!-- 4. SECCIÓN CARTA DE CONTRATACIÓN Y PRESUPUESTO PROYECTO -->
