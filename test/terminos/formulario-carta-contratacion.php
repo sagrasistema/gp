@@ -25,7 +25,7 @@ try {
             p.*, 
             c.name AS clientName, 
             c.rif AS clientRif
-        FROM proyectos p 
+        FROM terminos_condiciones p 
         INNER JOIN clientes c ON p.cliente_id = c.id 
         WHERE p.id = :id
     ");
