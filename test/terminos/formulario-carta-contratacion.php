@@ -400,6 +400,7 @@ if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
 
 <div class="card card-custom mb-3" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <div class="card-panel-header"><i class="ri-calendar-2-line"></i> 3. Selección Metodológica de Pruebas y Estimación de Horas</div>
         <h5 style="font-size: 0.9rem; font-weight: 700; color: #1e3a5f; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
             <i class="ri-list-check-2" style="color: #00bcd4;"></i> 3. Selección Metodológica de Pruebas y Estimación de Horas
         </h5>
