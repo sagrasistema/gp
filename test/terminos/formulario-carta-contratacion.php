@@ -186,10 +186,21 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
     .badge-subtotal-cat { font-size: 0.68rem; background: #e0f2fe; color: #0369a1; padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 700; border: 1px solid #bae6fd; }
 </style>
 <div class="view-container">
+<!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+            <h1 style="font-size: 1.4rem; font-weight: 700; color: #0f172a; margin: 0;">
+                Carta de Contratación y Presupuestación de Horas
+            </h1>
+            <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.875rem;">
+                Cliente: <strong><?= htmlspecialchars($headerData->clientName, ENT_QUOTES, 'UTF-8') ?></strong>
+            </p>
+        </div>
+        <a href="responder-terminos.php?id=<?= $terminoId ?>" class="btn btn-secondary" style="padding: 0.5rem 1rem; text-decoration: none; background: #e2e8f0; color: #334155; border-radius: 6px; font-weight: 600;">
+            <i class="ri-arrow-left-line"></i> Volver a Actividades
+        </a>
+    </div>
 <!---- cabecera de terminos --->
-
-
-
     <!-- Cabecera de Metadatos del Proyecto Compacta -->
     <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 0.75rem; padding: 0.6rem 0.8rem; border-radius: 8px; background: #ffffff; border: 1px solid var(--border-color);">
         <div style="display: flex; flex-direction: column; gap: 0.3rem; border-right: 1px solid #e2e8f0; padding-right: 0.5rem; font-size: 0.8rem;">
@@ -242,20 +253,7 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
 
 
 
-    <!-- CABECERA -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <div>
-            <h1 style="font-size: 1.4rem; font-weight: 700; color: #0f172a; margin: 0;">
-                Carta de Contratación y Presupuestación de Horas
-            </h1>
-            <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.875rem;">
-                Cliente: <strong><?= htmlspecialchars($headerData->clientName, ENT_QUOTES, 'UTF-8') ?></strong>
-            </p>
-        </div>
-        <a href="responder-terminos.php?id=<?= $terminoId ?>" class="btn btn-secondary" style="padding: 0.5rem 1rem; text-decoration: none; background: #e2e8f0; color: #334155; border-radius: 6px; font-weight: 600;">
-            <i class="ri-arrow-left-line"></i> Volver a Actividades
-        </a>
-    </div>
+
 
     <?php if (isset($errorMessage)): ?>
         <div style="padding: 1rem; background: #fee2e2; color: #991b1b; border-radius: 8px; margin-bottom: 1.5rem;">
