@@ -721,48 +721,6 @@ if ($frecuenciaCantidad < 1) $frecuenciaCantidad = 1;
     </div>
 </div>
 
-<!-- BLOQUE CARTA, PRESUPUESTO Y DETALLES ECONÓMICOS -->
-<div class="card card-custom mb-3" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem;">
-    <h5 style="font-size: 0.9rem; font-weight: 700; color: #1e3a5f; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.35rem;">
-        <i class="ri-money-dollar-circle-line" style="color: #2563eb;"></i> 4. Propuesta Económica y Firmas
-    </h5>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; font-size: 0.8rem; margin-bottom: 0.5rem;">
-        <div>
-            <label style="font-weight: 600; color: #475569;">Horas Contempladas Propuesta</label>
-            <input type="number" step="0.01" name="horas_contempladas" id="horas_contempladas" class="form-control" value="<?= htmlspecialchars((string)($savedData['horas_contempladas'] ?? '0.00')) ?>" style="padding: 0.3rem; font-size: 0.8rem;">
-        </div>
-        <div>
-            <label style="font-weight: 600; color: #475569;">Monto Propuesta Comercial</label>
-            <input type="text" name="monto_propuesta" class="form-control" value="<?= htmlspecialchars((string)($savedData['monto_propuesta'] ?? '0,00')) ?>" style="padding: 0.3rem; font-size: 0.8rem;">
-        </div>
-        <div>
-            <label style="font-weight: 600; color: #475569;">Moneda</label>
-            <select name="moneda" class="form-control" style="padding: 0.3rem; font-size: 0.8rem;">
-                <option value="USD" <?= (($savedData['moneda'] ?? '') === 'USD') ? 'selected' : '' ?>>USD ($)</option>
-                <option value="BS" <?= (($savedData['moneda'] ?? '') === 'BS') ? 'selected' : '' ?>>BS (Bs.)</option>
-                <option value="EUR" <?= (($savedData['moneda'] ?? '') === 'EUR') ? 'selected' : '' ?>>EUR (€)</option>
-            </select>
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; font-size: 0.8rem;">
-        <div>
-            <label style="font-weight: 600; color: #475569;">Adjuntar Carta de Contratación (PDF)</label>
-            <input type="file" name="archivo_carta" class="form-control-file border rounded p-1" accept=".pdf" style="font-size: 0.75rem; width: 100%;">
-        </div>
-        <div>
-            <label style="font-weight: 600; color: #475569;">Adjuntar Presupuesto (Excel/PDF)</label>
-            <input type="file" name="archivo_presupuesto" class="form-control-file border rounded p-1" accept=".xlsx, .xls, .pdf" style="font-size: 0.75rem; width: 100%;">
-        </div>
-    </div>
-</div>
-
-<div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
-    <button type="submit" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.82rem; background: #00bcd4; border: none; font-weight: 700; border-radius: 5px; cursor: pointer;">
-        <i class="ri-save-3-line"></i> Guardar Carta de Contratación
-    </button>
-</div>
 
 <script>
 function actualizarVisibilidadFrecuencias() {
