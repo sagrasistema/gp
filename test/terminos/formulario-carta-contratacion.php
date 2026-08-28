@@ -886,7 +886,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-```
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------>
         <!-- 4. SECCIÓN CARTA DE CONTRATACIÓN Y PRESUPUESTO PROYECTO -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
