@@ -367,22 +367,6 @@ $periodosGuardados = isset($savedData['periodos']) ? $savedData['periodos'] : []
             </div>
 
             <!-- Tabla Resumen de Periodos -->
-            <div>
-                <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight: 600;">
-                    Periodos de Revisión Configurados:
-                </label>
-                <table class="table-custom" style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
-                    <thead>
-                        <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left;">
-                            <th style="width: 100px; padding: 0.4rem;">Frecuencia</th>
-                            <th style="padding: 0.4rem;">Periodo Exacto / Descripción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="container_periodos_resumen">
-                        <!-- Se llena vía JavaScript -->
-                    </tbody>
-                </table>
-            </div>
 
         </div>
     </div>
