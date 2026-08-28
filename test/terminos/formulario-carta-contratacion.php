@@ -250,11 +250,6 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
 
 <!-- end cabecera de terminos --->
 
-
-
-
-
-
     <?php if (isset($errorMessage)): ?>
         <div style="padding: 1rem; background: #fee2e2; color: #991b1b; border-radius: 8px; margin-bottom: 1.5rem;">
             <i class="ri-error-warning-fill"></i> <?= htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') ?>
@@ -270,7 +265,7 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
 
 <!-- 1. DEFINICIÓN DE PARÁMETROS: FRECUENCIA Y PERIODOS -->
 <?php
-// Datos de ejemplo o datos recuperados de tu BD ($savedData)
+// Datos de ejemplo o datos recuperados de tu BD
 $frecuenciaCantidadVal = isset($savedData['frecuencia_cantidad']) ? (int)$savedData['frecuencia_cantidad'] : 1;
 $periodosGuardados = isset($savedData['periodos']) ? $savedData['periodos'] : []; // Array de periodos guardados
 ?>
@@ -323,7 +318,7 @@ $periodosGuardados = isset($savedData['periodos']) ? $savedData['periodos'] : []
 }
 .frec-grid-row {
     display: grid;
-    grid-template-columns: 80px 1fr;
+    grid-template-columns: 100px 1fr;
     gap: 0.75rem;
     align-items: center;
     margin-bottom: 0.6rem;
@@ -341,50 +336,30 @@ $periodosGuardados = isset($savedData['periodos']) ? $savedData['periodos'] : []
 </style>
 
 <!-- BLOQUE 1: DEFINICIÓN DE PARÁMETROS DE FRECUENCIA -->
-<div class="card-panel" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-    <div class="card-panel-header" style="font-size: 0.9rem; font-weight: 700; color: #1e3a5f; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
-        <i class="ri-calendar-2-line" style="color: #00bcd4;"></i> 1. Definición de Parámetros de Frecuencia
-    </div>
+<div class="card-panel">
+    <div class="card-panel-header"><i class="ri-calendar-2-line"></i> 1. Definición de Parámetros de Frecuencia</div>
     <div class="card-panel-body">
-        <div style="display: grid; grid-template-columns: 220px 1fr; gap: 1.5rem; align-items: start;">
-            
-            <!-- Selector de Frecuencia -->
-            <div>
-                <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight: 600;">
-                    Frecuencia (1 a 12):
-                </label>
-                <select name="frecuencia_cantidad" id="frecuencia_cantidad" class="form-control-line" onchange="abrirModalFrecuencias()" style="width: 100%; padding: 0.4rem; font-weight: 700; color: #2563eb; border: 1px solid #cbd5e1; border-radius: 6px;">
-                    <?php for ($f = 1; $f <= 12; $f++): ?>
-                        <option value="<?= $f ?>" <?= $f === $frecuenciaCantidadVal ? 'selected' : '' ?>>
-                            <?= $f ?> <?= $f === 1 ? 'Revisión (Anual)' : 'Revisiones' ?>
-                        </option>
-                    <?php endfor; ?>
-                </select>
-                
-                <button type="button" onclick="abrirModalFrecuencias()" class="btn" style="margin-top: 0.5rem; width: 100%; font-size: 0.75rem; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 5px; padding: 0.3rem; font-weight: 600; cursor: pointer;">
-                    <i class="ri-edit-line"></i> Configurar Periodos
-                </button>
-            </div>
+        
+        <div style="max-width: 300px;">
+            <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight: 600;">
+                Frecuencia (1 a 12):
+            </label>
+            <select name="frecuencia_cantidad" id="frecuencia_cantidad" class="form-control-line" onchange="abrirModalFrecuencias()" style="font-weight: 700; color: #2563eb; width: 100%;">
+                <?php for ($f = 1; $f <= 12; $f++): ?>
+                    <option value="<?= $f ?>" <?= $f === $frecuenciaCantidadVal ? 'selected' : '' ?>>
+                        <?= $f ?> <?= $f === 1 ? 'Revisión (Anual)' : 'Revisiones' ?>
+                    </option>
+                <?php endfor; ?>
+            </select>
 
-            <!-- Tabla Resumen de Periodos -->
-            <div>
-                <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight: 600;">
-                    Periodos de Revisión Configurados:
-                </label>
-                <table class="table-custom" style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
-                    <thead>
-                        <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left;">
-                            <th style="width: 100px; padding: 0.4rem;">Frecuencia</th>
-                            <th style="padding: 0.4rem;">Periodo Exacto / Descripción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="container_periodos_resumen">
-                        <!-- Se llena vía JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-
+            <button type="button" onclick="abrirModalFrecuencias()" class="btn" style="margin-top: 0.6rem; width: 100%; font-size: 0.78rem; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 5px; padding: 0.4rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.3rem;">
+                <i class="ri-edit-line"></i> Configurar Periodos
+            </button>
         </div>
+
+        <!-- Contenedor Oculto para Inputs que procesará PHP al enviar el formulario -->
+        <div id="container_periodos_hidden" style="display: none;"></div>
+
     </div>
 </div>
 
@@ -419,10 +394,10 @@ $periodosGuardados = isset($savedData['periodos']) ? $savedData['periodos'] : []
 </div>
 
 <script>
-// Objeto en memoria para mantener las descripciones de los periodos
+// Objeto global para almacenar descripciones en memoria
 let periodosData = <?= json_encode($periodosGuardados) ?> || {};
 
-// Abre el Modal y construye los campos según la frecuencia seleccionada
+// Despliega el Modal y genera los inputs dinámicos
 function abrirModalFrecuencias() {
     const cant = parseInt(document.getElementById('frecuencia_cantidad').value) || 1;
     const container = document.getElementById('modal_inputs_container');
@@ -452,44 +427,35 @@ function cerrarModalFrecuencias() {
     document.getElementById('modalFrecuencias').style.display = 'none';
 }
 
-// Guarda lo ingresado en el Modal, actualiza la vista resumen y sincroniza con el resto de la interfaz
+// Guarda los datos del modal en los inputs ocultos para el submit del POST
 function guardarPeriodosModal() {
     const cant = parseInt(document.getElementById('frecuencia_cantidad').value) || 1;
-    const tbodyResumen = document.getElementById('container_periodos_resumen');
-    tbodyResumen.innerHTML = '';
+    const hiddenContainer = document.getElementById('container_periodos_hidden');
+    hiddenContainer.innerHTML = '';
 
     for (let f = 1; f <= cant; f++) {
         const inputElem = document.getElementById('input_modal_frec_' + f);
-        const valor = inputElem ? inputElem.value.trim() : '';
+        const valor = inputElem ? inputElem.value.trim() : (periodosData['frec_' + f] || '');
         
-        // Guardar en variable global JS
+        // Actualizar almacenamiento en JS
         periodosData['frec_' + f] = valor;
 
-        // Renderizar en la Tabla Resumen (con inputs hidden para el POST del formulario)
-        const tr = document.createElement('tr');
-        tr.style.borderBottom = '1px solid #f1f5f9';
-        tr.innerHTML = `
-            <td style="padding: 0.35rem; font-weight: 700; color: #0369a1;">Frecuencia ${f}</td>
-            <td style="padding: 0.35rem; color: #334155;">
-                ${valor || '<em style="color:#94a3b8;">Sin especificar</em>'}
-                <input type="hidden" name="periodos_descripcion[${f}]" value="${valor}">
-            </td>
-        `;
-        tbodyResumen.appendChild(tr);
+        // Crear input hidden para envío en PHP: $_POST['periodos_descripcion'][1]
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = `periodos_descripcion[${f}]`;
+        hiddenInput.value = valor;
+        hiddenContainer.appendChild(hiddenInput);
     }
 
     cerrarModalFrecuencias();
 
-    // Sincronizar visibilidad de columnas de frecuencias en las pruebas de la Etapa 3 (si la función existe)
-    if (typeof actualizarVisibilidadFrecuencias === 'function') {
-        actualizarVisibilidadFrecuencias();
-    }
-    if (typeof recalcularTotales === 'function') {
-        recalcularTotales();
-    }
+    // Invocar callbacks adicionales si están definidos en tu script principal
+    if (typeof renderTablaPeriodos === 'function') { renderTablaPeriodos(); }
+    if (typeof recalcularTotales === 'function') { recalcularTotales(); }
 }
 
-// Inicializar la tabla resumen al cargar la página
+// Inicialización automática
 document.addEventListener('DOMContentLoaded', function() {
     guardarPeriodosModal();
 });
