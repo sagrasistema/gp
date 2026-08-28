@@ -484,17 +484,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------>
 <!-- ===================================================================== -->
-Aquí tienes la solución completa con las modificaciones solicitadas:
 
-1. **Ocultamiento de Checkboxes:** En las etapas 1, 2 y 4 no se renderiza el checkbox; sus pruebas se consideran obligatorias y siempre se computan sus horas. Además, se envía automáticamente un `<input type="hidden">` con el ID de la prueba para asegurar su envío por `POST`.
-2. **Tabla de Totales por Etapa:** Se colocó una tabla con diseño moderno y minimalista justo debajo de la sección de pruebas. Muestra las horas acumuladas por cada etapa y calcula el **Total del Proyecto** en tiempo real.
-3. **JS Corregido:** Se actualizaron los selectores en el script para soportar tanto las pruebas opcionales con checkbox (Etapa 3 / Ejecución) como las obligatorias sin checkbox.
-
----
-
-### Código Completo (PHP / HTML / JS)
-
-```php
 <?php
 // Frecuencia activa (mínimo 1, máximo 12)
 $frecuenciaCantidad = isset($savedData['frecuencia_cantidad']) ? (int)$savedData['frecuencia_cantidad'] : 1;
