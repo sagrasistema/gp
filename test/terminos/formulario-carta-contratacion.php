@@ -11,6 +11,17 @@ if (!$terminoId || $terminoId <= 0) {
     http_response_code(400);
     die("Error: Identificador de Términos y Condiciones no especificado.");
 }
+$proyectoId = filter_input(INPUT_GET, 'terminoId', FILTER_VALIDATE_INT) ?: 0;
+
+// 2. INICIALIZACIÓN PREVENTIVA DE VARIABLES Y METADATOS
+$projectData = $projectData ?? (object)[
+    'clientName' => 'N/D',
+    'socioLider' => 'N/D',
+    'nombre' => 'N/D',
+    'socioCalidad' => 'N/D',
+    'fechaRemision' => '',
+    'gerente' => 'N/D'
+];
 
 // Cargar datos previos
 $stmtItem = $pdo->prepare("SELECT datos_json FROM terminos_condiciones_items WHERE termino_id = :termino_id AND item_key = 'carta_contratacion'");
@@ -146,6 +157,62 @@ $etapaActiva = filter_input(INPUT_GET, 'etapa', FILTER_VALIDATE_INT) ?: ($etapas
     .badge-subtotal-cat { font-size: 0.68rem; background: #e0f2fe; color: #0369a1; padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 700; border: 1px solid #bae6fd; }
 </style>
 <div class="view-container">
+<!---- cabecera de terminos --->
+
+
+
+    <!-- Cabecera de Metadatos del Proyecto Compacta -->
+    <div class="meta-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 0.75rem; padding: 0.6rem 0.8rem; border-radius: 8px; background: #ffffff; border: 1px solid var(--border-color);">
+        <div style="display: flex; flex-direction: column; gap: 0.3rem; border-right: 1px solid #e2e8f0; padding-right: 0.5rem; font-size: 0.8rem;">
+            <div>
+                <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Cliente / Empresa</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars((string)($projectData->clientName ?? 'N/D'), ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.25rem;">
+                <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Socio Líder</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars((string)($projectData->socioLider ?? 'N/D'), ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.3rem; border-right: 1px solid #e2e8f0; padding-right: 0.5rem; padding-left: 0.25rem; font-size: 0.8rem;">
+            <div>
+                <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Proyecto / Alcance</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars((string)($projectData->nombre ?? 'N/D'), ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.25rem;">
+                <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Socio de Calidad</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars((string)($projectData->socioCalidad ?? 'N/D'), ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.3rem; padding-left: 0.25rem; font-size: 0.8rem;">
+            <div>
+                <?php
+                $fechaRemisionFormateada = 'N/D';
+                if (!empty($projectData->fechaRemision)) {
+                    try {
+                        $dateObj = new DateTime((string)$projectData->fechaRemision);
+                        $fechaRemisionFormateada = $dateObj->format('d/m/Y');
+                    } catch (Exception $e) {
+                        $fechaRemisionFormateada = (string)$projectData->fechaRemision;
+                    }
+                }
+                ?>
+                <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Fecha de Revisión</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars($fechaRemisionFormateada, ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.25rem;">
+                <span style="font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Gerente Encargado</span><br>
+                <strong style="color: #1e293b;"><?= htmlspecialchars((string)($projectData->gerente ?? 'N/D'), ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
+        </div>
+    </div>
+
+<!-- end cabecera de terminos --->
+
+
+
+
     <!-- CABECERA -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <div>
