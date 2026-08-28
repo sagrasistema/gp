@@ -340,7 +340,7 @@ $periodosGuardados = isset($savedData['periodos']) ? $savedData['periodos'] : []
     <div class="card-panel-header"><i class="ri-calendar-2-line"></i> 1. Definición de Parámetros de Frecuencia</div>
     <div class="card-panel-body">
         
-        <div style="max-width: 300px;">
+        <div style="max-width: 600px;">
             <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight: 600;">
                 Frecuencia (1 a 12):
             </label>
