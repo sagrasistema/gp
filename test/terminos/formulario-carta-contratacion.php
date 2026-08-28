@@ -11,6 +11,35 @@ if (!$terminoId || $terminoId <= 0) {
     http_response_code(400);
     die("Error: Identificador de Términos y Condiciones no especificado.");
 }
+
+$proyectoId = filter_input(INPUT_GET, 'terminoId', FILTER_VALIDATE_INT);
+
+if (!$proyectoId) {
+    die("Error: Proyecto no especificado o ID inválido.");
+}
+
+// 1. Cargar Cabecera del Proyecto y Datos del Cliente
+try {
+    $stmt = $pdo->prepare("
+        SELECT 
+            p.*, 
+            c.name AS clientName, 
+            c.rif AS clientRif
+        FROM proyectos p 
+        INNER JOIN clientes c ON p.cliente_id = c.id 
+        WHERE p.id = :id
+    ");
+    $stmt->execute([':id' => $proyectoId]);
+    $projectData = $stmt->fetch(PDO::FETCH_OBJ);
+
+    if (!$projectData) {
+        die("Error: El proyecto solicitado no existe.");
+    }
+} catch (PDOException $e) {
+    error_log("Error crítico en cabecera de proyecto: " . $e->getMessage());
+    die("Error crítico de base de datos al cargar el proyecto.");
+}
+
 $proyectoId = filter_input(INPUT_GET, 'terminoId', FILTER_VALIDATE_INT) ?: 0;
 
 // 2. INICIALIZACIÓN PREVENTIVA DE VARIABLES Y METADATOS
