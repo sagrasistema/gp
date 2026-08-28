@@ -346,7 +346,7 @@ $periodosGuardados = isset($savedData['periodos']) ? $savedData['periodos'] : []
         <i class="ri-calendar-2-line" style="color: #00bcd4;"></i> 1. Definición de Parámetros de Frecuencia
     </div>
     <div class="card-panel-body">
-        <div style="">
+        <div style="display: grid; grid-template-columns: 220px 1fr; gap: 1.5rem; align-items: start;">
             
             <!-- Selector de Frecuencia -->
             <div>
@@ -367,6 +367,22 @@ $periodosGuardados = isset($savedData['periodos']) ? $savedData['periodos'] : []
             </div>
 
             <!-- Tabla Resumen de Periodos -->
+            <div>
+                <label style="display: block; font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight: 600;">
+                    Periodos de Revisión Configurados:
+                </label>
+                <table class="table-custom" style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
+                    <thead>
+                        <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left;">
+                            <th style="width: 100px; padding: 0.4rem;">Frecuencia</th>
+                            <th style="padding: 0.4rem;">Periodo Exacto / Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="container_periodos_resumen">
+                        <!-- Se llena vía JavaScript -->
+                    </tbody>
+                </table>
+            </div>
 
         </div>
     </div>
